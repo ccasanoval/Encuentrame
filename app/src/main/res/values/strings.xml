@@ -1,0 +1,32 @@
+<resources>
+	<string name="app_name">Encuentrame</string>
+
+	<string name="cuenta">Cuenta</string>
+	<string name="config">Preferencias</string>
+	<string name="lugares">Lugares</string>
+	<string name="rutas">Rutas</string>
+	<string name="avisos">Avisos</string>
+
+
+	<string name="clave">Clave</string>
+	<string name="clave_confirmar">Confirmar Clave</string>
+	<string name="email">eMail</string>
+	<string name="enter">Entrar</string>
+	<string name="register">Registrate</string>
+	<string name="recover">Recordar</string>
+	<string name="send">Enviar</string>
+
+	<string name="enter_lbl">Entra en tu cuenta</string>
+	<string name="register_lbl">Crea una cuenta</string>
+	<string name="recover_lbl">Recuerda tu cuenta</string>
+
+	<string name="recover_ok">Se envió un correo con el que recurperar la clave de usuario</string>
+	<string name="recover_ko">Hubo un problema al recuperar la clave de usuario</string>
+	<string name="register_ok">Te has registrado con éxito. Comprueba tu correo.</string>
+
+
+
+	<string name="action_settings">Settings</string>
+	<string name="section_format">Hello World from section: %1$d</string>
+	<string name="title_activity_act_main">Encuentrate</string>
+</resources>
