@@ -4,15 +4,12 @@ import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,35 +24,33 @@ import com.backendless.exceptions.BackendlessFault;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
 {
+	private static final int ENTER=0, REGISTER=1, RECOVER=2;
 	private static ActLogin _win;
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide fragments for each of the sections. We use a
 	 * {@link FragmentPagerAdapter} derivative, which will keep every loaded fragment in memory. If this becomes too memory intensive, it may be best to switch to a
 	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
 	 */
-	private SectionsPagerAdapter mSectionsPagerAdapter;
+	private SectionsPagerAdapter _SectionsPagerAdapter;
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	private ViewPager mViewPager;
+	private ViewPager _viewPager;
+	public TabLayout _tabLayout;
 
-	private static final int ENTER=0, REGISTER=1, RECOVER=2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_login);
-		//Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		//setSupportActionBar(toolbar);
-		// Create the adapter that will return a fragment for each of the three
-		// primary sections of the activity.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
+		_SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
-		mViewPager = (ViewPager)findViewById(R.id.container);
-		mViewPager.setAdapter(mSectionsPagerAdapter);
-		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
-		tabLayout.setupWithViewPager(mViewPager);
+		_viewPager = (ViewPager)findViewById(R.id.container);
+		_viewPager.setAdapter(_SectionsPagerAdapter);
+		_tabLayout = (TabLayout)findViewById(R.id.tabs);
+		_tabLayout.setupWithViewPager(_viewPager);
 
 		/*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
@@ -67,29 +62,17 @@ public class ActLogin extends AppCompatActivity
 			}
 		});*/
 
+		/* NOT IN GIT FOR SECURITY REASONS
+		package com.cesoft.encuentrame;
+		public class BackendSettings
+		{
+			public static final String APP = "";
+			public static final String KEY = "";
+			public static final String VER = "v1";
+		}
+		*/
 		Backendless.initApp(this, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
 		_win = this;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.menu_act_main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		//noinspection SimplifiableIfStatement
-		if(id == R.id.action_settings)
-		{
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	/**
@@ -104,7 +87,6 @@ public class ActLogin extends AppCompatActivity
 		@Override
 		public Fragment getItem(int position)
 		{
-System.err.println("SectionsPagerAdapter:getItem----------"+position);
 			return PlaceholderFragment.newInstance(position);
 		}
 		@Override
@@ -115,7 +97,6 @@ System.err.println("SectionsPagerAdapter:getItem----------"+position);
 		@Override
 		public CharSequence getPageTitle(int position)
 		{
-System.err.println("SectionsPagerAdapter:getPageTitle----------"+position+", "+ENTER+":"+REGISTER+":"+RECOVER);
 			switch(position)
 			{
 			case ENTER:
@@ -199,6 +180,11 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 					@Override
 					public void onClick(View v)
 					{
+						if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
+						{
+							Snackbar.make(rootView, getString(R.string.register_bad_pass), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+							return;
+						}
 						BackendlessUser user = new BackendlessUser();
 						user.setPassword(txtPassword.getText().toString());
 						user.setEmail(txtEmail.getText().toString());
@@ -212,9 +198,10 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 								System.err.println("REGISTER-----------------" + backendlessUser);
 								//startActivity( new Intent(_win.getBaseContext(), ActLogin.class ) );
 								//_win.finish();
-								Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+								Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
 								//startActivity(new Intent(_win.getBaseContext(), ActMain.class));//NO: tiene que comprobar el correo
-								//TODO: Go to Login page
+								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+								if(t!=null)t.select();
 							}
 						});
 					}
@@ -236,15 +223,14 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 							public void handleResponse(Void response)
 							{
 								System.err.println("RECOVER-----------------OK:" + response);
-								Snackbar
-									.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG)
-									.setAction(getString(R.string.recover_lbl), null)
-									.show();
-								//TODO: Go to Login page
+								Snackbar.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+								if(t!=null)t.select();
 							}
+
 							public void handleFault(BackendlessFault fault)
 							{
-								System.err.println("RECOVER-----------------FAILED:" + fault+" : "+fault.getCode());
+								System.err.println("RECOVER-----------------FAILED:" + fault + " : " + fault.getCode());
 								Snackbar.make(rootView, getString(R.string.recover_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
 							}
 						});

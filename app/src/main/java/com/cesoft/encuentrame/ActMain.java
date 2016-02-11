@@ -24,39 +24,35 @@ import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 
+
+//TODO: ventana de mapa que muestre punto, ruta o geofence...
+//TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
+//TODO: CATEGORIA: hacer vista de lista y CRUD
+////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
 	private static ActMain _win;
-	/**
-	 * The {@link android.support.v4.view.PagerAdapter} that will provide fragments for each of the sections. We use a
-	 * {@link FragmentPagerAdapter} derivative, which will keep every loaded fragment in memory. If this becomes too memory intensive, it may be best to switch to a
-	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-	 */
-	private SectionsPagerAdapter mSectionsPagerAdapter;
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
-	private ViewPager mViewPager;
+	private SectionsPagerAdapter _SectionsPagerAdapter;
+	private ViewPager _viewPager;
 
-	private static final int ENTER=0, REGISTER=1, RECOVER=2;
+	private static final int LUGARES=0, RUTAS=1, AVISOS=2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_login);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setContentView(R.layout.act_main);
+		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		// Create the adapter that will return a fragment for each of the three
-		// primary sections of the activity.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
+		_SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
-		mViewPager = (ViewPager)findViewById(R.id.container);
-		mViewPager.setAdapter(mSectionsPagerAdapter);
+		_viewPager = (ViewPager)findViewById(R.id.container);
+		_viewPager.setAdapter(_SectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
-		tabLayout.setupWithViewPager(mViewPager);
+		tabLayout.setupWithViewPager(_viewPager);
 
-		/*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -64,16 +60,14 @@ public class ActMain extends AppCompatActivity
 			{
 				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 			}
-		});*/
+		});
 
-		Backendless.initApp(this, "FACC76FB-9F8E-A855-FF50-143C7ABF4D00", "AE28E980-5D05-FA1F-FF1C-2C5D689CF400", "v1");
 		_win = this;
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.menu_act_main, menu);
 		return true;
 	}
@@ -114,15 +108,15 @@ System.err.println("SectionsPagerAdapter:getItem----------"+position);
 		@Override
 		public CharSequence getPageTitle(int position)
 		{
-System.err.println("SectionsPagerAdapter:getPageTitle----------"+position+", "+ENTER+":"+REGISTER+":"+RECOVER);
+System.err.println("SectionsPagerAdapter:getPageTitle----------"+position);
 			switch(position)
 			{
-			case ENTER:
-				return "AAAAAAAAAAAAAAAA";//getString(R.string.enter_lbl);
-			case REGISTER:
-				return "BBBBBBBBBBBBBBB";//getString(R.string.register_lbl);
-			case RECOVER:
-				return "cccccccccccc";//getString(R.string.recover_lbl);
+			case LUGARES:
+				return getString(R.string.lugares);
+			case RUTAS:
+				return getString(R.string.rutas);
+			case AVISOS:
+				return getString(R.string.avisos);
 			}
 			return null;
 		}
@@ -153,24 +147,19 @@ System.err.println(sectionNumber+"--------------newInstance");
 			Bundle args = getArguments();
 System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(ARG_SECTION_NUMBER)");
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-			View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
+			View rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 
 			TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
-			final EditText txtLogin = (EditText)rootView.findViewById(R.id.txtLogin);txtLogin.requestFocus();
-			final EditText txtPassword = (EditText)rootView.findViewById(R.id.txtPassword);
-			final EditText txtPassword2 = (EditText)rootView.findViewById(R.id.txtPassword2);
-			final EditText txtEmail = (EditText)rootView.findViewById(R.id.txtEmail);
-			final Button btnSend = (Button)rootView.findViewById(R.id.btnSend);
 
 			switch(sectionNumber)
 			{
-			case ENTER://---------------------------------------------------------------------------
+			case LUGARES://---------------------------------------------------------------------------
 				break;
 
-			case REGISTER://------------------------------------------------------------------------
+			case RUTAS://------------------------------------------------------------------------
 				break;
 
-			case RECOVER://-------------------------------------------------------------------------
+			case AVISOS://-------------------------------------------------------------------------
 				break;
 			}
 
