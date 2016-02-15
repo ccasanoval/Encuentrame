@@ -1,8 +1,12 @@
 package com.cesoft.encuentrame.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 
 import java.util.ArrayList;
@@ -12,7 +16,7 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class Lugar
+public class Lugar implements Parcelable
 {
 	public Lugar(){}
 
@@ -39,10 +43,81 @@ public class Lugar
 	public void setDescripcion(String v){_sDescripcion=v;}
 
 
-	public void getLista(AsyncCallback<BackendlessCollection<Lugar>> res)
+	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res)
 	{
 		Backendless.Persistence.of(Lugar.class).find(res);
 	}
+
+	public void eliminar(AsyncCallback<Long> ac)
+	{
+		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
+		Backendless.Persistence.of(Lugar.class).remove(this, ac);
+			/*new AsyncCallback<Long>()
+			{
+				@Override
+				public void handleResponse(Long lugar)
+				{
+					// Contact has been deleted. The response is a time in milliseconds when the object was deleted
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault)
+				{
+					// an error has occurred, the error code can be retrieved with fault.getCode()
+				}
+			});*/
+	}
+
+	public void guardar(AsyncCallback<Lugar> ac)
+	{
+		//Backendless.Persistence.of(Lugar.class).save(this, ac);
+		Backendless.Persistence.save(this, ac);
+	}
+
+
+	// PARCELABLE
+	//______________________________________________________________________________________________
+	protected Lugar(Parcel in)
+	{
+		setObjectId(in.readString());
+		_sNombre = in.readString();
+		_sDescripcion = in.readString();
+		//
+		_lugar.setObjectId(in.readString());
+		_lugar.setLatitude(in.readDouble());
+		_lugar.setLongitude(in.readDouble());
+	}
+	@Override
+	public void writeToParcel(Parcel dest, int flags)
+	{
+		dest.writeString(getObjectId());
+		dest.writeString(_sNombre);
+		dest.writeString(_sDescripcion);
+		//
+		dest.writeString(_lugar.getObjectId());
+		dest.writeDouble(_lugar.getLatitude());
+		dest.writeDouble(_lugar.getLongitude());
+	}
+
+	@Override
+	public int describeContents()
+	{
+		return 0;
+	}
+	public static final Creator<Lugar> CREATOR = new Creator<Lugar>()
+	{
+		@Override
+		public Lugar createFromParcel(Parcel in)
+		{
+			return new Lugar(in);
+		}
+		@Override
+		public Lugar[] newArray(int size)
+		{
+			return new Lugar[size];
+		}
+	};
+
+
 	/*
 
 

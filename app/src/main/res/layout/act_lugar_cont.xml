@@ -57,54 +57,81 @@
 			android:singleLine="true"/>
 	</android.support.design.widget.TextInputLayout>
 
-	<TextView
-		android:id="@+id/lblPosicion_"
-		android:layout_below="@+id/txtDescripcion_"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textAppearance="?android:attr/textAppearanceMedium"
-		android:text="@string/lat_lon"
-		android:layout_marginTop="15dp"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentStart="true"/>
-
-	<TextView
-		android:id="@+id/lblPosicion"
-		android:layout_alignBottom="@+id/lblPosicion_"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textAppearance="?android:attr/textAppearanceLarge"
-		android:text="0/0"
-		android:layout_centerHorizontal="true"/>
-
+	<!-- DATE CREATED and MODIFIED ? -->
 
 	<LinearLayout
-		android:layout_below="@+id/lblPosicion_"
+		android:id="@+id/layPosicion"
+		android:layout_below="@+id/txtDescripcion_"
 		android:orientation="horizontal"
-		android:layout_width="match_parent"
+		android:layout_centerHorizontal="true"
+		android:layout_centerVertical="true"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentStart="true"
+		android:layout_marginTop="5dp">
+
+		<TextView
+			android:id="@+id/lblPosicion_"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:text="@string/lat_lon"
+			android:layout_marginRight="15dp"
+			android:layout_marginEnd="15dp"
+			android:layout_gravity="center_vertical"/>
+		<TextView
+			android:id="@+id/lblPosicion"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_marginRight="15dp"
+			android:layout_marginEnd="15dp"
+			android:text="0.0/0.0"
+			android:layout_gravity="center_vertical"/>
+		<ImageButton
+			android:id="@+id/btnActPos"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:layout_gravity="center_vertical"
+			android:contentDescription="@string/actualizar_posicion"
+			android:src="@android:drawable/ic_menu_mylocation" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_below="@+id/layPosicion"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
 		android:layout_marginTop="50dp">
 
 		<ImageButton
 			android:id="@+id/btnGuardar"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:contentDescription="@string/guardar"
 			android:src="@android:drawable/ic_menu_save" />
 
 		<ImageButton
 			android:id="@+id/btnMapa"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:contentDescription="@string/ver_mapa"
 			android:src="@android:drawable/ic_menu_mapmode" />
 
 		<ImageButton
 			android:id="@+id/btnEliminar"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:contentDescription="@string/eliminar"
 			android:src="@android:drawable/ic_menu_delete" />
-
 	</LinearLayout>
 
 

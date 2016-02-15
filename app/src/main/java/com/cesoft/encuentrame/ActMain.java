@@ -29,6 +29,7 @@ import com.cesoft.encuentrame.models.Lugar;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+//TODO:icono app
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: ventana de mapa que muestre punto, ruta o geofence...
 //TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
@@ -37,7 +38,6 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
-	private static ActMain _win;
 	private SectionsPagerAdapter _SectionsPagerAdapter;
 	private ViewPager _viewPager;
 
@@ -64,21 +64,24 @@ public class ActMain extends AppCompatActivity
 			@Override
 			public void onClick(View view)
 			{
-				Snackbar.make(view, "Replace with your own action: "+_viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-				System.err.println("---------------------"+_viewPager.getCurrentItem());
+				Snackbar.make(view, "Replace with your own action: " + _viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+				System.err.println("QAZ---------------------" + _viewPager.getCurrentItem());
 				switch(_viewPager.getCurrentItem())
 				{
 				case LUGARES:
-					;
+					startActivity(new Intent(getBaseContext(), ActLugar.class));
+					//i.putExtra("aviso", _o.getAviso());
+					//startActivityForResult(i, AVISO);//TODO: si es guardado, borrado => refresca la vista, si no nada
+					break;
 				case RUTAS:
-					;
+					break;
 				case AVISOS:
-					;
+					break;
 				}
 			}
 		});
 
-		_win = this;
+		cargaDatosDebug();
 	}
 
 	@Override
@@ -142,7 +145,7 @@ public class ActMain extends AppCompatActivity
 	}
 
 
-	//----------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	public static class PlaceholderFragment extends Fragment
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
@@ -175,26 +178,35 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 			{
 			case LUGARES://---------------------------------------------------------------------------
 				textView.setText(getString(R.string.lugares));
-				Backendless.Persistence.of(Lugar.class).find(
-					new AsyncCallback<BackendlessCollection<Lugar>>()
-					{
-						@Override
-						public void handleResponse(BackendlessCollection<Lugar> lugares)
+				Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
 						{
-							int n = lugares.getTotalObjects();
-							System.err.println("---------LUGARES:GET:OK:"+n);
-							if(n < 1)return;//TODO:change to use Lugar[] directly
-							Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
-							ArrayList<Lugar> listaAL = new ArrayList<>();
-							while(iterator.hasNext())listaAL.add(iterator.next());
-							listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL.toArray(new Lugar[0])));
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.err.println("---------LUGARES:GET:ERROR:"+backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
-						}
-					});
+							@Override
+							public void handleResponse(BackendlessCollection<Lugar> lugares)
+							{
+								int n = lugares.getTotalObjects();
+								System.err.println("---------LUGARES:GET:OK:" + n);
+								if(n < 1)return;//TODO:change to use Lugar[] directly
+
+								Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
+								Lugar[] listaAL = new Lugar[n];
+								//for(int i=0; i < n; i++)
+								int i=0;
+								while(iterator.hasNext())
+									listaAL[i++] = iterator.next();
+								/*
+								ArrayList<Lugar> listaAL = new ArrayList<>();
+								while(iterator.hasNext())
+									listaAL.add(iterator.next());
+									*/
+								listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL));//.toArray(new Lugar[0])));
+							}
+
+							@Override
+							public void handleFault(BackendlessFault backendlessFault)
+							{
+								System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+							}
+						});
 				//BackendlessCollection<Lugar> listaBE = Backendless.Data.of(Lugar.class).find();
 				//BackendlessCollection<GeoPoint> points = Backendless.Geo.getPoints( geoQuery);
 				//Iterator<GeoPoint> iterator=points.getCurrentPage().iterator();
@@ -222,9 +234,47 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 			_expListView.setAdapter(new NivelUnoListAdapter(this.getApplicationContext(), _expListView, lista));
 			_expListView.refreshDrawableState();
 		}*/
+
 	}
+
+
+//DEBUG
+	private void cargaDatosDebug()
+	{
+		Lugar l = new Lugar();
+		l.setNombre("Lugar 1");
+		l.setDescripcion("Lug Desc 1");
+		l.setLugar(new GeoPoint(40.4676352, -3.5608339));
+		l.guardar(new AsyncCallback<Lugar>()
+		{
+			@Override
+			public void handleResponse(Lugar lugar)
+			{
+				System.err.println("L1-----------" + lugar);
+			}
+
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+			}
+		});
+
+		l = new Lugar();
+		l.setNombre("Lugar 2");
+		l.setDescripcion("Lug Desc 2");
+		l.setLugar(new GeoPoint(40.4690717,-3.5721635));
+		l.guardar(new AsyncCallback<Lugar>()
+			{
+				@Override
+				public void handleResponse(Lugar lugar)
+				{
+					System.err.println("L2-----------" + lugar);
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault){}
+			});
+
+	}
+
 }
 
-/*
-
-*/
