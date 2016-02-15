@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,19 +16,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.backendless.Backendless;
-import com.backendless.BackendlessUser;
+import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.geo.GeoPoint;
+import com.cesoft.encuentrame.models.Lugar;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 
+//TODO: main window=> Number or routes, places and geofences...
 //TODO: ventana de mapa que muestre punto, ruta o geofence...
 //TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
+//TODO: Mejorar aspecto boton de login...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -52,13 +58,23 @@ public class ActMain extends AppCompatActivity
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
 
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View view)
 			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+				Snackbar.make(view, "Replace with your own action: "+_viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+				System.err.println("---------------------"+_viewPager.getCurrentItem());
+				switch(_viewPager.getCurrentItem())
+				{
+				case LUGARES:
+					;
+				case RUTAS:
+					;
+				case AVISOS:
+					;
+				}
 			}
 		});
 
@@ -78,8 +94,13 @@ public class ActMain extends AppCompatActivity
 		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		//noinspection SimplifiableIfStatement
-		if(id == R.id.action_settings)
+		switch(id)
 		{
+		case R.id.action_config:
+			startActivity(new Intent(getBaseContext(), ActConfig.class));
+			return true;
+		case R.id.action_mapa:
+			startActivity(new Intent(getBaseContext(), ActMaps.class));
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -97,7 +118,6 @@ public class ActMain extends AppCompatActivity
 		@Override
 		public Fragment getItem(int position)
 		{
-System.err.println("SectionsPagerAdapter:getItem----------"+position);
 			return PlaceholderFragment.newInstance(position);
 		}
 		@Override
@@ -108,7 +128,6 @@ System.err.println("SectionsPagerAdapter:getItem----------"+position);
 		@Override
 		public CharSequence getPageTitle(int position)
 		{
-System.err.println("SectionsPagerAdapter:getPageTitle----------"+position);
 			switch(position)
 			{
 			case LUGARES:
@@ -127,6 +146,7 @@ System.err.println("SectionsPagerAdapter:getPageTitle----------"+position);
 	public static class PlaceholderFragment extends Fragment
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
+		//private ListView _ListView;
 
 		public PlaceholderFragment(){}
 
@@ -147,23 +167,64 @@ System.err.println(sectionNumber+"--------------newInstance");
 			Bundle args = getArguments();
 System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(ARG_SECTION_NUMBER)");
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-			View rootView = inflater.inflate(R.layout.act_main_frag, container, false);
-
-			TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
+			final View rootView = inflater.inflate(R.layout.act_main_frag, container, false);
+			final ListView listView = (ListView)rootView.findViewById(R.id.listView);
+			final TextView textView = new TextView(rootView.getContext());
 
 			switch(sectionNumber)
 			{
 			case LUGARES://---------------------------------------------------------------------------
+				textView.setText(getString(R.string.lugares));
+				Backendless.Persistence.of(Lugar.class).find(
+					new AsyncCallback<BackendlessCollection<Lugar>>()
+					{
+						@Override
+						public void handleResponse(BackendlessCollection<Lugar> lugares)
+						{
+							int n = lugares.getTotalObjects();
+							System.err.println("---------LUGARES:GET:OK:"+n);
+							if(n < 1)return;//TODO:change to use Lugar[] directly
+							Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
+							ArrayList<Lugar> listaAL = new ArrayList<>();
+							while(iterator.hasNext())listaAL.add(iterator.next());
+							listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL.toArray(new Lugar[0])));
+						}
+						@Override
+						public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.err.println("---------LUGARES:GET:ERROR:"+backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+						}
+					});
+				//BackendlessCollection<Lugar> listaBE = Backendless.Data.of(Lugar.class).find();
+				//BackendlessCollection<GeoPoint> points = Backendless.Geo.getPoints( geoQuery);
+				//Iterator<GeoPoint> iterator=points.getCurrentPage().iterator();
 				break;
 
 			case RUTAS://------------------------------------------------------------------------
+				textView.setText(getString(R.string.rutas));
 				break;
 
 			case AVISOS://-------------------------------------------------------------------------
+				textView.setText(getString(R.string.avisos));
 				break;
 			}
 
+			listView.addHeaderView(textView);
 			return rootView;
 		}
+
+		//______________________________________________________________________________________________
+		/*public void refrescarLista()
+		{
+			Iterator<Objeto> it = Objeto.findAll(Objeto.class);
+			ArrayList<Objeto> lista = Objeto.conectarHijos(it);//TODO:Por que no funciona con la lista pasada????? Lo deja duplicado y el nuevo no es editable???
+			ActEdit.setLista(lista);
+			_expListView.setAdapter(new NivelUnoListAdapter(this.getApplicationContext(), _expListView, lista));
+			_expListView.refreshDrawableState();
+		}*/
 	}
 }
+
+/*
+
+*/

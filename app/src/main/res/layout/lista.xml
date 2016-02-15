@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	android:background="#888"
+	>
+
+	<TextView
+		android:id="@+id/txtNombre"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:paddingLeft="35dp"
+		android:paddingStart="35dp"
+		android:textSize="24sp"
+		android:textStyle="bold"
+		android:fontFamily="sans-serif"
+		android:textColor="@android:color/holo_green_light"
+		android:layout_gravity="center_vertical"
+		android:gravity="center_vertical"
+		android:focusable="false"
+        android:lines="1"
+        android:maxLines="1"
+		/>
+
+	<ImageButton
+		android:id="@+id/btnEditar"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+		android:layout_centerVertical="true"
+		android:layout_marginRight="15dp"
+		android:layout_marginEnd="15dp"
+		android:background="@android:color/transparent"
+		android:contentDescription="@string/editar"
+		android:layout_gravity="center"
+		android:focusable="false"
+		android:src="@android:drawable/ic_menu_edit" />
+		
+	<ImageButton
+		android:id="@+id/btnMapa"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+		android:layout_centerVertical="true"
+		android:layout_marginRight="15dp"
+		android:layout_marginEnd="15dp"
+		android:background="@android:color/transparent"
+		android:contentDescription="@string/ver_mapa"
+		android:layout_gravity="center"
+		android:focusable="false"
+		android:src="@android:drawable/ic_menu_edit" />
+
+</RelativeLayout>

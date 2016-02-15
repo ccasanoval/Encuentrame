@@ -1,15 +1,20 @@
 package com.cesoft.encuentrame.models;
 
+import com.backendless.Backendless;
+import com.backendless.BackendlessCollection;
+import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class Lugares
+public class Lugar
 {
-	public Lugares(){}
+	public Lugar(){}
 
 	//Backendless
 	private String objectId;
@@ -32,6 +37,41 @@ public class Lugares
 	public void setNombre(String v){_sNombre=v;}
 	public String getDescripcion(){return _sDescripcion;}
 	public void setDescripcion(String v){_sDescripcion=v;}
+
+
+	public void getLista(AsyncCallback<BackendlessCollection<Lugar>> res)
+	{
+		Backendless.Persistence.of(Lugar.class).find(res);
+	}
+	/*
+
+
+	BackendlessCollection<Lugar> listaBE = Backendless.Data.of(Lugar.class).find(
+			new AsyncCallback<BackendlessCollection<GeoPoint>>()
+	);
+
+			{
+				@Override
+				public void handleResponse( BackendlessCollection<GeoPoint> points )
+				{
+					System.out.println( String.format( "searchByDateInRectangularArea GETPOINTS: %s", points.getCurrentPage() ) );
+				}
+				@Override
+				public void handleFault( BackendlessFault fault )
+				{
+					System.err.println( String.format( "searchByDateInRectangularArea FAULT = %s", fault ) );
+				}
+			} );
+		}
+
+				//BackendlessCollection<GeoPoint> points = Backendless.Geo.getPoints( geoQuery);
+				//Iterator<GeoPoint> iterator=points.getCurrentPage().iterator();
+				Iterator<Lugar> iterator = listaBE.getCurrentPage().iterator();
+				ArrayList<Lugar> listaAL = new ArrayList<Lugar>();
+				while(iterator.hasNext())listaAL.add(iterator.next());
+				listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL.toArray(new Lugar[0])));
+*/
+
 }
 
 //TODO: https://www.thoughtworks.com/insights/blog/signing-open-source-android-apps-without-disclosing-passwords

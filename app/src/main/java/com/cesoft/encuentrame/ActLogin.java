@@ -164,8 +164,6 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
           					{
             					super.handleResponse(backendlessUser);
 								System.err.println("ENTER-----------------"+backendlessUser);
-								//TODO: show message & go to lugares... (or main window=> Number or routes, places and geofences...)
-								//TODO: go to lugares... (or main window=> Number or routes, places and geofences...)
 								startActivity(new Intent(_win.getBaseContext(), ActMain.class));
           					}
         				});
