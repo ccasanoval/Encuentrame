@@ -79,7 +79,7 @@ public class Lugar extends Objeto implements Parcelable
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
-System.err.println("Lugar:read Parcel:++++++++++++++++B: "+this);
+//System.err.println("Lugar:read Parcel:++++++++++++++++B: "+this);
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)

@@ -61,15 +61,13 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-		if(checkPlayServices())buildGoogleApiClient();
-
 
 		//-----------
 		_lblPosicion = (TextView) findViewById(R.id.lblPosicion);
 		_txtNombre = (EditText) findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText) findViewById(R.id.txtDescripcion);
 
-		ImageButton btnActPos = (ImageButton) findViewById(R.id.btnActPos);
+		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -79,7 +77,7 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 			}
 		});
 
-		ImageButton btnEliminar = (ImageButton) findViewById(R.id.btnEliminar);
+		ImageButton btnEliminar = (ImageButton)findViewById(R.id.btnEliminar);
 		if(_l==null)btnEliminar.setVisibility(View.GONE);
 		else
 		btnEliminar.setOnClickListener(new View.OnClickListener()
@@ -145,6 +143,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 			setTitle("Nuevo Lugar");
 		else
 			setTitle("Editar Lugar");
+
 	}
 
 	@Override
@@ -155,7 +154,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 		if(requestCode == ACC_MAPA)
 		{
 			_l = data.getParcelableExtra("lugar");
-			System.err.println("onActivityResult----------A:" + _l);
+			System.err.println("ActLugar:onActivityResult----------:" + _l);
 		}
 	}
 
@@ -167,10 +166,13 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 		_txtNombre.setText(_l.getNombre());
 		_txtDescripcion.setText(_l.getDescripcion());
 		//_locLast		//GeoPoint p = _l.getLugar();
-		_locLast.setLatitude(_l.getLugar().getLatitude());
-		_locLast.setLongitude(_l.getLugar().getLongitude());
-		setPosAct(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
-
+		if(_l.getLugar() != null)
+		{
+			if(_locLast == null)_locLast = new Location("dummyprovider");
+			_locLast.setLatitude(_l.getLugar().getLatitude());
+			_locLast.setLongitude(_l.getLugar().getLongitude());
+			setPosAct(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
+		}
 	}
 
 	//______________________________________________________________________________________________
@@ -178,8 +180,8 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	public void onStart()
 	{
 		super.onStart();
-		if(_GoogleApiClient != null)
-			_GoogleApiClient.connect();
+		if(checkPlayServices())buildGoogleApiClient();
+		if(_GoogleApiClient != null)_GoogleApiClient.connect();
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		/*Action viewAction = Action.newAction(Action.TYPE_VIEW, // TODO: choose an action type.
@@ -196,7 +198,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	protected void onResume()
 	{
 		super.onResume();
-		checkPlayServices();
+		//checkPlayServices();
 	}
 
 	@Override
@@ -221,23 +223,24 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	{
 		_GoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
 	}
-
 	private boolean checkPlayServices()
 	{
     	GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			int PLAY_SERVICES_RESOLUTION_REQUEST = 6969;
-        	if(googleAPI.isUserResolvableError(result))
-            	googleAPI.getErrorDialog(this, result, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+			/*int PLAY_SERVICES_RESOLUTION_REQUEST = 6969;
+        	if(googleAPI.isUserResolvableError(result))googleAPI.getErrorDialog(this.getParent(), result, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+        	*/
+			System.err.println("ActLugar:checkPlayServices:ERROR:-------------"+result);
+			//Snackbar.make(null, R.string.eliminar, Snackbar.LENGTH_LONG).setAction("Action", null).show();
 	        return false;
 	    }
 	    return true;
 	}
-
 	private void getAndDisplayLocation()
 	{
+		if(_GoogleApiClient == null)return;
 		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 		_locLast = LocationServices.FusedLocationApi.getLastLocation(_GoogleApiClient);
 		if(_locLast != null)
@@ -267,7 +270,8 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	@Override
 	public void onConnectionSuspended(int arg0)
 	{
-		_GoogleApiClient.connect();
+		if(_GoogleApiClient != null)
+			_GoogleApiClient.connect();
 	}
 
 

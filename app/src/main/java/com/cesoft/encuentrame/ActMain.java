@@ -284,7 +284,7 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 				i = new Intent(getContext(), ActLugar.class);
 				Lugar l = (Lugar)obj;
 				i.putExtra("lugar", l);
-System.err.println("MAIN:onItemEdit:++++++++++++++++" + l);
+//System.err.println("MAIN:onItemEdit:++++++++++++++++" + l);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
