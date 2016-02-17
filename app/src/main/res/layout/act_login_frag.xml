@@ -95,6 +95,7 @@
 			android:id="@+id/btnSend"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			style="@style/btnStyle"
 			android:text="@string/send"
 			/>
 	</android.support.v7.widget.LinearLayoutCompat>

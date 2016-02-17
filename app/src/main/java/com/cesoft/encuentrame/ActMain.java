@@ -24,11 +24,14 @@ import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
+import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
+import com.cesoft.encuentrame.models.Ruta;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
+//TODO:guardar usr/pwd de backendless (luego en settings)
 //TODO:icono app
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: ventana de mapa que muestre punto, ruta o geofence...
@@ -80,8 +83,6 @@ public class ActMain extends AppCompatActivity
 				}
 			}
 		});
-
-		cargaDatosDebug();
 	}
 
 	@Override
@@ -134,6 +135,7 @@ public class ActMain extends AppCompatActivity
 			switch(position)
 			{
 			case LUGARES:
+//cargaDatosDebug();//TODO:DEBUG
 				return getString(R.string.lugares);
 			case RUTAS:
 				return getString(R.string.rutas);
@@ -184,15 +186,16 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 							public void handleResponse(BackendlessCollection<Lugar> lugares)
 							{
 								int n = lugares.getTotalObjects();
-								System.err.println("---------LUGARES:GET:OK:" + n);
-								if(n < 1)return;//TODO:change to use Lugar[] directly
+System.err.println("---------LUGARES:GET:OK:" + n);
+								if(n < 1)return;
 
 								Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 								Lugar[] listaAL = new Lugar[n];
-								//for(int i=0; i < n; i++)
 								int i=0;
 								while(iterator.hasNext())
 									listaAL[i++] = iterator.next();
+System.err.println("---------LUGARES:GET:OK2:" + listaAL.length);
+System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 								/*
 								ArrayList<Lugar> listaAL = new ArrayList<>();
 								while(iterator.hasNext())
@@ -200,7 +203,6 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 									*/
 								listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL));//.toArray(new Lugar[0])));
 							}
-
 							@Override
 							public void handleFault(BackendlessFault backendlessFault)
 							{
@@ -214,10 +216,52 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 
 			case RUTAS://------------------------------------------------------------------------
 				textView.setText(getString(R.string.rutas));
+				Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
+						{
+							@Override
+							public void handleResponse(BackendlessCollection<Ruta> rutas)
+							{
+								int n = rutas.getTotalObjects();
+								System.err.println("---------RUTAS:GET:OK:" + n);
+								if(n < 1)return;
+								Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
+								Ruta[] listaAL = new Ruta[n];
+								int i=0;
+								while(iterator.hasNext())
+									listaAL[i++] = iterator.next();
+								listView.setAdapter(new RutaArrayAdapter(rootView.getContext(), listaAL));
+							}
+							@Override
+							public void handleFault(BackendlessFault backendlessFault)
+							{
+								System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
+							}
+						});
 				break;
 
 			case AVISOS://-------------------------------------------------------------------------
 				textView.setText(getString(R.string.avisos));
+				Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
+				{
+					@Override
+					public void handleResponse(BackendlessCollection<Aviso> aviso)
+					{
+						int n = aviso.getTotalObjects();
+						System.err.println("---------AVISOS:GET:OK:" + n);
+						if(n < 1)return;
+						Iterator<Aviso> iterator = aviso.getCurrentPage().iterator();
+						Aviso[] listaAL = new Aviso[n];
+						int i = 0;
+						while(iterator.hasNext())
+							listaAL[i++] = iterator.next();
+						listView.setAdapter(new AvisoArrayAdapter(rootView.getContext(), listaAL));
+					}
+					@Override
+					public void handleFault(BackendlessFault backendlessFault)
+					{
+						System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
+					}
+				});
 				break;
 			}
 
@@ -238,40 +282,38 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 	}
 
 
-//DEBUG
+
+//TODO:DEBUG
 	private void cargaDatosDebug()
 	{
 		Lugar l = new Lugar();
-		l.setNombre("Lugar 1");
-		l.setDescripcion("Lug Desc 1");
-		l.setLugar(new GeoPoint(40.4676352, -3.5608339));
+		l.setNombre("Lugar 3");
+		l.setDescripcion("Lug Desc 3");
+		l.setLugar(new GeoPoint(40.4676353, -3.5608333));
 		l.guardar(new AsyncCallback<Lugar>()
 		{
 			@Override
 			public void handleResponse(Lugar lugar)
 			{
-				System.err.println("L1-----------" + lugar);
+				System.err.println("************* L3-----------" + lugar);
 			}
-
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-			}
+			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L3-----------");}
 		});
 
 		l = new Lugar();
-		l.setNombre("Lugar 2");
-		l.setDescripcion("Lug Desc 2");
-		l.setLugar(new GeoPoint(40.4690717,-3.5721635));
+		l.setNombre("Lugar 4");
+		l.setDescripcion("Lug Desc 4");
+		l.setLugar(new GeoPoint(40.4690714,-3.5721634));
 		l.guardar(new AsyncCallback<Lugar>()
 			{
 				@Override
 				public void handleResponse(Lugar lugar)
 				{
-					System.err.println("L2-----------" + lugar);
+					System.err.println("************* L4-----------" + lugar);
 				}
 				@Override
-				public void handleFault(BackendlessFault backendlessFault){}
+				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------");}
 			});
 
 	}

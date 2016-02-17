@@ -8,6 +8,8 @@ import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
+import com.backendless.persistence.BackendlessDataQuery;
+import com.backendless.persistence.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,36 +18,29 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class Lugar implements Parcelable
+public class Lugar extends Objeto implements Parcelable
 {
 	public Lugar(){}
 
-	//Backendless
-	private String objectId;
-	private Date created;
-	private Date updated;
-	public String getObjectId(){return objectId;}
-	public void setObjectId(String objectId){this.objectId = objectId;}
-	public Date getCreated(){return created;}
-	public void setCreated(Date created){this.created = created;}
-	public Date getUpdated(){return updated;}
-	public void setUpdated(Date updated){this.updated = updated;}
+	private GeoPoint lugar;
+	public GeoPoint getLugar(){return lugar;}
+	public void setLugar(GeoPoint v){lugar=v;}
 
-	private GeoPoint _lugar;
-	public GeoPoint getLugar(){return _lugar;}
-	public void setLugar(GeoPoint v){this._lugar=v;}
+	public String toString()
+	{
+		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude());
+	}
 
-	private String _sNombre;
-	private String _sDescripcion;
-	public String getNombre(){return _sNombre;}
-	public void setNombre(String v){_sNombre=v;}
-	public String getDescripcion(){return _sDescripcion;}
-	public void setDescripcion(String v){_sDescripcion=v;}
-
-
+	//// Backendless
+	//______________________________________________________________________________________________
 	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res)
 	{
-		Backendless.Persistence.of(Lugar.class).find(res);
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("lugar");
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Lugar.class).find(query, res);
+		//Backendless.Persistence.of(Lugar.class).find(res);
 	}
 
 	public void eliminar(AsyncCallback<Long> ac)
@@ -78,24 +73,20 @@ public class Lugar implements Parcelable
 	//______________________________________________________________________________________________
 	protected Lugar(Parcel in)
 	{
-		setObjectId(in.readString());
-		_sNombre = in.readString();
-		_sDescripcion = in.readString();
+		super(in);
 		//
-		_lugar.setObjectId(in.readString());
-		_lugar.setLatitude(in.readDouble());
-		_lugar.setLongitude(in.readDouble());
+		lugar.setObjectId(in.readString());
+		lugar.setLatitude(in.readDouble());
+		lugar.setLongitude(in.readDouble());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
-		dest.writeString(getObjectId());
-		dest.writeString(_sNombre);
-		dest.writeString(_sDescripcion);
+		super.writeToParcel(dest, flags);
 		//
-		dest.writeString(_lugar.getObjectId());
-		dest.writeDouble(_lugar.getLatitude());
-		dest.writeDouble(_lugar.getLongitude());
+		dest.writeString(lugar.getObjectId());
+		dest.writeDouble(lugar.getLatitude());
+		dest.writeDouble(lugar.getLongitude());
 	}
 
 	@Override

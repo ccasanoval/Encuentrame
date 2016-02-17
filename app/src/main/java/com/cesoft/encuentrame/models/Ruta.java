@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.backendless.Backendless;
+import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
 
@@ -29,15 +30,15 @@ public class Ruta implements Parcelable
 	public void setUpdated(Date updated){this.updated = updated;}
 
 	//Payload
-	private List<GeoPoint> _aPuntos;
-	public List<GeoPoint> getPuntos(){return _aPuntos;}
+	private List<GeoPoint> puntos;
+	public List<GeoPoint> getPuntos(){return puntos;}
 
-	private String _sNombre;
-	private String _sDescripcion;
-	public String getNombre(){return _sNombre;}
-	public void setNombre(String v){_sNombre=v;}
-	public String getDescripcion(){return _sDescripcion;}
-	public void setDescripcion(String v){_sDescripcion=v;}
+	private String nombre;
+	private String descripcion;
+	public String getNombre(){return nombre;}
+	public void setNombre(String v){nombre=v;}
+	public String getDescripcion(){return descripcion;}
+	public void setDescripcion(String v){descripcion=v;}
 
 
 
@@ -45,16 +46,16 @@ public class Ruta implements Parcelable
 	protected Ruta(Parcel in)
 	{
 		setObjectId(in.readString());
-		_sNombre = in.readString();
-		_sDescripcion = in.readString();
+		nombre = in.readString();
+		descripcion = in.readString();
 		//
-		_aPuntos.clear();
+		puntos.clear();
 		int n = in.readInt();
 		for(int i=0; i < n; i++)
 		{
 			double lat = in.readDouble();
 			double lon = in.readDouble();
-			_aPuntos.add(new GeoPoint(lat, lon));
+			puntos.add(new GeoPoint(lat, lon));
 		}
 		/*
 		_lugar.setObjectId(in.readString());
@@ -65,11 +66,11 @@ public class Ruta implements Parcelable
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		dest.writeString(getObjectId());
-		dest.writeString(_sNombre);
-		dest.writeString(_sDescripcion);
+		dest.writeString(nombre);
+		dest.writeString(descripcion);
 		//
-		dest.writeInt(_aPuntos.size());
-		for(GeoPoint p : _aPuntos)
+		dest.writeInt(puntos.size());
+		for(GeoPoint p : puntos)
 		{
 			dest.writeDouble(p.getLatitude());
 			dest.writeDouble(p.getLongitude());
@@ -105,6 +106,10 @@ public class Ruta implements Parcelable
 	{
 		//Backendless.Persistence.of(Lugar.class).save(this, ac);
 		Backendless.Persistence.save(this, ac);
+	}
+	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res)
+	{
+		Backendless.Persistence.of(Ruta.class).find(res);
 	}
 
 }

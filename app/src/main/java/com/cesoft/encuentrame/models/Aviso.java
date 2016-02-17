@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.backendless.Backendless;
+import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
 
@@ -32,12 +33,12 @@ public class Aviso implements Parcelable
 	//TODO: GeoFence
 	//TODO: si no GeoFence => GeoPoint + radius
 
-	private String _sNombre;
-	private String _sAviso;
-	public String getNombre(){return _sNombre;}
-	public void setNombre(String v){_sNombre=v;}
-	public String getAviso(){return _sAviso;}
-	public void setAviso(String v){_sAviso=v;}
+	private String nombre;
+	private String descripcion;
+	public String getNombre(){return nombre;}
+	public void setNombre(String v){nombre=v;}
+	public String getAviso(){return descripcion;}
+	public void setAviso(String v){descripcion=v;}
 
 
 
@@ -45,8 +46,8 @@ public class Aviso implements Parcelable
 	protected Aviso(Parcel in)
 	{
 		setObjectId(in.readString());
-		_sNombre = in.readString();
-		_sAviso = in.readString();
+		nombre = in.readString();
+		descripcion = in.readString();
 		//
 		//TODO:GeoFence
 	}
@@ -54,8 +55,8 @@ public class Aviso implements Parcelable
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		dest.writeString(getObjectId());
-		dest.writeString(_sNombre);
-		dest.writeString(_sAviso);
+		dest.writeString(nombre);
+		dest.writeString(descripcion);
 		//
 		//TODO:GeoFence
 	}
@@ -80,6 +81,10 @@ public class Aviso implements Parcelable
 	{
 		//Backendless.Persistence.of(Lugar.class).save(this, ac);
 		Backendless.Persistence.save(this, ac);
+	}
+	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res)
+	{
+		Backendless.Persistence.of(Aviso.class).find(res);
 	}
 
 }
