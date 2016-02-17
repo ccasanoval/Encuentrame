@@ -57,42 +57,14 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_lugar);
 
+		//-----------
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 		if(checkPlayServices())buildGoogleApiClient();
 
-		//------------------------------------------------------------------------------------------
-		try
-		{
-			_l = this.getIntent().getParcelableExtra("lugar");
-			setValores();
-		}
-		catch(Exception e)
-		{
-			System.err.println("ActLugar:onCreate:ERROR:"+e);
-			this.finish();
-		}
-		//------------------------------------------------------------------------------------------
 
-		/*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-			}
-		});
-		*/
-
-		if(_l==null)
-			setTitle("Nuevo Lugar");
-		else
-			setTitle("Editar Lugar");
-
+		//-----------
 		_lblPosicion = (TextView) findViewById(R.id.lblPosicion);
 		_txtNombre = (EditText) findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText) findViewById(R.id.txtDescripcion);
@@ -142,7 +114,39 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 			}
 		});
 
+		//------------------------------------------------------------------------------------------
+		try
+		{
+			_l = this.getIntent().getParcelableExtra("lugar");
+System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
+			setValores();
+		}
+		catch(Exception e)
+		{
+			System.err.println("ActLugar:onCreate:ERROR:"+e);
+			this.finish();
+		}
+		//------------------------------------------------------------------------------------------
+
+		/*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		fab.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+			}
+		});
+		*/
+
+		if(_l==null)
+			setTitle("Nuevo Lugar");
+		else
+			setTitle("Editar Lugar");
 	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
@@ -271,13 +275,18 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 	private void guardar()
 	{
 		if(_l == null)	// CREAR
-		{
 			_l = new Lugar();
-		}
+
 		//else			// EDITAR
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
 		_l.setLugar(new GeoPoint(_locLast.getLatitude(), _locLast.getLongitude()));
+
+		//TODO:
+		/*Intent data = new Intent();
+		data.putExtra("aviso", _a);
+		setResult(Activity.RESULT_OK, data);*/
+		finish();
 	}
 
 	//______________________________________________________________________________________________

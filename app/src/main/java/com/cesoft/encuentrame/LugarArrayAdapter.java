@@ -18,14 +18,14 @@ import com.cesoft.encuentrame.models.Lugar;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 {
-	//private final Context _context;
 	private final Lugar[] _lugares;
+	private CesIntLista _inter;
 
-	public LugarArrayAdapter(Context context, Lugar[] lugares)//TODO:ArrayList<Lugares>
+	public LugarArrayAdapter(Context context, Lugar[] lugares, CesIntLista inter)
 	{
 		super(context, -1, lugares);
-		//_context = context;
 		_lugares = lugares;
+		_inter = inter;
 	}
 
 	@Override
@@ -47,10 +47,7 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 				@Override
 				public void onClick(View v)
 				{
-					//TODO: Abrir pantalla edicion con punto
-					/*Intent i = new Intent(LugarArrayAdapter.this.getContext(), ActLugar.class);
-					i.putExtra("lugar", _lugares[position]);
-					startActivityForResult(i, 69);//TODO: si es guardado, borrado => refresca la vista, si no nada*/
+					_inter.onItemEdit(CesIntLista.tipoLista.LUGAR, _lugares[position]);
 				}
 			});
 		btnMapa.setOnClickListener(new View.OnClickListener()
@@ -58,7 +55,7 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 				@Override
 				public void onClick(View v)
 				{
-					//TODO: Abrir pantalla mapa con punto
+					_inter.onItemMap(CesIntLista.tipoLista.LUGAR, _lugares[position]);
 				}
 			});
 

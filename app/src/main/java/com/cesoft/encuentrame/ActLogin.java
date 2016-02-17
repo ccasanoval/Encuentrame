@@ -147,6 +147,9 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 			switch(sectionNumber)
 			{
 			case ENTER://---------------------------------------------------------------------------
+//TODO:Debug
+txtLogin.setText("quake1978");
+txtPassword.setText("colt1911");
 				txtEmail.setVisibility(View.GONE);
 				txtPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));

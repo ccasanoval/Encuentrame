@@ -26,6 +26,7 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
+import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
 import java.util.ArrayList;
@@ -110,6 +111,7 @@ public class ActMain extends AppCompatActivity
 		return super.onOptionsItemSelected(item);
 	}
 
+
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
 	 */
@@ -147,8 +149,9 @@ public class ActMain extends AppCompatActivity
 	}
 
 
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	public static class PlaceholderFragment extends Fragment
+	public static class PlaceholderFragment extends Fragment implements CesIntLista
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		//private ListView _ListView;
@@ -201,7 +204,7 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 								while(iterator.hasNext())
 									listaAL.add(iterator.next());
 									*/
-								listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL));//.toArray(new Lugar[0])));
+								listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 							}
 							@Override
 							public void handleFault(BackendlessFault backendlessFault)
@@ -269,6 +272,59 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 			return rootView;
 		}
 
+		//// implements CesIntLista
+		//______________________________________________________________________________________________
+		@Override
+		public void onItemEdit(tipoLista tipo, Objeto obj)
+		{
+			Intent i;
+			switch(tipo)
+			{
+			case LUGAR:
+				i = new Intent(getContext(), ActLugar.class);
+				Lugar l = (Lugar)obj;
+				i.putExtra("lugar", l);
+System.err.println("MAIN:onItemEdit:++++++++++++++++" + l);
+				startActivityForResult(i, LUGARES);
+				break;
+			case RUTA:
+				i = new Intent(getContext(), ActLugar.class);
+				i.putExtra("ruta", obj);
+				startActivityForResult(i, RUTAS);
+				break;
+			case AVISO:
+				i = new Intent(getContext(), ActLugar.class);
+				i.putExtra("aviso", obj);
+				startActivityForResult(i, AVISOS);
+				break;
+			}
+		}
+		//TODO: mostrar objeto en mapa
+		@Override
+		public void onItemMap(tipoLista tipo, Objeto obj)
+		{
+			Intent i;
+			switch(tipo)
+			{
+			case LUGAR:
+				i = new Intent(getContext(), ActLugar.class);
+				i.putExtra("lugar", obj);
+				startActivityForResult(i, LUGARES);
+				break;
+			case RUTA:
+				i = new Intent(getContext(), ActLugar.class);
+				i.putExtra("ruta", obj);
+				startActivityForResult(i, RUTAS);
+				break;
+			case AVISO:
+				i = new Intent(getContext(), ActLugar.class);
+				i.putExtra("aviso", obj);
+				startActivityForResult(i, AVISOS);
+				break;
+			}
+		}
+
+
 		//______________________________________________________________________________________________
 		/*public void refrescarLista()
 		{
@@ -293,10 +349,7 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 		l.guardar(new AsyncCallback<Lugar>()
 		{
 			@Override
-			public void handleResponse(Lugar lugar)
-			{
-				System.err.println("************* L3-----------" + lugar);
-			}
+			public void handleResponse(Lugar lugar){System.err.println("************* L3-----------" + lugar);}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L3-----------");}
 		});
@@ -308,10 +361,7 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 		l.guardar(new AsyncCallback<Lugar>()
 			{
 				@Override
-				public void handleResponse(Lugar lugar)
-				{
-					System.err.println("************* L4-----------" + lugar);
-				}
+				public void handleResponse(Lugar lugar){System.err.println("************* L4-----------" + lugar);}
 				@Override
 				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------");}
 			});
