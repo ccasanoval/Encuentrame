@@ -46,11 +46,6 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 	private GoogleApiClient _GoogleApiClient;
 	private ConnectionResult result;
 
-	/**
-	 * ATTENTION: This was auto-generated to implement the App Indexing API.
-	 * See https://g.co/AppIndexing/AndroidStudio for more information.
-	 */
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -105,9 +100,8 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 			@Override
 			public void onClick(View v)
 			{
-				//showMapa(_l);//TODO
 				Intent i = new Intent(getBaseContext(), ActMaps.class);
-				i.putExtra("lugar", _l);
+				i.putExtra("objeto", _l);
 				startActivityForResult(i, ACC_MAPA);//TODO: si es guardado, borrado => refresca la vista, si no nada
 			}
 		});
@@ -115,7 +109,7 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 		//------------------------------------------------------------------------------------------
 		try
 		{
-			_l = this.getIntent().getParcelableExtra("lugar");
+			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
 System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 			setValores();
 		}

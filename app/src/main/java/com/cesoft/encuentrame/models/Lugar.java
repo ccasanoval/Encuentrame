@@ -20,6 +20,8 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Lugar extends Objeto implements Parcelable
 {
+	public static final String NOMBRE = "lugar";
+
 	public Lugar(){}
 
 	private GeoPoint lugar;

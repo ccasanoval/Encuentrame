@@ -11,6 +11,8 @@ import java.util.Date;
 //@ExcludeProperty( propertyName = "foo" )
 public class Objeto implements Parcelable
 {
+	public static final String NOMBRE = "objeto";
+
 	public Objeto(){}
 
 	//Backendless

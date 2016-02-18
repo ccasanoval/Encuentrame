@@ -272,19 +272,19 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 			case LUGAR:
 				i = new Intent(getContext(), ActLugar.class);
 				Lugar l = (Lugar)obj;
-				i.putExtra("lugar", l);
+				i.putExtra(Lugar.NOMBRE, l);
 //System.err.println("MAIN:onItemEdit:++++++++++++++++" + l);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
 				i = new Intent(getContext(), ActLugar.class);
-				i.putExtra("ruta", obj);
+				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
 				i = new Intent(getContext(), ActLugar.class);
 				Aviso a = (Aviso)obj;
-				i.putExtra("aviso", a);
+				i.putExtra(Aviso.NOMBRE, a);
 System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 				startActivityForResult(i, AVISOS);
 								break;

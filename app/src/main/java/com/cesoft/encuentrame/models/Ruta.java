@@ -16,6 +16,8 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Ruta extends Objeto implements Parcelable
 {
+	public static final String NOMBRE = "ruta";
+
 	public Ruta(){}
 
 	//Payload

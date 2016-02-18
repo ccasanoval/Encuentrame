@@ -18,6 +18,7 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Aviso extends Objeto implements Parcelable
 {
+	public static final String NOMBRE = "aviso";
 	public static final String RADIO = "radio";
 
 	public Aviso(){}
