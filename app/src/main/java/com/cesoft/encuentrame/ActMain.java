@@ -137,7 +137,7 @@ public class ActMain extends AppCompatActivity
 			switch(position)
 			{
 			case LUGARES:
-//cargaDatosDebug();//TODO:DEBUG
+cargaDatosDebug();//TODO:DEBUG
 				return getString(R.string.lugares);
 			case RUTAS:
 				return getString(R.string.rutas);
@@ -283,9 +283,11 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				break;
 			case AVISO:
 				i = new Intent(getContext(), ActLugar.class);
-				i.putExtra("aviso", obj);
+				Aviso a = (Aviso)obj;
+				i.putExtra("aviso", a);
+System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 				startActivityForResult(i, AVISOS);
-				break;
+								break;
 			}
 		}
 		//TODO: mostrar objeto en mapa
@@ -358,16 +360,18 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 		*/
 
 		Aviso a = new Aviso();
-		a.setNombre("Aviso 1");
-		a.setDescripcion("Aviso 1: Recoge la nota del buzon muerto");
-		GeoPoint l = new GeoPoint(40.4676359, -3.5608339); l.setDistance(1000);
+		a.setNombre("Aviso 5");
+		a.setDescripcion("Aviso 5: Recoge la nota del buzon muerto5");
+		GeoPoint l = new GeoPoint(40.4676555, -3.5608555);
+		l.setDistance(1000);
+		l.addMetadata("radio", 1000);
 		a.setLugar(l);
 		a.guardar(new AsyncCallback<Aviso>()
 		{
 			@Override
-			public void handleResponse(Aviso aviso){System.err.println("************* A1-----------" + aviso);}
+			public void handleResponse(Aviso aviso){System.err.println("************* A5-----------" + aviso);}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A1-----------");}
+			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A5-----------");}
 		});
 	}
 

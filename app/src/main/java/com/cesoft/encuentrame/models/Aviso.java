@@ -18,6 +18,8 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Aviso extends Objeto implements Parcelable
 {
+	public static final String RADIO = "radio";
+
 	public Aviso(){}
 
 	//Payload
@@ -32,7 +34,7 @@ public class Aviso extends Objeto implements Parcelable
 
 	public String toString()
 	{
-		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude());
+		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+lugar.getDistance());
 	}
 
 	//// PARCELABLE
@@ -46,7 +48,8 @@ public class Aviso extends Objeto implements Parcelable
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
-		lugar.setDistance(in.readDouble());
+		//lugar.setDistance(in.readDouble());
+		lugar.addMetadata(RADIO, in.readDouble());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -57,7 +60,8 @@ public class Aviso extends Objeto implements Parcelable
 		dest.writeString(lugar.getObjectId());
 		dest.writeDouble(lugar.getLatitude());
 		dest.writeDouble(lugar.getLongitude());
-		dest.writeDouble(lugar.getDistance());
+		//dest.writeDouble(lugar.getDistance());
+		dest.writeDouble((double)lugar.getMetadata(RADIO));
 	}
 	@Override
 	public int describeContents(){return 0;}
