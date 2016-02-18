@@ -191,19 +191,11 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 								int n = lugares.getTotalObjects();
 System.err.println("---------LUGARES:GET:OK:" + n);
 								if(n < 1)return;
-
 								Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 								Lugar[] listaAL = new Lugar[n];
 								int i=0;
 								while(iterator.hasNext())
 									listaAL[i++] = iterator.next();
-System.err.println("---------LUGARES:GET:OK2:" + listaAL.length);
-System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
-								/*
-								ArrayList<Lugar> listaAL = new ArrayList<>();
-								while(iterator.hasNext())
-									listaAL.add(iterator.next());
-									*/
 								listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 							}
 							@Override
@@ -212,9 +204,6 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 								System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 							}
 						});
-				//BackendlessCollection<Lugar> listaBE = Backendless.Data.of(Lugar.class).find();
-				//BackendlessCollection<GeoPoint> points = Backendless.Geo.getPoints( geoQuery);
-				//Iterator<GeoPoint> iterator=points.getCurrentPage().iterator();
 				break;
 
 			case RUTAS://------------------------------------------------------------------------
@@ -225,14 +214,14 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 							public void handleResponse(BackendlessCollection<Ruta> rutas)
 							{
 								int n = rutas.getTotalObjects();
-								System.err.println("---------RUTAS:GET:OK:" + n);
+System.err.println("---------RUTAS:GET:OK:" + n);
 								if(n < 1)return;
 								Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
 								Ruta[] listaAL = new Ruta[n];
 								int i=0;
 								while(iterator.hasNext())
 									listaAL[i++] = iterator.next();
-								listView.setAdapter(new RutaArrayAdapter(rootView.getContext(), listaAL));
+								listView.setAdapter(new RutaArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));
 							}
 							@Override
 							public void handleFault(BackendlessFault backendlessFault)
@@ -250,14 +239,14 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 					public void handleResponse(BackendlessCollection<Aviso> aviso)
 					{
 						int n = aviso.getTotalObjects();
-						System.err.println("---------AVISOS:GET:OK:" + n);
+System.err.println("---------AVISOS:GET:OK:" + n);
 						if(n < 1)return;
 						Iterator<Aviso> iterator = aviso.getCurrentPage().iterator();
 						Aviso[] listaAL = new Aviso[n];
 						int i = 0;
 						while(iterator.hasNext())
 							listaAL[i++] = iterator.next();
-						listView.setAdapter(new AvisoArrayAdapter(rootView.getContext(), listaAL));
+						listView.setAdapter(new AvisoArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
@@ -342,6 +331,7 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 //TODO:DEBUG
 	private void cargaDatosDebug()
 	{
+		/*
 		Lugar l = new Lugar();
 		l.setNombre("Lugar 3");
 		l.setDescripcion("Lug Desc 3");
@@ -365,7 +355,20 @@ System.err.println("---------LUGARES:GET:OK3:" + listaAL[0]);
 				@Override
 				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------");}
 			});
+		*/
 
+		Aviso a = new Aviso();
+		a.setNombre("Aviso 1");
+		a.setDescripcion("Aviso 1: Recoge la nota del buzon muerto");
+		GeoPoint l = new GeoPoint(40.4676359, -3.5608339); l.setDistance(1000);
+		a.setLugar(l);
+		a.guardar(new AsyncCallback<Aviso>()
+		{
+			@Override
+			public void handleResponse(Aviso aviso){System.err.println("************* A1-----------" + aviso);}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A1-----------");}
+		});
 	}
 
 }

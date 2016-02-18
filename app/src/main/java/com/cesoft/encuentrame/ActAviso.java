@@ -6,39 +6,34 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.backendless.Backendless;
-import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
+import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-public class ActLugar extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+public class ActAviso extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
 	private static final int ACC_MAPA = 1;
 
-	private Lugar _l;
+	private Aviso _a;
 	private TextView _lblPosicion;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
@@ -46,27 +41,46 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 	private GoogleApiClient _GoogleApiClient;
 	private ConnectionResult result;
 
-	/**
-	 * ATTENTION: This was auto-generated to implement the App Indexing API.
-	 * See https://g.co/AppIndexing/AndroidStudio for more information.
-	 */
-
+	//private ArrayAdapter<String> _adapter;
+	private String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private double[] _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private Spinner _spnRadio;
+	private double _radio;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_lugar);
+		setContentView(R.layout.act_aviso);
 
 		//-----------
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-		//-----------
-		_lblPosicion = (TextView) findViewById(R.id.lblPosicion);
-		_txtNombre = (EditText) findViewById(R.id.txtNombre);//txtLogin.requestFocus();
-		_txtDescripcion = (EditText) findViewById(R.id.txtDescripcion);
+		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
+		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
+		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
+		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
+		//ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.array_radio_tit, android.R.layout.simple_spinner_item);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		_spnRadio.setAdapter(adapter);
+		_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		{
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			{
+				_radio = _adRadio[position];
+				/*String sRadio = parent.getItemAtPosition(position).toString();
+				int i = sRadio.indexOf(" Km");
+				if(i > 0)		_radio = Integer.parseInt(sRadio.substring(0,i))*1000;
+				else			_radio = Integer.parseInt(sRadio);
+				*/
+System.err.println("------------------------------------_radio="+_radio);
+			}
+			@Override
+			public void onNothingSelected(AdapterView<?> parent)
+			{
+				_radio = 1000;//TODO:radio por defecto en settings
+			}
+		});
 
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(new View.OnClickListener()
@@ -79,7 +93,7 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 		});
 
 		ImageButton btnEliminar = (ImageButton)findViewById(R.id.btnEliminar);
-		if(_l==null)btnEliminar.setVisibility(View.GONE);
+		if(_a==null)btnEliminar.setVisibility(View.GONE);
 		else btnEliminar.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -107,7 +121,7 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 			{
 				//showMapa(_l);//TODO
 				Intent i = new Intent(getBaseContext(), ActMaps.class);
-				i.putExtra("lugar", _l);
+				i.putExtra("aviso", _a);
 				startActivityForResult(i, ACC_MAPA);//TODO: si es guardado, borrado => refresca la vista, si no nada
 			}
 		});
@@ -115,13 +129,13 @@ public class ActLugar extends AppCompatActivity implements GoogleApiClient.Conne
 		//------------------------------------------------------------------------------------------
 		try
 		{
-			_l = this.getIntent().getParcelableExtra("lugar");
-System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
+			_a = this.getIntent().getParcelableExtra("aviso");
+System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 			setValores();
 		}
 		catch(Exception e)
 		{
-			System.err.println("ActLugar:onCreate:ERROR:"+e);
+			System.err.println("ActAviso:onCreate:ERROR:"+e);
 			this.finish();
 		}
 		//------------------------------------------------------------------------------------------
@@ -139,10 +153,10 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 		});
 		*/
 
-		if(_l==null)
-			setTitle(getString(R.string.nuevo_lugar));
+		if(_a==null)
+			setTitle(getString(R.string.nuevo_aviso));
 		else
-			setTitle(getString(R.string.editar_lugar));
+			setTitle(getString(R.string.editar_aviso));
 
 	}
 
@@ -153,8 +167,8 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 		if(resultCode != RESULT_OK)return;
 		if(requestCode == ACC_MAPA)
 		{
-			_l = data.getParcelableExtra("lugar");
-			System.err.println("ActLugar:onActivityResult----------:" + _l);
+			_a = data.getParcelableExtra("aviso");
+			System.err.println("ActAviso:onActivityResult----------:" + _a);
 		}
 	}
 
@@ -163,15 +177,26 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	private void setPosAct(double lat, double lon){_lblPosicion.setText(lat + "/" + lon);}
 	private void setValores()
 	{
-		_txtNombre.setText(_l.getNombre());
-		_txtDescripcion.setText(_l.getDescripcion());
+		_txtNombre.setText(_a.getNombre());
+		_txtDescripcion.setText(_a.getDescripcion());
 		//_locLast		//GeoPoint p = _l.getLugar();
-		if(_l.getLugar() != null)
+		if(_a.getLugar() != null)
 		{
 			if(_locLast == null)_locLast = new Location("dummyprovider");
-			_locLast.setLatitude(_l.getLugar().getLatitude());
-			_locLast.setLongitude(_l.getLugar().getLongitude());
-			setPosAct(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
+			_locLast.setLatitude(_a.getLugar().getLatitude());
+			_locLast.setLongitude(_a.getLugar().getLongitude());
+			setPosAct(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
+
+			_radio = _a.getLugar().getDistance();
+			//int spinnerPosition = _adapter.getPosition("10 Km");
+			for(int i=0; i < _adRadio.length; i++)
+			{
+				if(_radio == _adRadio[i])
+				{
+					_spnRadio.setSelection(i);
+					break;
+				}
+			}
 		}
 	}
 
@@ -278,13 +303,15 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
-		if(_l == null)	// CREAR
-			_l = new Lugar();
+		if(_a == null)	// CREAR
+			_a = new Aviso();
 
 		//else			// EDITAR
-		_l.setNombre(_txtNombre.getText().toString());
-		_l.setDescripcion(_txtDescripcion.getText().toString());
-		_l.setLugar(new GeoPoint(_locLast.getLatitude(), _locLast.getLongitude()));
+		_a.setNombre(_txtNombre.getText().toString());
+		_a.setDescripcion(_txtDescripcion.getText().toString());
+		GeoPoint l = new GeoPoint(_locLast.getLatitude(), _locLast.getLongitude());
+		l.setDistance(_radio);
+		_a.setLugar(l);
 
 		//TODO:
 		/*Intent data = new Intent();
@@ -304,13 +331,13 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_l.eliminar(new AsyncCallback<Long>()
+				_a.eliminar(new AsyncCallback<Long>()
 				{
 					@Override
 					public void handleResponse(Long lugar)
 					{
 						Snackbar.make(null, R.string.eliminar, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-						ActLugar.this.finish();
+						ActAviso.this.finish();
 					}
 
 					@Override

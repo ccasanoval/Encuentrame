@@ -31,8 +31,6 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
-		// Get the data item for this position
-		Lugar user = _lugares[position];
 		// Check if an existing view is being reused, otherwise inflate the view
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
@@ -68,6 +66,5 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 		//if(s.startsWith("iPhone"))imageView.setImageResource(R.drawable.no);
 		return rowView;*/
 	}
-
 
 }

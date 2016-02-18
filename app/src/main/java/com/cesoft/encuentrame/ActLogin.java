@@ -166,8 +166,9 @@ txtPassword.setText("colt1911");
           					public void handleResponse(BackendlessUser backendlessUser)
           					{
             					super.handleResponse(backendlessUser);
-								System.err.println("ENTER-----------------"+backendlessUser);
+								System.err.println("ENTER-----------------" + backendlessUser);
 								startActivity(new Intent(_win.getBaseContext(), ActMain.class));
+								_win.finish();
           					}
         				});
 					}

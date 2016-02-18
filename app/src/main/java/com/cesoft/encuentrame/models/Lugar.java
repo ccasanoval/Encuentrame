@@ -23,8 +23,8 @@ public class Lugar extends Objeto implements Parcelable
 	public Lugar(){}
 
 	private GeoPoint lugar;
-	public GeoPoint getLugar(){return lugar;}
-	public void setLugar(GeoPoint v){lugar=v;}
+		public GeoPoint getLugar(){return lugar;}
+		public void setLugar(GeoPoint v){lugar=v;}
 
 	public String toString()
 	{

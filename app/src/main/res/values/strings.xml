@@ -40,11 +40,59 @@
 
 	<string name="nombre">Nombre</string>
 	<string name="descripcion">Descripción</string>
+	<string name="aviso">Mensaje de aviso</string>
 	<string name="categoria">Categoría</string>
 	<string name="lat_lon">Lat/Lon</string>
 	<string name="fecha">Fecha</string>
 	<string name="sin_posicion">Sin posición</string>
 	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
+
+	<string name="nuevo_lugar">Nuevo Lugar</string>
+	<string name="nuevo_aviso">Nuevo Aviso</string>
+	<string name="nueva_ruta">Nueva Ruta</string>
+	<string name="editar_lugar">Editar Lugar</string>
+	<string name="editar_aviso">Editar Aviso</string>
+	<string name="editar_ruta">Editar Ruta</string>
+
+	<string name="radio">Radio</string>
+	<string-array name="array_radio_tit">
+		<item>10 m</item>
+		<item>50 m</item>
+		<item>100 m</item>
+		<item>200 m</item>
+		<item>300 m</item>
+		<item>400 m</item>
+		<item>500 m</item>
+		<item>750 m</item>
+		<item>1 Km</item>
+		<item>2 Km</item>
+		<item>3 Km</item>
+		<item>4 Km</item>
+		<item>5 Km</item>
+		<item>7 Km</item>
+		<item>10 Km</item>
+		<item>20 Km</item>
+		<item>50 Km</item>
+	</string-array>
+	<string-array name="array_radio_val">
+		<item>10</item>
+		<item>50</item>
+		<item>100</item>
+		<item>200</item>
+		<item>300</item>
+		<item>400</item>
+		<item>500</item>
+		<item>750</item>
+		<item>1000</item>
+		<item>2000</item>
+		<item>3000</item>
+		<item>4000</item>
+		<item>5000</item>
+		<item>7000</item>
+		<item>10000</item>
+		<item>20000</item>
+		<item>50000</item>
+	</string-array>
 
 
 

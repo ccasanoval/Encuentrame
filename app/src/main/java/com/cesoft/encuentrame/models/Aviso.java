@@ -7,6 +7,8 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
+import com.backendless.persistence.BackendlessDataQuery;
+import com.backendless.persistence.QueryOptions;
 
 import java.util.Date;
 import java.util.List;
@@ -14,51 +16,48 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class Aviso implements Parcelable
+public class Aviso extends Objeto implements Parcelable
 {
 	public Aviso(){}
-
-	//Backendless
-	private String objectId;
-	private Date created;
-	private Date updated;
-	public String getObjectId(){return objectId;}
-	public void setObjectId(String objectId){this.objectId = objectId;}
-	public Date getCreated(){return created;}
-	public void setCreated(Date created){this.created = created;}
-	public Date getUpdated(){return updated;}
-	public void setUpdated(Date updated){this.updated = updated;}
 
 	//Payload
 	//TODO: GeoFence
 	//TODO: si no GeoFence => GeoPoint + radius
+	private GeoPoint lugar;
+		public GeoPoint getLugar(){return lugar;}
+		public void setLugar(GeoPoint v){lugar=v;}
+	/*private long radio;
+		public long getRadio(){return radio;}
+		public void setRadio(long v){radio=v;}*/
 
-	private String nombre;
-	private String descripcion;
-	public String getNombre(){return nombre;}
-	public void setNombre(String v){nombre=v;}
-	public String getAviso(){return descripcion;}
-	public void setAviso(String v){descripcion=v;}
+	public String toString()
+	{
+		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude());
+	}
 
-
-
-	//// PARCEL
+	//// PARCELABLE
+	//
 	protected Aviso(Parcel in)
 	{
-		setObjectId(in.readString());
-		nombre = in.readString();
-		descripcion = in.readString();
+		super(in);
 		//
-		//TODO:GeoFence
+		//TODO:GeoFence:  geopoint + radius
+		lugar = new GeoPoint();
+		lugar.setObjectId(in.readString());
+		lugar.setLatitude(in.readDouble());
+		lugar.setLongitude(in.readDouble());
+		lugar.setDistance(in.readDouble());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
-		dest.writeString(getObjectId());
-		dest.writeString(nombre);
-		dest.writeString(descripcion);
+		super.writeToParcel(dest, flags);
 		//
-		//TODO:GeoFence
+		//TODO:GeoFence:  geopoint + radius
+		dest.writeString(lugar.getObjectId());
+		dest.writeDouble(lugar.getLatitude());
+		dest.writeDouble(lugar.getLongitude());
+		dest.writeDouble(lugar.getDistance());
 	}
 	@Override
 	public int describeContents(){return 0;}
@@ -72,6 +71,7 @@ public class Aviso implements Parcelable
 
 
 	//// BACKENDLESS
+	//
 	public void eliminar(AsyncCallback<Long> ac)
 	{
 		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
@@ -84,7 +84,12 @@ public class Aviso implements Parcelable
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res)
 	{
-		Backendless.Persistence.of(Aviso.class).find(res);
+		//Backendless.Persistence.of(Aviso.class).find(res);
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("lugar");//TODO:GeoFence:  geopoint + radius
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Aviso.class).find(query, res);
 	}
 
 }

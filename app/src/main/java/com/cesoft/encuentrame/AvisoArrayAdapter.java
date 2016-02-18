@@ -16,46 +16,45 @@ import com.cesoft.encuentrame.models.Aviso;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 {
-	private final Context _context;
 	private final Aviso[] _avisos;
+	private CesIntLista _inter;
 
-	public AvisoArrayAdapter(Context context, Aviso[] avisos)
+	public AvisoArrayAdapter(Context context, Aviso[] avisos, CesIntLista inter)
 	{
 		super(context, -1, avisos);
-		_context = context;
 		_avisos = avisos;
+		_inter = inter;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(final int position, View convertView, ViewGroup parent)
 	{
-		LayoutInflater inflater = (LayoutInflater)_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.lista, parent, false);
-		TextView txtNombre = (TextView)rowView.findViewById(R.id.txtNombre);
+		// Check if an existing view is being reused, otherwise inflate the view
+		if(convertView == null)
+			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
+
+//System.err.println("----------------------"+position+" : "+_lugares[position]);
+		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
 		txtNombre.setText(_avisos[position].getNombre());
-		ImageButton btnEditar = (ImageButton)rowView.findViewById(R.id.btnEditar);
-		ImageButton btnMapa = (ImageButton)rowView.findViewById(R.id.btnMapa);
-		btnEditar.setOnClickListener(
-			new View.OnClickListener()
+		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
+		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
+		btnEditar.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					//TODO: Abrir pantalla edicion con aviso
+					_inter.onItemEdit(CesIntLista.tipoLista.AVISO, _avisos[position]);
 				}
 			});
-		btnMapa.setOnClickListener(
-			new View.OnClickListener()
+		btnMapa.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					//TODO: Abrir pantalla mapa con aviso
+					_inter.onItemMap(CesIntLista.tipoLista.AVISO, _avisos[position]);
 				}
 			});
-		//if(s.startsWith("iPhone"))imageView.setImageResource(R.drawable.no);
-		return rowView;
+
+		return convertView;
 	}
-
-
 }

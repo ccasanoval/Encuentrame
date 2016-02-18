@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:paddingBottom="@dimen/activity_vertical_margin"
+	android:paddingLeft="@dimen/activity_horizontal_margin"
+	android:paddingRight="@dimen/activity_horizontal_margin"
+	android:paddingTop="@dimen/activity_vertical_margin"
+	app:layout_behavior="@string/appbar_scrolling_view_behavior"
+	tools:context="com.cesoft.encuentrame.ActLugar"
+	tools:showIn="@layout/act_aviso">
+
+
+	<android.support.design.widget.TextInputLayout
+		android:id="@+id/txtNombre_"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentTop="true"
+		>
+		<AutoCompleteTextView
+			android:id="@+id/txtNombre"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:inputType="textPersonName"
+			android:ems="10"
+			android:hint="@string/nombre"
+			android:maxLines="1"
+			android:singleLine="true"/>
+	</android.support.design.widget.TextInputLayout>
+
+
+	<android.support.design.widget.TextInputLayout
+		android:id="@+id/txtDescripcion_"
+		android:layout_below="@+id/txtNombre_"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		>
+		<AutoCompleteTextView
+			android:id="@+id/txtDescripcion"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="@string/aviso"
+			android:ems="10"
+			android:inputType="textMultiLine"
+			android:maxLines="3"
+			android:singleLine="true"/>
+	</android.support.design.widget.TextInputLayout>
+
+	<!-- DATE CREATED and MODIFIED ? -->
+
+	<LinearLayout
+		android:id="@+id/layPosicion"
+		android:layout_below="@+id/txtDescripcion_"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
+		android:layout_centerVertical="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="5dp">
+
+		<TextView
+			android:id="@+id/lblPosicion_"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:text="@string/lat_lon"
+			android:layout_marginRight="15dp"
+			android:layout_marginEnd="15dp"
+			android:layout_gravity="center_vertical"/>
+		<TextView
+			android:id="@+id/lblPosicion"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_marginRight="15dp"
+			android:layout_marginEnd="15dp"
+			android:text="0.0/0.0"
+			android:layout_gravity="center_vertical"/>
+		<ImageButton
+			android:id="@+id/btnActPos"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:layout_gravity="center_vertical"
+			android:contentDescription="@string/actualizar_posicion"
+			android:src="@android:drawable/ic_menu_mylocation" />
+	</LinearLayout>
+
+	<Spinner
+		android:id="@+id/spnRadio"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:entries="@array/array_radio_val"
+        android:prompt="@string/radio" />
+		/>
+
+	<LinearLayout
+		android:layout_below="@+id/layPosicion"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="50dp">
+
+		<ImageButton
+			android:id="@+id/btnGuardar"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:contentDescription="@string/guardar"
+			android:src="@android:drawable/ic_menu_save" />
+
+		<ImageButton
+			android:id="@+id/btnMapa"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:contentDescription="@string/ver_mapa"
+			android:src="@android:drawable/ic_menu_mapmode" />
+
+		<ImageButton
+			android:id="@+id/btnEliminar"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="10dp"
+			android:layout_marginEnd="10dp"
+			android:contentDescription="@string/eliminar"
+			android:src="@android:drawable/ic_menu_delete" />
+	</LinearLayout>
+
+
+</RelativeLayout>

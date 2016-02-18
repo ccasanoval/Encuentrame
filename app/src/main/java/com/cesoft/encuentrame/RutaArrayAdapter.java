@@ -16,46 +16,43 @@ import com.cesoft.encuentrame.models.Ruta;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
-	private final Context _context;
 	private final Ruta[] _rutas;
+	private CesIntLista _inter;
 
-	public RutaArrayAdapter(Context context, Ruta[] rutas)
+	public RutaArrayAdapter(Context context, Ruta[] rutas, CesIntLista inter)
 	{
 		super(context, -1, rutas);
-		_context = context;
 		_rutas = rutas;
+		_inter = inter;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(final int position, View convertView, ViewGroup parent)
 	{
-		LayoutInflater inflater = (LayoutInflater)_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.lista, parent, false);
-		TextView txtNombre = (TextView)rowView.findViewById(R.id.txtNombre);
-		txtNombre.setText(_rutas[position].getNombre()+" ("+_rutas[position].getPuntos().size()+")");//TODO:Enhance
-		ImageButton btnEditar = (ImageButton)rowView.findViewById(R.id.btnEditar);
-		ImageButton btnMapa = (ImageButton)rowView.findViewById(R.id.btnMapa);
-		btnEditar.setOnClickListener(
-			new View.OnClickListener()
+		if(convertView == null)
+			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
+
+		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
+		txtNombre.setText(_rutas[position].getNombre());
+		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
+		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
+		btnEditar.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					//TODO: Abrir pantalla edicion con ruta
+					_inter.onItemEdit(CesIntLista.tipoLista.RUTA, _rutas[position]);
 				}
 			});
-		btnMapa.setOnClickListener(
-			new View.OnClickListener()
+		btnMapa.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					//TODO: Abrir pantalla mapa con ruta
+					_inter.onItemMap(CesIntLista.tipoLista.RUTA, _rutas[position]);
 				}
 			});
-		//if(s.startsWith("iPhone"))imageView.setImageResource(R.drawable.no);
-		return rowView;
+
+		return convertView;
 	}
-
-
 }
