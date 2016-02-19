@@ -18,8 +18,8 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Aviso extends Objeto implements Parcelable
 {
-	public static final String NOMBRE = "aviso";
-	public static final String RADIO = "radio";
+	public transient static final String NOMBRE = "aviso";
+	public transient static final String RADIO = "radio";//TRANSIENT so not to include in backendless
 
 	public Aviso(){}
 
@@ -62,7 +62,7 @@ public class Aviso extends Objeto implements Parcelable
 		dest.writeDouble(lugar.getLatitude());
 		dest.writeDouble(lugar.getLongitude());
 		//dest.writeDouble(lugar.getDistance());
-		dest.writeDouble((double)lugar.getMetadata(RADIO));
+		dest.writeDouble(Double.parseDouble((String)lugar.getMetadata(RADIO)));
 	}
 	@Override
 	public int describeContents(){return 0;}

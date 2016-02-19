@@ -20,7 +20,7 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Lugar extends Objeto implements Parcelable
 {
-	public static final String NOMBRE = "lugar";
+	public transient static final String NOMBRE = "lugar";//TRANSIENT so not to include in backendless
 
 	public Lugar(){}
 

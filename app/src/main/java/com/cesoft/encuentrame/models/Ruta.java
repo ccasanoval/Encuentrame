@@ -7,6 +7,7 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Date;
 import java.util.List;
@@ -16,13 +17,17 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class Ruta extends Objeto implements Parcelable
 {
-	public static final String NOMBRE = "ruta";
+	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to include in backendless
 
 	public Ruta(){}
 
 	//Payload
-	private List<GeoPoint> puntos;
-	public List<GeoPoint> getPuntos(){return puntos;}
+	private List<LatLng> puntos;//TODO: latLon ?
+		public List<LatLng> getPuntos(){return puntos;}
+		public void addPunto(LatLng v){puntos.add(v);}
+	private int periodo=2*60*1000;
+		public int getPeriodo(){return periodo;}
+		public void setPeriodo(int v){periodo=v;}
 
 	public String toString()
 	{
@@ -40,7 +45,7 @@ public class Ruta extends Objeto implements Parcelable
 		{
 			double lat = in.readDouble();
 			double lon = in.readDouble();
-			puntos.add(new GeoPoint(lat, lon));
+			puntos.add(new LatLng(lat, lon));
 		}
 	}
 	@Override
@@ -49,10 +54,10 @@ public class Ruta extends Objeto implements Parcelable
 		super.writeToParcel(dest, flags);
 		//
 		dest.writeInt(puntos.size());
-		for(GeoPoint p : puntos)
+		for(LatLng p : puntos)
 		{
-			dest.writeDouble(p.getLatitude());
-			dest.writeDouble(p.getLongitude());
+			dest.writeDouble(p.latitude);
+			dest.writeDouble(p.longitude);
 		}
 	}
 	@Override

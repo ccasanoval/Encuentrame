@@ -33,12 +33,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 //TODO:guardar usr/pwd de backendless (luego en settings)
+//TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO:icono app
 //TODO: main window=> Number or routes, places and geofences...
-//TODO: ventana de mapa que muestre punto, ruta o geofence...
-//TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
-//TODO: Mejorar aspecto boton de login...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -273,21 +271,21 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				i = new Intent(getContext(), ActLugar.class);
 				Lugar l = (Lugar)obj;
 				i.putExtra(Lugar.NOMBRE, l);
-//System.err.println("MAIN:onItemEdit:++++++++++++++++" + l);
+//System.err.println("MAIN:onItemEdit:Lugar++++++++++++++++" + l);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
-				i = new Intent(getContext(), ActLugar.class);
+				i = new Intent(getContext(), ActRuta.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
-				i = new Intent(getContext(), ActLugar.class);
+				i = new Intent(getContext(), ActAviso.class);
 				Aviso a = (Aviso)obj;
 				i.putExtra(Aviso.NOMBRE, a);
 System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 				startActivityForResult(i, AVISOS);
-								break;
+				break;
 			}
 		}
 		//TODO: mostrar objeto en mapa
@@ -343,7 +341,7 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 			@Override
 			public void handleResponse(Lugar lugar){System.err.println("************* L3-----------" + lugar);}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L3-----------");}
+			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L3-----------"+backendlessFault);}
 		});
 
 		l = new Lugar();
@@ -355,24 +353,28 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 				@Override
 				public void handleResponse(Lugar lugar){System.err.println("************* L4-----------" + lugar);}
 				@Override
-				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------");}
+				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------"+backendlessFault);}
 			});
 		*/
-
+/*
 		Aviso a = new Aviso();
 		a.setNombre("Aviso 5");
 		a.setDescripcion("Aviso 5: Recoge la nota del buzon muerto5");
 		GeoPoint l = new GeoPoint(40.4676555, -3.5608555);
-		l.setDistance(1000);
-		l.addMetadata("radio", 1000);
+		//l.setDistance(1000);
+		l.addMetadata(Aviso.RADIO, 1000);
 		a.setLugar(l);
 		a.guardar(new AsyncCallback<Aviso>()
 		{
 			@Override
 			public void handleResponse(Aviso aviso){System.err.println("************* A5-----------" + aviso);}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A5-----------");}
+			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A5-----------"+backendlessFault);}
 		});
+		*/
+		Ruta r = new Ruta();
+		r.setNombre("Ruta 1");
+		r.setDescripcion("Ruta 1 desc");
 	}
 
 }

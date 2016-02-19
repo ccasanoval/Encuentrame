@@ -60,6 +60,7 @@ public class ActAviso extends AppCompatActivity implements GoogleApiClient.Conne
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
 		//ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.array_radio_tit, android.R.layout.simple_spinner_item);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
+System.err.println("------------------------------------"+_spnRadio+" : "+adapter);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnRadio.setAdapter(adapter);
 		_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()

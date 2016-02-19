@@ -59,44 +59,10 @@
 	<string name="editar_ruta">Editar Ruta</string>
 
 	<string name="radio">Radio</string>
-	<string-array name="array_radio_tit">
-		<item>10 m</item>
-		<item>50 m</item>
-		<item>100 m</item>
-		<item>200 m</item>
-		<item>300 m</item>
-		<item>400 m</item>
-		<item>500 m</item>
-		<item>750 m</item>
-		<item>1 Km</item>
-		<item>2 Km</item>
-		<item>3 Km</item>
-		<item>4 Km</item>
-		<item>5 Km</item>
-		<item>7 Km</item>
-		<item>10 Km</item>
-		<item>20 Km</item>
-		<item>50 Km</item>
-	</string-array>
-	<string-array name="array_radio_val">
-		<item>10</item>
-		<item>50</item>
-		<item>100</item>
-		<item>200</item>
-		<item>300</item>
-		<item>400</item>
-		<item>500</item>
-		<item>750</item>
-		<item>1000</item>
-		<item>2000</item>
-		<item>3000</item>
-		<item>4000</item>
-		<item>5000</item>
-		<item>7000</item>
-		<item>10000</item>
-		<item>20000</item>
-		<item>50000</item>
-	</string-array>
+
+	<string name="periodo">Periodo</string>
+	<string name="start">Iniciar</string>
+	<string name="stop">detener</string>
 
 
 

@@ -10,7 +10,7 @@
 	android:paddingRight="@dimen/activity_horizontal_margin"
 	android:paddingTop="@dimen/activity_vertical_margin"
 	app:layout_behavior="@string/appbar_scrolling_view_behavior"
-	tools:context="com.cesoft.encuentrame.ActLugar"
+	tools:context="com.cesoft.encuentrame.ActRuta"
 	tools:showIn="@layout/act_ruta">
 
 
@@ -59,50 +59,10 @@
 
 	<!-- DATE CREATED and MODIFIED ? -->
 
-	<LinearLayout
-		android:id="@+id/layPosicion"
-		android:layout_below="@+id/txtDescripcion_"
-		android:orientation="horizontal"
-		android:layout_centerHorizontal="true"
-		android:layout_centerVertical="true"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="5dp">
-
-		<TextView
-			android:id="@+id/lblPosicion_"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceLarge"
-			android:text="@string/lat_lon"
-			android:layout_marginRight="15dp"
-			android:layout_marginEnd="15dp"
-			android:layout_gravity="center_vertical"/>
-		<TextView
-			android:id="@+id/lblPosicion"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceLarge"
-			android:layout_marginRight="15dp"
-			android:layout_marginEnd="15dp"
-			android:text="0.0/0.0"
-			android:layout_gravity="center_vertical"/>
-		<ImageButton
-			android:id="@+id/btnActPos"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="10dp"
-			android:layout_marginEnd="10dp"
-			android:layout_gravity="center_vertical"
-			android:contentDescription="@string/actualizar_posicion"
-			android:src="@android:drawable/ic_menu_mylocation" />
-	</LinearLayout>
-
 	<Spinner
-		android:id="@+id/spnRadio"
+		android:id="@+id/spnTrackingDelay"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:entries="@array/array_radio_val"
         android:prompt="@string/radio" />
 		/>
 

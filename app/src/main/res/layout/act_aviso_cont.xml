@@ -100,14 +100,40 @@
 
 	<Spinner
 		android:id="@+id/spnRadio"
+		android:layout_below="@+id/layPosicion"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:entries="@array/array_radio_val"
-        android:prompt="@string/radio" />
+        android:prompt="@string/periodo" />
 		/>
 
 	<LinearLayout
-		android:layout_below="@+id/layPosicion"
+		android:id="@+id/layStartStop"
+		android:layout_below="@+id/spnRadio"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp">
+		<ImageButton
+			android:id="@+id/btnStart"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
+			android:contentDescription="@string/start"
+			android:src="@android:drawable/ic_media_play" />
+		<ImageButton
+			android:id="@+id/btnStop"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
+			android:contentDescription="@string/stop"
+			android:src="@android:drawable/ic_media_pause" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_below="@+id/spnRadio"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"

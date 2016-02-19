@@ -11,7 +11,7 @@ import java.util.Date;
 //@ExcludeProperty( propertyName = "foo" )
 public class Objeto implements Parcelable
 {
-	public static final String NOMBRE = "objeto";
+	public transient static final String NOMBRE = "objeto";//TRANSIENT so not to include in backendless
 
 	public Objeto(){}
 
