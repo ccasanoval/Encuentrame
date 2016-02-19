@@ -112,48 +112,11 @@ public class Lugar extends Objeto implements Parcelable
 		}
 	};
 
-
-	/*
-
-
-	BackendlessCollection<Lugar> listaBE = Backendless.Data.of(Lugar.class).find(
-			new AsyncCallback<BackendlessCollection<GeoPoint>>()
-	);
-
-			{
-				@Override
-				public void handleResponse( BackendlessCollection<GeoPoint> points )
-				{
-					System.out.println( String.format( "searchByDateInRectangularArea GETPOINTS: %s", points.getCurrentPage() ) );
-				}
-				@Override
-				public void handleFault( BackendlessFault fault )
-				{
-					System.err.println( String.format( "searchByDateInRectangularArea FAULT = %s", fault ) );
-				}
-			} );
-		}
-
-				//BackendlessCollection<GeoPoint> points = Backendless.Geo.getPoints( geoQuery);
-				//Iterator<GeoPoint> iterator=points.getCurrentPage().iterator();
-				Iterator<Lugar> iterator = listaBE.getCurrentPage().iterator();
-				ArrayList<Lugar> listaAL = new ArrayList<Lugar>();
-				while(iterator.hasNext())listaAL.add(iterator.next());
-				listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL.toArray(new Lugar[0])));
-*/
-
 }
 
 //TODO: https://www.thoughtworks.com/insights/blog/signing-open-source-android-apps-without-disclosing-passwords
 
 /*
-BackendlessDataQuery query = new BackendlessDataQuery();
-QueryOptions queryOptions = new QueryOptions();
-queryOptions.addRelated( "RELATED-PROPERTY-NAME" );
-queryOptions.addRelated( "RELATED-PROPERTY-NAME.RELATION-OFRELATION");
-query.setQueryOptions( queryOptions );
-BackendlessCollection<T> collection = Backendless.Data.of( T.class).find( query );
-
 
 Order firstOrder = Backendless.Data.of( Order.class ).findFirst();
 ArrayList<String> relationProps = new ArrayList<String>();
@@ -169,7 +132,6 @@ query.setQueryOptions( queryOptions );
 BackendlessCollection<Foo> collection = Backendless.Data.of( Foo.class ).find( query );
 
 public GeoPoint location;
-
 public GeoPoint getLocation(){return location;}
 public void setLocation( GeoPoint location ){this.location = location;}
 

@@ -15,6 +15,7 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//TODO: al coger los datos buscar los RutaPto correspondientes...
 public class Ruta extends Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to include in backendless
@@ -22,43 +23,44 @@ public class Ruta extends Objeto implements Parcelable
 	public Ruta(){}
 
 	//Payload
+	/*
 	private List<LatLng> puntos;//TODO: latLon ?
 		public List<LatLng> getPuntos(){return puntos;}
-		public void addPunto(LatLng v){puntos.add(v);}
+		public void addPunto(LatLng v){puntos.add(v);}*/
 	private int periodo=2*60*1000;
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}
 
-	public String toString()
+	/*public String toString()
 	{
 		return super.toString() + ", RUT:"+(puntos==null?"":puntos.size());
-	}
+	}*/
 
 	//// PARCEL
 	protected Ruta(Parcel in)
 	{
 		super(in);
 		//
-		puntos.clear();
+		/*puntos.clear();
 		int n = in.readInt();
 		for(int i=0; i < n; i++)
 		{
 			double lat = in.readDouble();
 			double lon = in.readDouble();
 			puntos.add(new LatLng(lat, lon));
-		}
+		}*/
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
 		//
-		dest.writeInt(puntos.size());
+		/*dest.writeInt(puntos.size());
 		for(LatLng p : puntos)
 		{
 			dest.writeDouble(p.latitude);
 			dest.writeDouble(p.longitude);
-		}
+		}*/
 	}
 	@Override
 	public int describeContents(){return 0;}

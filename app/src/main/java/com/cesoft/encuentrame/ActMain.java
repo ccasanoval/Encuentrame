@@ -30,7 +30,9 @@ import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 //TODO:guardar usr/pwd de backendless (luego en settings)
 //TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
@@ -301,12 +303,12 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
-				i = new Intent(getContext(), ActLugar.class);
+				i = new Intent(getContext(), ActRuta.class);
 				i.putExtra("ruta", obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
-				i = new Intent(getContext(), ActLugar.class);
+				i = new Intent(getContext(), ActAviso.class);
 				i.putExtra("aviso", obj);
 				startActivityForResult(i, AVISOS);
 				break;
@@ -375,7 +377,81 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 		Ruta r = new Ruta();
 		r.setNombre("Ruta 1");
 		r.setDescripcion("Ruta 1 desc");
-	}
+		r.guardar(new AsyncCallback<Ruta>()
+		{
+			@Override
+			public void handleResponse(Ruta ruta)
+			{
+				System.err.println("************* R1-----------" + ruta);
+				Map<String, Object> meta = new HashMap<>();
+				meta.put(Ruta.NOMBRE, ruta);
+				try
+				{
+					Backendless.Geo.savePoint(40.4676555, -3.5608555, meta, new AsyncCallback<GeoPoint>()
+					{
+						@Override
+						public void handleResponse(GeoPoint geoPoint)
+						{
+							System.out.println("*************  pto1-----------" + geoPoint.getObjectId());
+						}
+						@Override
+						public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.out.println("*********** FAIL: pto1-----------" + backendlessFault);
+						}
+					});
+					Backendless.Geo.savePoint(40.4676599, -3.5608599, meta, new AsyncCallback<GeoPoint>()
+					{
+						@Override
+						public void handleResponse(GeoPoint geoPoint)
+						{
+							System.out.println("************* pto2-----------" + geoPoint.getObjectId());
+						}
+						@Override
+						public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.out.println("*********** FAIL: pto2-----------" + backendlessFault);
+						}
+					});
+					Backendless.Geo.savePoint(40.4676699, -3.5608699, meta, new AsyncCallback<GeoPoint>()
+					{
+						@Override
+						public void handleResponse(GeoPoint geoPoint)
+						{
+							System.out.println("*************  pto3-----------" + geoPoint.getObjectId());
+						}
+						@Override
+						public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.out.println("*********** FAIL: pto3-----------" + backendlessFault);
+						}
+					});
+					Backendless.Geo.savePoint(40.4676799, -3.5608799, meta, new AsyncCallback<GeoPoint>()
+					{
+						@Override
+						public void handleResponse(GeoPoint geoPoint)
+						{
+							System.out.println("************* pto4-----------" + geoPoint.getObjectId());
+						}
+						@Override
+						public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.out.println("*********** FAIL: pto4-----------" + backendlessFault);
+						}
+					});
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("*********** FAIL:R1-----------" + backendlessFault);
+			}
+		});
 
+	}
 }
 
