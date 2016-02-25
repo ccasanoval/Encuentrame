@@ -5,36 +5,43 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
-import com.cesoft.encuentrame.models.Lugar;
-import com.cesoft.encuentrame.models.Ruta;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+
+import com.cesoft.encuentrame.models.Ruta;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
 	private static final int ACC_MAPA = 1;
 
 	private Ruta _r;
-	private TextView _lblPosicion;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
-	private Location _locLast;
+	private Spinner _spnTrackingDelay;
+	private String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
+	private int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
+	private int _delay = 2;
+
 	private GoogleApiClient _GoogleApiClient;
 	private ConnectionResult result;
 	//TODO: puntos...
@@ -44,25 +51,27 @@ public class ActRuta extends AppCompatActivity implements GoogleApiClient.Connec
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_lugar);
+		setContentView(R.layout.act_ruta);
 
 		//-----------
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-		//-----------
-		_lblPosicion = (TextView) findViewById(R.id.lblPosicion);
-		_txtNombre = (EditText) findViewById(R.id.txtNombre);//txtLogin.requestFocus();
-		_txtDescripcion = (EditText) findViewById(R.id.txtDescripcion);
-
-		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
-		btnActPos.setOnClickListener(new View.OnClickListener()
+		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
+		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
+		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		_spnTrackingDelay.setAdapter(adapter);
+		_spnTrackingDelay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 		{
 			@Override
-			public void onClick(View v)
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 			{
-				getAndDisplayLocation();
+				_delay = _aiDelay[position]*60*1000;
+System.err.println("------------------------------------_radio="+_delay);
+			}
+			@Override
+			public void onNothingSelected(AdapterView<?> parent)
+			{
+				_delay = 2*60*1000;//TODO:radio por defecto en settings
 			}
 		});
 
@@ -103,17 +112,17 @@ public class ActRuta extends AppCompatActivity implements GoogleApiClient.Connec
 		try
 		{
 			_r = this.getIntent().getParcelableExtra(Ruta.NOMBRE);
-System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
+System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 			setValores();
 		}
 		catch(Exception e)
 		{
-			System.err.println("ActLugar:onCreate:ERROR:"+e);
+			System.err.println("ActRuta:onCreate:ERROR:"+e);
 			this.finish();
 		}
 		//------------------------------------------------------------------------------------------
 
-		/*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
@@ -121,16 +130,22 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 			@Override
 			public void onClick(View view)
 			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+				ActRuta.this.finish();
 			}
 		});
-		*/
+
 
 		if(_r==null)
-			setTitle(getString(R.string.nuevo_lugar));//TODO:...ruta
+			setTitle(getString(R.string.nueva_ruta));//TODO:...ruta
 		else
-			setTitle(getString(R.string.editar_lugar));
+			setTitle(getString(R.string.editar_ruta));
 
+	}
+
+	private void setValores()
+	{
+		_txtNombre.setText(_r.getNombre());
+		_txtDescripcion.setText(_r.getDescripcion());
 	}
 
 	@Override
@@ -140,20 +155,9 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 		if(resultCode != RESULT_OK)return;
 		if(requestCode == ACC_MAPA)
 		{
-			_r = data.getParcelableExtra("lugar");
-			System.err.println("ActLugar:onActivityResult----------:" + _r);
+			_r = data.getParcelableExtra(Ruta.NOMBRE);
+			System.err.println("ActRuta:onActivityResult----------:" + _r);
 		}
-	}
-
-	//______________________________________________________________________________________________
-	private void setPosAct(String s){_lblPosicion.setText(s);}
-	private void setPosAct(double lat, double lon){_lblPosicion.setText(lat + "/" + lon);}
-	private void setValores()
-	{
-		_txtNombre.setText(_r.getNombre());
-		_txtDescripcion.setText(_r.getDescripcion());
-		//_locLast		//GeoPoint p = _l.getLugar();
-		//TODO:....
 	}
 
 	//______________________________________________________________________________________________
@@ -166,7 +170,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		/*Action viewAction = Action.newAction(Action.TYPE_VIEW, // TODO: choose an action type.
-				"ActLugar Page", // TODO: Define a title for the content shown.
+				"ActRuta Page", // TODO: Define a title for the content shown.
 				// TODO: If you have web page content that matches this app activity's content,
 				// make sure this auto-generated web page URL is correct. Otherwise, set the URL to null.
 				Uri.parse("http://host/path"),
@@ -189,7 +193,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		/*Action viewAction = Action.newAction(Action.TYPE_VIEW, // TODO: choose an action type.
-				"ActLugar Page", // TODO: Define a title for the content shown.
+				"ActRuta Page", // TODO: Define a title for the content shown.
 				// TODO: If you have web page content that matches this app activity's content,
 				// make sure this auto-generated web page URL is correct. Otherwise, set the URL to null.
 				Uri.parse("http://host/path"),
@@ -213,7 +217,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 			/*int PLAY_SERVICES_RESOLUTION_REQUEST = 6969;
         	if(googleAPI.isUserResolvableError(result))googleAPI.getErrorDialog(this.getParent(), result, PLAY_SERVICES_RESOLUTION_REQUEST).show();
         	*/
-			System.err.println("ActLugar:checkPlayServices:ERROR:-------------"+result);
+			System.err.println("ActRuta:checkPlayServices:ERROR:-------------"+result);
 			//Snackbar.make(null, R.string.eliminar, Snackbar.LENGTH_LONG).setAction("Action", null).show();
 	        return false;
 	    }
@@ -223,11 +227,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 	{
 		if(_GoogleApiClient == null)return;
 		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		_locLast = LocationServices.FusedLocationApi.getLastLocation(_GoogleApiClient);
-		if(_locLast != null)
-			setPosAct(_locLast.getLatitude(), _locLast.getLongitude());
-		else
-			setPosAct(getString(R.string.sin_posicion));
+		//_locLast = LocationServices.FusedLocationApi.getLastLocation(_GoogleApiClient);
 	}
 
 
@@ -277,7 +277,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_r);
 				_r.eliminar(new AsyncCallback<Long>()
 				{
 					@Override
-					public void handleResponse(Long lugar)
+					public void handleResponse(Long ruta)
 					{
 						Snackbar.make(null, R.string.eliminar, Snackbar.LENGTH_LONG).setAction("Action", null).show();
 						ActRuta.this.finish();

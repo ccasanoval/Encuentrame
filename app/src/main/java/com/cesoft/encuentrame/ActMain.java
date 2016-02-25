@@ -271,9 +271,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 			{
 			case LUGAR:
 				i = new Intent(getContext(), ActLugar.class);
-				Lugar l = (Lugar)obj;
-				i.putExtra(Lugar.NOMBRE, l);
-//System.err.println("MAIN:onItemEdit:Lugar++++++++++++++++" + l);
+				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
@@ -283,9 +281,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				break;
 			case AVISO:
 				i = new Intent(getContext(), ActAviso.class);
-				Aviso a = (Aviso)obj;
-				i.putExtra(Aviso.NOMBRE, a);
-System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
+				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, AVISOS);
 				break;
 			}
@@ -298,17 +294,17 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 			switch(tipo)
 			{
 			case LUGAR:
-				i = new Intent(getContext(), ActLugar.class);
+				i = new Intent(getContext(), ActMaps.class);
 				i.putExtra("lugar", obj);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
-				i = new Intent(getContext(), ActRuta.class);
+				i = new Intent(getContext(), ActMaps.class);
 				i.putExtra("ruta", obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
-				i = new Intent(getContext(), ActAviso.class);
+				i = new Intent(getContext(), ActMaps.class);
 				i.putExtra("aviso", obj);
 				startActivityForResult(i, AVISOS);
 				break;
@@ -333,6 +329,7 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 //TODO:DEBUG
 	private void cargaDatosDebug()
 	{
+		//-------- LUGAR --------
 		/*
 		Lugar l = new Lugar();
 		l.setNombre("Lugar 3");
@@ -359,6 +356,7 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 			});
 		*/
 /*
+		//-------- AVISO --------
 		Aviso a = new Aviso();
 		a.setNombre("Aviso 5");
 		a.setDescripcion("Aviso 5: Recoge la nota del buzon muerto5");
@@ -374,6 +372,9 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A5-----------"+backendlessFault);}
 		});
 		*/
+
+		/*
+		//-------- RUTA --------
 		Ruta r = new Ruta();
 		r.setNombre("Ruta 1");
 		r.setDescripcion("Ruta 1 desc");
@@ -450,7 +451,7 @@ System.err.println("MAIN:onItemEdit:Aviso:++++++++++++++++" + a);
 			{
 				System.err.println("*********** FAIL:R1-----------" + backendlessFault);
 			}
-		});
+		});*/
 
 	}
 }

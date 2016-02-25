@@ -34,6 +34,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLugar extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
 	private static final int ACC_MAPA = 1;
@@ -120,24 +121,19 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 		}
 		//------------------------------------------------------------------------------------------
 
-		/*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
-		{
+		{//Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 			@Override
-			public void onClick(View view)
-			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-			}
+			public void onClick(View view){ActLugar.this.finish();}
 		});
-		*/
-
+		//------------------------------------------------------------------------------------------
 		if(_l==null)
 			setTitle(getString(R.string.nuevo_lugar));
 		else
 			setTitle(getString(R.string.editar_lugar));
-
 	}
 
 	@Override
@@ -147,7 +143,7 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 		if(resultCode != RESULT_OK)return;
 		if(requestCode == ACC_MAPA)
 		{
-			_l = data.getParcelableExtra("lugar");
+			_l = data.getParcelableExtra(Lugar.NOMBRE);
 			System.err.println("ActLugar:onActivityResult----------:" + _l);
 		}
 	}

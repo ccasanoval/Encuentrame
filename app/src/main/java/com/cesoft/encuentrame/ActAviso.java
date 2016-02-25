@@ -8,9 +8,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -58,6 +60,8 @@ public class ActAviso extends AppCompatActivity implements GoogleApiClient.Conne
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
+System.err.println("------------------------------------"+_spnRadio);
+		como que es null???
 		//ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.array_radio_tit, android.R.layout.simple_spinner_item);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 System.err.println("------------------------------------"+_spnRadio+" : "+adapter);
@@ -142,24 +146,19 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 		}
 		//------------------------------------------------------------------------------------------
 
-		/*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
-			public void onClick(View view)
-			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-			}
+			public void onClick(View view){ActAviso.this.finish();}
 		});
-		*/
 
 		if(_a==null)
 			setTitle(getString(R.string.nuevo_aviso));
 		else
 			setTitle(getString(R.string.editar_aviso));
-
 	}
 
 	@Override

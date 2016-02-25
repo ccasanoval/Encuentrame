@@ -61,13 +61,14 @@
 
 	<Spinner
 		android:id="@+id/spnTrackingDelay"
+		android:layout_below="@+id/txtDescripcion_"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-        android:prompt="@string/radio" />
+        android:prompt="@string/periodo" />
 		/>
 
 	<LinearLayout
-		android:layout_below="@+id/layPosicion"
+		android:layout_below="@+id/spnTrackingDelay"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"
@@ -101,6 +102,5 @@
 			android:contentDescription="@string/eliminar"
 			android:src="@android:drawable/ic_menu_delete" />
 	</LinearLayout>
-
 
 </RelativeLayout>
