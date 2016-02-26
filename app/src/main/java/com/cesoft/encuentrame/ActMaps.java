@@ -1,5 +1,7 @@
 package com.cesoft.encuentrame;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -36,8 +38,8 @@ import java.util.List;
 
 
 import android.graphics.Color;
-
-
+import android.view.View;
+import android.widget.ImageButton;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
@@ -75,6 +77,22 @@ System.err.println("ActAviso:onCreate:++++++++++++++++" + _a);
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
+
+
+		ImageButton btnSave = (ImageButton) findViewById(R.id.btnGuardar);
+		btnSave.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				Intent data = new Intent();
+				if(_l != null)data.putExtra(Lugar.NOMBRE, _l);
+				if(_a != null)data.putExtra(Aviso.NOMBRE, _a);
+				if(_r != null)data.putExtra(Ruta.NOMBRE, _r);
+				setResult(Activity.RESULT_OK, data);
+				finish();
+			}
+		});
 	}
 
 	/**
@@ -116,11 +134,11 @@ System.err.println("ActAviso:onCreate:++++++++++++++++" + _a);
 	private String getMapsApiDirectionsUrl(GeoPoint[] pts)
 	{
 		StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?waypoints=optimize:true|");
-		for(int i=0; i < pts.length; i++)
+		for(GeoPoint pt : pts)//for(int i=0; i < pts.length; i++)
 		{
-			sb.append(pts[i].getLatitude());
+			sb.append(pt.getLatitude());
 			sb.append(",");
-			sb.append(pts[i].getLongitude());
+			sb.append(pt.getLongitude());
 			sb.append("|");
 		}
 		sb.append("&sensor=false");
@@ -131,8 +149,8 @@ System.err.println("ActAviso:onCreate:++++++++++++++++" + _a);
 	{
 		if(_Map != null)
 		{
-			for(int i=0; i < pts.length; i++)
-				_Map.addMarker(new MarkerOptions().position(new LatLng(pts[i].getLatitude(), pts[i].getLongitude())));//.title("")
+			for(GeoPoint pt : pts)
+				_Map.addMarker(new MarkerOptions().position(new LatLng(pt.getLatitude(), pt.getLongitude())));//.title("")
 		}
 	}
 
@@ -167,7 +185,8 @@ System.err.println("ActAviso:onCreate:++++++++++++++++" + _a);
 					String line;
 					while((line = br.readLine()) != null)
 					{
-						sb.append(line+"\n");
+						sb.append(line);
+						sb.append("\n");
 					}
 					br.close();
 					return sb.toString();
@@ -179,7 +198,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++" + _a);
 			}
 			finally
 			{
-				if(c != null)try{c.disconnect();}catch(Exception ex){}
+				if(c != null)try{c.disconnect();}catch(Exception e){System.err.println("ReadTask:doInBackground:e:"+e);}
 			}
 			return data;
 		}

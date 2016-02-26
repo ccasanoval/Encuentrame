@@ -59,16 +59,55 @@
 
 	<!-- DATE CREATED and MODIFIED ? -->
 
-	<Spinner
-		android:id="@+id/spnTrackingDelay"
+	<LinearLayout
+		android:id="@+id/layPeriodo"
 		android:layout_below="@+id/txtDescripcion_"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-        android:prompt="@string/periodo" />
-		/>
+		android:layout_marginTop="10dp">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="@string/periodo"/>
+		<Spinner
+			android:id="@+id/spnTrackingDelay"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:prompt="@string/periodo" />
+	</LinearLayout>
 
 	<LinearLayout
-		android:layout_below="@+id/spnTrackingDelay"
+		android:id="@+id/layStartStop"
+		android:layout_below="@+id/layPeriodo"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20dp">
+		<ImageButton
+			android:id="@+id/btnStart"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
+			android:contentDescription="@string/start"
+			android:src="@android:drawable/ic_media_play" />
+		<ImageButton
+			android:id="@+id/btnStop"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
+			android:contentDescription="@string/stop"
+			android:src="@android:drawable/ic_media_pause" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_below="@+id/layStartStop"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"
@@ -79,8 +118,8 @@
 			android:id="@+id/btnGuardar"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginRight="10dp"
-			android:layout_marginEnd="10dp"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/guardar"
 			android:src="@android:drawable/ic_menu_save" />
 
@@ -88,8 +127,8 @@
 			android:id="@+id/btnMapa"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginRight="10dp"
-			android:layout_marginEnd="10dp"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/ver_mapa"
 			android:src="@android:drawable/ic_menu_mapmode" />
 
@@ -97,8 +136,8 @@
 			android:id="@+id/btnEliminar"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginRight="10dp"
-			android:layout_marginEnd="10dp"
+			android:layout_marginRight="20dp"
+			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/eliminar"
 			android:src="@android:drawable/ic_menu_delete" />
 	</LinearLayout>

@@ -29,13 +29,25 @@ public class Aviso extends Objeto implements Parcelable
 	private GeoPoint lugar;
 		public GeoPoint getLugar(){return lugar;}
 		public void setLugar(GeoPoint v){lugar=v;}
-	/*private long radio;
-		public long getRadio(){return radio;}
-		public void setRadio(long v){radio=v;}*/
+	public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
+
+		public int getRadio()
+		{
+			Object o = lugar.getMetadata(RADIO);
+			if(String.class == o.getClass())
+			{
+				System.err.println("Aviso:getRadio:String:------------------------"+o);
+				return Integer.parseInt((String)o);
+			}
+			else if(Integer.class == o.getClass()) return (Integer)o;
+			else return 0;
+			//return (Integer)lugar.getMetadata(RADIO);
+		}
+		public void setRadio(int v){lugar.addMetadata(RADIO, v);}
 
 	public String toString()
 	{
-		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+lugar.getDistance());
+		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio());
 	}
 
 	//// PARCELABLE
@@ -50,7 +62,7 @@ public class Aviso extends Objeto implements Parcelable
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
 		//lugar.setDistance(in.readDouble());
-		lugar.addMetadata(RADIO, in.readDouble());
+		setRadio(in.readInt());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -62,7 +74,18 @@ public class Aviso extends Objeto implements Parcelable
 		dest.writeDouble(lugar.getLatitude());
 		dest.writeDouble(lugar.getLongitude());
 		//dest.writeDouble(lugar.getDistance());
-		dest.writeDouble(Double.parseDouble((String)lugar.getMetadata(RADIO)));
+		/*Object o = lugar.getMetadata(RADIO);
+		if(String.class == o.getClass())
+		{
+			dest.writeInt(Integer.parseInt((String)o));
+			System.err.println("Aviso:writeToParcel:String:"+o);
+		}
+		else if(Integer.class == o.getClass())
+		{
+			dest.writeInt((Integer)o);
+			System.err.println("Aviso:writeToParcel:Integer:" + o);
+		}*/
+		dest.writeInt(getRadio());
 	}
 	@Override
 	public int describeContents(){return 0;}

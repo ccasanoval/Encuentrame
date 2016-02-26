@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+//TODO:Añadir margin top a todos incluso login
 //TODO:guardar usr/pwd de backendless (luego en settings)
 //TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO:icono app
@@ -354,16 +355,15 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				@Override
 				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------"+backendlessFault);}
 			});
-		*/
-/*
+		/**/
+
+		/*
 		//-------- AVISO --------
 		Aviso a = new Aviso();
-		a.setNombre("Aviso 5");
-		a.setDescripcion("Aviso 5: Recoge la nota del buzon muerto5");
-		GeoPoint l = new GeoPoint(40.4676555, -3.5608555);
-		//l.setDistance(1000);
-		l.addMetadata(Aviso.RADIO, 1000);
-		a.setLugar(l);
+		a.setNombre("Aviso 1");
+		a.setDescripcion("Aviso 1: Recoge la nota del buzon muerto1");
+		GeoPoint l = new GeoPoint(40.4676111, -3.5608111);
+		a.setLugar(l, 2000);//l.setDistance(1000);	//l.setRa(Aviso.RADIO, 1000);
 		a.guardar(new AsyncCallback<Aviso>()
 		{
 			@Override
@@ -371,7 +371,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 			@Override
 			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A5-----------"+backendlessFault);}
 		});
-		*/
+		/**/
 
 		/*
 		//-------- RUTA --------
@@ -451,7 +451,8 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 			{
 				System.err.println("*********** FAIL:R1-----------" + backendlessFault);
 			}
-		});*/
+		});
+		/**/
 
 	}
 }

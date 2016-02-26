@@ -45,9 +45,9 @@ public class ActAviso extends AppCompatActivity implements GoogleApiClient.Conne
 
 	//private ArrayAdapter<String> _adapter;
 	private String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private double[] _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 	private Spinner _spnRadio;
-	private double _radio;
+	private int _radio;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -61,7 +61,7 @@ public class ActAviso extends AppCompatActivity implements GoogleApiClient.Conne
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
 System.err.println("------------------------------------"+_spnRadio);
-		como que es null???
+
 		//ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.array_radio_tit, android.R.layout.simple_spinner_item);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 System.err.println("------------------------------------"+_spnRadio+" : "+adapter);
@@ -183,13 +183,16 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 		//_locLast		//GeoPoint p = _l.getLugar();
 		if(_a.getLugar() != null)
 		{
+System.err.println("--------0");
 			if(_locLast == null)_locLast = new Location("dummyprovider");
 			_locLast.setLatitude(_a.getLugar().getLatitude());
 			_locLast.setLongitude(_a.getLugar().getLongitude());
 			setPosAct(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
-
-			_radio = _a.getLugar().getDistance();
+System.err.println("--------1");
+System.err.println("--------2"+_a.getRadio());
+			_radio = _a.getRadio();
 			//int spinnerPosition = _adapter.getPosition("10 Km");
+System.err.println("--------3");
 			for(int i=0; i < _adRadio.length; i++)
 			{
 				if(_radio == _adRadio[i])
