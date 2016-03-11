@@ -6,7 +6,9 @@
 .DS_Store
 /build
 /captures
-BackendSettings.java
-google_maps_api.xml
 *.apk
 *.jks
+BackendSettings.java
+google_maps_api.xml
+google-services.json
+gradle.properties
