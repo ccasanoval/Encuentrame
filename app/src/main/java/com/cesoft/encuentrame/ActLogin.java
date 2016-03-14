@@ -159,18 +159,24 @@ txtPassword.setText("colt1911");
 					public void onClick(View v)
 					{
 						Backendless.UserService.login(
-						txtLogin.getText().toString(),
-						txtPassword.getText().toString(),
-						new DefaultCallback<BackendlessUser>(ActLogin._win)
-						{
-          					public void handleResponse(BackendlessUser backendlessUser)
-          					{
-            					super.handleResponse(backendlessUser);
-								System.err.println("ENTER-----------------" + backendlessUser);
-								startActivity(new Intent(_win.getBaseContext(), ActMain.class));
-								_win.finish();
-          					}
-        				});
+							txtLogin.getText().toString(),
+							txtPassword.getText().toString(),
+							new DefaultCallback<BackendlessUser>(ActLogin._win)
+							{
+								@Override
+								public void handleResponse(BackendlessUser backendlessUser)
+								{
+									super.handleResponse(backendlessUser);
+									System.err.println("ENTER-----------------" + backendlessUser);
+									startActivity(new Intent(_win.getBaseContext(), ActMain.class));
+									_win.finish();
+								}
+								@Override
+								public void handleFault(BackendlessFault backendlessFault)
+								{
+									System.out.println("ActLogin:Backendless reported an error: " + backendlessFault.getMessage());
+								}
+							});
 					}
 				});
 				break;

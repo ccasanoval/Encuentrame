@@ -35,10 +35,7 @@ public class Aviso extends Objeto implements Parcelable
 		{
 			Object o = lugar.getMetadata(RADIO);
 			if(String.class == o.getClass())
-			{
-				System.err.println("Aviso:getRadio:String:------------------------"+o);
 				return Integer.parseInt((String)o);
-			}
 			else if(Integer.class == o.getClass()) return (Integer)o;
 			else return 0;
 			//return (Integer)lugar.getMetadata(RADIO);
@@ -61,7 +58,6 @@ public class Aviso extends Objeto implements Parcelable
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
-		//lugar.setDistance(in.readDouble());
 		setRadio(in.readInt());
 	}
 	@Override
@@ -73,18 +69,6 @@ public class Aviso extends Objeto implements Parcelable
 		dest.writeString(lugar.getObjectId());
 		dest.writeDouble(lugar.getLatitude());
 		dest.writeDouble(lugar.getLongitude());
-		//dest.writeDouble(lugar.getDistance());
-		/*Object o = lugar.getMetadata(RADIO);
-		if(String.class == o.getClass())
-		{
-			dest.writeInt(Integer.parseInt((String)o));
-			System.err.println("Aviso:writeToParcel:String:"+o);
-		}
-		else if(Integer.class == o.getClass())
-		{
-			dest.writeInt((Integer)o);
-			System.err.println("Aviso:writeToParcel:Integer:" + o);
-		}*/
 		dest.writeInt(getRadio());
 	}
 	@Override

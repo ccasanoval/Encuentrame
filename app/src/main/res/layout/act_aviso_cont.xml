@@ -119,41 +119,18 @@
 			android:prompt="@string/radio" />
 	</LinearLayout>
 
-	<LinearLayout
+
+	<fragment
+		android:id="@+id/map"
 		android:layout_below="@+id/layRadio"
-		android:orientation="horizontal"
-		android:layout_centerHorizontal="true"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="50dp">
-
-		<ImageButton
-			android:id="@+id/btnGuardar"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="20dp"
-			android:layout_marginEnd="20dp"
-			android:contentDescription="@string/guardar"
-			android:src="@android:drawable/ic_menu_save" />
-
-		<ImageButton
-			android:id="@+id/btnMapa"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="20dp"
-			android:layout_marginEnd="20dp"
-			android:contentDescription="@string/ver_mapa"
-			android:src="@android:drawable/ic_menu_mapmode" />
-
-		<ImageButton
-			android:id="@+id/btnEliminar"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="20dp"
-			android:layout_marginEnd="20dp"
-			android:contentDescription="@string/eliminar"
-			android:src="@android:drawable/ic_menu_delete" />
-	</LinearLayout>
+		xmlns:android="http://schemas.android.com/apk/res/android"
+    	xmlns:tools="http://schemas.android.com/tools"
+		class="com.google.android.gms.maps.SupportMapFragment"
+		android:layout_marginTop="5dp"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		tools:context=".ActAviso"
+		/>
 
 
 </RelativeLayout>

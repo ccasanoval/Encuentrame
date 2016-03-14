@@ -5,10 +5,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -21,10 +21,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
-import com.cesoft.encuentrame.models.Lugar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -38,36 +34,39 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.jetbrains.annotations.NotNull;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.geo.GeoPoint;
+
+import com.cesoft.encuentrame.models.Lugar;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
 	private static final int DELAY_LOCATION = 60000;
-	private static final int ACC_MAPA = 1;
 
 	private boolean _bNuevo = false;
 	private Lugar _l;
 	private TextView _lblPosicion;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
-	private GoogleApiClient _GoogleApiClient;
 
+	private GoogleApiClient _GoogleApiClient;
 	private Location _loc, _locLast;
 	private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
+
+	CoordinatorLayout _coordinatorLayout;
 
 
 	//______________________________________________________________________________________________
@@ -77,8 +76,10 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_lugar);
 
-		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
+
 
 		//------------------------------------------------------------------------------------------
 		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
@@ -103,14 +104,9 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		});
 
 		//-----------
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-		//-----------
-		_lblPosicion = (TextView) findViewById(R.id.lblPosicion);
-		_txtNombre = (EditText) findViewById(R.id.txtNombre);//txtLogin.requestFocus();
-		_txtDescripcion = (EditText) findViewById(R.id.txtDescripcion);
+		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
+		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
+		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(new View.OnClickListener()
@@ -127,7 +123,6 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		try
 		{
 			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
-System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 			setValores();
 		}
 		catch(Exception e)
@@ -145,6 +140,23 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 			setTitle(getString(R.string.editar_lugar));
 	}
 	//______________________________________________________________________________________________
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		if(checkPlayServices())buildGoogleApiClient();
+		if(_GoogleApiClient != null)_GoogleApiClient.connect();
+		// ATTENTION: This was auto-generated to implement the App Indexing API.
+		// See https://g.co/AppIndexing/AndroidStudio for more information.
+		/*Action viewAction = Action.newAction(Action.TYPE_VIEW, // choose an action type.
+				"ActLugar Page", // Define a title for the content shown.
+				// If you have web page content that matches this app activity's content,
+				// make sure this auto-generated web page URL is correct. Otherwise, set the URL to null.
+				Uri.parse("http://host/path"),
+				// Make sure this auto-generated app deep link URI is correct.
+				Uri.parse("android-app://com.cesoft.encuentrame/http/host/path"));
+		AppIndex.AppIndexApi.start(_GoogleApiClient, viewAction);*/
+	}
 	@Override
 	protected void onPause()
 	{
@@ -186,21 +198,13 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if(item.getItemId() == R.id.menu_guardar)
-		{
 			guardar();
-			System.err.println("R.id.menu_guardar");
-		}
 		else if(item.getItemId() == R.id.menu_eliminar)
-		{
 			eliminar();
-			System.err.println("R.id.menu_eliminar");
-		}
-		///saveValores();
 		return super.onOptionsItemSelected(item);
 	}
 
 	//______________________________________________________________________________________________
-	private void setPosLabel(String s){_lblPosicion.setText(s);}
 	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format("%.5f/%.5f", lat, lon));}
 	private void setValores()
 	{
@@ -212,28 +216,9 @@ System.err.println("ActLugar:onCreate:++++++++++++++++"+_l);
 			_loc.setLatitude(_l.getLugar().getLatitude());
 			_loc.setLongitude(_l.getLugar().getLongitude());
 			setPosLabel(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
-System.err.println("INI----------"+_l.getLugar().getLatitude()+"/"+_l.getLugar().getLongitude());
 		}
 	}
 
-	//______________________________________________________________________________________________
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		if(checkPlayServices())buildGoogleApiClient();
-		if(_GoogleApiClient != null)_GoogleApiClient.connect();
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		/*Action viewAction = Action.newAction(Action.TYPE_VIEW, // TODO: choose an action type.
-				"ActLugar Page", // TODO: Define a title for the content shown.
-				// TODO: If you have web page content that matches this app activity's content,
-				// make sure this auto-generated web page URL is correct. Otherwise, set the URL to null.
-				Uri.parse("http://host/path"),
-				// TODO: Make sure this auto-generated app deep link URI is correct.
-				Uri.parse("android-app://com.cesoft.encuentrame/http/host/path"));
-		AppIndex.AppIndexApi.start(_GoogleApiClient, viewAction);*/
-	}
 
 	//______________________________________________________________________________________________
 	protected synchronized void buildGoogleApiClient()
@@ -249,24 +234,12 @@ System.err.println("INI----------"+_l.getLugar().getLatitude()+"/"+_l.getLugar()
 			/*int PLAY_SERVICES_RESOLUTION_REQUEST = 6969;
         	if(googleAPI.isUserResolvableError(result))googleAPI.getErrorDialog(this.getParent(), result, PLAY_SERVICES_RESOLUTION_REQUEST).show();
         	*/
-			System.err.println("ActLugar:checkPlayServices:e:"+result);
-			//Snackbar.make(null, R.string.eliminar, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+			System.err.println("ActLugar:checkPlayServices:e:" + result);
+			//Snackbar.make(_coordinatorLayout, "Play Services Error:"+result, Snackbar.LENGTH_LONG).show();
 	        return false;
 	    }
 	    return true;
 	}
-	/*private void getAndDisplayLocation()
-	{
-		if(_GoogleApiClient == null)return;
-		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		_locLast = LocationServices.FusedLocationApi.getLastLocation(_GoogleApiClient);
-		if(_locLast != null)
-			setPosLabel(_locLast.getLatitude(), _locLast.getLongitude());
-		else
-			setPosLabel(getString(R.string.sin_posicion));
-	}*/
-
-
 
 	//______________________________________________________________________________________________
 	//// 4 OnConnectionFailedListener
@@ -295,33 +268,35 @@ System.err.println("INI----------"+_l.getLugar().getLatitude()+"/"+_l.getLugar()
 	{
 		if(_loc == null)
 		{
-			Snackbar.make(null, "El lugar no tiene posición...", Snackbar.LENGTH_LONG).show();
+			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			return;
 		}
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-			Snackbar.make(null, "El lugar no tienen nombre...", Snackbar.LENGTH_LONG).show();
+			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
 		}
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
 		_l.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()));
-
 		_l.guardar(new AsyncCallback<Lugar>()
 		{
 			@Override
 			public void handleResponse(Lugar l)
 			{
-				System.out.println(l.getObjectId());
+				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+				Intent data = new Intent();
+				//data.putExtra(Lugar.class.getName(), _l);
+				setResult(android.app.Activity.RESULT_OK, data);
+				finish();
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
+				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
 			}
 		});
-System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getLugar().getLongitude());
-		finish();
 	}
 
 	//______________________________________________________________________________________________
@@ -330,7 +305,7 @@ System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getL
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
-		dialog.setPositiveButton("OK", new DialogInterface.OnClickListener()
+		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
 			public void onClick(DialogInterface dialog, int which)
@@ -340,26 +315,19 @@ System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getL
 					@Override
 					public void handleResponse(Long lugar)
 					{
-						Snackbar.make(null, R.string.eliminar, Snackbar.LENGTH_LONG).show();
+						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
 						ActLugar.this.finish();
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
-						// an error has occurred, the error code can be retrieved with
-						Snackbar.make(null, "Error:" + backendlessFault.getCode(), Snackbar.LENGTH_LONG).show();
+						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
 					}
 				});
 			}
 		});
-		/*dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which){}
-		});*/
 		dialog.create().show();
 	}
-
 
 
 
@@ -376,23 +344,15 @@ System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getL
 	//______________________________________________________________________________________________
 	// 4 GoogleMap.OnCameraChangeListener
 	@Override
-	public void onCameraChange(CameraPosition cameraPosition)
-	{
-		//if(_l != null && (_l.getLugar().getLatitude() != 0 || _l.getLugar().getLongitude() != 0))
-	}
+	public void onCameraChange(CameraPosition cameraPosition){}
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		if(_l != null && (_l.getLugar().getLatitude() != 0 || _l.getLugar().getLongitude() != 0))
-		{
-			LatLng latLng = new LatLng(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
-			_Map.animateCamera(cameraUpdate);
-		}
-		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+			return;
 		_Map.setMyLocationEnabled(true);
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
@@ -402,15 +362,14 @@ System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getL
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
+		_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		setPosLugar(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
 	}
 
 	//______________________________________________________________________________________________
 	//// 4 ResultCallback
 	@Override
-	public void onResult(@NonNull Status status)
-	{
-	}
+	public void onResult(@NonNull Status status){}
 
 
 	//______________________________________________________________________________________________
@@ -437,8 +396,9 @@ System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getL
 					.title(_l.getNombre())//getString(R.string.aviso)
 					.snippet(_l.getDescripcion());
 			_marker = _Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
+			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
+			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
+			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
 		}
 		catch(Exception e){System.err.println("ActLugar:setMarker:e:"+e);}
 	}
@@ -456,7 +416,7 @@ System.err.println("INI----------" + _l.getLugar().getLatitude() + "/" + _l.getL
 		result.setResultCallback(new ResultCallback<LocationSettingsResult>()
 		{
      		@Override
-     		public void onResult(@NotNull LocationSettingsResult result)
+     		public void onResult(@NonNull LocationSettingsResult result)
 			{
          		final Status status = result.getStatus();
          		final LocationSettingsStates le = result.getLocationSettingsStates();

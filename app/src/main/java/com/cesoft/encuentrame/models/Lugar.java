@@ -114,8 +114,6 @@ public class Lugar extends Objeto implements Parcelable
 
 }
 
-//TODO: https://www.thoughtworks.com/insights/blog/signing-open-source-android-apps-without-disclosing-passwords
-
 /*
 
 Order firstOrder = Backendless.Data.of( Order.class ).findFirst();

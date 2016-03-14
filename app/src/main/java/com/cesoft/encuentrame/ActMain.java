@@ -43,9 +43,7 @@ import java.util.Map;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
-	private SectionsPagerAdapter _SectionsPagerAdapter;
 	private ViewPager _viewPager;
-
 	private static final int LUGARES=0, RUTAS=1, AVISOS=2;
 
 	@Override
@@ -56,10 +54,10 @@ public class ActMain extends AppCompatActivity
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
-		_SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
 		_viewPager = (ViewPager)findViewById(R.id.container);
-		_viewPager.setAdapter(_SectionsPagerAdapter);
+		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
 
@@ -74,9 +72,10 @@ public class ActMain extends AppCompatActivity
 				switch(_viewPager.getCurrentItem())
 				{
 				case LUGARES:
-					startActivity(new Intent(getBaseContext(), ActLugar.class));
+					//startActivity(new Intent(getBaseContext(), ActLugar.class));
 					//i.putExtra("aviso", _o.getAviso());
 					//startActivityForResult(i, AVISO);//TODO: si es guardado, borrado => refresca la vista, si no nada
+					System.err.println("-------------***LUG");
 					break;
 				case RUTAS:
 					break;
@@ -138,7 +137,6 @@ public class ActMain extends AppCompatActivity
 			switch(position)
 			{
 			case LUGARES:
-cargaDatosDebug();//TODO:DEBUG
 				return getString(R.string.lugares);
 			case RUTAS:
 				return getString(R.string.rutas);
@@ -170,96 +168,38 @@ System.err.println(sectionNumber+"--------------newInstance");
 			return fragment;
 		}
 
+		private View _rootView;
+		private ListView _listView;
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			Bundle args = getArguments();
 System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(ARG_SECTION_NUMBER)");
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-			final View rootView = inflater.inflate(R.layout.act_main_frag, container, false);
-			final ListView listView = (ListView)rootView.findViewById(R.id.listView);
-			final TextView textView = new TextView(rootView.getContext());
+			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
+			_listView = (ListView)_rootView.findViewById(R.id.listView);
+			final TextView textView = new TextView(_rootView.getContext());
 
 			switch(sectionNumber)
 			{
-			case LUGARES://---------------------------------------------------------------------------
+			case LUGARES://-------------------------------------------------------------------------
 				textView.setText(getString(R.string.lugares));
-				Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
-						{
-							@Override
-							public void handleResponse(BackendlessCollection<Lugar> lugares)
-							{
-								int n = lugares.getTotalObjects();
-System.err.println("---------LUGARES:GET:OK:" + n);
-								if(n < 1)return;
-								Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
-								Lugar[] listaAL = new Lugar[n];
-								int i=0;
-								while(iterator.hasNext())
-									listaAL[i++] = iterator.next();
-								listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
-							}
-							@Override
-							public void handleFault(BackendlessFault backendlessFault)
-							{
-								System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
-							}
-						});
+				refreshLugares();
 				break;
 
-			case RUTAS://------------------------------------------------------------------------
+			case RUTAS://---------------------------------------------------------------------------
 				textView.setText(getString(R.string.rutas));
-				Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
-						{
-							@Override
-							public void handleResponse(BackendlessCollection<Ruta> rutas)
-							{
-								int n = rutas.getTotalObjects();
-System.err.println("---------RUTAS:GET:OK:" + n);
-								if(n < 1)return;
-								Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
-								Ruta[] listaAL = new Ruta[n];
-								int i=0;
-								while(iterator.hasNext())
-									listaAL[i++] = iterator.next();
-								listView.setAdapter(new RutaArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));
-							}
-							@Override
-							public void handleFault(BackendlessFault backendlessFault)
-							{
-								System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
-							}
-						});
+				refreshRutas();
 				break;
 
-			case AVISOS://-------------------------------------------------------------------------
+			case AVISOS://--------------------------------------------------------------------------
 				textView.setText(getString(R.string.avisos));
-				Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
-				{
-					@Override
-					public void handleResponse(BackendlessCollection<Aviso> aviso)
-					{
-						int n = aviso.getTotalObjects();
-System.err.println("---------AVISOS:GET:OK:" + n);
-						if(n < 1)return;
-						Iterator<Aviso> iterator = aviso.getCurrentPage().iterator();
-						Aviso[] listaAL = new Aviso[n];
-						int i = 0;
-						while(iterator.hasNext())
-							listaAL[i++] = iterator.next();
-						listView.setAdapter(new AvisoArrayAdapter(rootView.getContext(), listaAL, PlaceholderFragment.this));
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
-					}
-				});
+				refreshAvisos();
 				break;
 			}
 
-			listView.addHeaderView(textView);
-			return rootView;
+			_listView.addHeaderView(textView);
+			return _rootView;
 		}
 
 		//// implements CesIntLista
@@ -287,7 +227,6 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				break;
 			}
 		}
-		//TODO: mostrar objeto en mapa
 		@Override
 		public void onItemMap(tipoLista tipo, Objeto obj)
 		{
@@ -296,32 +235,120 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 			{
 			case LUGAR:
 				i = new Intent(getContext(), ActMaps.class);
-				i.putExtra("lugar", obj);
+				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
 				i = new Intent(getContext(), ActMaps.class);
-				i.putExtra("ruta", obj);
+				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
 				i = new Intent(getContext(), ActMaps.class);
-				i.putExtra("aviso", obj);
+				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, AVISOS);
 				break;
 			}
 		}
-
-
-		//______________________________________________________________________________________________
-		/*public void refrescarLista()
+		@Override
+		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
-			Iterator<Objeto> it = Objeto.findAll(Objeto.class);
-			ArrayList<Objeto> lista = Objeto.conectarHijos(it);//TODO:Por que no funciona con la lista pasada????? Lo deja duplicado y el nuevo no es editable???
-			ActEdit.setLista(lista);
-			_expListView.setAdapter(new NivelUnoListAdapter(this.getApplicationContext(), _expListView, lista));
-			_expListView.refreshDrawableState();
-		}*/
+			super.onActivityResult(requestCode, resultCode, data);
+			if(resultCode != RESULT_OK)return;
+			if(requestCode == LUGARES)
+			{
+				//Snackbar.make(null, "Se guardaron los datos del lugar.", Snackbar.LENGTH_LONG).show();
+				refreshLugares();
+			}
+			else if(requestCode == RUTAS)
+			{
+				//Snackbar.make(null, "Se guardaron los datos de la ruta.", Snackbar.LENGTH_LONG).show();
+				refreshRutas();
+			}
+			else if(requestCode == AVISOS)
+			{
+				//Snackbar.make(null, "Se guardaron los datos del aviso.", Snackbar.LENGTH_LONG).show();
+				refreshAvisos();
+			}
+		}
+
+
+		//__________________________________________________________________________________________
+		public void refreshLugares()
+		{
+			Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
+			{
+				@Override
+				public void handleResponse(BackendlessCollection<Lugar> lugares)
+				{
+					int n = lugares.getTotalObjects();
+					System.err.println("---------LUGARES:GET:OK:" + n);
+					if(n < 1)
+						return;
+					Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
+					Lugar[] listaAL = new Lugar[n];
+					int i = 0;
+					while(iterator.hasNext())
+						listaAL[i++] = iterator.next();
+					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault)
+				{
+					System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				}
+			});
+		}
+		//__________________________________________________________________________________________
+		public void refreshRutas()
+		{
+			Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
+			{
+				@Override
+				public void handleResponse(BackendlessCollection<Ruta> rutas)
+				{
+					int n = rutas.getTotalObjects();
+System.err.println("---------RUTAS:GET:OK:" + n);
+					if(n < 1)return;
+					Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
+					Ruta[] listaAL = new Ruta[n];
+					int i=0;
+					while(iterator.hasNext())
+						listaAL[i++] = iterator.next();
+					_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault)
+				{
+					System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
+				}
+			});
+		}
+		//__________________________________________________________________________________________
+		public void refreshAvisos()
+		{
+			Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
+			{
+				@Override
+				public void handleResponse(BackendlessCollection<Aviso> aviso)
+				{
+					int n = aviso.getTotalObjects();
+System.err.println("---------AVISOS:GET:OK:" + n);
+					if(n < 1)return;
+					Iterator<Aviso> iterator = aviso.getCurrentPage().iterator();
+					Aviso[] listaAL = new Aviso[n];
+					int i = 0;
+					while(iterator.hasNext())
+						listaAL[i++] = iterator.next();
+					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault)
+				{
+					System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
+				}
+			});
+		}
 
 	}
 

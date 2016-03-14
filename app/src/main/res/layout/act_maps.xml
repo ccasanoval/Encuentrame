@@ -1,7 +1,11 @@
-<RelativeLayout
+<android.support.design.widget.CoordinatorLayout
+	android:id="@+id/coordinatorLayout"
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:fitsSystemWindows="true"
+	tools:context=".ActAvisoEdit">
 
 	<fragment xmlns:android="http://schemas.android.com/apk/res/android"
     	xmlns:tools="http://schemas.android.com/tools"
@@ -11,13 +15,11 @@
 		android:layout_height="match_parent"
 		tools:context=".ActMaps" />
 
-	<ImageButton
+	<android.support.design.widget.FloatingActionButton
 		android:id="@+id/btnGuardar"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_centerHorizontal="true"
-		android:text="@string/guardar"
-		android:src="@android:drawable/ic_menu_save"
-		/>
-</RelativeLayout>
+		android:layout_gravity="center_horizontal|bottom"
+		android:layout_margin="@dimen/fab_margin"
+		android:src="@android:drawable/ic_menu_save"/>
+</android.support.design.widget.CoordinatorLayout>
