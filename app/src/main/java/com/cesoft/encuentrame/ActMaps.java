@@ -161,21 +161,11 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 
 		if(_l != null)			/// LUGAR
 		{
-			setPosLugar(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
-			/*LatLng pos = new LatLng(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
-			MarkerOptions mo = new MarkerOptions().position(pos).title(_l.getNombre()).snippet(_l.getDescripcion());
-			_Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(15));*/
+			setPosLugar(_l.getLatitud(), _l.getLongitud());
 		}
 		else if(_a != null)		/// AVISO
 		{
-			setPosLugar(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
-			/*LatLng pos = new LatLng(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
-			MarkerOptions mo = new MarkerOptions().position(pos).title(_a.getNombre()).snippet(_a.getDescripcion());
-			_Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(15));*/
+			setPosLugar(_a.getLatitud(), _a.getLongitud());
 		}
 		else if(_r != null)		/// RUTA
 		{
@@ -201,14 +191,12 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		_loc.setLongitude(lon);
 		if(_l != null)
 		{
-			_l.getLugar().setLatitude(lat);
-			_l.getLugar().setLongitude(lon);
+			_l.setLatLon(lat, lon);
 			setMarker(_l.getNombre(), _l.getDescripcion());
 		}
 		else if(_a != null)
 		{
-			_a.getLugar().setLatitude(lat);
-			_a.getLugar().setLongitude(lon);
+			_a.setLatLon(lat, lon);
 			setMarker(_a.getNombre(), _a.getDescripcion());
 			setMarkerRadius();
 		}

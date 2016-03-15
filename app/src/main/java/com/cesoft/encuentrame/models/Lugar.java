@@ -24,9 +24,14 @@ public class Lugar extends Objeto implements Parcelable
 
 	public Lugar(){}
 
-	private GeoPoint lugar;
-		public GeoPoint getLugar(){return lugar;}
-		public void setLugar(GeoPoint v){lugar=v;}
+	private GeoPoint lugar = new GeoPoint(0,0);
+		//public GeoPoint getLugar(){return lugar;}
+		//public void setLugar(GeoPoint v){lugar=v;}
+		public Double getLatitud(){return lugar.getLatitude();}
+		public Double getLongitud(){return lugar.getLongitude();}
+		public void setLatLon(Double lat, Double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
+		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
+		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
 
 	public String toString()
 	{

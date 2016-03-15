@@ -63,8 +63,8 @@ public class ActMain extends AppCompatActivity
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
-cargaDatosDebug();
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
+//cargaDatosDebug();//TODO:Debug
+		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabNuevo);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -160,7 +160,6 @@ cargaDatosDebug();
 	public static class PlaceholderFragment extends Fragment implements CesIntLista
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
-		//private ListView _ListView;
 
 		public PlaceholderFragment(){}
 

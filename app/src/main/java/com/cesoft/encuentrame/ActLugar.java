@@ -1,17 +1,14 @@
 package com.cesoft.encuentrame;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -38,19 +35,18 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
 
 import com.cesoft.encuentrame.models.Lugar;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
+public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
+	//GoogleMap.OnCameraChangeListener,
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -61,7 +57,6 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private EditText _txtDescripcion;
 
 	private GoogleApiClient _GoogleApiClient;
-	private Location _loc, _locLast;
 	private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
@@ -79,33 +74,6 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
-
-		//------------------------------------------------------------------------------------------
-		try
-		{
-			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
-			setValores();
-		}
-		catch(Exception e)
-		{
-			_bNuevo = true;
-			_l = new Lugar();
-		}
-		//------------------------------------------------------------------------------------------
-		if(_bNuevo)
-			setTitle(getString(R.string.nuevo_lugar));
-		else
-			setTitle(getString(R.string.editar_lugar));
-		//------------------------------------------------------------------------------------------
-
-		//------------------------------------------------------------------------------------------
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();
 
 		//------------------------------------------------------------------------------------------
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -130,10 +98,39 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void onClick(View v)
 			{
-				if(_locLast != null)
-					setPosLugar(_locLast);
+				Location loc = Util.getLocation(getBaseContext());
+				if(loc != null)setPosLugar(loc);
 			}
 		});
+
+		//------------------------------------------------------------------------------------------
+		try
+		{
+			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
+System.err.println("*************"+_l);
+			setValores();
+		}
+		catch(Exception e)
+		{
+			_bNuevo = true;
+			_l = new Lugar();
+		}
+
+		//------------------------------------------------------------------------------------------
+		if(_bNuevo)
+			setTitle(getString(R.string.nuevo_lugar));
+		else
+			setTitle(getString(R.string.editar_lugar));
+		//------------------------------------------------------------------------------------------
+
+		//------------------------------------------------------------------------------------------
+		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+		_GoogleApiClient.connect();
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+		pideGPS();
 	}
 	//______________________________________________________________________________________________
 	@Override
@@ -169,8 +166,11 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 		{
-			if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+			//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+			try
+			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
+			}catch(SecurityException se){}
 		}
 	}
 	private void stopTracking()
@@ -206,13 +206,7 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	{
 		_txtNombre.setText(_l.getNombre());
 		_txtDescripcion.setText(_l.getDescripcion());
-		if(_l.getLugar() != null)
-		{
-			if(_loc == null)_loc = new Location("dummyprovider");
-			_loc.setLatitude(_l.getLugar().getLatitude());
-			_loc.setLongitude(_l.getLugar().getLongitude());
-			setPosLabel(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
-		}
+		setPosLabel(_l.getLatitud(), _l.getLongitud());
 	}
 
 
@@ -242,15 +236,10 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
-		//this.result = result;
-		//Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode());
 		System.err.println("Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode());
 	}
 	@Override
-	public void onConnected(Bundle arg0)
-	{
-		//displayLocation();
-	}
+	public void onConnected(Bundle arg0){}
 	@Override
 	public void onConnectionSuspended(int arg0)
 	{
@@ -258,11 +247,10 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 			_GoogleApiClient.connect();
 	}
 
-
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
-		if(_loc == null)
+		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			return;
@@ -275,7 +263,6 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		}
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
-		_l.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()));
 		_l.guardar(new AsyncCallback<Lugar>()
 		{
 			@Override
@@ -287,6 +274,7 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 				setResult(android.app.Activity.RESULT_OK, data);
 				finish();
 			}
+
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
@@ -314,6 +302,7 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
 						ActLugar.this.finish();
 					}
+
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
@@ -326,30 +315,27 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	}
 
 
-
 	//______________________________________________________________________________________________
 	//// 4 LocationListener
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		_locLast = location;
-		if(_loc.getLatitude() == 0 && _loc.getLongitude() == 0)
-			setPosLugar(_locLast);
+		Util.setLocation(location);
+		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
+			setPosLugar(location);
 	}
 
 	//______________________________________________________________________________________________
 	// 4 GoogleMap.OnCameraChangeListener
-	@Override
-	public void onCameraChange(CameraPosition cameraPosition){}
+	//@Override public void onCameraChange(CameraPosition cameraPosition){}
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-			return;
-		_Map.setMyLocationEnabled(true);
+		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override
@@ -359,7 +345,12 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 			}
 		});
 		_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
-		setPosLugar(_l.getLugar().getLatitude(), _l.getLugar().getLongitude());
+		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
+		{
+			Location loc = Util.getLocation(getBaseContext());
+			_l.setLatLon(loc.getLatitude(), loc.getLongitude());
+		}
+		setPosLugar(_l.getLatitud(), _l.getLongitud());
 	}
 
 	//______________________________________________________________________________________________
@@ -375,10 +366,8 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	}
 	private void setPosLugar(double lat, double lon)
 	{
-		if(_loc == null)_loc = new Location("dummyprovider");
-		_loc.setLatitude(lat);
-		_loc.setLongitude(lon);
-		_lblPosicion.setText(String.format("%.5f/%.5f", _loc.getLatitude(), _loc.getLongitude()));
+		_l.setLatLon(lat, lon);
+		_lblPosicion.setText(String.format("%.5f/%.5f", _l.getLatitud(), _l.getLongitud()));
 		setMarker();
 	}
 	private void setMarker()
@@ -386,7 +375,7 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		try
 		{
 			if(_marker != null)_marker.remove();
-			LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
+			LatLng pos = new LatLng(_l.getLatitud(), _l.getLongitud());
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
 					.title(_l.getNombre())//getString(R.string.aviso)
@@ -440,4 +429,5 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 			}
 		});
 	}
+
 }

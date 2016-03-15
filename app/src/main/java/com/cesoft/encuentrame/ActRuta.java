@@ -72,6 +72,7 @@ public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChan
 	CoordinatorLayout _coordinatorLayout;
 
 
+	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -81,40 +82,6 @@ public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChan
 		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
-
-		//------------------------------------------------------------------------------------------
-		try
-		{
-			_r = this.getIntent().getParcelableExtra(Ruta.NOMBRE);
-System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
-			setValores();
-		}
-		catch(Exception e)
-		{
-			_bNuevo = true;
-			_r = new Ruta();
-		}
-		//------------------------------------------------------------------------------------------
-		if(_bNuevo)
-		{
-			setTitle(getString(R.string.nueva_ruta));
-			//findViewById(R.id.layStartStop).setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			setTitle(getString(R.string.editar_ruta));
-			findViewById(R.id.layStartStop).setVisibility(View.GONE);
-			findViewById(R.id.layPeriodo).setVisibility(View.GONE);
-		}
-
-		//------------------------------------------------------------------------------------------
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();
 
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
@@ -130,7 +97,6 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 			{
 				_r.setPeriodo(_aiDelay[position] * 60 * 1000);
 			}
-
 			@Override
 			public void onNothingSelected(AdapterView<?> parent)
 			{
@@ -169,6 +135,40 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 				ActRuta.this.finish();
 			}
 		});
+
+		//------------------------------------------------------------------------------------------
+		try
+		{
+			_r = this.getIntent().getParcelableExtra(Ruta.NOMBRE);
+System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
+			setValores();
+		}
+		catch(Exception e)
+		{
+			_bNuevo = true;
+			_r = new Ruta();
+		}
+		//------------------------------------------------------------------------------------------
+		if(_bNuevo)
+		{
+			setTitle(getString(R.string.nueva_ruta));
+			//findViewById(R.id.layStartStop).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			setTitle(getString(R.string.editar_ruta));
+			findViewById(R.id.layStartStop).setVisibility(View.GONE);
+			findViewById(R.id.layPeriodo).setVisibility(View.GONE);
+		}
+
+		//------------------------------------------------------------------------------------------
+		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+		_GoogleApiClient.connect();
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+		pideGPS();
 	}
 
 	//______________________________________________________________________________________________

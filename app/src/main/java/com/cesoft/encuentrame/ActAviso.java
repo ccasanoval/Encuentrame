@@ -66,7 +66,6 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private EditText _txtDescripcion;
 
 	private GoogleApiClient _GoogleApiClient;
-	private Location _locLast;
 	private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
@@ -78,6 +77,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 	CoordinatorLayout _coordinatorLayout;
 
+	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -89,42 +89,14 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		mapFragment.getMapAsync(this);
 
 		//------------------------------------------------------------------------------------------
-		try
-		{
-			_a = this.getIntent().getParcelableExtra(Aviso.NOMBRE);
-System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
-			setValores();
-		}
-		catch(Exception e)
-		{
-			_bNuevo = true;
-			_a = new Aviso();
-		}
-		//------------------------------------------------------------------------------------------
-		if(_bNuevo)
-			setTitle(getString(R.string.nuevo_aviso));
-		else
-			setTitle(getString(R.string.editar_aviso));
-
-		//------------------------------------------------------------------------------------------
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();
-
-		//------------------------------------------------------------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				//LatLng pos = new LatLng(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
-				//_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
-				if(_locLast != null)setPosLugar(_locLast);
+				Location loc = Util.getLocation(getBaseContext());
+				if(loc != null)setPosLugar(loc);
 			}
 		});
 
@@ -162,6 +134,33 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 				_a.setRadio(50);//TODO:radio por defecto en settings
 			}
 		});
+
+		//------------------------------------------------------------------------------------------
+		try
+		{
+			_a = this.getIntent().getParcelableExtra(Aviso.NOMBRE);
+System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
+			setValores();
+		}
+		catch(Exception e)
+		{
+			_bNuevo = true;
+			_a = new Aviso();
+		}
+		//------------------------------------------------------------------------------------------
+		if(_bNuevo)
+			setTitle(getString(R.string.nuevo_aviso));
+		else
+			setTitle(getString(R.string.editar_aviso));
+
+		//------------------------------------------------------------------------------------------
+		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+		_GoogleApiClient.connect();
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+		pideGPS();
 	}
 
 	//______________________________________________________________________________________________
@@ -219,16 +218,13 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	{
 		_txtNombre.setText(_a.getNombre());
 		_txtDescripcion.setText(_a.getDescripcion());
-		if(_a.getLugar() != null)
+		setPosLabel(_a.getLatitud(), _a.getLongitud());
+		for(int i=0; i < _adRadio.length; i++)
 		{
-			setPosLabel(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
-			for(int i=0; i < _adRadio.length; i++)
+			if(_a.getRadio() == _adRadio[i])
 			{
-				if(_a.getRadio() == _adRadio[i])
-				{
-					_spnRadio.setSelection(i);
-					break;
-				}
+				_spnRadio.setSelection(i);
+				break;
 			}
 		}
 	}
@@ -281,7 +277,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
-		if(_a.getLugar() == null || (_a.getLugar().getLatitude()==0 && _a.getLugar().getLongitude()==0))
+		if(_a.getLatitud()==0 && _a.getLongitud()==0)
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			return;
@@ -355,9 +351,9 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		_locLast = location;
-		if(_a.getLugar().getLatitude() == 0 && _a.getLugar().getLongitude() == 0)
-			setPosLugar(_locLast);
+		Util.setLocation(location);
+		if(_a.getLatitud() == 0 && _a.getLongitud() == 0)
+			setPosLugar(location);
 	}
 
 	//______________________________________________________________________________________________
@@ -365,8 +361,13 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	@Override
 	public void onCameraChange(CameraPosition cameraPosition)
 	{
-		if(_a != null && (_a.getLugar().getLatitude() != 0 || _a.getLugar().getLongitude() != 0))
-			_Map.addCircle(new CircleOptions().center(new LatLng(_a.getLugar().getLatitude(), _a.getLugar().getLongitude())).radius(_a.getRadio()).fillColor(0x40ff0000).strokeColor(Color.TRANSPARENT).strokeWidth(2));
+		if(_a.getLatitud() != 0 || _a.getLongitud() != 0)
+			_Map.addCircle(new CircleOptions()
+					.center(new LatLng(_a.getLatitud(), _a.getLongitud()))
+					.radius(_a.getRadio())
+					.fillColor(0x40ff0000)
+					.strokeColor(Color.TRANSPARENT)
+					.strokeWidth(2));
 	}
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
@@ -384,7 +385,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
-		setPosLugar(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
+		setPosLugar(_a.getLatitud(), _a.getLongitud());
 	}
 
 	//______________________________________________________________________________________________
@@ -399,9 +400,8 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	}
 	private void setPosLugar(double lat, double lon)
 	{
-		_a.getLugar().setLatitude(lat);
-		_a.getLugar().setLongitude(lon);
-		_lblPosicion.setText(String.format("%.5f/%.5f", _a.getLugar().getLatitude(), _a.getLugar().getLongitude()));
+		_a.setLatLon(lat, lon);
+		_lblPosicion.setText(String.format("%.5f/%.5f", _a.getLatitud(), _a.getLongitud()));
 		setMarker();
 	}
 	private void setMarker()
@@ -409,7 +409,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 		try
 		{
 			if(_marker != null)_marker.remove();
-			LatLng pos = new LatLng(_a.getLugar().getLatitude(), _a.getLugar().getLongitude());
+			LatLng pos = new LatLng(_a.getLatitud(), _a.getLongitud());
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
 					.title(_a.getNombre()).snippet(_a.getDescripcion());
