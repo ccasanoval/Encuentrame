@@ -99,7 +99,7 @@ public class Aviso extends Objeto implements Parcelable
 		//Backendless.Persistence.of(Aviso.class).find(res);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");//TODO:GeoFence:  geopoint + radius
+		queryOptions.addRelated("lugar");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Aviso.class).find(query, res);
 	}

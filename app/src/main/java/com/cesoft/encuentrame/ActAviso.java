@@ -89,6 +89,24 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		mapFragment.getMapAsync(this);
 
 		//------------------------------------------------------------------------------------------
+		try
+		{
+			_a = this.getIntent().getParcelableExtra(Aviso.NOMBRE);
+System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
+			setValores();
+		}
+		catch(Exception e)
+		{
+			_bNuevo = true;
+			_a = new Aviso();
+		}
+		//------------------------------------------------------------------------------------------
+		if(_bNuevo)
+			setTitle(getString(R.string.nuevo_aviso));
+		else
+			setTitle(getString(R.string.editar_aviso));
+
+		//------------------------------------------------------------------------------------------
 		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
 		_GoogleApiClient.connect();
 		_LocationRequest = new LocationRequest();
@@ -96,8 +114,8 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
-		//------------------------------------------------------------------------------------------
 
+		//------------------------------------------------------------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(new View.OnClickListener()
 		{
@@ -112,7 +130,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
+		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -144,26 +162,6 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 				_a.setRadio(50);//TODO:radio por defecto en settings
 			}
 		});
-
-		//------------------------------------------------------------------------------------------
-		try
-		{
-			_a = this.getIntent().getParcelableExtra(Aviso.NOMBRE);
-System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
-			setValores();
-		}
-		catch(Exception e)
-		{
-			System.err.println("ActAviso:onCreate:e:"+e);
-			_bNuevo = true;
-			this.finish();
-		}
-		//------------------------------------------------------------------------------------------
-
-		if(_a==null)
-			setTitle(getString(R.string.nuevo_aviso));
-		else
-			setTitle(getString(R.string.editar_aviso));
 	}
 
 	//______________________________________________________________________________________________
@@ -320,7 +318,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	private void eliminar()
 	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle(getString(R.string.eliminar));
+		dialog.setTitle(_a.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{

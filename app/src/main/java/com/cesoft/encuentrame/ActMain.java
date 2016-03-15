@@ -34,12 +34,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+//TODO:Añadir servicio de geofence aviso
 //TODO:Añadir margin top a todos incluso login
-//TODO:guardar usr/pwd de backendless (luego en settings)
-//TODO: CONFIF: hacer vista de configuracion : start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
+//TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO:icono app
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
+//TODO: Main menu => refresh listas, or inside config: refresh data...
+//TODO:Traducir a ingles
+//TODO:Add photo to lugar & alerta n save it in backendless...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -60,26 +63,30 @@ public class ActMain extends AppCompatActivity
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
-
+cargaDatosDebug();
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View view)
 			{
-				Snackbar.make(view, "Replace with your own action: " + _viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-				System.err.println("QAZ---------------------" + _viewPager.getCurrentItem());
+				//Snackbar.make(view, "Replace with your own action: " + _viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+				Intent i;
 				switch(_viewPager.getCurrentItem())
 				{
 				case LUGARES:
 					//startActivity(new Intent(getBaseContext(), ActLugar.class));
+					i = new Intent(getBaseContext(), ActLugar.class);
 					//i.putExtra("aviso", _o.getAviso());
-					//startActivityForResult(i, AVISO);//TODO: si es guardado, borrado => refresca la vista, si no nada
-					System.err.println("-------------***LUG");
+					startActivityForResult(i, LUGARES);//TODO: si es guardado, borrado => refresca la vista, si no nada
 					break;
 				case RUTAS:
+					i = new Intent(getBaseContext(), ActRuta.class);
+					startActivityForResult(i, RUTAS);
 					break;
 				case AVISOS:
+					i = new Intent(getBaseContext(), ActAviso.class);
+					startActivityForResult(i, AVISOS);
 					break;
 				}
 			}
@@ -255,20 +262,11 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 		{
 			super.onActivityResult(requestCode, resultCode, data);
 			if(resultCode != RESULT_OK)return;
-			if(requestCode == LUGARES)
+			switch(requestCode)
 			{
-				//Snackbar.make(null, "Se guardaron los datos del lugar.", Snackbar.LENGTH_LONG).show();
-				refreshLugares();
-			}
-			else if(requestCode == RUTAS)
-			{
-				//Snackbar.make(null, "Se guardaron los datos de la ruta.", Snackbar.LENGTH_LONG).show();
-				refreshRutas();
-			}
-			else if(requestCode == AVISOS)
-			{
-				//Snackbar.make(null, "Se guardaron los datos del aviso.", Snackbar.LENGTH_LONG).show();
-				refreshAvisos();
+			case LUGARES:	refreshLugares(); break;
+			case RUTAS:		refreshRutas(); break;
+			case AVISOS:	refreshAvisos(); break;
 			}
 		}
 
@@ -400,17 +398,32 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 		});
 		/**/
 
-		/*
+
 		//-------- RUTA --------
-		Ruta r = new Ruta();
+		/*Ruta r = new Ruta();
 		r.setNombre("Ruta 1");
 		r.setDescripcion("Ruta 1 desc");
+
+		r.addPunto(new GeoPoint(40.4610001, -3.5611001));
+		r.addPunto(new GeoPoint(40.4752002, -3.5644002));
+		r.addPunto(new GeoPoint(40.4893003, -3.5677003));
+		r.addPunto(new GeoPoint(40.4940004, -3.5711004));
+		r.addPunto(new GeoPoint(40.5050005, -3.5744005));
+
 		r.guardar(new AsyncCallback<Ruta>()
 		{
 			@Override
 			public void handleResponse(Ruta ruta)
 			{
-				System.err.println("************* R1-----------" + ruta);
+				System.err.println("************* OK-----------");
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("*********** FAIL-----------" + backendlessFault);
+			}
+		});
+				/*System.err.println("************* R1-----------" + ruta);
 				Map<String, Object> meta = new HashMap<>();
 				meta.put(Ruta.NOMBRE, ruta);
 				try

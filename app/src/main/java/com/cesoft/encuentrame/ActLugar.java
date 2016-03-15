@@ -80,6 +80,23 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
+		//------------------------------------------------------------------------------------------
+		try
+		{
+			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
+			setValores();
+		}
+		catch(Exception e)
+		{
+			_bNuevo = true;
+			_l = new Lugar();
+		}
+		//------------------------------------------------------------------------------------------
+		if(_bNuevo)
+			setTitle(getString(R.string.nuevo_lugar));
+		else
+			setTitle(getString(R.string.editar_lugar));
+		//------------------------------------------------------------------------------------------
 
 		//------------------------------------------------------------------------------------------
 		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
@@ -89,11 +106,11 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
-		//------------------------------------------------------------------------------------------
 
+		//------------------------------------------------------------------------------------------
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
+		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -103,11 +120,10 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 			}
 		});
 
-		//-----------
+		//------------------------------------------------------------------------------------------
 		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
-
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(new View.OnClickListener()
 		{
@@ -118,26 +134,6 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 					setPosLugar(_locLast);
 			}
 		});
-
-		//------------------------------------------------------------------------------------------
-		try
-		{
-			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
-			setValores();
-		}
-		catch(Exception e)
-		{
-			System.err.println("ActLugar:onCreate:e:"+e);
-			_bNuevo = true;
-			_l = new Lugar();
-		}
-		//------------------------------------------------------------------------------------------
-
-		//------------------------------------------------------------------------------------------
-		if(_bNuevo)
-			setTitle(getString(R.string.nuevo_lugar));
-		else
-			setTitle(getString(R.string.editar_lugar));
 	}
 	//______________________________________________________________________________________________
 	@Override
@@ -303,7 +299,7 @@ public class ActLugar extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private void eliminar()
 	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle(getString(R.string.eliminar));
+		dialog.setTitle(_l.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{

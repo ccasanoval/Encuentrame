@@ -1,12 +1,11 @@
 <resources>
-	<string name="app_name">Encuentrame</string>
-	<string name="title_activity_act_main">Encuentrame</string>
+	<string name="app_name">Encuentrame!</string>
+	<string name="title_activity_act_main">Encuentrame!</string>
 	<string name="title_activity_act_maps">Mapa</string>
 	<string name="title_activity_act_config">Configuración</string>
 	<string name="title_activity_act_ruta">Ruta</string>
 	<string name="title_activity_act_aviso">Aviso</string>
 	<string name="title_activity_act_lugar">Lugar</string>
-
 
 	<string name="cuenta">Cuenta</string>
 	<string name="config">Preferencias</string>

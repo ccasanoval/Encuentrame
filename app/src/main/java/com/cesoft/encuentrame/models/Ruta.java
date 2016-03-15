@@ -7,22 +7,27 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
+import com.backendless.persistence.BackendlessDataQuery;
+import com.backendless.persistence.QueryOptions;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: al coger los datos buscar los RutaPto correspondientes...
+//TODO: Añadir fecha a cada punto del tracking... +metadata?
 public class Ruta extends Objeto implements Parcelable
 {
-	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to include in backendless
+	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to be included in backendless
 
 	public Ruta(){}
 
-	//Payload
+	private List<GeoPoint> puntos = new ArrayList<>();
+		public List<GeoPoint> getPuntos(){return puntos;}
+		public void addPunto(GeoPoint v){puntos.add(v);}
 	/*
 	private List<LatLng> puntos;//TODO: latLon ?
 		public List<LatLng> getPuntos(){return puntos;}
@@ -31,36 +36,36 @@ public class Ruta extends Objeto implements Parcelable
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}
 
-	/*public String toString()
+	public String toString()
 	{
-		return super.toString() + ", RUT:"+(puntos==null?"":puntos.size());
-	}*/
+		return super.toString() + ", RUT:"+(puntos==null?"null":puntos.size());
+	}
 
 	//// PARCEL
 	protected Ruta(Parcel in)
 	{
 		super(in);
 		//
-		/*puntos.clear();
+		puntos.clear();
 		int n = in.readInt();
 		for(int i=0; i < n; i++)
 		{
 			double lat = in.readDouble();
 			double lon = in.readDouble();
-			puntos.add(new LatLng(lat, lon));
-		}*/
+			puntos.add(new GeoPoint(lat, lon));
+		}
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
 		//
-		/*dest.writeInt(puntos.size());
-		for(LatLng p : puntos)
+		dest.writeInt(puntos.size());
+		for(GeoPoint p : puntos)
 		{
-			dest.writeDouble(p.latitude);
-			dest.writeDouble(p.longitude);
-		}*/
+			dest.writeDouble(p.getLatitude());
+			dest.writeDouble(p.getLongitude());
+		}
 	}
 	@Override
 	public int describeContents(){return 0;}
@@ -86,7 +91,13 @@ public class Ruta extends Objeto implements Parcelable
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res)
 	{
-		Backendless.Persistence.of(Ruta.class).find(res);
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("puntos");
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Ruta.class).find(query, res);
+
+		//Backendless.Persistence.of(Ruta.class).find(res);
 		/*
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
