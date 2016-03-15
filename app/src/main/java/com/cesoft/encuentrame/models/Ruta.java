@@ -19,19 +19,23 @@ import java.util.List;
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Añadir fecha a cada punto del tracking... +metadata?
+//TODO: Config : max number of points per rute => cuando alcanza el limite corta...
+//TODO: config : lenght of geofence....
 public class Ruta extends Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to be included in backendless
 
 	public Ruta(){}
 
+	private boolean activo = false;
+		public boolean isActivo(){return activo;}
+		public void setActivo(boolean b){activo = b;}
+
 	private List<GeoPoint> puntos = new ArrayList<>();
 		public List<GeoPoint> getPuntos(){return puntos;}
 		public void addPunto(GeoPoint v){puntos.add(v);}
-	/*
-	private List<LatLng> puntos;//TODO: latLon ?
-		public List<LatLng> getPuntos(){return puntos;}
-		public void addPunto(LatLng v){puntos.add(v);}*/
+
+	//TODO: Quitar si se utiliza geofence tracking
 	private int periodo=2*60*1000;
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}

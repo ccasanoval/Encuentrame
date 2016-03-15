@@ -87,6 +87,7 @@ public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChan
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
+_spnTrackingDelay.setVisibility(View.GONE);//TODO: si se hace tracking mediante geofence no necesito esto...
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnTrackingDelay.setAdapter(adapter);
@@ -112,6 +113,7 @@ public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChan
 			{
 				//TODO: Save object and start background gps tracking proces
 				//TODO: Show stratus in list (recording...)
+				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
 			}
 		});
 		ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
