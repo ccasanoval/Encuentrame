@@ -1,6 +1,9 @@
 package com.cesoft.encuentrame;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +17,9 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.NotificationCompat;
+
+import com.cesoft.encuentrame.models.Aviso;
 
 import java.util.HashMap;
 
@@ -21,9 +27,10 @@ import java.util.HashMap;
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
-	protected  static Location _locLast;
-
 	//______________________________________________________________________________________________
+	// LOCATION
+	//______________________________________________________________________________________________
+	protected  static Location _locLast;
 	public static void setLocation(Location loc){_locLast=loc;}
 	public static Location getLocation(Context c)
 	{
@@ -51,10 +58,6 @@ public class Util
 		}
 		return _locLast;
     }
-
-
-
-
 
 
 	//______________________________________________________________________________________________
@@ -97,20 +100,16 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
-	/*public static void showAviso(Context c, String sTitulo, AvisoAbs a, Intent intent)
+	public static void showAviso(Context c, String sTitulo, Aviso a, Intent intent)
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message_type", true))
-		{
 			showNotificacionDlg(c, a, intent);
-		}
-		else
-		{
+		else*/
 			showNotificacion(c, sTitulo, a, intent);
-		}
 	}
 	//______________________________________________________________________________________________
-	private static void showNotificacion(Context c, String titulo, AvisoAbs a, Intent intent)
+	private static void showNotificacion(Context c, String titulo, Aviso a, Intent intent)
 	{
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
@@ -118,16 +117,17 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setContentTitle(titulo)
-				.setContentText(a.getTexto())
+				.setContentText(a.getDescripcion())
 				.setDefaults(Notification.DEFAULT_ALL)
 				.setContentIntent(PendingIntent.getActivity(c, 0, intent, 0))
 				.setAutoCancel(true);
 		NotificationManager notificationManager = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(a.getId().intValue(), notificationBuilder.build());
+		Integer iId = Integer.parseInt(a.getObjectId().substring(0,6).replace('-','0'), 16);
+		notificationManager.notify(iId, notificationBuilder.build());
 		wakeLock.release();
 	}
 	//______________________________________________________________________________________________
-	private static void showNotificacionDlg(Context c, AvisoAbs a, Intent intent)
+	/*private static void showNotificacionDlg(Context c, Aviso a, Intent intent)
 	{
 		Intent i = new Intent(c, ActAvisoDlg.class);
 		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

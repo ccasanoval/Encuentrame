@@ -300,9 +300,9 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 			{
 				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 				Intent data = new Intent();
-				//data.putExtra(Ruta.class.getName(), _l);
-				setResult(android.app.Activity.RESULT_OK, data);
-				finish();
+				data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
+				ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
+				ActRuta.this.finish();
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -329,9 +329,11 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 					public void handleResponse(Long ruta)
 					{
 						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
+						Intent data = new Intent();
+						data.putExtra("dirty", true);
+						ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
 						ActRuta.this.finish();
 					}
-
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{

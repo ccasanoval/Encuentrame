@@ -27,17 +27,12 @@ public class ActLogin extends AppCompatActivity
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
 	private static ActLogin _win;
 	/**
-	 * The {@link android.support.v4.view.PagerAdapter} that will provide fragments for each of the sections. We use a
-	 * {@link FragmentPagerAdapter} derivative, which will keep every loaded fragment in memory. If this becomes too memory intensive, it may be best to switch to a
-	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+	 * The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
+	 * If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
+	 *
+	 * The ViewPager will host the section contents.
 	 */
-	private SectionsPagerAdapter _SectionsPagerAdapter;
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
-	private ViewPager _viewPager;
 	public TabLayout _tabLayout;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -45,12 +40,12 @@ public class ActLogin extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_login);
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
-		_SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		SectionsPagerAdapter SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
-		_viewPager = (ViewPager)findViewById(R.id.container);
-		_viewPager.setAdapter(_SectionsPagerAdapter);
+		ViewPager viewPager = (ViewPager)findViewById(R.id.container);
+		viewPager.setAdapter(SectionsPagerAdapter);
 		_tabLayout = (TabLayout)findViewById(R.id.tabs);
-		_tabLayout.setupWithViewPager(_viewPager);
+		_tabLayout.setupWithViewPager(viewPager);
 
 		/*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
@@ -121,7 +116,6 @@ public class ActLogin extends AppCompatActivity
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber)
 		{
-System.err.println(sectionNumber+"--------------newInstance");
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -133,7 +127,6 @@ System.err.println(sectionNumber+"--------------newInstance");
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			Bundle args = getArguments();
-System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(ARG_SECTION_NUMBER)");
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
 

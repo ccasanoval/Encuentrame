@@ -36,7 +36,7 @@ public class Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public String toString()
 	{
-		return "NOM:"+(nombre==null?"":nombre) + ", DESC:"+(descripcion==null?"":descripcion);
+		return "ID:"+getObjectId()+", NOM:"+(nombre==null?"":nombre) + ", DESC:"+(descripcion==null?"":descripcion);
 	}
 
 

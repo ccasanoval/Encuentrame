@@ -6,18 +6,16 @@ import android.os.Parcelable;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
+import weborb.service.ExcludeProperties;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+@ExcludeProperties(propertyNames = { "latitud, longitud" })
 public class Lugar extends Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "lugar";//TRANSIENT so not to include in backendless
@@ -25,8 +23,8 @@ public class Lugar extends Objeto implements Parcelable
 	public Lugar(){}
 
 	private GeoPoint lugar = new GeoPoint(0,0);
-		//public GeoPoint getLugar(){return lugar;}
-		//public void setLugar(GeoPoint v){lugar=v;}
+		public GeoPoint getLugar(){return lugar;}
+		public void setLugar(GeoPoint v){lugar=v;}
 		public Double getLatitud(){return lugar.getLatitude();}
 		public Double getLongitud(){return lugar.getLongitude();}
 		public void setLatLon(Double lat, Double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}

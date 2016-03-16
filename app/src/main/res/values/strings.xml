@@ -41,6 +41,7 @@
 	<string name="ver_mapa">Ver mapa</string>
 	<string name="configuracion">Configuración</string>
 
+	<string name="activo">Activo</string>
 	<string name="nombre">Nombre</string>
 	<string name="descripcion">Descripción</string>
 	<string name="aviso">Mensaje de aviso</string>
@@ -49,6 +50,7 @@
 	<string name="fecha">Fecha</string>
 	<string name="sin_posicion">Sin posición</string>
 	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
+	<string name="en_zona_aviso">En zona de aviso</string>
 
 	<string name="nuevo_lugar">Nuevo Lugar</string>
 	<string name="nuevo_aviso">Nuevo Aviso</string>

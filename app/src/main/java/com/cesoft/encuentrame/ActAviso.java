@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.backendless.async.callback.AsyncCallback;
@@ -53,6 +54,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame.models.Aviso;
 
+//TODO:Cuando arranca no tiene la posición actual en el mapa......
 //TODO: dialogo que pida activar gps! si no esta activo
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
@@ -64,6 +66,11 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private TextView _lblPosicion;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
+	private Switch  _swtActivo;
+
+	private String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private Spinner _spnRadio;
 
 	private GoogleApiClient _GoogleApiClient;
 	private LocationRequest _LocationRequest;
@@ -71,11 +78,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private Marker _marker;
 	private Circle _circle;
 
-	private String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
-	private Spinner _spnRadio;
-
-	CoordinatorLayout _coordinatorLayout;
+	private CoordinatorLayout _coordinatorLayout;
 
 	//______________________________________________________________________________________________
 	@Override
@@ -116,6 +119,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
+		_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -146,6 +150,8 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 		{
 			_bNuevo = true;
 			_a = new Aviso();
+			Location loc = Util.getLocation(getBaseContext());
+			if(loc != null)setPosLugar(loc);
 		}
 		//------------------------------------------------------------------------------------------
 		if(_bNuevo)
@@ -218,6 +224,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 	{
 		_txtNombre.setText(_a.getNombre());
 		_txtDescripcion.setText(_a.getDescripcion());
+		_swtActivo.setChecked(_a.isActivo());
 		setPosLabel(_a.getLatitud(), _a.getLongitud());
 		for(int i=0; i < _adRadio.length; i++)
 		{
@@ -290,6 +297,8 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 		}
 		_a.setNombre(_txtNombre.getText().toString());
 		_a.setDescripcion(_txtDescripcion.getText().toString());
+		_a.setActivo(_swtActivo.isChecked());
+		//_a.reactivarPorHoy();
 		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
 		_a.guardar(new AsyncCallback<Aviso>()
 		{
@@ -298,9 +307,9 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 			{
 				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 				Intent data = new Intent();
-				//data.putExtra(Lugar.class.getName(), _l);
-				setResult(android.app.Activity.RESULT_OK, data);
-				finish();
+				data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
+				ActAviso.this.setResult(android.app.Activity.RESULT_OK, data);
+				ActAviso.this.finish();
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -327,6 +336,9 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 					public void handleResponse(Long aviso)
 					{
 						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
+						Intent data = new Intent();
+						data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
+						ActAviso.this.setResult(android.app.Activity.RESULT_OK, data);
 						ActAviso.this.finish();
 					}
 					@Override
@@ -337,11 +349,6 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 				});
 			}
 		});
-		/*dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which){}
-		});*/
 		dialog.create().show();
 	}
 

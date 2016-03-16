@@ -11,6 +11,7 @@
 	<uses-permission android:name="com.javapapers.android.maps.path.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.VIBRATE"/>
 
 	<application
 		android:allowBackup="true"
@@ -19,13 +20,23 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
 
-		<service android:name="com.backendless.geo.LocationTracker"/>
-
+		<!-- service android:name="com.backendless.geo.LocationTracker"/>
 		<receiver android:name="com.backendless.AutoStart">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
 			</intent-filter>
+		</receiver -->
+		<receiver android:name=".CesOnSysBoot">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+			</intent-filter>
 		</receiver>
+		<service
+			android:name=".CesService"
+			android:exported="false"/>
+		<service
+			android:name=".CesServiceAvisoGeo"
+			android:exported="false"/>
 
 		<activity
 			android:name=".ActLogin"

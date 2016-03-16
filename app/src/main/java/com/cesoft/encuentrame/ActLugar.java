@@ -268,11 +268,11 @@ System.err.println("*************"+_l);
 			@Override
 			public void handleResponse(Lugar l)
 			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();//TODO: no lo muestra?
 				Intent data = new Intent();
-				//data.putExtra(Lugar.class.getName(), _l);
-				setResult(android.app.Activity.RESULT_OK, data);
-				finish();
+				data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
+				ActLugar.this.setResult(android.app.Activity.RESULT_OK, data);
+				ActLugar.this.finish();
 			}
 
 			@Override
@@ -300,6 +300,9 @@ System.err.println("*************"+_l);
 					public void handleResponse(Long lugar)
 					{
 						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
+						Intent data = new Intent();
+						data.putExtra("dirty", true);
+						ActLugar.this.setResult(android.app.Activity.RESULT_OK, data);
 						ActLugar.this.finish();
 					}
 

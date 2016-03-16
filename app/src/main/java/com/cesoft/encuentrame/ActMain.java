@@ -37,12 +37,13 @@ import java.util.Map;
 //TODO:Añadir servicio de geofence aviso
 //TODO:Añadir margin top a todos incluso login
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
-//TODO:icono app
+//TODO:icono app : android con gorro de wally?
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
 //TODO: Main menu => refresh listas, or inside config: refresh data...
 //TODO:Traducir a ingles
 //TODO:Add photo to lugar & alerta n save it in backendless...
+//TODO:Refresh listas cuando se añade un nuevo registro (o modifica?)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -91,6 +92,9 @@ public class ActMain extends AppCompatActivity
 				}
 			}
 		});
+
+		//Iniciar servicio
+		startService(new Intent(this, CesService.class));
 	}
 
 	@Override
@@ -166,7 +170,6 @@ public class ActMain extends AppCompatActivity
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber)
 		{
-System.err.println(sectionNumber+"--------------newInstance");
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -180,7 +183,6 @@ System.err.println(sectionNumber+"--------------newInstance");
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			Bundle args = getArguments();
-System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(ARG_SECTION_NUMBER)");
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
@@ -260,7 +262,10 @@ System.err.println(args.getInt(ARG_SECTION_NUMBER)+"--------------args.getInt(AR
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
 			super.onActivityResult(requestCode, resultCode, data);
+			//Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+System.err.println("ActMain:onActivityResult:--------+++++++++++++++--"+requestCode+":"+resultCode);//TODO:No llegamos aqui!!!!!
 			if(resultCode != RESULT_OK)return;
+			if( ! data.getBooleanExtra("dirty", true))return;
 			switch(requestCode)
 			{
 			case LUGARES:	refreshLugares(); break;
@@ -327,12 +332,12 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 			Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
 			{
 				@Override
-				public void handleResponse(BackendlessCollection<Aviso> aviso)
+				public void handleResponse(BackendlessCollection<Aviso> avisos)
 				{
-					int n = aviso.getTotalObjects();
+					int n = avisos.getTotalObjects();
 System.err.println("---------AVISOS:GET:OK:" + n);
 					if(n < 1)return;
-					Iterator<Aviso> iterator = aviso.getCurrentPage().iterator();
+					Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
 					Aviso[] listaAL = new Aviso[n];
 					int i = 0;
 					while(iterator.hasNext())

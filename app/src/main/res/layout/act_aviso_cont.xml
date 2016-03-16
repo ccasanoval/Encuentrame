@@ -13,9 +13,18 @@
 	tools:context="com.cesoft.encuentrame.ActAviso"
 	tools:showIn="@layout/act_aviso">
 
+	<Switch
+		android:id="@+id/bActivo"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerHorizontal="true"
+		android:paddingBottom="20dp"
+		android:text="@string/activo"
+		/>
 
 	<android.support.design.widget.TextInputLayout
 		android:id="@+id/txtNombre_"
+		android:layout_below="@+id/bActivo"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentLeft="true"
