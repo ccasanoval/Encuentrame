@@ -27,9 +27,9 @@ public class Ruta extends Objeto implements Parcelable
 
 	public Ruta(){}
 
-	private boolean activo = false;
+	/*private boolean activo = false;
 		public boolean isActivo(){return activo;}
-		public void setActivo(boolean b){activo = b;}
+		public void setActivo(boolean b){activo = b;}*/
 
 	private List<GeoPoint> puntos = new ArrayList<>();
 		public List<GeoPoint> getPuntos(){return puntos;}

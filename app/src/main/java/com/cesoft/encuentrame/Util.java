@@ -19,6 +19,7 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 
 import com.cesoft.encuentrame.models.Aviso;
@@ -210,5 +211,12 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
  		return sp.getString(ID_TRACKING, "");
 	}
 
+	/*public static void showSnackbar()
+	{
+		_app.getBaseContext().runOnUiThread(new Runnable(){public void run(){
+							Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
+        						//Toast.makeText(activity, "Hello, world!", Toast.LENGTH_SHORT).show();
+						}});
+	}*/
 
 }

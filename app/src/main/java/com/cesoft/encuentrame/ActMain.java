@@ -45,6 +45,7 @@ import java.util.Map;
 //TODO:Traducir a ingles
 //TODO:Add photo to lugar & alerta n save it in backendless...
 //TODO:Refresh listas cuando se añade un nuevo registro (o modifica?)
+//TODO:Menu para ir al menu inicio, asi cuando abres aviso puedes volver a menu y no cerrar directamente
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -278,7 +279,7 @@ System.err.println("b:"+b);*/
 		{
 			super.onActivityResult(requestCode, resultCode, data);
 			//Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-System.err.println("ActMain:onActivityResult:--------+++++++++++++++--"+requestCode+":"+resultCode);//TODO:No llegamos aqui!!!!!
+System.err.println("ActMain:onActivityResult:--------+++++++++++++++--"+requestCode+":"+resultCode);
 			if(resultCode != RESULT_OK)return;
 			if( ! data.getBooleanExtra("dirty", true))return;
 			switch(requestCode)

@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,14 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 					_inter.onItemMap(CesIntLista.tipoLista.RUTA, _rutas[position]);
 				}
 			});
+
+		// Si la ruta se está grabando, resaltar
+		String sIdRuta = Util.getTrackingRoute();
+		if(sIdRuta.equals(_rutas[position].getObjectId()))
+		{
+			txtNombre.setTextColor(Color.RED);
+			convertView.setBackgroundColor(Color.YELLOW);
+		}
 
 		return convertView;
 	}

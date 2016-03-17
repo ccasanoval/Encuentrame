@@ -359,7 +359,10 @@ System.err.println("*************"+_l);
 	//______________________________________________________________________________________________
 	//// 4 ResultCallback
 	@Override
-	public void onResult(@NonNull Status status){}
+	public void onResult(@NonNull Status status)
+	{
+		System.err.println("----------ActLugar:onResult:"+status);
+	}
 
 
 	//______________________________________________________________________________________________

@@ -44,7 +44,7 @@ import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Ruta;
 
 
-
+//TODO:Quitar boton guardar cuando es ruta...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
@@ -158,6 +158,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
 
 		if(_l != null)			/// LUGAR
 		{
@@ -231,6 +232,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				.strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
+
 
 
 	//______________________________________________________________________________________________

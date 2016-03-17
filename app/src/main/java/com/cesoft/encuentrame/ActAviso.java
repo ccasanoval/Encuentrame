@@ -186,8 +186,12 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 		{
-			if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+			//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+			try
+			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
+			}catch(SecurityException se){}
+
 		}
 	}
 	private void stopTracking()
@@ -382,8 +386,8 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		_Map.setMyLocationEnabled(true);
+		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override

@@ -1,10 +1,8 @@
 package com.cesoft.encuentrame;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -24,10 +22,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.backendless.Backendless;
-import com.backendless.BackendlessCollection;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -54,12 +50,13 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
+
 import com.cesoft.encuentrame.models.Ruta;
 
-
+//TODO: Cuando es nuevo borrar boton menu guardar... porque lo unico que toca es grabar nueva ruta...
+//TODO: por que no refresca lista de rutas cuando empieza a grabar...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
-	//, ResultCallback<Status>,
+public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -164,6 +161,13 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		{
 			setTitle(getString(R.string.nueva_ruta));
 			//findViewById(R.id.layStartStop).setVisibility(View.VISIBLE);
+			try
+			{
+				FragmentTransaction ft = mapFragment.getFragmentManager().beginTransaction();
+				ft.hide(mapFragment);
+				ft.commit();
+			}
+			catch(Exception e){e.printStackTrace();}
 		}
 		else
 		{
@@ -217,7 +221,10 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	{
 		getMenuInflater().inflate(R.menu.menu_aviso, menu);
 		if(_bNuevo)
+		{
+			menu.findItem(R.id.menu_guardar).setVisible(false);
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
+		}
 		return true;
 	}
 	@Override
@@ -299,7 +306,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 				@Override
 				public void handleResponse(Ruta r)
 				{
-					Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+					//TODO: Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 					Intent data = new Intent();
 					data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
 					ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
@@ -308,7 +315,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
-					Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+					//TODO: Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
 				}
 			});
 	}
@@ -316,6 +323,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	{
 		if(_txtNombre.getText().toString().isEmpty())
 		{
+System.err.println("----------------------"+_coordinatorLayout+" -- "+getString(R.string.sin_nombre));
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
@@ -341,18 +349,22 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 					@Override
 					public void handleResponse(Long ruta)
 					{
-						//TODO: Avisar
-						//Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show(); java.lang.NullPointerException: Attempt to invoke virtual method 'android.content.Context android.view.ViewGroup.getContext()' on a null object reference
 						Intent data = new Intent();
 						data.putExtra("dirty", true);
 						ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
 						ActRuta.this.finish();
+
+						/*TODO: Arreglar
+						ActRuta.this.runOnUiThread(new Runnable(){public void run(){
+							Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
+						}});*/
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
-						//TODO: Avisar
-						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						ActRuta.this.runOnUiThread(new Runnable(){public void run(){
+							Snackbar.make(_coordinatorLayout, getString(R.string.error_eliminar), Snackbar.LENGTH_LONG).show();
+						}});
 					}
 				});
 			}
@@ -369,7 +381,10 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	}
 	//______________________________________________________________________________________________
 	//// 4 ResultCallback
-	//@Override public void onResult(@NonNull Status status){}
+	@Override public void onResult(@NonNull Status status)
+	{
+		System.err.println("----------ActRuta:onResult:"+status);
+	}
 
 	//______________________________________________________________________________________________
 	// 4 GoogleMap.OnCameraChangeListener
@@ -382,8 +397,8 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		_Map.setMyLocationEnabled(true);
+		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
 
 		if(_bNuevo)
 		{
@@ -456,44 +471,67 @@ System.err.println("showMarkers: "+pos);
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
-System.err.println("ActRuta:startTrackingRecord-----------1");
 		guardar(new AsyncCallback<Ruta>()
 		{
 			@Override
 			public void handleResponse(Ruta r)
 			{
-System.err.println("ActRuta:startTrackingRecord-----------2");
 				/// Si hay una ruta activa, se cierra ¿Avisar?
 				//TODO: Guardar varias rutas al mismo tiempo ???
 				String sId = Util.getTrackingRoute();
-System.err.println("ActRuta:startTrackingRecord-----------3:"+sId);
 				if(!sId.isEmpty())
 				{
 					try{
 						GeoPoint geoPoint = Backendless.Persistence.of(GeoPoint.class).findFirst();
 						Backendless.Persistence.of(GeoPoint.class).remove(geoPoint);
-					}catch(Exception e){System.err.println("ActRuta:startTrackingRecord:e:"+e);}
+					}catch(Exception e){System.err.println("ActRuta:startTrackingRecord:Borrar geo antigua:e:"+e);}
 				}
 				/// Activar tracking, guardar ruta activa
 				Util.setTrackingRoute(r.getObjectId());
-System.err.println("ActRuta:startTrackingRecord-----------5:"+_r);
 				/// Obtener posicion y guardar primer punto
 				Location loc = Util.getLocation();
-				_r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
-System.err.println("ActRuta:startTrackingRecord-----------6:"+_r);
+				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
+				r.guardar(new AsyncCallback<Ruta>()
+				{
+					@Override
+					public void handleResponse(Ruta ruta){}
+					@Override
+					public void handleFault(BackendlessFault backendlessFault)
+					{
+						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:handleFault:"+backendlessFault);
+					}
+				});
+System.err.println("ActRuta:startTrackingRecord-----------6:" + r);
 				/// Crear geofence con pos actual
 				GeoPoint gp = new GeoPoint(loc.getLatitude(), loc.getLongitude());
-				Backendless.Persistence.of(GeoPoint.class).save(gp);
-				CesService.cargarGeoTracking();
-System.err.println("ActRuta:startTrackingRecord-----------9:" + _r);
-				//SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ActRuta.this);
-				//if(prefs.getBoolean("notifications_new_message", true))
+				gp.addCategory("tracking");//https://backendless.com/feature-32-saving-a-geo-point-with-api/
+				//gp.addMetadata("fecha", java.util.Date());
+				Backendless.Geo.savePoint(gp, new AsyncCallback<GeoPoint>()
+				{
+					@Override
+					public void handleResponse(GeoPoint geoPoint)
+					{
+						Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+System.err.println("ActRuta:startTrackingRecord-----------8:" + geoPoint);
+						CesService.cargarGeoTracking();
+						Intent data = new Intent();
+						data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
+						ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);///TODO : por q ostias no va a Main?
+System.err.println("ActRuta:startTrackingRecord-----------9:");
+						ActRuta.this.finish();
+					}
+					@Override
+					public void handleFault(BackendlessFault backendlessFault)
+					{
+						System.err.println("ActRuta:startTrackingRecord:Backendless.Geo.savePoint:handleFault:"+backendlessFault);
+					}
+				});
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-System.err.println("ActRuta:startTrackingRecord:handleFault-----------0:");
-				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
+				//TODO : Avisar..
 			}
 		});
 	}
