@@ -95,6 +95,7 @@
 			android:layout_marginRight="20dp"
 			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/start"
+			style="@style/btnStyle"
 			android:src="@android:drawable/ic_media_play" />
 		<ImageButton
 			android:id="@+id/btnStop"
@@ -103,6 +104,7 @@
 			android:layout_marginRight="20dp"
 			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/stop"
+			style="@style/btnStyle"
 			android:src="@android:drawable/ic_media_pause" />
 	</LinearLayout>
 

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -21,22 +22,21 @@ import android.widget.EditText;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
-import com.backendless.geo.GeoPoint;
+import com.backendless.Backendless;
+import com.backendless.BackendlessCollection;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-
-import com.cesoft.encuentrame.models.Ruta;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
@@ -51,9 +51,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.geo.GeoPoint;
+import com.cesoft.encuentrame.models.Ruta;
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
-	//, ResultCallback<Status>, LocationListener,
+public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
+	//, ResultCallback<Status>,
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -87,7 +93,8 @@ public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChan
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
-_spnTrackingDelay.setVisibility(View.GONE);//TODO: si se hace tracking mediante geofence no necesito esto...
+//TODO: si se hace tracking mediante geofence no necesito esto...
+((LinearLayout)findViewById(R.id.layPeriodo)).setVisibility(View.GONE);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnTrackingDelay.setAdapter(adapter);
@@ -114,15 +121,17 @@ _spnTrackingDelay.setVisibility(View.GONE);//TODO: si se hace tracking mediante 
 				//TODO: Save object and start background gps tracking proces
 				//TODO: Show stratus in list (recording...)
 				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
+				startTrackingRecord();
 			}
 		});
 		ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
-		btnStart.setOnClickListener(new View.OnClickListener()
+		btnStop.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
 				//TODO: Stop process...
+				stopTrackingRecord();
 			}
 		});
 		//-----------
@@ -284,6 +293,27 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
+		guardar(
+			new AsyncCallback<Ruta>()
+			{
+				@Override
+				public void handleResponse(Ruta r)
+				{
+					Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+					Intent data = new Intent();
+					data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
+					ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
+					ActRuta.this.finish();
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault)
+				{
+					Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				}
+			});
+	}
+	private void guardar(AsyncCallback<Ruta> res)
+	{
 		if(_txtNombre.getText().toString().isEmpty())
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
@@ -292,24 +322,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		}
 		_r.setNombre(_txtNombre.getText().toString());
 		_r.setDescripcion(_txtDescripcion.getText().toString());
-		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
-		_r.guardar(new AsyncCallback<Ruta>()
-		{
-			@Override
-			public void handleResponse(Ruta r)
-			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-				Intent data = new Intent();
-				data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
-				ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
-				ActRuta.this.finish();
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
-			}
-		});
+		_r.guardar(res);
 	}
 
 	//______________________________________________________________________________________________
@@ -328,7 +341,8 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 					@Override
 					public void handleResponse(Long ruta)
 					{
-						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
+						//TODO: Avisar
+						//Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show(); java.lang.NullPointerException: Attempt to invoke virtual method 'android.content.Context android.view.ViewGroup.getContext()' on a null object reference
 						Intent data = new Intent();
 						data.putExtra("dirty", true);
 						ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
@@ -337,7 +351,8 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						//TODO: Avisar
+						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
 					}
 				});
 			}
@@ -348,7 +363,10 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 
 	//______________________________________________________________________________________________
 	//// 4 LocationListener
-	//@Override public void onLocationChanged(Location location){}
+	@Override public void onLocationChanged(Location location)
+	{
+		Util.setLocation(location);
+	}
 	//______________________________________________________________________________________________
 	//// 4 ResultCallback
 	//@Override public void onResult(@NonNull Status status){}
@@ -432,5 +450,57 @@ System.err.println("showMarkers: "+pos);
 				}
 			}
 		});
+	}
+
+
+	//______________________________________________________________________________________________
+	private void startTrackingRecord()
+	{
+System.err.println("ActRuta:startTrackingRecord-----------1");
+		guardar(new AsyncCallback<Ruta>()
+		{
+			@Override
+			public void handleResponse(Ruta r)
+			{
+System.err.println("ActRuta:startTrackingRecord-----------2");
+				/// Si hay una ruta activa, se cierra ¿Avisar?
+				//TODO: Guardar varias rutas al mismo tiempo ???
+				String sId = Util.getTrackingRoute();
+System.err.println("ActRuta:startTrackingRecord-----------3:"+sId);
+				if(!sId.isEmpty())
+				{
+					try{
+						GeoPoint geoPoint = Backendless.Persistence.of(GeoPoint.class).findFirst();
+						Backendless.Persistence.of(GeoPoint.class).remove(geoPoint);
+					}catch(Exception e){System.err.println("ActRuta:startTrackingRecord:e:"+e);}
+				}
+				/// Activar tracking, guardar ruta activa
+				Util.setTrackingRoute(r.getObjectId());
+System.err.println("ActRuta:startTrackingRecord-----------5:"+_r);
+				/// Obtener posicion y guardar primer punto
+				Location loc = Util.getLocation();
+				_r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
+System.err.println("ActRuta:startTrackingRecord-----------6:"+_r);
+				/// Crear geofence con pos actual
+				GeoPoint gp = new GeoPoint(loc.getLatitude(), loc.getLongitude());
+				Backendless.Persistence.of(GeoPoint.class).save(gp);
+				CesService.cargarGeoTracking();
+System.err.println("ActRuta:startTrackingRecord-----------9:" + _r);
+				//SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ActRuta.this);
+				//if(prefs.getBoolean("notifications_new_message", true))
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+System.err.println("ActRuta:startTrackingRecord:handleFault-----------0:");
+				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+			}
+		});
+	}
+	//______________________________________________________________________________________________
+	private void stopTrackingRecord()
+	{
+System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
+		Util.setTrackingRoute("");
 	}
 }

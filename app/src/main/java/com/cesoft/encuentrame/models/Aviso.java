@@ -75,37 +75,44 @@ public class Aviso extends Objeto
 	//______________________________________________________________________________________________
 	public String toString()
 	{
-		return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio());
+		return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio()+" "+lugar.getObjectId());
 	}
 
 	//// PARCELABLE
 	//
 	protected Aviso(Parcel in)
 	{
-		setObjectId(in.readString());
-		nombre = in.readString();
-		descripcion = in.readString();
-		//super(in);
+		//setObjectId(in.readString());nombre = in.readString();descripcion = in.readString();
+		super(in);
 		//
-System.err.println("---------Aviso:parcel:out:act");
 		setActivo(in.readByte() > 0);
-System.err.println("---------Aviso:parcel:out::act:" + isActivo());
 		//lugar = new GeoPoint(0,0);
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
 		setRadio(in.readInt());
-System.err.println("---------Aviso:parcel:out:"+this);
+
+		/*if(lugar.getObjectId() == null && getObjectId() != null)
+		{
+			ArrayList<String> relationProps = new ArrayList<>();
+			relationProps.add("lugar");
+			Aviso a = Backendless.Persistence.of(Aviso.class).findById(getObjectId(), relationProps);
+
+			setNombre(a.getNombre());
+			setDescripcion(a.getDescripcion());
+			setLugar(a.getLugar());
+			setActivo(a.isActivo());
+System.err.println("---------Aviso:parcel:out:3" + this);
+		}*/
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
-		dest.writeString(getObjectId());
-		dest.writeString(nombre);
-		dest.writeString(descripcion);
-		//super.writeToParcel(dest, flags);
+//		dest.writeString(getObjectId());
+//		dest.writeString(nombre);
+//		dest.writeString(descripcion);
+		super.writeToParcel(dest, flags);
 		//
-System.err.println("---------Aviso:parcel:in:"+this);
 		dest.writeByte(isActivo()?(byte)1:0);
 		if(lugar == null)lugar = new GeoPoint(0,0);
 		dest.writeString(lugar.getObjectId());
@@ -148,8 +155,8 @@ System.err.println("---------Aviso:parcel:in:"+this);
 	public static void getActivos(AsyncCallback<BackendlessCollection<Aviso>> res)
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
-		query.setWhereClause("activo = true");
-		//query.setWhereClause("activo > 0");
+		//query.setWhereClause("activo = True");
+		query.setWhereClause("activo > 0");
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addRelated("lugar");
 		query.setQueryOptions(queryOptions);

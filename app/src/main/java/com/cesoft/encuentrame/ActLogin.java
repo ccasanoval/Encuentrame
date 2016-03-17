@@ -22,6 +22,7 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//TODO:Check Util.user pass and log in automatically to backendless...
 public class ActLogin extends AppCompatActivity
 {
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
@@ -29,8 +30,6 @@ public class ActLogin extends AppCompatActivity
 	/**
 	 * The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	 * If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
-	 *
-	 * The ViewPager will host the section contents.
 	 */
 	public TabLayout _tabLayout;
 

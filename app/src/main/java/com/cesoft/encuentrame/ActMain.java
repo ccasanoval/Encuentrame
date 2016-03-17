@@ -2,6 +2,7 @@ package com.cesoft.encuentrame;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -57,6 +58,7 @@ public class ActMain extends AppCompatActivity
 		setContentView(R.layout.act_main);
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		Util.setApplication(getApplication());
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
@@ -93,8 +95,21 @@ public class ActMain extends AppCompatActivity
 			}
 		});
 
-		//Iniciar servicio
-		startService(new Intent(this, CesService.class));
+/*
+		Aviso a = new Aviso();
+		a.setActivo(true);
+		a.setNombre("Nombre");
+		a.setDescripcion("Descripcion");
+		a.setLatLon(40.1, -3.1);
+		a.setRadio(500);
+System.err.println("a:" + a);
+		Intent i = new Intent();
+		i.putExtra(Aviso.NOMBRE, a);
+		Aviso b = i.getParcelableExtra(Aviso.NOMBRE);
+System.err.println("b:"+b);*/
+
+				//Iniciar servicio
+				startService(new Intent(this, CesService.class));
 	}
 
 	@Override

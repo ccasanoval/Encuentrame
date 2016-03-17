@@ -98,7 +98,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(View v)
 			{
-				Location loc = Util.getLocation(getBaseContext());
+				Location loc = Util.getLocation();
 				if(loc != null)setPosLugar(loc);
 			}
 		});
@@ -350,7 +350,7 @@ System.err.println("*************"+_l);
 		_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
-			Location loc = Util.getLocation(getBaseContext());
+			Location loc = Util.getLocation();
 			_l.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
 		setPosLugar(_l.getLatitud(), _l.getLongitud());

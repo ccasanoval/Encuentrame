@@ -1,6 +1,8 @@
 package com.cesoft.encuentrame;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -27,17 +29,21 @@ import java.util.HashMap;
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
+	//TODO: Comprobar con servicio, que solo llamo a esto en main...
+	private static Application _app;//TODO: cambiar los context de abajo por esto...
+		public static void setApplication(Application app){_app = app;}
+
 	//______________________________________________________________________________________________
 	// LOCATION
 	//______________________________________________________________________________________________
 	protected  static Location _locLast;
 	public static void setLocation(Location loc){_locLast=loc;}
-	public static Location getLocation(Context c)
+	public static Location getLocation()
 	{
 		Location location1=null, location2=null;
 		try
 		{
-			LocationManager locationManager = (LocationManager)c.getSystemService(Context.LOCATION_SERVICE);
+			LocationManager locationManager = (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
 			if(locationManager == null)return _locLast;
 			boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -47,9 +53,9 @@ public class Util
 				location2 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			if(location1==null && location2==null)return _locLast;
 			if(_locLast == null)_locLast = location1!=null?location1:location2;
-			if(location1.getTime() > _locLast.getTime())
+			if(location1 != null && location1.getTime() > _locLast.getTime())
 				_locLast = location1;
-			else if(location2.getTime() > _locLast.getTime())
+			else if(location2 != null && location2.getTime() > _locLast.getTime())
 				_locLast = location2;
 		}
 		catch(SecurityException se)
@@ -63,18 +69,18 @@ public class Util
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	public static void playNotificacion(Context c)
+	public static void playNotificacion()
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_app);
 		if(prefs.getBoolean("notifications_new_message", true))//true o false ha de coincidir con lo que tengas en pref_notificacion.xml
 		{
 System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 			String sound = prefs.getString("notifications_new_message_ringtone", "");
 			if( ! sound.isEmpty())
-				playSound(c, Uri.parse(sound));
+				playSound(_app, Uri.parse(sound));
 
 			if(prefs.getBoolean("notifications_new_message_vibrate", true))
-				vibrate(c);
+				vibrate(_app);
 		}
 	}
 
@@ -187,4 +193,22 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		return prefs.getBoolean("is_auto_arranque", true);
 	}
+
+	//______________________________________________________________________________________________
+	private static final String PREF_TRACKING = "tracking_prefs";
+	private static final String ID_TRACKING = "id_tracking_route";
+	public static void setTrackingRoute(String sIdRoute)
+	{
+		SharedPreferences sp = _app.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences.Editor editor = sp.edit();
+		editor.putString(ID_TRACKING, sIdRoute);
+		editor.commit();
+	}
+	public static String getTrackingRoute()
+	{
+		SharedPreferences sp = _app.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+ 		return sp.getString(ID_TRACKING, "");
+	}
+
+
 }

@@ -98,7 +98,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void onClick(View v)
 			{
-				Location loc = Util.getLocation(getBaseContext());
+				Location loc = Util.getLocation();
 				if(loc != null)setPosLugar(loc);
 			}
 		});
@@ -143,14 +143,14 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		try
 		{
 			_a = this.getIntent().getParcelableExtra(Aviso.NOMBRE);
-System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
+System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps failing pass only ID and I get it from db....
 			setValores();
 		}
 		catch(Exception e)
 		{
 			_bNuevo = true;
 			_a = new Aviso();
-			Location loc = Util.getLocation(getBaseContext());
+			Location loc = Util.getLocation();
 			if(loc != null)setPosLugar(loc);
 		}
 		//------------------------------------------------------------------------------------------
