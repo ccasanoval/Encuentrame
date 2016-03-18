@@ -1,58 +1,20 @@
 package com.cesoft.encuentrame.models;
 
+
 import com.backendless.Backendless;
-import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
-import com.backendless.geo.GeoPoint;
-import com.backendless.persistence.BackendlessDataQuery;
-import com.backendless.persistence.QueryOptions;
+import com.backendless.exceptions.BackendlessFault;
 
 import java.util.Date;
-
-/*
-public GeoPoint savePoint( GeoPoint geoPoint, AsyncCallback<GeoPoint>responder ) throws BackendlessException
-public GeoPoint savePoint( double latitude,double longitude,Map<String, Object> metadata,AsyncCallback<GeoPoint> responder ) throws BackendlessException
-public GeoPoint savePoint( double latitude,double longitude,List<String> categories,Map<String, Object> metadata,AsyncCallback<GeoPoint> responder ) throws BackendlessException
-
-
-List<String> categories = new ArrayList<String>()
-categories.add( "restaurants" );
-categories.add( "cool_places" );
-Map<String, Object> meta = new HashMap<String, Object>();
-meta.put( "name", "Eatzi's" );
-Backendless.Geo.savePoint( 32.81, -96.80, categories, meta, new AsyncCallback<GeoPoint>()
-	{
-		@Override
-		public void handleResponse( GeoPoint geoPoint ){System.out.println( geoPoint.getObjectId() );}
-		@Override
-		public void handleFault( BackendlessFault backendlessFault ){}
-	});
-
-
-public void removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
-
-
-public void getPoints( BackendlessGeoQuery geoQuery,AsyncCallback<BackendlessCollection<GeoPoint>>responder )
-
-BackendlessGeoQuery geoQuery = new BackendlessGeoQuery();
-geoQuery.addCategory( "Restaurants" );
-HashMap<String, String> metaSearch = new HashMap<String, String>();
-metaSearch.put( "Cuisine", "French" );
-metaSearch.put( "Athmosphere", "Romantic" );
-geoQuery.setMetadata( metaSearch );
-BackendlessCollection<GeoPoint> geoPoints = Backendless.Geo.getPoints(geoQuery );
-
-
-
-*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 19/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//TODO: tener claro si el punto es GeoFenceTracking o es un punto de ruta... un objeto para cada cosa?
+//TODO: Quiza heredar de Objeto y te ahorras id, fechas, etc... si vas a utilizar esos campos
 public class RutaPto
 {
-	/*
-	//Backendless
+	/// Backendless
 	protected String objectId;
 	protected Date created;
 	protected Date updated;
@@ -63,40 +25,57 @@ public class RutaPto
 		public Date getUpdated(){return updated;}
 		public void setUpdated(Date updated){this.updated = updated;}
 
-	protected String objectIdRuta;
-		public String getObjectIdRuta(){return objectId;}
-		public void setObjectIdRuta(String objectId){this.objectId = objectId;}
-	protected Ruta ruta;
-		public Ruta getRuta(){return ruta;}
-		public void setRuta(Ruta v){ruta = v;}
+	protected String idRuta;
+		public String getIdRuta(){return idRuta;}
+		public void setIdRuta(String idRuta){this.idRuta = idRuta;}
 
-	private GeoPoint lugar;
-		public GeoPoint getLugar(){return lugar;}
-		public void setLugar(GeoPoint v){lugar=v;}
+	/// Payload
+	private double latitud, longitud;
+		public void setLatLon(double lat, double lon){latitud = lat; longitud = lon;}
+		public double getLatitud(){return latitud;}
+		public double getLongitud(){return longitud;}
 
 
-	//// Backendless
-	//______________________________________________________________________________________________
-	public static void getLista(Ruta ruta, AsyncCallback<BackendlessCollection<RutaPto>> res)
+	public String toString()
 	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		//queryOptions.addRelated(Ruta.NOMBRE);
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(RutaPto.class).find(query, res);
-		//Backendless.Persistence.of(Lugar.class).find(res);
+		return super.toString() + ", POS:"+latitud+"/"+longitud;
 	}
 
-	public void eliminar(AsyncCallback<Long> ac)
+	/// TRACKING POINT
+	public static void getTrackingPto(AsyncCallback<RutaPto> res)
 	{
-		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
-		Backendless.Persistence.of(Lugar.class).remove(this, ac);
-
+		Backendless.Persistence.of(RutaPto.class).findFirst(res);
 	}
-
-	public void guardar(AsyncCallback<Lugar> ac)
+	public void saveTrackingPto(AsyncCallback<RutaPto> res)
 	{
-		//Backendless.Persistence.of(Lugar.class).save(this, ac);
-		Backendless.Persistence.save(this, ac);
-	}*/
+		getTrackingPto(new AsyncCallback<RutaPto>()
+		{
+			@Override public void handleResponse(RutaPto rutaPto)
+			{
+				//Backendless.Persistence.of(RutaPto.class).remove(rutaPto);
+				Backendless.Persistence.of(RutaPto.class).remove(rutaPto, new AsyncCallback<Long>()
+				{
+					@Override
+					public void handleResponse(Long aLong)
+					{
+						System.err.println("RutaPto:saveTrackingPto:getTrackingPto:Remove old:Eliminado:"+aLong);
+					}
+					@Override
+					public void handleFault(BackendlessFault backendlessFault)
+					{
+						System.err.println("RutaPto:saveTrackingPto:getTrackingPto:Remove old:f:"+backendlessFault);
+					}
+				});
+			}
+			@Override public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("RutaPto:saveTrackingPto:getTrackingPto:f:"+backendlessFault);
+			}
+		});
+		Backendless.Persistence.save(this, res);
+	}
+	public void removeTrackingPto(AsyncCallback<Long> res)
+	{
+		Backendless.Persistence.of(RutaPto.class).remove(this, res);
+	}
 }

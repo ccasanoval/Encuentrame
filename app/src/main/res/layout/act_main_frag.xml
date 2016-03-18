@@ -7,8 +7,7 @@
 	android:paddingLeft="@dimen/activity_horizontal_margin"
 	android:paddingRight="@dimen/activity_horizontal_margin"
 	android:paddingTop="@dimen/activity_vertical_margin"
-	tools:context=".ActMain"
-	>
+	tools:context=".ActMain">
 
 	<ListView
 		android:id="@+id/listView"
@@ -17,5 +16,15 @@
 		android:layout_alignParentTop="true"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fabNuevo"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:layout_centerHorizontal="true"
+		android:layout_marginBottom="60dp"
+		android:src="@android:drawable/ic_input_add"/>
+	<!-- android:layout_margin="@dimen/fab_margin" -->
 
 </RelativeLayout>

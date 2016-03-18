@@ -48,29 +48,14 @@ public class Lugar extends Objeto implements Parcelable
 		//Backendless.Persistence.of(Lugar.class).find(res);
 	}
 
-	public void eliminar(AsyncCallback<Long> ac)
+	public void eliminar(AsyncCallback<Long> res)
 	{
-		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
-		Backendless.Persistence.of(Lugar.class).remove(this, ac);
-			/*new AsyncCallback<Long>()
-			{
-				@Override
-				public void handleResponse(Long lugar)
-				{
-					// Contact has been deleted. The response is a time in milliseconds when the object was deleted
-				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
-				{
-					// an error has occurred, the error code can be retrieved with fault.getCode()
-				}
-			});*/
+		Backendless.Persistence.of(Lugar.class).remove(this, res);
 	}
 
-	public void guardar(AsyncCallback<Lugar> ac)
+	public void guardar(AsyncCallback<Lugar> res)
 	{
-		//Backendless.Persistence.of(Lugar.class).save(this, ac);
-		Backendless.Persistence.save(this, ac);
+		Backendless.Persistence.save(this, res);
 	}
 
 

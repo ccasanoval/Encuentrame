@@ -168,6 +168,15 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
 	}
+	//______________________________________________________________________________________________
+	private void return2Main(boolean bDirty, String sMensaje)
+	{
+		Intent data = new Intent();
+		data.putExtra("dirty", bDirty);
+		data.putExtra("mensaje", sMensaje);
+		setResult(android.app.Activity.RESULT_OK, data);
+		finish();
+	}
 
 	//______________________________________________________________________________________________
 	@Override
@@ -309,16 +318,14 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 			@Override
 			public void handleResponse(Aviso a)
 			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-				Intent data = new Intent();
-				data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
-				ActAviso.this.setResult(android.app.Activity.RESULT_OK, data);
-				ActAviso.this.finish();
+				System.err.println("ActAviso:guardar:handleResponse:" + a);
+				return2Main(true, getString(R.string.ok_guardar));
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				System.err.println("ActAviso:guardar:handleFault:f:"+backendlessFault);
+				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -337,17 +344,15 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 				_a.eliminar(new AsyncCallback<Long>()
 				{
 					@Override
-					public void handleResponse(Long aviso)
+					public void handleResponse(Long l)
 					{
-						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
-						Intent data = new Intent();
-						data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
-						ActAviso.this.setResult(android.app.Activity.RESULT_OK, data);
-						ActAviso.this.finish();
+						System.err.println("ActAviso:eliminar:handleResponse:" + l);
+						return2Main(true, getString(R.string.ok_eliminar));
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
+						System.err.println("ActAviso:eliminar:handleFault:f:"+backendlessFault);
 						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
 					}
 				});

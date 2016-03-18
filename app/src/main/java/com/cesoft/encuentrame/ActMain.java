@@ -3,6 +3,7 @@ package com.cesoft.encuentrame;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -51,66 +52,36 @@ public class ActMain extends AppCompatActivity
 {
 	private ViewPager _viewPager;
 	private static final int LUGARES=0, RUTAS=1, AVISOS=2;
+	private static ActMain _this;
+	private static CoordinatorLayout _coordinatorLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
+
+		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);
+		_this = this;
+
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+
 		Util.setApplication(getApplication());
+
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
 		// Set up the ViewPager with the sections adapter.
 		_viewPager = (ViewPager)findViewById(R.id.container);
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
+
 //cargaDatosDebug();//TODO:Debug
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabNuevo);
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				//Snackbar.make(view, "Replace with your own action: " + _viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-				Intent i;
-				switch(_viewPager.getCurrentItem())
-				{
-				case LUGARES:
-					//startActivity(new Intent(getBaseContext(), ActLugar.class));
-					i = new Intent(getBaseContext(), ActLugar.class);
-					//i.putExtra("aviso", _o.getAviso());
-					startActivityForResult(i, LUGARES);//TODO: si es guardado, borrado => refresca la vista, si no nada
-					break;
-				case RUTAS:
-					i = new Intent(getBaseContext(), ActRuta.class);
-					startActivityForResult(i, RUTAS);
-					break;
-				case AVISOS:
-					i = new Intent(getBaseContext(), ActAviso.class);
-					startActivityForResult(i, AVISOS);
-					break;
-				}
-			}
-		});
 
-/*
-		Aviso a = new Aviso();
-		a.setActivo(true);
-		a.setNombre("Nombre");
-		a.setDescripcion("Descripcion");
-		a.setLatLon(40.1, -3.1);
-		a.setRadio(500);
-System.err.println("a:" + a);
-		Intent i = new Intent();
-		i.putExtra(Aviso.NOMBRE, a);
-		Aviso b = i.getParcelableExtra(Aviso.NOMBRE);
-System.err.println("b:"+b);*/
-
-				//Iniciar servicio
-				startService(new Intent(this, CesService.class));
+		//Iniciar servicio
+		startService(new Intent(this, CesService.class));
 	}
 
 	@Override
@@ -129,10 +100,10 @@ System.err.println("b:"+b);*/
 		switch(id)
 		{
 		case R.id.action_config:
-			startActivity(new Intent(getBaseContext(), ActConfig.class));
+			startActivity(new Intent(ActMain._this, ActConfig.class));
 			return true;
 		case R.id.action_mapa:
-			startActivity(new Intent(getBaseContext(), ActMaps.class));
+			startActivity(new Intent(ActMain._this, ActMaps.class));
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -163,19 +134,19 @@ System.err.println("b:"+b);*/
 		{
 			switch(position)
 			{
-			case LUGARES:
-				return getString(R.string.lugares);
-			case RUTAS:
-				return getString(R.string.rutas);
-			case AVISOS:
-				return getString(R.string.avisos);
+			case LUGARES:	return getString(R.string.lugares);
+			case RUTAS:		return getString(R.string.rutas);
+			case AVISOS:	return getString(R.string.avisos);
 			}
 			return null;
 		}
 	}
 
-
-
+/*	Si está este, no se llama al de PlaceholderFragment
+	@Override public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		System.err.println("ActMain:onActivityResult:--------+++++++MAIN++++++++--" + requestCode+":"+resultCode);
+	}*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	public static class PlaceholderFragment extends Fragment implements CesIntLista
 	{
@@ -203,6 +174,33 @@ System.err.println("b:"+b);*/
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
+
+			FloatingActionButton fab = (FloatingActionButton)_rootView.findViewById(R.id.fabNuevo);
+			fab.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View view)
+				{
+					//Snackbar.make(view, "Replace with your own action: " + _viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+					Intent i;
+					//switch(_viewPager.getCurrentItem())
+					switch(sectionNumber)
+					{
+					case LUGARES:
+						i = new Intent(ActMain._this, ActLugar.class);
+						startActivityForResult(i, LUGARES);
+						break;
+					case RUTAS:
+						i = new Intent(ActMain._this, ActRuta.class);
+						startActivityForResult(i, RUTAS);
+						break;
+					case AVISOS:
+						i = new Intent(ActMain._this, ActAviso.class);
+						startActivityForResult(i, AVISOS);
+						break;
+					}
+				}
+			});
 
 			switch(sectionNumber)
 			{
@@ -235,17 +233,17 @@ System.err.println("b:"+b);*/
 			switch(tipo)
 			{
 			case LUGAR:
-				i = new Intent(getContext(), ActLugar.class);
+				i = new Intent(ActMain._this, ActLugar.class);
 				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
-				i = new Intent(getContext(), ActRuta.class);
+				i = new Intent(ActMain._this, ActRuta.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
-				i = new Intent(getContext(), ActAviso.class);
+				i = new Intent(ActMain._this, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, AVISOS);
 				break;
@@ -258,17 +256,17 @@ System.err.println("b:"+b);*/
 			switch(tipo)
 			{
 			case LUGAR:
-				i = new Intent(getContext(), ActMaps.class);
+				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, LUGARES);
 				break;
 			case RUTA:
-				i = new Intent(getContext(), ActMaps.class);
+				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, RUTAS);
 				break;
 			case AVISO:
-				i = new Intent(getContext(), ActMaps.class);
+				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, AVISOS);
 				break;
@@ -277,9 +275,9 @@ System.err.println("b:"+b);*/
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
-			super.onActivityResult(requestCode, resultCode, data);
-			//Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-System.err.println("ActMain:onActivityResult:--------+++++++++++++++--"+requestCode+":"+resultCode);
+			String sMensaje = data.getStringExtra("mensaje");
+			if(sMensaje != null && !sMensaje.isEmpty())
+				Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 			if(resultCode != RESULT_OK)return;
 			if( ! data.getBooleanExtra("dirty", true))return;
 			switch(requestCode)
@@ -320,6 +318,7 @@ System.err.println("ActMain:onActivityResult:--------+++++++++++++++--"+requestC
 		//__________________________________________________________________________________________
 		public void refreshRutas()
 		{
+System.err.println("---------refreshRutas()");
 			Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
 			{
 				@Override
@@ -389,17 +388,6 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L3-----------"+backendlessFault);}
 		});
 
-		l = new Lugar();
-		l.setNombre("Lugar 4");
-		l.setDescripcion("Lug Desc 4");
-		l.setLugar(new GeoPoint(40.4690714,-3.5721634));
-		l.guardar(new AsyncCallback<Lugar>()
-			{
-				@Override
-				public void handleResponse(Lugar lugar){System.err.println("************* L4-----------" + lugar);}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L4-----------"+backendlessFault);}
-			});
 		/**/
 
 		/*

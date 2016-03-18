@@ -68,7 +68,7 @@
 	<string name="ok_eliminar">Se eliminó el registro</string>
 	<string name="error_eliminar">Error al eliminar: %s</string>
 	<string name="ok_guardar">Se guardaron los datos del registro</string>
-	<string name="error_guardar">Hubo un problema al guardar los datos del registro</string>
+	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
 	<string name="sin_nombre">Debe establecer un nombre...</string>
 	<string name="sin_lugar">Debe establecer una posición...</string>
 

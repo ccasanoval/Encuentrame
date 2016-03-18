@@ -219,4 +219,15 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 						}});
 	}*/
 
+
+	//______________________________________________________________________________________________
+	public static void return2Main(Activity act, boolean bDirty, String sMensaje)
+	{
+		Intent data = new Intent();
+		data.putExtra("dirty", bDirty);
+		data.putExtra("mensaje", sMensaje);
+		act.setResult(Activity.RESULT_OK, data);
+		act.finish();
+	}
+
 }

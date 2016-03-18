@@ -133,6 +133,15 @@ System.err.println("*************"+_l);
 		pideGPS();
 	}
 	//______________________________________________________________________________________________
+	private void return2Main(boolean bDirty, String sMensaje)
+	{
+		Intent data = new Intent();
+		data.putExtra("dirty", bDirty);
+		data.putExtra("mensaje", sMensaje);
+		setResult(android.app.Activity.RESULT_OK, data);
+		finish();
+	}
+	//______________________________________________________________________________________________
 	@Override
 	public void onStart()
 	{
@@ -268,17 +277,13 @@ System.err.println("*************"+_l);
 			@Override
 			public void handleResponse(Lugar l)
 			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();//TODO: no lo muestra?
-				Intent data = new Intent();
-				data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
-				ActLugar.this.setResult(android.app.Activity.RESULT_OK, data);
-				ActLugar.this.finish();
+				return2Main(true, getString(R.string.ok_guardar));
 			}
-
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				System.err.println("ActLugar:guardar:handleFault:f:" + backendlessFault);
+				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -299,16 +304,12 @@ System.err.println("*************"+_l);
 					@Override
 					public void handleResponse(Long lugar)
 					{
-						Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
-						Intent data = new Intent();
-						data.putExtra("dirty", true);
-						ActLugar.this.setResult(android.app.Activity.RESULT_OK, data);
-						ActLugar.this.finish();
+						return2Main(true, getString(R.string.ok_eliminar));
 					}
-
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
+						System.err.println("ActLugar:eliminar:handleFault:f:"+backendlessFault);
 						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
 					}
 				});

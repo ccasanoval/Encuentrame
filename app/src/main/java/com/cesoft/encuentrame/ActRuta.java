@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.backendless.Backendless;
+import com.cesoft.encuentrame.models.RutaPto;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -41,7 +42,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -56,7 +56,8 @@ import com.cesoft.encuentrame.models.Ruta;
 //TODO: Cuando es nuevo borrar boton menu guardar... porque lo unico que toca es grabar nueva ruta...
 //TODO: por que no refresca lista de rutas cuando empieza a grabar...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
+public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
+//, ResultCallback<Status>, GoogleMap.OnCameraChangeListener,
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -90,7 +91,7 @@ public class ActRuta extends AppCompatActivity implements GoogleMap.OnCameraChan
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
-//TODO: si se hace tracking mediante geofence no necesito esto...
+//TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
 ((LinearLayout)findViewById(R.id.layPeriodo)).setVisibility(View.GONE);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -160,6 +161,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		if(_bNuevo)
 		{
 			setTitle(getString(R.string.nueva_ruta));
+			btnStop.setVisibility(View.GONE);
 			//findViewById(R.id.layStartStop).setVisibility(View.VISIBLE);
 			try
 			{
@@ -172,8 +174,13 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		else
 		{
 			setTitle(getString(R.string.editar_ruta));
-			findViewById(R.id.layStartStop).setVisibility(View.GONE);
 			findViewById(R.id.layPeriodo).setVisibility(View.GONE);
+			//si está activo muestra btnStop
+			String sId = Util.getTrackingRoute();
+			if( ! sId.equals(_r.getObjectId()))
+				findViewById(R.id.layStartStop).setVisibility(View.GONE);
+			else
+				_txtNombre.setTextColor(Color.RED);
 		}
 
 		//------------------------------------------------------------------------------------------
@@ -185,6 +192,16 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
 	}
+	//______________________________________________________________________________________________
+	/*private void return2Main(boolean bDirty, String sMensaje)
+	{
+		/*Intent data = new Intent();
+		data.putExtra("dirty", bDirty);
+		data.putExtra("mensaje", sMensaje);
+		setResult(android.app.Activity.RESULT_OK, data);
+		finish();
+		Util.return2Main(this, bDirty, sMensaje);
+	}*/
 
 	//______________________________________________________________________________________________
 	@Override
@@ -201,16 +218,23 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	}
 	private void startTracking()
 	{
-		/*if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
+		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 		{
-			if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+			try
+			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
-		}*/
+			}
+			catch(SecurityException e)
+			{
+				System.err.println("ActRuta:startTracking:e:"+e);
+				Snackbar.make(_coordinatorLayout, "ActRuta:startTracking:e:"+e, Snackbar.LENGTH_LONG).show();
+			}
+		}
 	}
 	private void stopTracking()
 	{
-		//if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
-		//LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
+		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
+			LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
 	}
 
 	//____________________________________________________________________________________________________________________________________________________
@@ -273,7 +297,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			System.err.println("ActAviso:checkPlayServices:e:" + result);
+			System.err.println("ActRuta:checkPlayServices:e:" + result);
 	        return false;
 	    }
 	    return true;
@@ -284,7 +308,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
-		System.err.println("Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+		System.err.println("ActRuta:onConnectionFailed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
 	}
 	@Override
 	public void onConnected(Bundle arg0)
@@ -306,16 +330,15 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 				@Override
 				public void handleResponse(Ruta r)
 				{
-					//TODO: Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-					Intent data = new Intent();
-					data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
-					ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
-					ActRuta.this.finish();
+					System.err.println("ActRuta:guardar:" + r);
+					//return2Main(true, getString(R.string.ok_guardar));
+					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
 				}
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
-					//TODO: Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+					System.err.println("ActRuta:guardar:handleFault:f:" + backendlessFault);
+					Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 				}
 			});
 	}
@@ -323,7 +346,6 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	{
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-System.err.println("----------------------"+_coordinatorLayout+" -- "+getString(R.string.sin_nombre));
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
@@ -349,22 +371,16 @@ System.err.println("----------------------"+_coordinatorLayout+" -- "+getString(
 					@Override
 					public void handleResponse(Long ruta)
 					{
-						Intent data = new Intent();
-						data.putExtra("dirty", true);
-						ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);
-						ActRuta.this.finish();
-
-						/*TODO: Arreglar
-						ActRuta.this.runOnUiThread(new Runnable(){public void run(){
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
-						}});*/
+						Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar));
+						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){Snackbar.make(_coordinatorLayout, , Snackbar.LENGTH_LONG).show();}});
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
-						ActRuta.this.runOnUiThread(new Runnable(){public void run(){
-							Snackbar.make(_coordinatorLayout, getString(R.string.error_eliminar), Snackbar.LENGTH_LONG).show();
-						}});
+						System.err.println("ActRuta:eliminar:handleFault:f:" + backendlessFault);
+						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){
+						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault), Snackbar.LENGTH_LONG).show();
+						//}});
 					}
 				});
 			}
@@ -381,15 +397,14 @@ System.err.println("----------------------"+_coordinatorLayout+" -- "+getString(
 	}
 	//______________________________________________________________________________________________
 	//// 4 ResultCallback
-	@Override public void onResult(@NonNull Status status)
+	/*@Override public void onResult(@NonNull Status status)
 	{
 		System.err.println("----------ActRuta:onResult:"+status);
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	// 4 GoogleMap.OnCameraChangeListener
-	@Override
-	public void onCameraChange(CameraPosition cameraPosition){}
+	//@Override public void onCameraChange(CameraPosition cameraPosition){}
 
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
@@ -479,12 +494,34 @@ System.err.println("showMarkers: "+pos);
 				/// Si hay una ruta activa, se cierra ¿Avisar?
 				//TODO: Guardar varias rutas al mismo tiempo ???
 				String sId = Util.getTrackingRoute();
-				if(!sId.isEmpty())
+				if( ! sId.isEmpty())//No hace falta borrar punto anterior ...
 				{
-					try{
+/*System.err.println("ActRuta:startTrackingRecord:Borrar ruta antigua: getTrackingRoute="+sId);
+					RutaPto.getTrackingPto(new AsyncCallback<RutaPto>()
+					{
+						@Override public void handleResponse(RutaPto rutaPto)
+						{
+							rutaPto.removeTrackingPto(new AsyncCallback<Long>()
+							{
+								@Override public void handleResponse(Long l)
+								{
+									System.err.println("ActRuta:startTrackingRecord:RutaPto.removeTrackingPto:OK:"+l);
+								}
+								@Override public void handleFault(BackendlessFault backendlessFault)
+								{
+									System.err.println("ActRuta:startTrackingRecord:RutaPto.removeTrackingPto:f:"+backendlessFault);
+								}
+							});
+						}
+						@Override public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.err.println("ActRuta:startTrackingRecord:RutaPto.getTrackingPto:f:"+backendlessFault);
+						}
+					});
+					/*try{
 						GeoPoint geoPoint = Backendless.Persistence.of(GeoPoint.class).findFirst();
 						Backendless.Persistence.of(GeoPoint.class).remove(geoPoint);
-					}catch(Exception e){System.err.println("ActRuta:startTrackingRecord:Borrar geo antigua:e:"+e);}
+					}catch(Exception e){System.err.println("ActRuta:startTrackingRecord:Borrar geo antigua:e:"+e);}*/
 				}
 				/// Activar tracking, guardar ruta activa
 				Util.setTrackingRoute(r.getObjectId());
@@ -494,7 +531,10 @@ System.err.println("showMarkers: "+pos);
 				r.guardar(new AsyncCallback<Ruta>()
 				{
 					@Override
-					public void handleResponse(Ruta ruta){}
+					public void handleResponse(Ruta ruta)
+					{
+						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:"+ruta);
+					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
@@ -502,7 +542,27 @@ System.err.println("showMarkers: "+pos);
 					}
 				});
 System.err.println("ActRuta:startTrackingRecord-----------6:" + r);
+
 				/// Crear geofence con pos actual
+				RutaPto rp = new RutaPto();
+				rp.setIdRuta(r.getObjectId());
+				rp.setLatLon(loc.getLatitude(), loc.getLongitude());
+				rp.saveTrackingPto(new AsyncCallback<RutaPto>()
+				{
+					@Override public void handleResponse(RutaPto rutaPto)
+					{
+System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
+						CesService.cargarGeoTracking();
+System.err.println("ActRuta:startTrackingRecord-----------9:");
+						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
+					}
+					@Override public void handleFault(BackendlessFault backendlessFault)
+					{
+						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
+					}
+				});
+/*
 				GeoPoint gp = new GeoPoint(loc.getLatitude(), loc.getLongitude());
 				gp.addCategory("tracking");//https://backendless.com/feature-32-saving-a-geo-point-with-api/
 				//gp.addMetadata("fecha", java.util.Date());
@@ -525,13 +585,13 @@ System.err.println("ActRuta:startTrackingRecord-----------9:");
 					{
 						System.err.println("ActRuta:startTrackingRecord:Backendless.Geo.savePoint:handleFault:"+backendlessFault);
 					}
-				});
+				});*/
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
 System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
-				//TODO : Avisar..
+				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
 	}
