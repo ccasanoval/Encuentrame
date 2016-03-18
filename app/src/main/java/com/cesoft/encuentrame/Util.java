@@ -19,7 +19,6 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 
 import com.cesoft.encuentrame.models.Aviso;
@@ -38,7 +37,11 @@ public class Util
 	// LOCATION
 	//______________________________________________________________________________________________
 	protected  static Location _locLast;
-	public static void setLocation(Location loc){_locLast=loc;}
+	public static void setLocation(Location loc)
+	{
+		_locLast=loc;
+System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
+	}
 	public static Location getLocation()
 	{
 		Location location1=null, location2=null;
@@ -63,6 +66,7 @@ public class Util
 		{
 			se.printStackTrace();
 		}
+System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 		return _locLast;
     }
 

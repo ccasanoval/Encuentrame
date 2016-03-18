@@ -318,13 +318,14 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 			@Override
 			public void handleResponse(Aviso a)
 			{
+				CesService.cargarListaGeoAvisos();
 				System.err.println("ActAviso:guardar:handleResponse:" + a);
 				return2Main(true, getString(R.string.ok_guardar));
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				System.err.println("ActAviso:guardar:handleFault:f:"+backendlessFault);
+				System.err.println("ActAviso:guardar:handleFault:f:" + backendlessFault);
 				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});

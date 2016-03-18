@@ -275,11 +275,14 @@ public class ActMain extends AppCompatActivity
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
-			String sMensaje = data.getStringExtra("mensaje");
-			if(sMensaje != null && !sMensaje.isEmpty())
-				Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+			if(data != null)
+			{
+				String sMensaje = data.getStringExtra("mensaje");
+				if(sMensaje != null && !sMensaje.isEmpty())
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+				if( ! data.getBooleanExtra("dirty", true))return;
+			}
 			if(resultCode != RESULT_OK)return;
-			if( ! data.getBooleanExtra("dirty", true))return;
 			switch(requestCode)
 			{
 			case LUGARES:	refreshLugares(); break;

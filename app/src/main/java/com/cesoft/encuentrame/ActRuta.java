@@ -42,6 +42,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -174,6 +176,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		else
 		{
 			setTitle(getString(R.string.editar_ruta));
+			btnStart.setVisibility(View.GONE);
 			findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 			//si está activo muestra btnStop
 			String sId = Util.getTrackingRoute();
@@ -436,6 +439,8 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 System.err.println("showMarkers: "+pos);
 			_Map.addMarker(new MarkerOptions().position(pos));//.title("")//TODO: Show INI, FIN, y add fecha to each point
 			po.add(pos);
+
+			_Map.addCircle(new CircleOptions().center(pos).radius(2).strokeColor(Color.TRANSPARENT).fillColor(0x55AA0000));
 		}
 		po.width(5).color(Color.RED);
 		Polyline line = _Map.addPolyline(po);
@@ -494,35 +499,8 @@ System.err.println("showMarkers: "+pos);
 				/// Si hay una ruta activa, se cierra ¿Avisar?
 				//TODO: Guardar varias rutas al mismo tiempo ???
 				String sId = Util.getTrackingRoute();
-				if( ! sId.isEmpty())//No hace falta borrar punto anterior ...
-				{
-/*System.err.println("ActRuta:startTrackingRecord:Borrar ruta antigua: getTrackingRoute="+sId);
-					RutaPto.getTrackingPto(new AsyncCallback<RutaPto>()
-					{
-						@Override public void handleResponse(RutaPto rutaPto)
-						{
-							rutaPto.removeTrackingPto(new AsyncCallback<Long>()
-							{
-								@Override public void handleResponse(Long l)
-								{
-									System.err.println("ActRuta:startTrackingRecord:RutaPto.removeTrackingPto:OK:"+l);
-								}
-								@Override public void handleFault(BackendlessFault backendlessFault)
-								{
-									System.err.println("ActRuta:startTrackingRecord:RutaPto.removeTrackingPto:f:"+backendlessFault);
-								}
-							});
-						}
-						@Override public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.err.println("ActRuta:startTrackingRecord:RutaPto.getTrackingPto:f:"+backendlessFault);
-						}
-					});
-					/*try{
-						GeoPoint geoPoint = Backendless.Persistence.of(GeoPoint.class).findFirst();
-						Backendless.Persistence.of(GeoPoint.class).remove(geoPoint);
-					}catch(Exception e){System.err.println("ActRuta:startTrackingRecord:Borrar geo antigua:e:"+e);}*/
-				}
+				//if( ! sId.isEmpty())//No hace falta borrar punto anterior ...
+
 				/// Activar tracking, guardar ruta activa
 				Util.setTrackingRoute(r.getObjectId());
 				/// Obtener posicion y guardar primer punto
@@ -562,30 +540,6 @@ System.err.println("ActRuta:startTrackingRecord-----------9:");
 						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
 					}
 				});
-/*
-				GeoPoint gp = new GeoPoint(loc.getLatitude(), loc.getLongitude());
-				gp.addCategory("tracking");//https://backendless.com/feature-32-saving-a-geo-point-with-api/
-				//gp.addMetadata("fecha", java.util.Date());
-				Backendless.Geo.savePoint(gp, new AsyncCallback<GeoPoint>()
-				{
-					@Override
-					public void handleResponse(GeoPoint geoPoint)
-					{
-						Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-System.err.println("ActRuta:startTrackingRecord-----------8:" + geoPoint);
-						CesService.cargarGeoTracking();
-						Intent data = new Intent();
-						data.putExtra("dirty", true);//si es guardado, editado, borrado => refresca la vista, si no nada
-						ActRuta.this.setResult(android.app.Activity.RESULT_OK, data);///TODO : por q ostias no va a Main?
-System.err.println("ActRuta:startTrackingRecord-----------9:");
-						ActRuta.this.finish();
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("ActRuta:startTrackingRecord:Backendless.Geo.savePoint:handleFault:"+backendlessFault);
-					}
-				});*/
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
