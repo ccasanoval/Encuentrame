@@ -19,6 +19,7 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
 
+
 		<!-- service android:name="com.backendless.geo.LocationTracker"/>
 		<receiver android:name="com.backendless.AutoStart">
 			<intent-filter>

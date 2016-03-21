@@ -93,6 +93,15 @@ public class Ruta extends Objeto implements Parcelable
 		//Backendless.Persistence.of(Lugar.class).save(this, ac);
 		Backendless.Persistence.save(this, ac);
 	}
+	public static void getById(String sId, AsyncCallback<BackendlessCollection<Ruta>> res)
+	{
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("puntos");
+		query.setWhereClause("objectId = '" + sId + "'");
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Ruta.class).find(query, res);
+	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res)
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();

@@ -34,7 +34,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
 
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-		txtNombre.setText(_rutas[position].getNombre());
+		txtNombre.setText(String.format("%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntos().size()));
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
 		btnEditar.setOnClickListener(new View.OnClickListener()

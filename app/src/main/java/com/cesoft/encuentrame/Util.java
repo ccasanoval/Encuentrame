@@ -32,6 +32,13 @@ public class Util
 	//TODO: Comprobar con servicio, que solo llamo a esto en main...
 	private static Application _app;//TODO: cambiar los context de abajo por esto...
 		public static void setApplication(Application app){_app = app;}
+	private static CesIntLista _refresh;
+		public static void setRefreshCallback(CesIntLista refresh){_refresh = refresh;}
+		public static void refreshListaRutas()
+		{
+			System.err.println("----------------------Util.refreshListaRutas  = "+_refresh);
+			if(_refresh!=null)_refresh.onRefreshListaRutas();
+		}
 
 	//______________________________________________________________________________________________
 	// LOCATION

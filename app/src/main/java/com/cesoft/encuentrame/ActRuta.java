@@ -530,7 +530,7 @@ System.err.println("ActRuta:startTrackingRecord-----------6:" + r);
 					@Override public void handleResponse(RutaPto rutaPto)
 					{
 System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
-						CesService.cargarGeoTracking();
+						//CesService.cargarGeoTracking();
 System.err.println("ActRuta:startTrackingRecord-----------9:");
 						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
 					}

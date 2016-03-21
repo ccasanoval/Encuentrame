@@ -1,6 +1,9 @@
 package com.cesoft.encuentrame;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.support.design.widget.CoordinatorLayout;
@@ -10,6 +13,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -151,16 +155,18 @@ public class ActMain extends AppCompatActivity
 	public static class PlaceholderFragment extends Fragment implements CesIntLista
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
+		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
 		public PlaceholderFragment(){}
 
 		// Returns a new instance of this fragment for the given section number.
-		public static PlaceholderFragment newInstance(int sectionNumber)
+		public static PlaceholderFragment newInstance(final int sectionNumber)
 		{
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
+			_apf[sectionNumber] = fragment;
 			return fragment;
 		}
 
@@ -218,6 +224,20 @@ public class ActMain extends AppCompatActivity
 				textView.setText(getString(R.string.avisos));
 				refreshAvisos();
 				break;
+			}
+
+			/// Actualizar lista de rutas
+			if(sectionNumber == RUTAS)
+			{
+				Util.setRefreshCallback(this);// CesService(on new track point) -> Util(refres ruta) -> this fragment(broadcast -> refresh lista rutas)
+				_MessageReceiver = new BroadcastReceiver()
+				{
+					@Override
+					public void onReceive(Context context, Intent intent)
+					{
+						refreshRutas();
+					}
+				};
 			}
 
 			_listView.addHeaderView(textView);
@@ -290,6 +310,29 @@ public class ActMain extends AppCompatActivity
 			case AVISOS:	refreshAvisos(); break;
 			}
 		}
+		// 4 CesIntLista
+		public void onRefreshListaRutas()
+		{
+			//ActMain._this.runOnUiThread(new Runnable(){public void run(){refreshRutas();}});//No funciona, ha de hacerse mediante broadcast...
+			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent("ces"));
+		}
+		@Override
+		public void onResume()
+		{
+  			super.onResume();
+			if(_MessageReceiver != null)
+			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
+  			LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter("ces"));
+		}
+		@Override
+		public void onPause()
+		{
+			if(_MessageReceiver != null)
+			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
+			LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
+  			super.onPause();
+		}
+		private BroadcastReceiver _MessageReceiver;
 
 
 		//__________________________________________________________________________________________
@@ -311,6 +354,7 @@ public class ActMain extends AppCompatActivity
 						listaAL[i++] = iterator.next();
 					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 				}
+
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
@@ -328,15 +372,19 @@ System.err.println("---------refreshRutas()");
 				public void handleResponse(BackendlessCollection<Ruta> rutas)
 				{
 					int n = rutas.getTotalObjects();
-System.err.println("---------RUTAS:GET:OK:" + n);
-					if(n < 1)return;
+					System.err.println("---------RUTAS:GET:OK:" + n);
+					if(n < 1)
+						return;
 					Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
 					Ruta[] listaAL = new Ruta[n];
-					int i=0;
+					int i = 0;
 					while(iterator.hasNext())
 						listaAL[i++] = iterator.next();
-					_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
+					RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this);
+					_listView.setAdapter(r);
+					r.notifyDataSetChanged();
 				}
+
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
@@ -344,6 +392,7 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 				}
 			});
 		}
+
 		//__________________________________________________________________________________________
 		public void refreshAvisos()
 		{
@@ -353,8 +402,9 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 				public void handleResponse(BackendlessCollection<Aviso> avisos)
 				{
 					int n = avisos.getTotalObjects();
-System.err.println("---------AVISOS:GET:OK:" + n);
-					if(n < 1)return;
+					System.err.println("---------AVISOS:GET:OK:" + n);
+					if(n < 1)
+						return;
 					Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
 					Aviso[] listaAL = new Aviso[n];
 					int i = 0;
@@ -362,6 +412,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 						listaAL[i++] = iterator.next();
 					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
 				}
+
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{

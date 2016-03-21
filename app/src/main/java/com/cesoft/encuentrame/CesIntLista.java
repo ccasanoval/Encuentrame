@@ -18,4 +18,6 @@ public interface CesIntLista
 		private tipoLista(int value){this.value = value;}
 		public int getValue(){return value;}
 	}
+
+	public void onRefreshListaRutas();
 }
