@@ -36,11 +36,11 @@ public class CesService extends IntentService
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
 	private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
-	private static CesGeofenceStore _GeofenceStoreAvisos, _GeofenceStoreTracking;
+	private static CesGeofenceStore _GeofenceStoreAvisos;//, _GeofenceStoreTracking;
 	private static CesService _this;
 
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
-	private static ArrayList<GeoPoint> _listaGeoTracking = new ArrayList<>();
+	//private static ArrayList<GeoPoint> _listaGeoTracking = new ArrayList<>();
 
 
 	//______________________________________________________________________________________________
@@ -59,6 +59,7 @@ public class CesService extends IntentService
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
 			while(true)
 			{
+System.err.println("CesService:loop-------------------------------------------------------------"+java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
 //Util.getLocation();
 				if(tmLoad + DELAY_LOAD < System.currentTimeMillis())
 				{
@@ -96,6 +97,7 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 					while(it.hasNext())
 					{
 						Aviso a = it.next();
+System.err.println("CesService:cargarListaGeoAvisos:handleResponse:a:-------------"+a);
 						if(a.getRadio() == 0 || (a.getLatitud()==0 && a.getLongitud()==0))continue;
 						//if(_listaGeoAvisos.contains(a))continue;
 						if( ! _listaGeoAvisos.contains(a))
@@ -109,6 +111,7 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
 								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL).build());
 					}
+System.err.println("CesService:cargarListaGeoAvisos:handleResponse:d:-------------"+bDirty);
 					if(bDirty)
 						_GeofenceStoreAvisos = new CesGeofenceStore(CesService._this, aGeofences);//Se puede añadri en lugar de crear desde cero?
 				}
@@ -143,27 +146,27 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 			public void handleResponse(BackendlessCollection<Ruta> ar)
 			{
 				System.err.println("CesService:saveGeoTracking:Ruta.getById");
-				if(ar.getCurrentPage().size() < 1)return;
+				if(ar.getCurrentPage().size() < 1)
+					return;
 				Ruta r = ar.getCurrentPage().get(0);
 				Location loc = Util.getLocation();
-System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:"+loc.getLatitude()+","+loc.getLongitude());
-				if( ! _sId.equals(sId))
+				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
+				if(!_sId.equals(sId))
 				{
-					_sId  = sId;
-					System.err.println("CesService:saveGeoTracking:Nueva ruta: "+_sId+" != "+sId);
-				}
-				else if(loc.distanceTo(_locLast) < 2)//Puntos muy cercanos
+					_sId = sId;
+					System.err.println("CesService:saveGeoTracking:Nueva ruta: " + _sId + " != " + sId);
+				} else if(loc.distanceTo(_locLast) < 2)//Puntos muy cercanos
 				{
-					System.err.println("CesService:saveGeoTracking:Punto repetido: "+sId+" dist="+_locLast.distanceTo(loc)+" ::: "+_locLast.getLatitude()+","+_locLast.getLongitude());
+					System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLast.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude());
 					return;
 				}
 				String s = "null";
 				if(_locLast != null)
-					s = _locLast.getLatitude()+","+_locLast.getLongitude();
-				System.err.println("CesService:saveGeoTracking:Punto dif: "+sId+" ::: "+s+" ///// "+loc.getLatitude()+","+loc.getLongitude());
+					s = _locLast.getLatitude() + "," + _locLast.getLongitude();
+				System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s + " ///// " + loc.getLatitude() + "," + loc.getLongitude());
 				_locLast = loc;
 				//TODO: añadir geofence por si quisiera funcionar...?
-				System.err.println("CesService:saveGeoTracking:findById:----------------------:"+r+" :::: "+s);
+				System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
 				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
 				r.guardar(new AsyncCallback<Ruta>()
 				{
@@ -173,17 +176,19 @@ System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()------
 						System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + r);
 						Util.refreshListaRutas();//Refrescar lista rutas en main..
 					}
+
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
-						System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:"+backendlessFault);
+						System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + backendlessFault);
 					}
 				});
 			}
+
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:"+backendlessFault);
+				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:" + backendlessFault);
 			}
 		});
 

@@ -94,7 +94,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
 //TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
-((LinearLayout)findViewById(R.id.layPeriodo)).setVisibility(View.GONE);
+findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnTrackingDelay.setAdapter(adapter);
@@ -416,7 +416,7 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 	{
 		_Map = googleMap;
 		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){;}
 
 		if(_bNuevo)
 		{
@@ -496,6 +496,10 @@ System.err.println("showMarkers: "+pos);
 			@Override
 			public void handleResponse(Ruta r)
 			{
+				Util.setTrackingRoute(r.getObjectId());
+				Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
+
+				/*
 				/// Si hay una ruta activa, se cierra ¿Avisar?
 				//TODO: Guardar varias rutas al mismo tiempo ???
 				String sId = Util.getTrackingRoute();
@@ -540,6 +544,7 @@ System.err.println("ActRuta:startTrackingRecord-----------9:");
 						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
 					}
 				});
+				*/
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -554,5 +559,7 @@ System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault
 	{
 System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 		Util.setTrackingRoute("");
+		//Util.refreshListaRutas();
+		Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
 	}
 }

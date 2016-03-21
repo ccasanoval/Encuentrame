@@ -52,7 +52,7 @@ public class Aviso extends Objeto
 	private GeoPoint lugar = new GeoPoint(0,0);
 		public GeoPoint getLugar(){return lugar;}
 		public void setLugar(GeoPoint v){lugar=v;}
-	//public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
+		//public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
 		public Double getLatitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLatitude();}
 		public Double getLongitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLongitude();}
 		public void setLatLon(Double lat, Double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}

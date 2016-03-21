@@ -42,22 +42,28 @@ public class CesServiceAvisoGeo extends IntentService
 			switch(transition)
 			{
 			case Geofence.GEOFENCE_TRANSITION_ENTER:
-System.err.println("CesServiceAvisoGeo:onHandleIntent:-----------------------------GEOFENCE_TRANSITION_ENTER");
-				for(Geofence geof : geofences)
-					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso));
-				break;
-			case Geofence.GEOFENCE_TRANSITION_DWELL:
-				System.err.println("CesServiceAvisoGeo:onHandleIntent:-----------------------------GEOFENCE_TRANSITION_DWELL");
+System.err.println("CesServiceAvisoGeo:onHandleIntent:-------------------------------------GEOFENCE_TRANSITION_ENTER");
 				for(Geofence geof : geofences)
 				{
 					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso));
+					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
+				}
+				break;
+			case Geofence.GEOFENCE_TRANSITION_DWELL:
+System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------------------GEOFENCE_TRANSITION_DWELL");
+				for(Geofence geof : geofences)
+				{
+					//showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso));
 					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
 				}
 				break;
 			case Geofence.GEOFENCE_TRANSITION_EXIT:
-System.err.println("CesServiceAvisoGeo:onHandleIntent:-----------------------------GEOFENCE_TRANSITION_EXIT");
+System.err.println("CesServiceAvisoGeo:onHandleIntent:---------------------------------------GEOFENCE_TRANSITION_EXIT");
 				for(Geofence geof : geofences)
-					addTrackingPoint(geof);
+				{
+					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_EXIT:"+geof.getRequestId());
+				}
+				//for(Geofence geof : geofences)addTrackingPoint(geof);
 				break;
 			default:
 				System.err.println("CesServiceAvisoGeo:onHandleIntent:e: Unknown Geofence Transition -----------------------------");
@@ -88,7 +94,7 @@ System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------
 	}
 
 	//______________________________________________________________________________________________
-	protected void addTrackingPoint(Geofence geof)
+	/*protected void addTrackingPoint(Geofence geof)
 	{
 		//GeoPoint.getById(sId);
 System.err.println("CesServiceAvisoGeo:addTrackingPoint-----------*****************************************------------"+geof);
@@ -128,5 +134,5 @@ System.err.println("CesServiceAvisoGeo:addTrackingPoint:----------------------:"
 			Backendless.Persistence.of(GeoPoint.class).save(gp);
 			CesService.cargarGeoTracking();
 		}
-	}
+	}*/
 }
