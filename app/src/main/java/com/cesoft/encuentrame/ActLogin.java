@@ -23,6 +23,8 @@ import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO:Check Util.user pass and log in automatically to backendless...
+//TODO:its a must, cos services must be able to connect and retrieve avisos and save tracking...
+//TODO: Create several users and test user access to each object...
 public class ActLogin extends AppCompatActivity
 {
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
@@ -69,9 +71,7 @@ public class ActLogin extends AppCompatActivity
 		_win = this;
 	}
 
-	/**
-	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
-	 */
+	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
 	public class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
 		public SectionsPagerAdapter(FragmentManager fm)
@@ -109,8 +109,24 @@ public class ActLogin extends AppCompatActivity
 	public static class PlaceholderFragment extends Fragment
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
-
 		public PlaceholderFragment(){}
+
+		AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()//DefaultCallback<BackendlessUser>(ActLogin._win)
+		{
+			@Override
+			public void handleResponse(BackendlessUser backendlessUser)
+			{
+				//super.handleResponse(backendlessUser);
+				System.err.println("ENTER-----------------" + backendlessUser);
+				startActivity(new Intent(_win.getBaseContext(), ActMain.class));
+				_win.finish();
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.out.println("ActLogin:Backendless reported an error: " + backendlessFault.getMessage());
+			}
+		};
 
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber)
@@ -128,6 +144,13 @@ public class ActLogin extends AppCompatActivity
 			Bundle args = getArguments();
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
+
+			/*if(Util.isLogged())
+			{
+				startActivity(new Intent(_win.getBaseContext(), ActMain.class));
+				_win.finish();
+			}*/
+			Util.login(resLogin);//Si hay usr & pwd guardadas, hacemos login automatico... //TODO: hacer boton borrar cuenta en config
 
 			TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
 			final EditText txtLogin = (EditText)rootView.findViewById(R.id.txtLogin);txtLogin.requestFocus();
@@ -150,7 +173,8 @@ txtPassword.setText("colt1911");
 					@Override
 					public void onClick(View v)
 					{
-						Backendless.UserService.login(
+						Util.login(
+						//Backendless.UserService.login(
 							txtLogin.getText().toString(),
 							txtPassword.getText().toString(),
 							new DefaultCallback<BackendlessUser>(ActLogin._win)

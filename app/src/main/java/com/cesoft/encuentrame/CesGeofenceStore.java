@@ -36,17 +36,16 @@ import com.google.android.gms.location.LocationServices;
 // http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823
 public class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>
 {
-	private Context _Context;
+	private Context _context;
 	private GoogleApiClient _GoogleApiClient;
 	private PendingIntent _PendingIntent;
 	private ArrayList<Geofence> _aGeofences;
+		public int size(){return _aGeofences==null?0:_aGeofences.size();}
 
 	public CesGeofenceStore(Context context, ArrayList<Geofence> geofences)
 	{
-		_Context = context;
+		_context = context;
 		_aGeofences = new ArrayList<>(geofences);
-		// Build a new GoogleApiClient, specify that we want to use LocationServices by adding the API to the client,
-		// specify the connection callbacks are in this class as well as the OnConnectionFailed method.
 		_GoogleApiClient = new GoogleApiClient.Builder(context).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
 		_GoogleApiClient.connect();
 System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+this);
@@ -57,7 +56,7 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 	public void onResult(@NonNull Status result)
 	{
 		if(result.isSuccess())
-			System.err.println("CesGeofenceStore:onResult------------------Success!"+this);
+			System.err.println("CesGeofenceStore:onResult------------------Success!");
 		else if(result.hasResolution())
 			System.err.println("CesGeofenceStore:onResult------------------hasResolution");
 		else if(result.isCanceled())
@@ -67,7 +66,7 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 	}
 	//// 4 OnConnectionFailedListener
 	@Override
-	public void onConnectionFailed(ConnectionResult connectionResult)
+	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
 	{
 		System.err.println("CesGeofenceStore:e:Connection failed");
 	}
@@ -81,10 +80,8 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 		{
 			GeofencingRequest GeofencingRequest = new GeofencingRequest.Builder().addGeofences(_aGeofences).build();
 			_PendingIntent = createRequestPendingIntent();
-			// Submitting the request to monitor geofences.
-			//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 			try
-			{
+			{	// Submitting the request to monitor geofences.
 				PendingResult<Status> pendingResult = LocationServices.GeofencingApi.addGeofences(_GoogleApiClient, GeofencingRequest, _PendingIntent);
 				pendingResult.setResultCallback(this);// Set the result callbacks listener to this class.
 			}catch(SecurityException se){}
@@ -107,12 +104,18 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 	// This creates a PendingIntent that is to be fired when geofence transitions take place. In this instance, we are using an IntentService to handle the transitions.
 	private PendingIntent createRequestPendingIntent()
 	{
-		if(_PendingIntent == null)
+		/*if(_PendingIntent == null)
 		{
 			Intent intent = new Intent(_Context, CesServiceAvisoGeo.class);
 			_PendingIntent = PendingIntent.getService(_Context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		}
-		return _PendingIntent;
+		return _PendingIntent;*/
+
+		if(null != _PendingIntent)return _PendingIntent;
+		Intent intent = new Intent("com.cesoft.encuentrame.ACCION_RECIBE_GEOFENCE");
+		// Return a PendingIntent to start the IntentService. Always create a PendingIntent sent to Location Services with FLAG_UPDATE_CURRENT,
+		// so that sending the PendingIntent again updates the original. Otherwise, Location Services can't match the PendingIntent to requests made with it.
+		return PendingIntent.getBroadcast(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 	}
 
 }

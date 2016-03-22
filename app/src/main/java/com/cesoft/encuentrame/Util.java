@@ -21,6 +21,9 @@ import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 
+import com.backendless.Backendless;
+import com.backendless.BackendlessUser;
+import com.backendless.async.callback.AsyncCallback;
 import com.cesoft.encuentrame.models.Aviso;
 
 import java.util.HashMap;
@@ -32,6 +35,9 @@ public class Util
 	//TODO: Comprobar con servicio, que solo llamo a esto en main...
 	private static Application _app;//TODO: cambiar los context de abajo por esto...
 		public static void setApplication(Application app){_app = app;}
+		public static Application getApplication(){return _app;}
+	private static Context _svcContext;
+		public static void setSvcContext(Context c){_svcContext = c;}
 	private static CesIntLista _refresh;
 		public static void setRefreshCallback(CesIntLista refresh){_refresh = refresh;}
 		public static void refreshListaRutas()
@@ -54,7 +60,7 @@ System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getL
 		Location location1=null, location2=null;
 		try
 		{
-			LocationManager locationManager = (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
+			LocationManager locationManager = (LocationManager)_svcContext.getSystemService(Context.LOCATION_SERVICE);
 			if(locationManager == null)return _locLast;
 			boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -83,7 +89,7 @@ System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getL
 	//______________________________________________________________________________________________
 	public static void playNotificacion()
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_app);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		if(prefs.getBoolean("notifications_new_message", true))//true o false ha de coincidir con lo que tengas en pref_notificacion.xml
 		{
 System.err.println("-----------------------------Ding Dong!!!!!!!!!");
@@ -211,14 +217,14 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	private static final String ID_TRACKING = "id_tracking_route";
 	public static void setTrackingRoute(String sIdRoute)
 	{
-		SharedPreferences sp = _app.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences sp = _svcContext.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
-		editor.commit();
+		editor.apply();//editor.commit(); Aply does it in background
 	}
 	public static String getTrackingRoute()
 	{
-		SharedPreferences sp = _app.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences sp = _svcContext.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
  		return sp.getString(ID_TRACKING, "");
 	}
 
@@ -239,6 +245,56 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		data.putExtra("mensaje", sMensaje);
 		act.setResult(Activity.RESULT_OK, data);
 		act.finish();
+//		Intent intent = new Intent(act, ActMain.class);
+//		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//		intent.putExtra("dirty", bDirty);
+//		intent.putExtra("mensaje", sMensaje);
+//		act.setResult(Activity.RESULT_OK, intent);
+//		act.finish();
+//		startActivity(intent);
 	}
 
+
+	//______________________________________________________________________________________________
+	// LOGIN
+	public static String getUsuario()
+	{
+		//TODO: Check preferences...
+		return "quake1978";
+	}
+	public static String getClave()
+	{
+		//TODO: Check preferences...
+		return "colt1911";
+	}
+	public static boolean login(AsyncCallback<BackendlessUser> res)
+	{
+		String usr = getUsuario();
+		String pwd = getClave();
+		if( ! usr.isEmpty() && ! pwd.isEmpty())
+		{
+			login(usr, pwd, res);
+			return true;
+		}
+		return false;
+	}
+	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
+	{
+		BackendlessUser bu = Backendless.UserService.CurrentUser();
+		if(bu != null)
+		{
+			res.handleResponse(bu);
+System.err.println("Util.login: Usuario ya logado: "+bu);
+		}
+		else
+		{
+			Backendless.UserService.login(usr, pwd, res);
+System.err.println("Util.login: logando...");
+		}
+	}
+	public static boolean isLogged()
+	{
+		BackendlessUser usr = Backendless.UserService.CurrentUser();
+		return (usr != null);
+	}
 }

@@ -53,9 +53,9 @@ public class Aviso extends Objeto
 		public GeoPoint getLugar(){return lugar;}
 		public void setLugar(GeoPoint v){lugar=v;}
 		//public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
-		public Double getLatitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLatitude();}
-		public Double getLongitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLongitude();}
-		public void setLatLon(Double lat, Double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
+		public double getLatitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLatitude();}
+		public double getLongitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLongitude();}
+		public void setLatLon(double lat, double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
 		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
 		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
 
@@ -76,6 +76,17 @@ public class Aviso extends Objeto
 	public String toString()
 	{
 		return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio()+" "+lugar.getObjectId());
+	}
+	//______________________________________________________________________________________________
+	@Override public boolean equals(Object o)
+	{
+		if(this == o)return true;
+		if(!(o instanceof Aviso))return false;
+		Aviso a = (Aviso)o;
+
+		return getObjectId().equals(a.getObjectId())
+			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud() && getRadio() == a.getRadio()
+			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
 	}
 
 	//// PARCELABLE

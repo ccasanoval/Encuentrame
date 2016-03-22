@@ -103,7 +103,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			}
 		});
 
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		fab.setOnClickListener(new View.OnClickListener()
@@ -111,6 +111,10 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void onClick(View view)
 			{
+				Intent intent = new Intent(ActAviso.this, ActMain.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra("pagina", ActMain.AVISOS);//TODO:Go to section Avisos...!
+				ActAviso.this.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
 				ActAviso.this.finish();
 			}
 		});
@@ -297,22 +301,26 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
+System.err.println("ActAviso:guardar:-------------------------------------------0");
 		if(_a.getLatitud()==0 && _a.getLongitud()==0)
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			return;
 		}
+System.err.println("ActAviso:guardar:-------------------------------------------1");
 		if(_txtNombre.getText().toString().isEmpty())
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
 		}
+System.err.println("ActAviso:guardar:-------------------------------------------3");
 		_a.setNombre(_txtNombre.getText().toString());
 		_a.setDescripcion(_txtDescripcion.getText().toString());
 		_a.setActivo(_swtActivo.isChecked());
 		//_a.reactivarPorHoy();
 		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
+System.err.println("ActAviso:guardar:-------------------------------------------4:"+_a);
 		_a.guardar(new AsyncCallback<Aviso>()
 		{
 			@Override
@@ -329,6 +337,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
+System.err.println("ActAviso:guardar:-------------------------------------------5");
 	}
 
 	//______________________________________________________________________________________________

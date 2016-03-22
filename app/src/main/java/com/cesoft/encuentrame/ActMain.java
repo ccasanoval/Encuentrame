@@ -55,7 +55,7 @@ import java.util.Map;
 public class ActMain extends AppCompatActivity
 {
 	private ViewPager _viewPager;
-	private static final int LUGARES=0, RUTAS=1, AVISOS=2;
+	public static final int LUGARES=0, RUTAS=1, AVISOS=2;
 	private static ActMain _this;
 	private static CoordinatorLayout _coordinatorLayout;
 
@@ -81,6 +81,15 @@ public class ActMain extends AppCompatActivity
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
+
+		try
+		{
+			Integer nPagina = getIntent().getIntExtra("pagina", AVISOS);
+			if(nPagina >= LUGARES && nPagina <= AVISOS)
+				_viewPager.setCurrentItem(nPagina);
+System.err.println("PAGINA++++++++++++++++"+nPagina);
+		}
+		catch(Exception e){}
 
 //cargaDatosDebug();//TODO:Debug
 
@@ -365,7 +374,7 @@ public class ActMain extends AppCompatActivity
 		//__________________________________________________________________________________________
 		public void refreshRutas()
 		{
-System.err.println("---------refreshRutas()");
+System.err.println("ActMain:refreshRutas()");
 			Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
 			{
 				@Override

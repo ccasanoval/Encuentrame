@@ -39,6 +39,28 @@ public class Objeto implements Parcelable
 		return "ID:"+getObjectId()+", NOM:"+(nombre==null?"":nombre) + ", DESC:"+(descripcion==null?"":descripcion);
 	}
 
+	//______________________________________________________________________________________________
+	/*@Override public boolean equals(Object o)
+	{
+		// Return true if the objects are identical. (This is just an optimization, not required for correctness.)
+		if(this == o)return true;
+
+		// Return false if the other object has the wrong type.
+		// This type may be an interface depending on the interface's specification.
+		if(!(o instanceof Objeto))return false;
+
+		// Cast to the appropriate type.
+		// This will succeed because of the instanceof, and lets us access private fields.
+		Objeto lhs = (Objeto)o;
+
+		// Check each field. Primitive fields, reference fields, and nullable reference
+		// fields are all treated differently.
+		if(getObjectId() == null && lhs.getObjectId() == null)
+			return getNombre().equals(lhs.getNombre()) && getDescripcion().equals(lhs.getDescripcion());
+		return getObjectId().equals(lhs.getObjectId());
+	}*/
+
+
 
 	// PARCELABLE
 	//______________________________________________________________________________________________

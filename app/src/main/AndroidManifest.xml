@@ -22,7 +22,7 @@
 
 		<receiver android:name=".CesGeofenceReceiver" android:exported="false">
 			<intent-filter >
-				<action android:name="com.cesoft.encuentrame.ACTION_RECEIVE_GEOFENCE"/>
+				<action android:name="com.cesoft.encuentrame.ACCION_RECIBE_GEOFENCE"/>
 			</intent-filter>
 		</receiver>
 		<!-- service android:name="com.backendless.geo.LocationTracker"/>

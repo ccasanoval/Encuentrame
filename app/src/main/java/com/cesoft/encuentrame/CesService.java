@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
+import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.BackendlessGeoQuery;
@@ -32,7 +33,7 @@ import java.util.Iterator;
 
 public class CesService extends IntentService
 {
-	private static final int GEOFEN_DWELL_TIME = 1*60*1000;//TODO:customize in settings...
+	private static final int GEOFEN_DWELL_TIME = 2*60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
 	private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
@@ -48,6 +49,23 @@ public class CesService extends IntentService
 	{
 		super("EncuentrameAvisoSvc");
 		_this = this;
+		Util.setSvcContext(this);
+
+		boolean b = Util.login(new AsyncCallback<BackendlessUser>()
+		{
+			@Override
+			public void handleResponse(BackendlessUser backendlessUser)
+			{
+				//super.handleResponse(backendlessUser);
+				System.err.println("ENTER--------(desde CesService)---------" + backendlessUser);
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.out.println("CesService:Login:f: " + backendlessFault.getMessage());
+			}
+		});
+		System.out.println("*********************************CesService:Util.login=: "+b);//TODO: if false close service...
 	}
 
 	//______________________________________________________________________________________________
@@ -60,6 +78,13 @@ public class CesService extends IntentService
 			while(true)
 			{
 System.err.println("CesService:loop-------------------------------------------------------------"+java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
+				if( ! Util.isLogged())
+				{
+					System.err.println("CesService:loop---sin usuario");
+					Thread.sleep(DELAY_LOAD / 3);
+					continue;
+				}
+
 //Util.getLocation();
 				if(tmLoad + DELAY_LOAD < System.currentTimeMillis())
 				{
@@ -68,7 +93,7 @@ System.err.println("CesService:loop---------------------------------------------
 					tmLoad = System.currentTimeMillis();
 				}
 				saveGeoTracking();//TODO: periodo...
-				Thread.sleep(DELAY_LOAD/3);
+				Thread.sleep(DELAY_LOAD / 3);
 			}
 		}
 		catch(InterruptedException e){System.err.println("CesService:onHandleIntent:e:"+e);}
@@ -83,37 +108,50 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 			//TODO: si so n los mismos no hay necesidad de recrearlos: comprobar...
 			//_listaGeoAvisos.clear();
 
-			if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
 			Aviso.getActivos(new AsyncCallback<BackendlessCollection<Aviso>>()
 			{
 				@Override
 				public void handleResponse(BackendlessCollection<Aviso> avisos)
 				{
+					//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 					boolean bDirty = false;
 					int n = avisos.getTotalObjects();
-					if(n < 1)return;
+					if(n != _listaGeoAvisos.size())
+					{
+						if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
+						_listaGeoAvisos.clear();
+						bDirty = true;
+					}
 					ArrayList<Geofence> aGeofences = new ArrayList<>();
+					ArrayList<Aviso> aAvisos = new ArrayList<>();
 					Iterator<Aviso> it = avisos.getCurrentPage().iterator();
+					int i=0;
 					while(it.hasNext())
 					{
 						Aviso a = it.next();
-System.err.println("CesService:cargarListaGeoAvisos:handleResponse:a:-------------"+a);
-						if(a.getRadio() == 0 || (a.getLatitud()==0 && a.getLongitud()==0))continue;
-						//if(_listaGeoAvisos.contains(a))continue;
-						if( ! _listaGeoAvisos.contains(a))
-						{
-							bDirty = true;
-							_listaGeoAvisos.add(a);
-						}
+						aAvisos.add(a);
 						aGeofences.add(new Geofence.Builder().setRequestId(a.getObjectId())
 								.setCircularRegion(a.getLatitud(), a.getLongitud(), a.getRadio())
 								.setExpirationDuration(Geofence.NEVER_EXPIRE)
 								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
 								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL).build());
+
+						if( ! bDirty)
+						{
+							if(_listaGeoAvisos.size() < i)
+								bDirty = true;
+							else if( ! _listaGeoAvisos.contains(a))//else if(_listaGeoAvisos.get(i))
+								bDirty = true;
+							i++;
+						}
 					}
-System.err.println("CesService:cargarListaGeoAvisos:handleResponse:d:-------------"+bDirty);
 					if(bDirty)
-						_GeofenceStoreAvisos = new CesGeofenceStore(CesService._this, aGeofences);//Se puede añadri en lugar de crear desde cero?
+					{
+System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------DIRTY");
+						_listaGeoAvisos = aAvisos;
+						//_GeofenceStoreAvisos = new CesGeofenceStore(Util.getApplication(), aGeofences);//Se puede añadri en lugar de crear desde cero?
+						_GeofenceStoreAvisos = new CesGeofenceStore(_this, aGeofences);//Se puede añadri en lugar de crear desde cero?
+					}
 				}
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
@@ -136,7 +174,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:d:-----------
 	private static String _sId = "";
 	public static void saveGeoTracking()
 	{
-		final String sId = Util.getTrackingRoute();
+		final String sId = Util.getTrackingRoute();//TODO: guardar ruta en nube para que no se olvide al reiniciar?
 		if(sId.isEmpty())return;
 
 		//Backendless.Persistence.of(Ruta.class).findById(sId, new AsyncCallback<Ruta>()
