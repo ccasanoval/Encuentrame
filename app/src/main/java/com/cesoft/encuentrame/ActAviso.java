@@ -139,14 +139,14 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void onNothingSelected(AdapterView<?> parent)
 			{
-				_a.setRadio(50);//TODO:radio por defecto en settings
+				_a.setRadio(100);//TODO:radio por defecto en settings
 			}
 		});
 
 		//------------------------------------------------------------------------------------------
 		try
 		{
-			_a = this.getIntent().getParcelableExtra(Aviso.NOMBRE);
+			_a = getIntent().getParcelableExtra(Aviso.NOMBRE);
 System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps failing pass only ID and I get it from db....
 			setValores();
 		}

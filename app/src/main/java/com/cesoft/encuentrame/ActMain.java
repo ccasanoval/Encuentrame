@@ -84,7 +84,7 @@ public class ActMain extends AppCompatActivity
 
 		try
 		{
-			Integer nPagina = getIntent().getIntExtra("pagina", AVISOS);
+			Integer nPagina = getIntent().getIntExtra("pagina", -1);
 			if(nPagina >= LUGARES && nPagina <= AVISOS)
 				_viewPager.setCurrentItem(nPagina);
 System.err.println("PAGINA++++++++++++++++"+nPagina);

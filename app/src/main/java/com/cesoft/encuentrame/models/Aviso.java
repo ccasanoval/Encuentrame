@@ -59,7 +59,7 @@ public class Aviso extends Objeto
 		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
 		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
 
-		public int getRadio()
+		public int getRadio()//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence
 		{
 			if(lugar == null)return 0;
 			Object o = lugar.getMetadata(RADIO);
@@ -186,6 +186,7 @@ System.err.println("---------Aviso:parcel:out:3" + this);
 		ArrayList<String> relationProps = new ArrayList<>();
 		relationProps.add("lugar");
 		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);
+System.err.println("-------------------1------------------Aviso:getById:" + sId);
 	}
 
 }

@@ -43,29 +43,34 @@ public class CesService extends IntentService
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 	//private static ArrayList<GeoPoint> _listaGeoTracking = new ArrayList<>();
 
+	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
+	{
+		@Override
+		public void handleResponse(BackendlessUser backendlessUser)
+		{
+			System.err.println("ENTER--------(desde CesService)---------" + backendlessUser);
+			//TODO: hacer listener para avisar a todos que ya tenemos usuario... (a login para que pase a main...)
+		}
+		@Override
+		public void handleFault(BackendlessFault backendlessFault)
+		{
+			System.out.println("CesService:Login:f: " + backendlessFault.getMessage());
+		}
+	};
 
 	//______________________________________________________________________________________________
 	public CesService()
 	{
 		super("EncuentrameAvisoSvc");
+	}
+	@Override
+	public void onCreate()
+	{
+		super.onCreate();
 		_this = this;
+		Util.initBackendless(this);
 		Util.setSvcContext(this);
-
-		boolean b = Util.login(new AsyncCallback<BackendlessUser>()
-		{
-			@Override
-			public void handleResponse(BackendlessUser backendlessUser)
-			{
-				//super.handleResponse(backendlessUser);
-				System.err.println("ENTER--------(desde CesService)---------" + backendlessUser);
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.out.println("CesService:Login:f: " + backendlessFault.getMessage());
-			}
-		});
-		System.out.println("*********************************CesService:Util.login=: "+b);//TODO: if false close service...
+		boolean b = Util.login(resLogin);
 	}
 
 	//______________________________________________________________________________________________
@@ -81,10 +86,11 @@ System.err.println("CesService:loop---------------------------------------------
 				if( ! Util.isLogged())
 				{
 					System.err.println("CesService:loop---sin usuario");
+					Util.login(resLogin);
+					//try{Backendless.UserService.login("quake1978", "colt1911");}catch(Exception e){System.err.println("e:" + e);}
 					Thread.sleep(DELAY_LOAD / 3);
 					continue;
 				}
-
 //Util.getLocation();
 				if(tmLoad + DELAY_LOAD < System.currentTimeMillis())
 				{
@@ -130,11 +136,12 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 					{
 						Aviso a = it.next();
 						aAvisos.add(a);
-						aGeofences.add(new Geofence.Builder().setRequestId(a.getObjectId())
+						Geofence gf = new Geofence.Builder().setRequestId(a.getObjectId())
 								.setCircularRegion(a.getLatitud(), a.getLongitud(), a.getRadio())
 								.setExpirationDuration(Geofence.NEVER_EXPIRE)
 								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL).build());
+								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
+						aGeofences.add(gf);
 
 						if( ! bDirty)
 						{
@@ -144,12 +151,15 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 								bDirty = true;
 							i++;
 						}
+if(bDirty)
+{
+	System.err.println("Aviso="+a.getObjectId()+" : "+a.getNombre()+":"+a.getDescripcion() + "\t Geof=" + gf.getRequestId());
+}
 					}
 					if(bDirty)
 					{
 System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 						_listaGeoAvisos = aAvisos;
-						//_GeofenceStoreAvisos = new CesGeofenceStore(Util.getApplication(), aGeofences);//Se puede añadri en lugar de crear desde cero?
 						_GeofenceStoreAvisos = new CesGeofenceStore(_this, aGeofences);//Se puede añadri en lugar de crear desde cero?
 					}
 				}

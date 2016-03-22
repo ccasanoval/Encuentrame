@@ -32,12 +32,9 @@ import java.util.HashMap;
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
-	//TODO: Comprobar con servicio, que solo llamo a esto en main...
-	private static Application _app;//TODO: cambiar los context de abajo por esto...
-		public static void setApplication(Application app){_app = app;}
-		public static Application getApplication(){return _app;}
-	private static Context _svcContext;
-		public static void setSvcContext(Context c){_svcContext = c;}
+	//______________________________________________________________________________________________
+	// REFRESH LISTA RUTAS
+	//______________________________________________________________________________________________
 	private static CesIntLista _refresh;
 		public static void setRefreshCallback(CesIntLista refresh){_refresh = refresh;}
 		public static void refreshListaRutas()
@@ -45,6 +42,20 @@ public class Util
 			System.err.println("----------------------Util.refreshListaRutas  = "+_refresh);
 			if(_refresh!=null)_refresh.onRefreshListaRutas();
 		}
+
+	//______________________________________________________________________________________________
+	// INIT
+	//______________________________________________________________________________________________
+	private static Application _app;
+		public static void setApplication(Application app){_app = app;}
+		public static Application getApplication(){return _app;}
+	private static Context _svcContext;
+		public static void setSvcContext(Context c){_svcContext = c;}
+	public static void initBackendless(Context c)
+	{
+System.err.println("---------------Util.initBackendless c = "+c);
+		Backendless.initApp(c, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
+	}
 
 	//______________________________________________________________________________________________
 	// LOCATION
@@ -133,22 +144,48 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 			showNotificacion(c, sTitulo, a, intent);
 	}
 	//______________________________________________________________________________________________
+	//private static int _idNotificacion = 1;
 	private static void showNotificacion(Context c, String titulo, Aviso a, Intent intent)
 	{
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
+System.err.println("------------********0*************-----------UTIL--showAviso:" + a);
+System.err.println("------------********1*************-----------UTIL--showAviso:" + intent.getParcelableExtra(Aviso.NOMBRE));
+
+		Integer idNotificacion = Integer.parseInt(a.getObjectId().substring(0,6).replace('-','0'), 16);
+System.err.println("------------********999999*************-----------UTIL--iId:" + idNotificacion);
+
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
+				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(titulo)
-				.setContentText(a.getDescripcion())
+				.setContentText(a.getNombre()+":"+a.getDescripcion())
 				.setDefaults(Notification.DEFAULT_ALL)
-				.setContentIntent(PendingIntent.getActivity(c, 0, intent, 0))
+				.setContentIntent(PendingIntent.getActivity(c, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true);
 		NotificationManager notificationManager = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
-		Integer iId = Integer.parseInt(a.getObjectId().substring(0,6).replace('-','0'), 16);
-		notificationManager.notify(iId, notificationBuilder.build());
+
+		notificationManager.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
+
+		//http://stackoverflow.com/questions/18094791/android-notification-pendingintent-open-activity-per-notification-click
+		/*
+		NotificationCompat.Builder b = new NotificationCompat.Builder(c);
+       b.setNumber(g_push.Counter)
+        .setLargeIcon(BitmapFactory.decodeResource(c.getResources(), R.drawable.list_avatar))
+        .setSmallIcon(R.drawable.ic_stat_example)
+        .setAutoCancel(true)
+        .setContentTitle(pushCount > 1 ? c.getString(R.string.stat_messages_title) + pushCount : title)
+        .setContentText(pushCount > 1 ? push.ProfileID : mess)
+        .setWhen(g_push.Timestamp)
+        .setContentIntent(PendingIntent.getActivity(c, 0, it, PendingIntent.FLAG_UPDATE_CURRENT))
+        .setDeleteIntent(PendingIntent.getBroadcast(c, 0, new Intent(ACTION_CLEAR_NOTIFICATION), PendingIntent.FLAG_CANCEL_CURRENT))
+        .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
+        .setSound(Uri.parse(prefs.getString(
+                SharedPreferencesID.PREFERENCE_ID_PUSH_SOUND_URI,
+                "android.resource://ru.mail.mailapp/raw/new_message_bells")));
+		*/
 	}
 	//______________________________________________________________________________________________
 	/*private static void showNotificacionDlg(Context c, Aviso a, Intent intent)
@@ -255,6 +292,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	}
 
 
+
 	//______________________________________________________________________________________________
 	// LOGIN
 	public static String getUsuario()
@@ -273,9 +311,11 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		String pwd = getClave();
 		if( ! usr.isEmpty() && ! pwd.isEmpty())
 		{
+System.err.println("Util.login: "+usr);
 			login(usr, pwd, res);
 			return true;
 		}
+System.err.println("Util.login: no hay usr y pwd en settings..."+usr+" / "+pwd);
 		return false;
 	}
 	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)

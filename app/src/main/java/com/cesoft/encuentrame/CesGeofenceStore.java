@@ -28,12 +28,14 @@ import com.google.android.gms.location.LocationServices;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 04/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Por que no saltan geofences trackin y aviso?
+//TODO: Por que no saltan geofences trackin y aviso? ======> Parece que funcionan cuando radio es muy grande. Poca precision de google?????
 // http://stackoverflow.com/questions/21414160/how-to-increase-consistency-of-android-geofence-enter-exit-notifications
 //    Make sure you're using a BroadcastReceiver and not a Service to receive the transitions, otherwise you will not/might not get it if your app gets killed/turned off. As discussed here: Android Geofence eventually stop getting transition intents
 //    Make sure you recreate your geofences after the device is rebooted, preferably using a boot-broadcast receiver. As discussed here: Do Geofences remain active in android after a device reboot
 //    One other common misconception, and which stumped me since it's different than IOS is that you'll always get a trigger immediately for a newly created geofence, if the device discovers that you're inside the geofence when creating it. I have solved this myself using a "grace period" for newly created geofences, which i explained in this thread: addProximityAlert doesn't work as expected
 // http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823
+
+//https://www.raywenderlich.com/103540/geofences-googleapiclient
 public class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>
 {
 	private Context _context;

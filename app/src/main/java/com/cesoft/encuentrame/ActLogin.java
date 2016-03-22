@@ -22,9 +22,8 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO:Check Util.user pass and log in automatically to backendless...
-//TODO:its a must, cos services must be able to connect and retrieve avisos and save tracking...
 //TODO: Create several users and test user access to each object...
+//TODO: Cuando se cierra app, no funciona backendless pero lo necesito para servicio...services must be able to connect and retrieve avisos and save tracking...
 public class ActLogin extends AppCompatActivity
 {
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
@@ -48,16 +47,6 @@ public class ActLogin extends AppCompatActivity
 		_tabLayout = (TabLayout)findViewById(R.id.tabs);
 		_tabLayout.setupWithViewPager(viewPager);
 
-		/*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-			}
-		});*/
-
 		/* NOT IN GIT FOR SECURITY REASONS
 		package com.cesoft.encuentrame;
 		public class BackendSettings
@@ -67,7 +56,9 @@ public class ActLogin extends AppCompatActivity
 			public static final String VER = "v1";
 		}
 		*/
-		Backendless.initApp(this, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
+		startService(new Intent(this, CesService.class));
+		//Backendless.initApp(this, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
+		//Util.initBackendless(this);
 		_win = this;
 	}
 
@@ -104,7 +95,6 @@ public class ActLogin extends AppCompatActivity
 		}
 	}
 
-
 	//----------------------------------------------------------------------------------------------
 	public static class PlaceholderFragment extends Fragment
 	{
@@ -118,8 +108,7 @@ public class ActLogin extends AppCompatActivity
 			{
 				//super.handleResponse(backendlessUser);
 				System.err.println("ENTER-----------------" + backendlessUser);
-				startActivity(new Intent(_win.getBaseContext(), ActMain.class));
-				_win.finish();
+				goMain();
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -127,6 +116,13 @@ public class ActLogin extends AppCompatActivity
 				System.out.println("ActLogin:Backendless reported an error: " + backendlessFault.getMessage());
 			}
 		};
+		private void goMain()
+		{
+			Intent intent = new Intent(_win.getBaseContext(), ActMain.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			_win.finish();
+		}
 
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber)
@@ -145,12 +141,11 @@ public class ActLogin extends AppCompatActivity
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
 
-			/*if(Util.isLogged())
+			if(Util.isLogged())
 			{
-				startActivity(new Intent(_win.getBaseContext(), ActMain.class));
-				_win.finish();
-			}*/
-			Util.login(resLogin);//Si hay usr & pwd guardadas, hacemos login automatico... //TODO: hacer boton borrar cuenta en config
+				goMain();
+			}
+//Util.login(resLogin);//Si hay usr & pwd guardadas, hacemos login automatico... //TODO: hacer boton borrar cuenta en config
 
 			TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
 			final EditText txtLogin = (EditText)rootView.findViewById(R.id.txtLogin);txtLogin.requestFocus();
@@ -162,9 +157,6 @@ public class ActLogin extends AppCompatActivity
 			switch(sectionNumber)
 			{
 			case ENTER://---------------------------------------------------------------------------
-//TODO:Debug
-txtLogin.setText("quake1978");
-txtPassword.setText("colt1911");
 				txtEmail.setVisibility(View.GONE);
 				txtPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));
@@ -173,26 +165,7 @@ txtPassword.setText("colt1911");
 					@Override
 					public void onClick(View v)
 					{
-						Util.login(
-						//Backendless.UserService.login(
-							txtLogin.getText().toString(),
-							txtPassword.getText().toString(),
-							new DefaultCallback<BackendlessUser>(ActLogin._win)
-							{
-								@Override
-								public void handleResponse(BackendlessUser backendlessUser)
-								{
-									super.handleResponse(backendlessUser);
-									System.err.println("ENTER-----------------" + backendlessUser);
-									startActivity(new Intent(_win.getBaseContext(), ActMain.class));
-									_win.finish();
-								}
-								@Override
-								public void handleFault(BackendlessFault backendlessFault)
-								{
-									System.out.println("ActLogin:Backendless reported an error: " + backendlessFault.getMessage());
-								}
-							});
+						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), resLogin);
 					}
 				});
 				break;
