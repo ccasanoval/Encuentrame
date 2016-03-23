@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.backendless.BackendlessCollection;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,6 +32,7 @@ import org.json.JSONObject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Color;
@@ -57,6 +59,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	private Aviso _a;
 	private Ruta _r;
 
+	private int _iTipo=-1;
+
 	CoordinatorLayout _coordinatorLayout;
 
 	@Override
@@ -69,6 +73,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		try{_l = getIntent().getParcelableExtra(Lugar.NOMBRE);}catch(Exception e){_l=null;}
 		try{_r = getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
 		try{_a = getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
+		try{_iTipo = getIntent().getIntExtra("tipo", -1);}catch(Exception e){_iTipo=-1;}
+System.err.println("**********************_iTipo="+_iTipo);
 		//------------------------------------------------------------------------------------------
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -76,14 +82,12 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
-		//ImageButton btnSave = (ImageButton) findViewById(R.id.btnGuardar);btnSave.setOnClickListener(new View.OnClickListener()
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View view)
 			{
-				Intent data = new Intent();
 				if(_l != null)
 				{
 					_l.guardar(new AsyncCallback<Lugar>()
@@ -146,6 +150,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				}
 			}
 		});
+
 	}
 
 	/**
@@ -158,7 +163,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActAviso:onMapReady:e:"+se);}
 
 		if(_l != null)			/// LUGAR
 		{
@@ -170,9 +175,16 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		}
 		else if(_r != null)		/// RUTA
 		{
-			//http://javapapers.com/android/draw-path-on-google-maps-android-api/
-			//TODO: Draw a route...
+			//TODO: Draw a route... copiar de ActRuta
 		}
+		else
+		switch(_iTipo)
+		{
+		case Util.LUGARES:	showLugares();break;
+		case Util.AVISOS:	showAvisos();break;
+		case Util.RUTAS:	showRutas();break;
+		}
+
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override
@@ -181,7 +193,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
-
 	}
 
 	//______________________________________________________________________________________________
@@ -234,7 +245,88 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	}
 
 
+	//______________________________________________________________________________________________
+	private void showLugares()
+	{
+		Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Lugar> lugares)
+			{
+				int n = lugares.getTotalObjects();
+				System.err.println("---------LUGARES:GET:OK:" + n);
+				if(n < 1)
+					return;
+				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
+				Lugar[] listaAL = new Lugar[n];
+				int i = 0;
+				while(iterator.hasNext())
+				{
+					listaAL[i++] = iterator.next();
+					//TODO: show on map
+				}
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+			}
+		});
+	}
+	private void showAvisos()
+	{
+		Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Aviso> avisos)
+			{
+				int n = avisos.getTotalObjects();
+				System.err.println("---------AVISOS:GET:OK:" + n);
+				if(n < 1)
+					return;
+				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
+				Aviso[] listaAL = new Aviso[n];
+				int i = 0;
+				while(iterator.hasNext())
+					listaAL[i++] = iterator.next();
+				//TODO: show on map
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
+			}
+		});
+	}
+	private void showRutas()
+	{
+		Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Ruta> rutas)
+			{
+				int n = rutas.getTotalObjects();
+				System.err.println("---------RUTAS:GET:OK:" + n);
+				if(n < 1)
+					return;
+				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
+				Ruta[] listaAL = new Ruta[n];
+				int i = 0;
+				while(iterator.hasNext())
+					listaAL[i++] = iterator.next();
+				//TODO: show on map
+			}
 
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
+			}
+		});
+	}
+
+
+/*
 	//______________________________________________________________________________________________
 	private String getMapsApiDirectionsUrl(GeoPoint[] pts)
 	{
@@ -258,6 +350,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				_Map.addMarker(new MarkerOptions().position(new LatLng(pt.getLatitude(), pt.getLongitude())));//.title("")
 		}
 	}
+
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -376,24 +469,24 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			try
 			{
 				jRoutes = jObject.getJSONArray("routes");
-				/** Traversing all routes */
+				// Traversing all routes
 				for (int i = 0; i < jRoutes.length(); i++)
 				{
 					jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
 					List<HashMap<String, String>> path = new ArrayList<>();
 
-					/** Traversing all legs */
+					// Traversing all legs
 					for (int j = 0; j < jLegs.length(); j++)
 					{
 						jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
 
-						/** Traversing all steps */
+						// Traversing all steps
 						for (int k = 0; k < jSteps.length(); k++)
 						{
 							String polyline = (String)((JSONObject) ((JSONObject)jSteps.get(k)).get("polyline")).get("points");
 							List<LatLng> list = decodePoly(polyline);
 
-							/** Traversing all points */
+							// Traversing all points
 							for (int l = 0; l < list.size(); l++)
 							{
 								HashMap<String, String> hm = new HashMap<>();
@@ -414,11 +507,11 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			return routes;
 		}
 
-		/**
-		 * Method Courtesy :
-		 * jeffreysambells.com/2010/05/27
-		 * /decoding-polylines-from-google-maps-direction-api-with-java
-		 * */
+//
+//		 * Method Courtesy :
+//		 * jeffreysambells.com/2010/05/27
+//		 * /decoding-polylines-from-google-maps-direction-api-with-java
+//		 *
 		private List<LatLng> decodePoly(String encoded)
 		{
 			List<LatLng> poly = new ArrayList<>();
@@ -456,4 +549,5 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			return poly;
 		}
 	}
+	*/
 }

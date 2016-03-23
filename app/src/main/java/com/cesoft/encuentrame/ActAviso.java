@@ -185,7 +185,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 			intent.putExtra(ActMain.MENSAJE, sMensaje);
 			startActivity(intent);
 			finish();*/
-			Util.openMain(ActAviso.this, bDirty, sMensaje, ActMain.AVISOS);
+			Util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
 		}
 		else
 			Util.return2Main(ActAviso.this, bDirty, sMensaje);
@@ -212,7 +212,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 			try
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
-			}catch(SecurityException se){}
+			}catch(SecurityException se){System.err.println("ActAviso:startTracking:e:"+se);}
 
 		}
 	}
@@ -409,7 +409,7 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 	{
 		_Map = googleMap;
 		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActAviso:onMapReady:e:"+se);}
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override

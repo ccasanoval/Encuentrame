@@ -55,7 +55,6 @@ import java.util.Map;
 public class ActMain extends AppCompatActivity
 {
 	private ViewPager _viewPager;
-	public static final int LUGARES=0, RUTAS=1, AVISOS=2;
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 	private static ActMain _this;
 	private static CoordinatorLayout _coordinatorLayout;
@@ -86,7 +85,7 @@ public class ActMain extends AppCompatActivity
 		try
 		{
 			Integer nPagina = getIntent().getIntExtra(PAGINA, -1);
-			if(nPagina >= LUGARES && nPagina <= AVISOS)
+			if(nPagina >= Util.LUGARES && nPagina <= Util.AVISOS)
 				_viewPager.setCurrentItem(nPagina);
 System.err.println("PAGINA++++++++++++++++"+nPagina);
 
@@ -95,12 +94,9 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 				Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();
 			//if( ! getIntent().getBooleanExtra(DIRTY, true))return;
 		}
-		catch(Exception e){}
+		catch(Exception e){System.err.println("ActMain:onCreate:e:"+e);}
 
 //cargaDatosDebug();//TODO:Debug
-
-		//Iniciar servicio
-		startService(new Intent(this, CesService.class));
 	}
 
 	@Override
@@ -119,10 +115,12 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		switch(id)
 		{
 		case R.id.action_config:
-			startActivity(new Intent(ActMain._this, ActConfig.class));
+			startActivity(new Intent(this, ActConfig.class));
 			return true;
 		case R.id.action_mapa:
-			startActivity(new Intent(ActMain._this, ActMaps.class));
+			Intent i = new Intent(this, ActMaps.class);
+			i.putExtra("tipo", _viewPager.getCurrentItem());
+			startActivity(i);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -153,9 +151,9 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		{
 			switch(position)
 			{
-			case LUGARES:	return getString(R.string.lugares);
-			case RUTAS:		return getString(R.string.rutas);
-			case AVISOS:	return getString(R.string.avisos);
+			case Util.LUGARES:	return getString(R.string.lugares);
+			case Util.RUTAS:	return getString(R.string.rutas);
+			case Util.AVISOS:	return getString(R.string.avisos);
 			}
 			return null;
 		}
@@ -207,17 +205,17 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 					//switch(_viewPager.getCurrentItem())
 					switch(sectionNumber)
 					{
-					case LUGARES:
+					case Util.LUGARES:
 						i = new Intent(ActMain._this, ActLugar.class);
-						startActivityForResult(i, LUGARES);
+						startActivityForResult(i, Util.LUGARES);
 						break;
-					case RUTAS:
+					case Util.RUTAS:
 						i = new Intent(ActMain._this, ActRuta.class);
-						startActivityForResult(i, RUTAS);
+						startActivityForResult(i, Util.RUTAS);
 						break;
-					case AVISOS:
+					case Util.AVISOS:
 						i = new Intent(ActMain._this, ActAviso.class);
-						startActivityForResult(i, AVISOS);
+						startActivityForResult(i, Util.AVISOS);
 						break;
 					}
 				}
@@ -225,24 +223,24 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 
 			switch(sectionNumber)
 			{
-			case LUGARES://-------------------------------------------------------------------------
+			case Util.LUGARES://-------------------------------------------------------------------------
 				textView.setText(getString(R.string.lugares));
 				refreshLugares();
 				break;
 
-			case RUTAS://---------------------------------------------------------------------------
+			case Util.RUTAS://---------------------------------------------------------------------------
 				textView.setText(getString(R.string.rutas));
 				refreshRutas();
 				break;
 
-			case AVISOS://--------------------------------------------------------------------------
+			case Util.AVISOS://--------------------------------------------------------------------------
 				textView.setText(getString(R.string.avisos));
 				refreshAvisos();
 				break;
 			}
 
 			/// Actualizar lista de rutas
-			if(sectionNumber == RUTAS)
+			if(sectionNumber == Util.RUTAS)
 			{
 				Util.setRefreshCallback(this);// CesService(on new track point) -> Util(refres ruta) -> this fragment(broadcast -> refresh lista rutas)
 				_MessageReceiver = new BroadcastReceiver()
@@ -270,17 +268,17 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			case LUGAR:
 				i = new Intent(ActMain._this, ActLugar.class);
 				i.putExtra(Lugar.NOMBRE, obj);
-				startActivityForResult(i, LUGARES);
+				startActivityForResult(i, Util.LUGARES);
 				break;
 			case RUTA:
 				i = new Intent(ActMain._this, ActRuta.class);
 				i.putExtra(Ruta.NOMBRE, obj);
-				startActivityForResult(i, RUTAS);
+				startActivityForResult(i, Util.RUTAS);
 				break;
 			case AVISO:
 				i = new Intent(ActMain._this, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, obj);
-				startActivityForResult(i, AVISOS);
+				startActivityForResult(i, Util.AVISOS);
 				break;
 			}
 		}
@@ -293,17 +291,17 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			case LUGAR:
 				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Lugar.NOMBRE, obj);
-				startActivityForResult(i, LUGARES);
+				startActivityForResult(i, Util.LUGARES);
 				break;
 			case RUTA:
 				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Ruta.NOMBRE, obj);
-				startActivityForResult(i, RUTAS);
+				startActivityForResult(i, Util.RUTAS);
 				break;
 			case AVISO:
 				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Aviso.NOMBRE, obj);
-				startActivityForResult(i, AVISOS);
+				startActivityForResult(i, Util.AVISOS);
 				break;
 			}
 		}
@@ -320,9 +318,9 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			if(resultCode != RESULT_OK)return;
 			switch(requestCode)
 			{
-			case LUGARES:	refreshLugares(); break;
-			case RUTAS:		refreshRutas(); break;
-			case AVISOS:	refreshAvisos(); break;
+			case Util.LUGARES:	refreshLugares(); break;
+			case Util.RUTAS:	refreshRutas(); break;
+			case Util.AVISOS:	refreshAvisos(); break;
 			}
 		}
 		// 4 CesIntLista
@@ -338,14 +336,14 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
   			super.onResume();
 			if(_MessageReceiver != null)
 			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
-  			LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter("ces"));
+  			LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter("ces"));
 		}
 		@Override
 		public void onPause()
 		{
 			if(_MessageReceiver != null)
 			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
-			LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
+			LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
   			super.onPause();
 		}
 		private BroadcastReceiver _MessageReceiver;
@@ -370,7 +368,6 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 						listaAL[i++] = iterator.next();
 					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 				}
-
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
@@ -400,7 +397,6 @@ System.err.println("ActMain:refreshRutas()");
 					_listView.setAdapter(r);
 					r.notifyDataSetChanged();
 				}
-
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
@@ -428,7 +424,6 @@ System.err.println("ActMain:refreshRutas()");
 						listaAL[i++] = iterator.next();
 					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
 				}
-
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
 				{
