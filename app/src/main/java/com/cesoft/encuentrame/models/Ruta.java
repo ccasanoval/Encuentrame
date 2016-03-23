@@ -6,15 +6,16 @@ import android.os.Parcelable;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
 
+//@formatter:off
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +24,7 @@ import java.util.List;
 //TODO: config : lenght of geofence....
 public class Ruta extends Objeto implements Parcelable
 {
+
 	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to be included in backendless
 
 	public Ruta(){}
@@ -35,7 +37,7 @@ public class Ruta extends Objeto implements Parcelable
 		public List<GeoPoint> getPuntos(){return puntos;}
 		public void addPunto(GeoPoint v){puntos.add(v);}
 
-	//TODO: Quitar si se utiliza geofence tracking
+	//TODO: Quitar si se utiliza geofence tracking y cambiar por radio...
 	private int periodo=2*60*1000;
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}
@@ -54,9 +56,12 @@ public class Ruta extends Objeto implements Parcelable
 		int n = in.readInt();
 		for(int i=0; i < n; i++)
 		{
+			String id = in.readString();
 			double lat = in.readDouble();
 			double lon = in.readDouble();
-			puntos.add(new GeoPoint(lat, lon));
+			GeoPoint gp = new GeoPoint(lat, lon);
+			gp.setObjectId(id);
+			puntos.add(gp);
 		}
 	}
 	@Override
@@ -67,6 +72,7 @@ public class Ruta extends Objeto implements Parcelable
 		dest.writeInt(puntos.size());
 		for(GeoPoint p : puntos)
 		{
+			dest.writeString(p.getObjectId());
 			dest.writeDouble(p.getLatitude());
 			dest.writeDouble(p.getLongitude());
 		}
@@ -85,7 +91,21 @@ public class Ruta extends Objeto implements Parcelable
 	//// BACKENDLESS
 	public void eliminar(AsyncCallback<Long> ac)
 	{
-		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
+System.err.println("Ruta:eliminar:r:" + this);
+		for(GeoPoint gp : puntos)//Si borro directamente la ruta me dice: ClassCastException: com.backendless.geo.GeoPoint cannot be cast to java.util.Map
+		{
+			Backendless.Geo.removePoint(gp, new AsyncCallback<Void>()
+			{
+				@Override public void handleResponse(Void response){}
+				@Override public void handleFault(BackendlessFault fault){}
+			});
+		}
+		puntos.clear();
+		/*Backendless.Persistence.save(this, new AsyncCallback<Ruta>()
+		{
+			@Override public void handleResponse(Ruta ruta){}
+			@Override public void handleFault(BackendlessFault backendlessFault){}
+		});*/
 		Backendless.Persistence.of(Ruta.class).remove(this, ac);
 	}
 	public void guardar(AsyncCallback<Ruta> ac)
@@ -121,3 +141,4 @@ public class Ruta extends Objeto implements Parcelable
 	}
 
 }
+//@formatter:on

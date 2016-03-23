@@ -372,8 +372,9 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 				_r.eliminar(new AsyncCallback<Long>()
 				{
 					@Override
-					public void handleResponse(Long ruta)
+					public void handleResponse(Long l)
 					{
+System.err.println("ActRuta:eliminar:handleResponse:"+l);
 						Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar));
 						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){Snackbar.make(_coordinatorLayout, , Snackbar.LENGTH_LONG).show();}});
 					}

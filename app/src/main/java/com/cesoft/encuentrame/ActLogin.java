@@ -157,6 +157,7 @@ public class ActLogin extends AppCompatActivity
 			switch(sectionNumber)
 			{
 			case ENTER://---------------------------------------------------------------------------
+				txtLogin.setText(Util.getUsuario());
 				txtEmail.setVisibility(View.GONE);
 				txtPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));

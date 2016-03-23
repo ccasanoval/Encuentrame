@@ -133,6 +133,18 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
     }
 
 	//______________________________________________________________________________________________
+	private static void showLights(Context c, int color)
+	{
+		NotificationManager notif = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
+		notif.cancel(1); // clear previous notification
+		final Notification notification = new Notification();
+		notification.ledARGB = color;
+		notification.ledOnMS = 1000;
+		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+		notif.notify(1, notification);
+	}
+
+	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
 	public static void showAviso(Context c, String sTitulo, Aviso a, Intent intent)
@@ -150,12 +162,8 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
-System.err.println("------------********0*************-----------UTIL--showAviso:" + a);
-System.err.println("------------********1*************-----------UTIL--showAviso:" + intent.getParcelableExtra(Aviso.NOMBRE));
 
 		Integer idNotificacion = Integer.parseInt(a.getObjectId().substring(0,6).replace('-','0'), 16);
-System.err.println("------------********999999*************-----------UTIL--iId:" + idNotificacion);
-
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
@@ -275,22 +283,26 @@ System.err.println("------------********999999*************-----------UTIL--iId:
 
 
 	//______________________________________________________________________________________________
+	// GET BACK TO MAIN
+	//______________________________________________________________________________________________
 	public static void return2Main(Activity act, boolean bDirty, String sMensaje)
 	{
-		Intent data = new Intent();
-		data.putExtra("dirty", bDirty);
-		data.putExtra("mensaje", sMensaje);
-		act.setResult(Activity.RESULT_OK, data);
+		Intent intent = new Intent();
+		intent.putExtra(ActMain.DIRTY, bDirty);
+		intent.putExtra(ActMain.MENSAJE, sMensaje);
+		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
-//		Intent intent = new Intent(act, ActMain.class);
-//		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//		intent.putExtra("dirty", bDirty);
-//		intent.putExtra("mensaje", sMensaje);
-//		act.setResult(Activity.RESULT_OK, intent);
-//		act.finish();
-//		startActivity(intent);
 	}
-
+	public static void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
+	{
+		Intent intent = new Intent(act, ActMain.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(ActMain.PAGINA, pagina);//Go to specific section (ActMain.AVISOS...)
+		intent.putExtra(ActMain.DIRTY, bDirty);
+		intent.putExtra(ActMain.MENSAJE, sMensaje);
+		act.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
+		act.finish();
+	}
 
 
 	//______________________________________________________________________________________________

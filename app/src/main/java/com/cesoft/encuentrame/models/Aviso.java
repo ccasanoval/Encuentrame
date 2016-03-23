@@ -1,7 +1,6 @@
 package com.cesoft.encuentrame.models;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
@@ -13,10 +12,8 @@ import com.backendless.persistence.QueryOptions;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
-import weborb.service.ExcludeProperties;
-import weborb.service.ExcludeProperty;
+import weborb.service.ExcludeProperties;//import weborb.service.ExcludeProperty;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
@@ -102,26 +99,10 @@ public class Aviso extends Objeto
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
 		setRadio(in.readInt());
-
-		/*if(lugar.getObjectId() == null && getObjectId() != null)
-		{
-			ArrayList<String> relationProps = new ArrayList<>();
-			relationProps.add("lugar");
-			Aviso a = Backendless.Persistence.of(Aviso.class).findById(getObjectId(), relationProps);
-
-			setNombre(a.getNombre());
-			setDescripcion(a.getDescripcion());
-			setLugar(a.getLugar());
-			setActivo(a.isActivo());
-System.err.println("---------Aviso:parcel:out:3" + this);
-		}*/
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
-//		dest.writeString(getObjectId());
-//		dest.writeString(nombre);
-//		dest.writeString(descripcion);
 		super.writeToParcel(dest, flags);
 		//
 		dest.writeByte(isActivo()?(byte)1:0);

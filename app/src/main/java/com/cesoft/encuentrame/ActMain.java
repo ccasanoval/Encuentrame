@@ -56,6 +56,7 @@ public class ActMain extends AppCompatActivity
 {
 	private ViewPager _viewPager;
 	public static final int LUGARES=0, RUTAS=1, AVISOS=2;
+	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 	private static ActMain _this;
 	private static CoordinatorLayout _coordinatorLayout;
 
@@ -84,10 +85,15 @@ public class ActMain extends AppCompatActivity
 
 		try
 		{
-			Integer nPagina = getIntent().getIntExtra("pagina", -1);
+			Integer nPagina = getIntent().getIntExtra(PAGINA, -1);
 			if(nPagina >= LUGARES && nPagina <= AVISOS)
 				_viewPager.setCurrentItem(nPagina);
 System.err.println("PAGINA++++++++++++++++"+nPagina);
+
+			String sMensaje = getIntent().getStringExtra(MENSAJE);
+			if(sMensaje != null && !sMensaje.isEmpty())
+				Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();
+			//if( ! getIntent().getBooleanExtra(DIRTY, true))return;
 		}
 		catch(Exception e){}
 
@@ -306,10 +312,10 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		{
 			if(data != null)
 			{
-				String sMensaje = data.getStringExtra("mensaje");
+				String sMensaje = data.getStringExtra(MENSAJE);
 				if(sMensaje != null && !sMensaje.isEmpty())
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-				if( ! data.getBooleanExtra("dirty", true))return;
+				if( ! data.getBooleanExtra(DIRTY, true))return;
 			}
 			if(resultCode != RESULT_OK)return;
 			switch(requestCode)
@@ -322,6 +328,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		// 4 CesIntLista
 		public void onRefreshListaRutas()
 		{
+System.err.println("---------ActMain:onRefreshListaRutas():");
 			//ActMain._this.runOnUiThread(new Runnable(){public void run(){refreshRutas();}});//No funciona, ha de hacerse mediante broadcast...
 			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent("ces"));
 		}

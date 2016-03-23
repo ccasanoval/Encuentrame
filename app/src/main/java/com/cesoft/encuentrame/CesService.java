@@ -180,6 +180,9 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 	//______________________________________________________________________________________________
 	//TODO: No guardar punto si es igual que el último...
 	//TODO: No guardar si (distancia con ultimo punto)/(tiempo ultimo punto) > 300km/h
+	private static Location _locLastSaved = null;
+	private static long _tmLastSaved = System.currentTimeMillis();
+	//
 	private static Location _locLast = null;
 	private static String _sId = "";
 	public static void saveGeoTracking()
@@ -202,11 +205,23 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				if(!_sId.equals(sId))
 				{
 					_sId = sId;
+					_locLastSaved = null;
 					System.err.println("CesService:saveGeoTracking:Nueva ruta: " + _sId + " != " + sId);
-				} else if(loc.distanceTo(_locLast) < 2)//Puntos muy cercanos
+				}
+				else if(loc.distanceTo(_locLast) < 2)//Puntos muy cercanos
 				{
 					System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLast.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude());
 					return;
+				}
+				else if(_locLastSaved != null)
+				{
+					//Si el nuevo punto no tiene sentido, no se guarda...
+					double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
+					if(vel > 300)//kilometros hora a metros segundo : 300km/h = 83m/s
+					{
+						System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
+						return;
+					}
 				}
 				String s = "null";
 				if(_locLast != null)
@@ -216,6 +231,8 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				//TODO: añadir geofence por si quisiera funcionar...?
 				System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
 				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
+				_locLastSaved = loc;
+				_tmLastSaved = System.currentTimeMillis();
 				r.guardar(new AsyncCallback<Ruta>()
 				{
 					@Override
