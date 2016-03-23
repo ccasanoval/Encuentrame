@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -61,6 +62,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 {
 	private static final int DELAY_LOCATION = 60000;
 
+	private boolean _bDesdeNotificacion = false;
 	private boolean _bNuevo = false;
 	private Aviso _a;
 	private TextView _lblPosicion;
@@ -111,11 +113,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void onClick(View view)
 			{
-				Intent intent = new Intent(ActAviso.this, ActMain.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.putExtra("pagina", ActMain.AVISOS);//TODO:Go to section Avisos...!
-				ActAviso.this.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
-				ActAviso.this.finish();
+				openMain(false, "");
 			}
 		});
 
@@ -148,6 +146,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		{
 			_a = getIntent().getParcelableExtra(Aviso.NOMBRE);
 System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps failing pass only ID and I get it from db....
+			_bDesdeNotificacion = getIntent().getBooleanExtra("notificacion", false);
 			setValores();
 		}
 		catch(Exception e)
@@ -172,14 +171,24 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
 	}
+
 	//______________________________________________________________________________________________
-	private void return2Main(boolean bDirty, String sMensaje)
+	// GET BACK TO MAIN
+	public void openMain(boolean bDirty, String sMensaje)
 	{
-		Intent data = new Intent();
-		data.putExtra("dirty", bDirty);
-		data.putExtra("mensaje", sMensaje);
-		setResult(android.app.Activity.RESULT_OK, data);
-		finish();
+		if(_bDesdeNotificacion)
+		{
+			/*Intent intent = new Intent(this, ActMain.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(ActMain.PAGINA, ActMain.AVISOS);//pagina);//Go to specific section (ActMain.AVISOS...)
+			intent.putExtra(ActMain.DIRTY, bDirty);
+			intent.putExtra(ActMain.MENSAJE, sMensaje);
+			startActivity(intent);
+			finish();*/
+			Util.openMain(ActAviso.this, bDirty, sMensaje, ActMain.AVISOS);
+		}
+		else
+			Util.return2Main(ActAviso.this, bDirty, sMensaje);
 	}
 
 	//______________________________________________________________________________________________
@@ -301,26 +310,22 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
-System.err.println("ActAviso:guardar:-------------------------------------------0");
 		if(_a.getLatitud()==0 && _a.getLongitud()==0)
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			return;
 		}
-System.err.println("ActAviso:guardar:-------------------------------------------1");
 		if(_txtNombre.getText().toString().isEmpty())
 		{
 			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
 		}
-System.err.println("ActAviso:guardar:-------------------------------------------3");
 		_a.setNombre(_txtNombre.getText().toString());
 		_a.setDescripcion(_txtDescripcion.getText().toString());
 		_a.setActivo(_swtActivo.isChecked());
 		//_a.reactivarPorHoy();
 		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
-System.err.println("ActAviso:guardar:-------------------------------------------4:"+_a);
 		_a.guardar(new AsyncCallback<Aviso>()
 		{
 			@Override
@@ -328,7 +333,8 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 			{
 				CesService.cargarListaGeoAvisos();
 				System.err.println("ActAviso:guardar:handleResponse:" + a);
-				return2Main(true, getString(R.string.ok_guardar));
+				//return2Main(true, getString(R.string.ok_guardar));
+				openMain(true, getString(R.string.ok_guardar));
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -337,7 +343,7 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
-System.err.println("ActAviso:guardar:-------------------------------------------5");
+System.err.println("ActAviso:guardar:-------------------------------------------fin");
 	}
 
 	//______________________________________________________________________________________________
@@ -357,7 +363,8 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 					public void handleResponse(Long l)
 					{
 						System.err.println("ActAviso:eliminar:handleResponse:" + l);
-						return2Main(true, getString(R.string.ok_eliminar));
+						//return2Main(true, getString(R.string.ok_eliminar));
+						openMain(true, getString(R.string.ok_eliminar));
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
