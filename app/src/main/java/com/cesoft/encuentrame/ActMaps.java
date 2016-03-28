@@ -15,11 +15,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.BufferedReader;
@@ -30,13 +33,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Color;
 import android.view.View;
+import android.widget.TextView;
 
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
@@ -153,12 +159,9 @@ System.err.println("**********************_iTipo="+_iTipo);
 
 	}
 
-	/**
-	 * This callback is triggered when the map is ready to be used.
-	 * This is where we can add markers or lines, add listeners or move the camera.
-	 * If Google Play services is not installed on the device, the user will be prompted to install it inside the SupportMapFragment.
-	 * This method will only be triggered once the user has installed Google Play services and returned to the app.
-	 */
+	// This callback is triggered when the map is ready to be used. This is where we can add markers or lines, add listeners or move the camera.
+	// If Google Play services is not installed on the device, the user will be prompted to install it inside the SupportMapFragment.
+	// This method will only be triggered once the user has installed Google Play services and returned to the app.
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
@@ -168,14 +171,18 @@ System.err.println("**********************_iTipo="+_iTipo);
 		if(_l != null)			/// LUGAR
 		{
 			setPosLugar(_l.getLatitud(), _l.getLongitud());
+			showLugar(_l);
 		}
 		else if(_a != null)		/// AVISO
 		{
 			setPosLugar(_a.getLatitud(), _a.getLongitud());
+			showAviso(_a);
 		}
 		else if(_r != null)		/// RUTA
 		{
-			//TODO: Draw a route... copiar de ActRuta
+			if(_r.getPuntos().size() > 0)
+				setPosLugar(_r.getPuntos().get(0).getLatitude(), _r.getPuntos().get(0).getLongitude());
+			showRuta(_r);
 		}
 		else
 		switch(_iTipo)
@@ -245,6 +252,129 @@ System.err.println("**********************_iTipo="+_iTipo);
 	}
 
 
+
+	//______________________________________________________________________________________________
+	private int _iColor = Color.LTGRAY;
+	private BitmapDescriptor getNextIcon()
+	{
+		BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+		switch(_iColor)
+		{
+		case Color.MAGENTA:
+			_iColor = Color.BLUE;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+			break;
+		case Color.BLUE:
+			_iColor = Color.BLACK;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
+			break;
+		case Color.BLACK:
+			_iColor = Color.DKGRAY;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE);
+			break;
+		case Color.DKGRAY:
+			_iColor = Color.YELLOW;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW);
+			break;
+		case Color.YELLOW:
+			_iColor = Color.CYAN;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN);
+			break;
+		case Color.CYAN:
+			_iColor = Color.LTGRAY;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
+			break;
+		case Color.LTGRAY:
+			_iColor = Color.MAGENTA;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
+			break;
+		}
+		return bm;
+	}
+
+	private void showLugar(Lugar l)
+	{
+		//try{
+		LatLng pos = new LatLng(l.getLatitud(), l.getLongitud());
+		MarkerOptions mo = new MarkerOptions()
+				.position(pos)
+				.icon(getNextIcon())
+				.title(l.getNombre())
+				.snippet(l.getDescripcion());
+		_marker = _Map.addMarker(mo);
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+		//}catch(Exception e){System.err.println("ActLugar:setMarker:e:"+e);}
+	}
+	private void showAviso(Aviso a)
+	{
+		BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+
+		LatLng pos = new LatLng(a.getLatitud(), a.getLongitud());
+		MarkerOptions mo = new MarkerOptions()
+				.position(pos)
+				.icon(getNextIcon())
+				.title(a.getNombre())
+				.snippet(a.getDescripcion());
+		_marker = _Map.addMarker(mo);
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+		_circle = _Map.addCircle(new CircleOptions()
+				.center(pos)
+				.radius(a.getRadio())
+				.strokeColor(Color.TRANSPARENT)
+				.fillColor(_iColor));
+				//.fillColor(0x55AA0000));//Color.BLUE
+		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
+	}
+	private void showRuta(Ruta r)//TODO: un color diferente de marker para cada ruta
+	{
+		if(r.getPuntos().size() < 1)return;
+
+		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+		String INI = getString(R.string.ini);
+		String FIN = getString(R.string.fin);
+		PolylineOptions po = new PolylineOptions();
+		BitmapDescriptor bm = getNextIcon();
+
+		GeoPoint gpIni = r.getPuntos().get(0);
+		GeoPoint gpFin = r.getPuntos().get(r.getPuntos().size() -1);
+		for(GeoPoint pt : r.getPuntos())
+		{
+			MarkerOptions mo = new MarkerOptions();
+			mo.title(r.getNombre());
+			Date date = r.getFechaPunto(pt);
+			if(date != null)mo.snippet(dateFormat.format(date));
+
+			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
+System.err.println("showRuta: " + pos);
+			if(pt == gpIni)
+			{
+				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+				mo.snippet(INI);
+				_Map.addMarker(mo.position(pos));
+System.err.println("------- INI " + r.getNombre());
+			}
+			else if(pt == gpFin)
+			{
+System.err.println("------- FIN " + r.getNombre());
+				mo.snippet(FIN);
+				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+				_Map.addMarker(mo.position(pos));
+			}
+			else if((pt.getLatitude() != gpIni.getLatitude() || pt.getLongitude() != gpIni.getLongitude())
+					&& (pt.getLatitude() != gpFin.getLatitude() || pt.getLongitude() != gpFin.getLongitude()))
+			{
+				mo.icon(bm);
+				_Map.addMarker(mo.position(pos));
+			}
+			po.add(pos);
+		}
+		po.width(5).color(_iColor);
+		Polyline line = _Map.addPolyline(po);
+
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
+	}
+
+
 	//______________________________________________________________________________________________
 	private void showLugares()
 	{
@@ -255,16 +385,10 @@ System.err.println("**********************_iTipo="+_iTipo);
 			{
 				int n = lugares.getTotalObjects();
 				System.err.println("---------LUGARES:GET:OK:" + n);
-				if(n < 1)
-					return;
+				if(n < 1)return;
 				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
-				Lugar[] listaAL = new Lugar[n];
-				int i = 0;
 				while(iterator.hasNext())
-				{
-					listaAL[i++] = iterator.next();
-					//TODO: show on map
-				}
+					showLugar(iterator.next());
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -282,14 +406,10 @@ System.err.println("**********************_iTipo="+_iTipo);
 			{
 				int n = avisos.getTotalObjects();
 				System.err.println("---------AVISOS:GET:OK:" + n);
-				if(n < 1)
-					return;
+				if(n < 1)return;
 				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
-				Aviso[] listaAL = new Aviso[n];
-				int i = 0;
 				while(iterator.hasNext())
-					listaAL[i++] = iterator.next();
-				//TODO: show on map
+					showAviso(iterator.next());
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -307,16 +427,11 @@ System.err.println("**********************_iTipo="+_iTipo);
 			{
 				int n = rutas.getTotalObjects();
 				System.err.println("---------RUTAS:GET:OK:" + n);
-				if(n < 1)
-					return;
+				if(n < 1)return;
 				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
-				Ruta[] listaAL = new Ruta[n];
-				int i = 0;
 				while(iterator.hasNext())
-					listaAL[i++] = iterator.next();
-				//TODO: show on map
+					showRuta(iterator.next());
 			}
-
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{

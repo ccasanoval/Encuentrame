@@ -40,6 +40,7 @@
 	<string name="actualizar_posicion">Actualizar posición</string>
 	<string name="ver_mapa">Ver mapa</string>
 	<string name="configuracion">Configuración</string>
+	<string name="buscar">Buscar</string>
 
 	<string name="activo">Activo</string>
 	<string name="nombre">Nombre</string>
@@ -64,6 +65,8 @@
 	<string name="periodo">Periodo</string>
 	<string name="start">Iniciar</string>
 	<string name="stop">detener</string>
+	<string name="ini">Ini</string>
+	<string name="fin">Fin</string>
 
 	<string name="ok_eliminar">Se eliminó el registro</string>
 	<string name="error_eliminar">Error al eliminar: %s</string>
@@ -71,8 +74,6 @@
 	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
 	<string name="sin_nombre">Debe establecer un nombre...</string>
 	<string name="sin_lugar">Debe establecer una posición...</string>
-
-
 
 	<!-- Strings related to Settings -->
 	<!-- Example General settings -->
@@ -130,5 +131,6 @@
 	<string name="pref_ringtone_silent">Silent</string>
 	
 	<string name="pref_title_vibrate">Vibrate</string>
+	<string name="title_activity_act_buscar">Buscar</string>
 
 </resources>

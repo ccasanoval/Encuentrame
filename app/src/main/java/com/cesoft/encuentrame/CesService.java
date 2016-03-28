@@ -230,7 +230,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				_locLast = loc;
 				//TODO: añadir geofence por si quisiera funcionar...?
 				System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
+				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()), new java.util.Date());
 				_locLastSaved = loc;
 				_tmLastSaved = System.currentTimeMillis();
 				r.guardar(new AsyncCallback<Ruta>()

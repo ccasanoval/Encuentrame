@@ -12,7 +12,7 @@ import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
 
 import java.util.ArrayList;
-
+import java.util.Date;
 import java.util.List;
 
 //@formatter:off
@@ -24,8 +24,8 @@ import java.util.List;
 //TODO: config : lenght of geofence....
 public class Ruta extends Objeto implements Parcelable
 {
-
 	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to be included in backendless
+	public transient static final String FECHA = "fecha";//TRANSIENT so not to be included in backendless
 
 	public Ruta(){}
 
@@ -35,7 +35,22 @@ public class Ruta extends Objeto implements Parcelable
 
 	private List<GeoPoint> puntos = new ArrayList<>();
 		public List<GeoPoint> getPuntos(){return puntos;}
-		public void addPunto(GeoPoint v){puntos.add(v);}
+		//public void addPunto(GeoPoint v){puntos.add(v);}//new java.util.Date().getTime()
+		public void addPunto(GeoPoint gp, Date d)
+		{
+			gp.addMetadata(FECHA, d.getTime());
+			puntos.add(gp);
+		}
+		public Date getFechaPunto(GeoPoint gp)
+		{
+			try
+			{
+				Object o = gp.getMetadata(FECHA);
+				if(o == null)return null;
+				return new Date((long)o);
+			}
+			catch(Exception e){System.err.println("Ruta:getFechaPunto:e:"+e+":::"+gp.getMetadata(FECHA));return null;}
+		}
 
 	//TODO: Quitar si se utiliza geofence tracking y cambiar por radio...
 	private int periodo=2*60*1000;
@@ -60,6 +75,7 @@ public class Ruta extends Objeto implements Parcelable
 			double lat = in.readDouble();
 			double lon = in.readDouble();
 			GeoPoint gp = new GeoPoint(lat, lon);
+			gp.addMetadata(FECHA, in.readLong());
 			gp.setObjectId(id);
 			puntos.add(gp);
 		}
@@ -75,6 +91,7 @@ public class Ruta extends Objeto implements Parcelable
 			dest.writeString(p.getObjectId());
 			dest.writeDouble(p.getLatitude());
 			dest.writeDouble(p.getLongitude());
+			dest.writeLong((long)p.getMetadata(FECHA));//try{}catch(Exception e){}
 		}
 	}
 	@Override
@@ -129,15 +146,6 @@ System.err.println("Ruta:eliminar:r:" + this);
 		queryOptions.addRelated("puntos");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
-
-		//Backendless.Persistence.of(Ruta.class).find(res);
-		/*
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Lugar.class).find(query, res);
-		* */
 	}
 
 }

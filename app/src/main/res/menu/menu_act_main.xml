@@ -9,8 +9,14 @@
 		android:icon="@android:drawable/ic_menu_mapmode"
 		app:showAsAction="ifRoom"/>
 	<item
-		android:id="@+id/action_config"
+		android:id="@+id/action_buscar"
 		android:orderInCategory="110"
+		android:title="@string/buscar"
+		android:icon="@android:drawable/ic_menu_search"
+		app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/action_config"
+		android:orderInCategory="120"
 		android:title="@string/config"
 		android:icon="@android:drawable/ic_menu_preferences"
 		app:showAsAction="ifRoom"/>

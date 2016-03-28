@@ -1,8 +1,10 @@
 package com.cesoft.encuentrame;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -20,11 +22,9 @@ import android.widget.EditText;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
-import com.backendless.Backendless;
-import com.cesoft.encuentrame.models.RutaPto;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,8 +42,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -156,9 +154,11 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 		}
 		catch(Exception e)
 		{
+System.err.println("ActRuta:onCreate:e:"+e);
 			_bNuevo = true;
 			_r = new Ruta();
 		}
+System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		//------------------------------------------------------------------------------------------
 		if(_bNuevo)
 		{
@@ -278,6 +278,11 @@ System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 				break;
 			}
 		}
+		//
+		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
+		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
+		lblFecha.setText(dateFormat.format(date));
 	}
 
 	//______________________________________________________________________________________________
@@ -437,11 +442,10 @@ System.err.println("ActRuta:eliminar:handleResponse:"+l);
 		for(GeoPoint pt : _r.getPuntos())
 		{
 			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
-System.err.println("showMarkers: "+pos);
-			_Map.addMarker(new MarkerOptions().position(pos));//.title("")//TODO: Show INI, FIN, y add fecha to each point
+System.err.println("showMarkers: " + pos);
+			_Map.addMarker(new MarkerOptions().position(pos));
 			po.add(pos);
-
-			_Map.addCircle(new CircleOptions().center(pos).radius(2).strokeColor(Color.TRANSPARENT).fillColor(0x55AA0000));
+			//_Map.addCircle(new CircleOptions().center(pos).radius(2).strokeColor(Color.TRANSPARENT).fillColor(0x55AA0000));
 		}
 		po.width(5).color(Color.RED);
 		Polyline line = _Map.addPolyline(po);

@@ -45,13 +45,14 @@ import com.backendless.exceptions.BackendlessFault;
 import com.cesoft.encuentrame.models.Lugar;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
 public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 	//GoogleMap.OnCameraChangeListener,
 {
 	private static final int DELAY_LOCATION = 60000;
 
 	private boolean _bNuevo = false;
-	private Lugar _l;
+	private Lugar _l = new Lugar();
 	private TextView _lblPosicion;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
@@ -352,7 +353,7 @@ System.err.println("*************"+_l);
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
 			Location loc = Util.getLocation();
-			_l.setLatLon(loc.getLatitude(), loc.getLongitude());
+			if(loc != null)_l.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
 		setPosLugar(_l.getLatitud(), _l.getLongitud());
 	}

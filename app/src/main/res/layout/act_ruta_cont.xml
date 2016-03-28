@@ -57,7 +57,13 @@
 			android:singleLine="true"/>
 	</android.support.design.widget.TextInputLayout>
 
-	<!-- DATE CREATED and MODIFIED ? -->
+	<TextView
+		android:id="@+id/lblFecha"
+		android:layout_below="@+id/txtDescripcion_"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		/>
 
 	<LinearLayout
 		android:id="@+id/layPeriodo"

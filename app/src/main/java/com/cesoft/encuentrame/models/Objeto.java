@@ -4,11 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.Date;
 
+import weborb.service.ExcludeProperty;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //import weborb.service.ExcludeProperty;
-//@ExcludeProperty( propertyName = "foo" )
+@ExcludeProperty(propertyName = "fecha")
 public class Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "objeto";//TRANSIENT so not to include in backendless
@@ -25,6 +27,7 @@ public class Objeto implements Parcelable
 	public void setCreated(Date created){this.created = created;}
 	public Date getUpdated(){return updated;}
 	public void setUpdated(Date updated){this.updated = updated;}
+		public Date getFecha(){return updated!=null?updated:created;}
 
 	protected String nombre;
 	protected String descripcion;

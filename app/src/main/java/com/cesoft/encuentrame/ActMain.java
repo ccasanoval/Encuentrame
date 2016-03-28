@@ -40,17 +40,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-//TODO:Añadir servicio de geofence aviso
-//TODO:Añadir margin top a todos incluso login
+//TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
-//TODO:icono app : android con gorro de wally?
+//TODO: Añadir margin top a todos incluso login
+//TODO: icono app : android con gorro de wally?
+//TODO: Main menu => refresh listas, or inside config: refresh data...
+//TODO: Traducir a ingles
+//TODO: widget para ruta start/stop... widget para guardar punto...
+//TODO: Add photo to lugar & alerta n save it in backendless...
+//TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
-//TODO: Main menu => refresh listas, or inside config: refresh data...
-//TODO:Traducir a ingles
-//TODO:Add photo to lugar & alerta n save it in backendless...
-//TODO:Refresh listas cuando se añade un nuevo registro (o modifica?)
-//TODO:Menu para ir al menu inicio, asi cuando abres aviso puedes volver a menu y no cerrar directamente
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -110,15 +110,20 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
+		Intent i;
 		int id = item.getItemId();
-		//noinspection SimplifiableIfStatement
 		switch(id)
 		{
 		case R.id.action_config:
 			startActivity(new Intent(this, ActConfig.class));
 			return true;
 		case R.id.action_mapa:
-			Intent i = new Intent(this, ActMaps.class);
+			i = new Intent(this, ActMaps.class);
+			i.putExtra("tipo", _viewPager.getCurrentItem());
+			startActivity(i);
+			return true;
+		case R.id.action_buscar:
+			i = new Intent(this, ActBuscar.class);
 			i.putExtra("tipo", _viewPager.getCurrentItem());
 			startActivity(i);
 			return true;
@@ -350,7 +355,7 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 
 
 		//__________________________________________________________________________________________
-		public void refreshLugares()
+		public void refreshLugares()//TODO: Hacer filtro...
 		{
 			Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
 			{
