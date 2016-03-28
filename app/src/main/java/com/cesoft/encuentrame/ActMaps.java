@@ -89,6 +89,19 @@ System.err.println("**********************_iTipo="+_iTipo);
 		mapFragment.getMapAsync(this);
 
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
+		if(_iTipo > -1 || _r != null)
+		{
+			fab.setImageResource(getResources().getIdentifier("@android:drawable/ic_menu_revert", null, null));
+			fab.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View view)
+				{
+					Util.return2Main(ActMaps.this, false, "");
+				}
+			});
+		}
+		else
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -124,26 +137,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 							Intent data = new Intent();
 							data.putExtra(Aviso.NOMBRE, _a);
-							setResult(Activity.RESULT_OK, data);
-							finish();
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
-						}
-					});
-				}
-				if(_r != null)
-				{
-					_r.guardar(new AsyncCallback<Ruta>()
-					{
-						@Override
-						public void handleResponse(Ruta a)
-						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
-							Intent data = new Intent();
-							data.putExtra(Ruta.NOMBRE, _r);
 							setResult(Activity.RESULT_OK, data);
 							finish();
 						}
@@ -230,6 +223,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 		{
 			LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
 			if(_marker != null)_marker.remove();
+			_Map.clear();
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
 					.title(sTitulo)
@@ -250,7 +244,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 				.strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
-
 
 
 	//______________________________________________________________________________________________
@@ -321,15 +314,18 @@ System.err.println("**********************_iTipo="+_iTipo);
 				.center(pos)
 				.radius(a.getRadio())
 				.strokeColor(Color.TRANSPARENT)
-				.fillColor(_iColor));
+				.fillColor(0x55000000 + _iColor));
 				//.fillColor(0x55AA0000));//Color.BLUE
 		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
 	}
-	private void showRuta(Ruta r)//TODO: un color diferente de marker para cada ruta
+	private void showRuta(Ruta r)
 	{
 		if(r.getPuntos().size() < 1)return;
 
-		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
+		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
@@ -342,7 +338,9 @@ System.err.println("**********************_iTipo="+_iTipo);
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
 			Date date = r.getFechaPunto(pt);
-			if(date != null)mo.snippet(dateFormat.format(date));
+			if(date != null)
+				mo.snippet(df.format(date));
+				//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
 
 			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
 System.err.println("showRuta: " + pos);
@@ -351,20 +349,29 @@ System.err.println("showRuta: " + pos);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI);
 				_Map.addMarker(mo.position(pos));
-System.err.println("------- INI " + r.getNombre());
+System.err.println("------- INI " + r.getNombre() + " : "+pos + " : "+ df.format(date));
 			}
 			else if(pt == gpFin)
 			{
-System.err.println("------- FIN " + r.getNombre());
+System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format(date));
 				mo.snippet(FIN);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				_Map.addMarker(mo.position(pos));
 			}
-			else if((pt.getLatitude() != gpIni.getLatitude() || pt.getLongitude() != gpIni.getLongitude())
-					&& (pt.getLatitude() != gpFin.getLatitude() || pt.getLongitude() != gpFin.getLongitude()))
+			else
 			{
-				mo.icon(bm);
-				_Map.addMarker(mo.position(pos));
+				//else if((pt.getLatitude() != gpIni.getLatitude() || pt.getLongitude() != gpIni.getLongitude()) && (pt.getLatitude() != gpFin.getLatitude() || pt.getLongitude() != gpFin.getLongitude()))
+				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
+				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
+				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
+				if(disIni > 0.01 && disFin > 0.01)
+				{
+					System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
+					mo.icon(bm);
+					_Map.addMarker(mo.position(pos));
+				}
+				else //Punto igual a ini o fin
+					System.err.println("------- NO " + r.getNombre() + " : " + pos + " : " + df.format(date));
 			}
 			po.add(pos);
 		}
@@ -376,6 +383,7 @@ System.err.println("------- FIN " + r.getNombre());
 
 
 	//______________________________________________________________________________________________
+
 	private void showLugares()
 	{
 		Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()

@@ -46,7 +46,7 @@
 
 	<LinearLayout
 		android:id="@+id/layRadio"
-		android:layout_below="@+id/layPosicion"
+		android:layout_below="@+id/txtNombre_"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"

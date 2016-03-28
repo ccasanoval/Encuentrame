@@ -12,6 +12,8 @@ import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -34,20 +36,63 @@ public class Ruta extends Objeto implements Parcelable
 		public void setActivo(boolean b){activo = b;}*/
 
 	private List<GeoPoint> puntos = new ArrayList<>();
-		public List<GeoPoint> getPuntos(){return puntos;}
+		public List<GeoPoint> getPuntos()
+		{
+			Collections.sort(puntos, new Comparator<GeoPoint>()
+			{
+        		@Override
+        		public int compare(GeoPoint gp1, GeoPoint gp2)
+				{
+					long time1=0, time2=0;
+					Object o1 = gp1.getMetadata(FECHA);
+					Object o2 = gp2.getMetadata(FECHA);
+					if(o1 == null || o2 == null)return 0;//Dont compare...
+					return ((String)o1).compareTo(((String)o2));
+
+					/*if(o1 instanceof String)
+					{
+						time1 = Long.parseLong((String)o1);
+						System.err.println("----"+o1+" is String");
+					}
+					else if(o1 instanceof Long)
+					{
+						time1 = (Long)o1;
+						System.err.println("----"+o1+" is Long");
+					}
+					if(o2 instanceof String)
+					{
+						time2 = Long.parseLong((String)o2);
+						System.err.println("----"+o2+" is String");
+					}
+					else if(o2 instanceof Long)
+					{
+						time2 = (Long)o2;
+						System.err.println("----"+o2+" is Long");
+					}
+					if(time1 == time2)return 0;
+					else if(time1 > time2)return 1;
+					else return -1;*/
+        		}
+    		});
+			return puntos;
+		}
 		//public void addPunto(GeoPoint v){puntos.add(v);}//new java.util.Date().getTime()
 		public void addPunto(GeoPoint gp, Date d)
 		{
-			gp.addMetadata(FECHA, d.getTime());
+			gp.addMetadata(FECHA, d.getTime());//Se guarda como string...
 			puntos.add(gp);
 		}
 		public Date getFechaPunto(GeoPoint gp)
 		{
 			try
 			{
+				long time=0;
 				Object o = gp.getMetadata(FECHA);
 				if(o == null)return null;
-				return new Date((long)o);
+				if(o instanceof String)time = Long.parseLong((String)o);
+				//else if(o instanceof Long)time = (Long)o;//ver cual es...
+				Date d = new Date();d.setTime(time);
+				return d;
 			}
 			catch(Exception e){System.err.println("Ruta:getFechaPunto:e:"+e+":::"+gp.getMetadata(FECHA));return null;}
 		}
@@ -91,7 +136,7 @@ public class Ruta extends Objeto implements Parcelable
 			dest.writeString(p.getObjectId());
 			dest.writeDouble(p.getLatitude());
 			dest.writeDouble(p.getLongitude());
-			dest.writeLong((long)p.getMetadata(FECHA));//try{}catch(Exception e){}
+			try{dest.writeLong(Long.parseLong((String)p.getMetadata(FECHA)));}catch(Exception e){dest.writeLong(0);System.err.println("-----"+p.getMetadata(FECHA)+":e:"+e);}
 		}
 	}
 	@Override
@@ -134,7 +179,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");
+		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
 		query.setWhereClause("objectId = '" + sId + "'");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
@@ -143,10 +188,12 @@ System.err.println("Ruta:eliminar:r:" + this);
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");
+		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
+		queryOptions.addSortByOption("created ASC");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
 	}
+	//public static void sortPuntos(GeoPoint[] gp)
 
 }
 //@formatter:on

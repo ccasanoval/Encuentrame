@@ -282,7 +282,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
-		lblFecha.setText(dateFormat.format(date));
+		if(date != null)lblFecha.setText(dateFormat.format(date));
 	}
 
 	//______________________________________________________________________________________________
