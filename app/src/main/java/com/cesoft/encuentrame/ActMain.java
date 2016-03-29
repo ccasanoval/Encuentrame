@@ -40,17 +40,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+//TODO: Dejar ingles como lengua por defecto: mover ingles a carpeta default y crear carpeta español...
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
-//TODO: Añadir margin top a todos incluso login
 //TODO: icono app : android con gorro de wally?
 //TODO: Main menu => refresh listas, or inside config: refresh data...
-//TODO: Traducir a ingles
 //TODO: widget para ruta start/stop... widget para guardar punto...
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
+//MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -119,13 +119,14 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
-			i.putExtra("tipo", _viewPager.getCurrentItem());
+			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
 			startActivity(i);
 			return true;
 		case R.id.action_buscar:
 			i = new Intent(this, ActBuscar.class);
-			i.putExtra("tipo", _viewPager.getCurrentItem());
-			startActivity(i);
+			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
+			startActivityForResult(i, Util.LUGARES);//TODO
+			//startActivity(i);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

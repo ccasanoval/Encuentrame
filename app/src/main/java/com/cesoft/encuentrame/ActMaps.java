@@ -3,11 +3,12 @@ package com.cesoft.encuentrame;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
-import android.os.AsyncTask;
+
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.backendless.BackendlessCollection;
@@ -28,21 +29,16 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.net.URL;
+
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import android.graphics.Color;
 import android.view.View;
-import android.widget.TextView;
 
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
@@ -52,7 +48,6 @@ import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Ruta;
 
 
-//TODO:Quitar boton guardar cuando es ruta...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
@@ -65,7 +60,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	private Aviso _a;
 	private Ruta _r;
 
-	private int _iTipo=-1;
+	private int _iTipo = Util.NADA;
 
 	CoordinatorLayout _coordinatorLayout;
 
@@ -79,7 +74,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		try{_l = getIntent().getParcelableExtra(Lugar.NOMBRE);}catch(Exception e){_l=null;}
 		try{_r = getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
 		try{_a = getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
-		try{_iTipo = getIntent().getIntExtra("tipo", -1);}catch(Exception e){_iTipo=-1;}
+		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
 System.err.println("**********************_iTipo="+_iTipo);
 		//------------------------------------------------------------------------------------------
 
@@ -89,9 +84,11 @@ System.err.println("**********************_iTipo="+_iTipo);
 		mapFragment.getMapAsync(this);
 
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
-		if(_iTipo > -1 || _r != null)
+		if(_iTipo != Util.NADA || _r != null)
 		{
 			fab.setImageResource(getResources().getIdentifier("@android:drawable/ic_menu_revert", null, null));
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+				fab.setForegroundGravity(android.view.Gravity.RIGHT + android.view.Gravity.BOTTOM);
 			fab.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
@@ -364,7 +361,7 @@ System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format
 				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
 				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
 				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
-				if(disIni > 0.01 && disFin > 0.01)
+				if(disIni > 0.0001 && disFin > 0.0001)
 				{
 					System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);
@@ -394,9 +391,8 @@ System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format
 				int n = lugares.getTotalObjects();
 				System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)return;
-				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
-				while(iterator.hasNext())
-					showLugar(iterator.next());
+				for(Lugar lugar : lugares.getCurrentPage())
+					showLugar(lugar);
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -415,9 +411,8 @@ System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format
 				int n = avisos.getTotalObjects();
 				System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)return;
-				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
-				while(iterator.hasNext())
-					showAviso(iterator.next());
+				for(Aviso aviso : avisos.getCurrentPage())
+					showAviso(aviso);
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -436,9 +431,8 @@ System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format
 				int n = rutas.getTotalObjects();
 				System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)return;
-				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
-				while(iterator.hasNext())
-					showRuta(iterator.next());
+				for(Ruta ruta : rutas.getCurrentPage())
+					showRuta(ruta);
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)

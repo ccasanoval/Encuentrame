@@ -61,6 +61,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private Marker _marker;
 	private Circle _circle;
 
+	private int _iTipo=-1;
+
 	private CoordinatorLayout _coordinatorLayout;
 
 	@Override
@@ -111,11 +113,23 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();*/
+
+		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
+		switch(_iTipo)
+		{
+		case Util.LUGARES:
+			_swtActivo.setVisibility(View.GONE);
+			break;
+		}
 	}
 
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
+		_Map = googleMap;
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActBuscar:onMapReady:setMyLocationEnabled:e:"+se);}
+		Location loc = Util.getLocation();
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
 	}
 
 

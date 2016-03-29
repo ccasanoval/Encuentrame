@@ -15,7 +15,7 @@
 
 	<string name="clave">Clave</string>
 	<string name="clave_confirmar">Confirmar Clave</string>
-	<string name="email">eMail</string>
+	<string name="email" translatable="false">eMail</string>
 	<string name="enter">Entrar</string>
 	<string name="register">Registrate</string>
 	<string name="recover">Recordar</string>
@@ -23,14 +23,14 @@
 
 	<string name="enter_lbl">Introduce tu usuario</string>
 	<string name="register_lbl">Crea una cuenta</string>
-	<string name="recover_lbl">Recuerda tu clave</string>
+	<string name="recover_lbl">Recupera tu clave</string>
 
 	<string name="recover_ok">Te hemos enviado un correo \n para que recurperes la cuenta</string>
 	<string name="recover_ko">Ocurrió un error al recuperar \n la cuenta de usuario</string>
-	<string name="register_ok">¡Te has registrado con éxito! \n Ahora comprueba tu correo.</string>
+	<string name="register_ok">¡Te has registrado con éxito! \n Ahora comprueba tu correo</string>
 	<string name="register_bad_pass">¡Atención, ambas claves deben ser iguales!</string>
 
-	<string name="action_settings">Settings</string>
+	<string name="action_settings">Config</string>
 	<string name="section_format">Hello World from section: %1$d</string>
 
 	<string name="guardar">Guardar</string>
@@ -47,7 +47,7 @@
 	<string name="descripcion">Descripción</string>
 	<string name="aviso">Mensaje de aviso</string>
 	<string name="categoria">Categoría</string>
-	<string name="lat_lon">Lat/Lon</string>
+	<string name="lat_lon" translatable="false">Lat/Lon</string>
 	<string name="fecha">Fecha</string>
 	<string name="sin_posicion">Sin posición</string>
 	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
@@ -64,9 +64,11 @@
 
 	<string name="periodo">Periodo</string>
 	<string name="start">Iniciar</string>
-	<string name="stop">detener</string>
+	<string name="stop">Detener</string>
 	<string name="ini">Ini</string>
 	<string name="fin">Fin</string>
+	<string name="fecha_desde">Del</string>
+	<string name="fecha_hasta">al</string>
 
 	<string name="ok_eliminar">Se eliminó el registro</string>
 	<string name="error_eliminar">Error al eliminar: %s</string>

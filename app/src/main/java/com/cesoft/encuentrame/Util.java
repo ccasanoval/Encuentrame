@@ -32,7 +32,8 @@ import java.util.HashMap;
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
-	public static final int LUGARES=0, RUTAS=1, AVISOS=2;
+	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2;
+	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS

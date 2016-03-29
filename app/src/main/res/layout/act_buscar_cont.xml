@@ -13,7 +13,6 @@
 	tools:context="com.cesoft.encuentrame.ActBuscar"
 	tools:showIn="@layout/act_buscar">
 
-
 	<Switch
 		android:id="@+id/bActivo"
 		android:layout_width="wrap_content"
@@ -33,7 +32,7 @@
 		android:layout_alignParentStart="true"
 		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true">
-		<AutoCompleteTextView
+		<TextEdit
 			android:id="@+id/txtNombre"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -43,6 +42,47 @@
 			android:maxLines="1"
 			android:singleLine="true"/>
 	</android.support.design.widget.TextInputLayout>
+
+	<LinearLayout
+		android:id="@+id/layFechas"
+		android:layout_below="@+id/txtNombre_"
+		android:orientation="horizontal"
+		android:layout_centerHorizontal="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="4dp">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:text="@string/fecha_desde"/>
+		<TextEdit
+			android:id="@+id/txtFechaIni"
+			android:layout_width="250dp"
+			android:layout_height="wrap_content"
+			android:hint="@string/fecha_desde"
+			android:inputType="date" />
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:text="@string/fecha_hasta"/>
+		<TextEdit
+			android:id="@+id/txtFechaFin"
+			android:layout_width="250dp"
+			android:layout_height="wrap_content"
+			android:hint="@string/fecha_hasta"
+			android:inputType="date" />
+		<!-- ImageButton
+			android:id="@+id/imageButton1"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignBottom="@+id/editText"
+			android:layout_toRightOf="@+id/editText"
+			android:contentDescription="@string/selectdate"
+			android:cropToPadding="true"
+			android:src="@drawable/calendar_icon" / -->
+	</LinearLayout>
 
 	<LinearLayout
 		android:id="@+id/layRadio"

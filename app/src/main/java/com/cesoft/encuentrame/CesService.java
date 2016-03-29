@@ -27,7 +27,7 @@ import java.util.Iterator;
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
-
+//TODO: Si el primer punto de ruta es erroneo y esta lejos, los demas no se grabaran por filtro velocidad!!!
 //Backendless GEOFencing service:
 //https://backendless.com/backend-as-a-service/quick-start-guide-for-backendless-geofencing/
 
