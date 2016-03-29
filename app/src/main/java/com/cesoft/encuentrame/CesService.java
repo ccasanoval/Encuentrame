@@ -200,40 +200,39 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				if(ar.getCurrentPage().size() < 1)
 					return;
 				Ruta r = ar.getCurrentPage().get(0);
-				Location loc = Util.getLocation();
+				final Location loc = Util.getLocation();
 				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
-				if(!_sId.equals(sId))
+				if( ! _sId.equals(sId))
 				{
 					_sId = sId;
 					_locLastSaved = null;
 					System.err.println("CesService:saveGeoTracking:Nueva ruta: " + _sId + " != " + sId);
 				}
-				else if(loc.distanceTo(_locLast) < 2)//Puntos muy cercanos
-				{
-					System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLast.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude());
-					return;
-				}
 				else if(_locLastSaved != null)
 				{
+					if(loc.distanceTo(_locLastSaved) < 2)//Puntos muy cercanos
+					{
+						System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude());
+						return;
+					}
+
 					//Si el nuevo punto no tiene sentido, no se guarda...
 					double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
-System.err.println("CesService:saveGeoTracking:Punto FALSO???: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
+//System.err.println("CesService:saveGeoTracking:Punto FALSO???: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
 					if(vel > 300)//kilometros hora a metros segundo : 300km/h = 83m/s
 					{
 						System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
 						return;
 					}
 				}
-				String s = "null";
-				if(_locLast != null)
-					s = _locLast.getLatitude() + "," + _locLast.getLongitude();
-				System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s + " ///// " + loc.getLatitude() + "," + loc.getLongitude());
-				_locLast = loc;
+String s = "null";
+if(_locLastSaved != null)s = _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude();
+System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s + " ///// " + loc.getLatitude() + "," + loc.getLongitude());
+System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
+
 				//TODO: añadir geofence por si quisiera funcionar...?
-				System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()), new java.util.Date());
-				_locLastSaved = loc;
-				_tmLastSaved = System.currentTimeMillis();
+				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
+System.err.println("CesService:saveGeoTracking:guardar0000:----------------------:" + r);
 				r.guardar(new AsyncCallback<Ruta>()
 				{
 					@Override
@@ -241,8 +240,10 @@ System.err.println("CesService:saveGeoTracking:Punto FALSO???: " + vel+ " dist="
 					{
 						System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + r);
 						Util.refreshListaRutas();//Refrescar lista rutas en main..
-					}
 
+						_locLastSaved = loc;
+						_tmLastSaved = System.currentTimeMillis();
+					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
@@ -362,3 +363,4 @@ if(g.getLatitude() == null)return;
 	}*/
 
 }
+

@@ -76,7 +76,7 @@ public class Ruta extends Objeto implements Parcelable
     		});
 			return puntos;
 		}
-		//public void addPunto(GeoPoint v){puntos.add(v);}//new java.util.Date().getTime()
+		public void addPunto(GeoPoint gp){addPunto(gp, new java.util.Date());}
 		public void addPunto(GeoPoint gp, Date d)
 		{
 			gp.addMetadata(FECHA, d.getTime());//Se guarda como string...

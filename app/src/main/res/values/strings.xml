@@ -1,138 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">Encuentrame!</string>
-	<string name="title_activity_act_main">Encuentrame!</string>
-	<string name="title_activity_act_maps">Mapa</string>
-	<string name="title_activity_act_config">Configuración</string>
-	<string name="title_activity_act_ruta">Ruta</string>
-	<string name="title_activity_act_aviso">Aviso</string>
-	<string name="title_activity_act_lugar">Lugar</string>
-
-	<string name="cuenta">Cuenta</string>
-	<string name="config">Preferencias</string>
-	<string name="lugares">Lugares</string>
-	<string name="rutas">Rutas</string>
-	<string name="avisos">Avisos</string>
-
-	<string name="clave">Clave</string>
-	<string name="clave_confirmar">Confirmar Clave</string>
 	<string name="email" translatable="false">eMail</string>
-	<string name="enter">Entrar</string>
-	<string name="register">Registrate</string>
-	<string name="recover">Recordar</string>
-	<string name="send">Enviar</string>
-
-	<string name="enter_lbl">Introduce tu usuario</string>
-	<string name="register_lbl">Crea una cuenta</string>
-	<string name="recover_lbl">Recupera tu clave</string>
-
-	<string name="recover_ok">Te hemos enviado un correo \n para que recurperes la cuenta</string>
-	<string name="recover_ko">Ocurrió un error al recuperar \n la cuenta de usuario</string>
-	<string name="register_ok">¡Te has registrado con éxito! \n Ahora comprueba tu correo</string>
-	<string name="register_bad_pass">¡Atención, ambas claves deben ser iguales!</string>
-
-	<string name="action_settings">Config</string>
-	<string name="section_format">Hello World from section: %1$d</string>
-
-	<string name="guardar">Guardar</string>
-	<string name="editar">Editar</string>
-	<string name="eliminar">Eliminar</string>
-	<string name="nuevo">Nuevo</string>
-	<string name="actualizar_posicion">Actualizar posición</string>
-	<string name="ver_mapa">Ver mapa</string>
-	<string name="configuracion">Configuración</string>
-	<string name="buscar">Buscar</string>
-
-	<string name="activo">Activo</string>
-	<string name="nombre">Nombre</string>
-	<string name="descripcion">Descripción</string>
-	<string name="aviso">Mensaje de aviso</string>
-	<string name="categoria">Categoría</string>
 	<string name="lat_lon" translatable="false">Lat/Lon</string>
-	<string name="fecha">Fecha</string>
-	<string name="sin_posicion">Sin posición</string>
-	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
-	<string name="en_zona_aviso">En zona de aviso</string>
 
-	<string name="nuevo_lugar">Nuevo Lugar</string>
-	<string name="nuevo_aviso">Nuevo Aviso</string>
-	<string name="nueva_ruta">Nueva Ruta</string>
-	<string name="editar_lugar">Editar Lugar</string>
-	<string name="editar_aviso">Editar Aviso</string>
-	<string name="editar_ruta">Editar Ruta</string>
+	<string name="app_name">Find me!</string>
 
-	<string name="radio">Radio</string>
+	<string name="app_lice" translatable="false">2016 Cesar Casanova Creative Commons NC-SA</string>
+	<string name="app_vers" translatable="false">2016 - V 1.0</string>
+	<string name="app_lice_tit">Licence</string>
+	<string name="app_vers_tit">Version:</string>
+	<string name="app_desc">\nApplication for the managemente of your personal points of interest. It counts with geo-position alerts and geo-tracking.\n\n</string>
 
-	<string name="periodo">Periodo</string>
-	<string name="start">Iniciar</string>
-	<string name="stop">Detener</string>
+	<string name="activo">Active</string>
+	<string name="actualizar_posicion">Refresh location</string>
+	<string name="aviso">Alert message</string>
+	<string name="avisos">Alerts</string>
+	<string name="buscar">Search</string>
+	<string name="categoria">Category</string>
+	<string name="clave">Password</string>
+	<string name="clave_confirmar">Repeat password</string>
+	<string name="config">Settings</string>
+	<string name="configuracion">Settings</string>
+	<string name="cuenta">Login</string>
+	<string name="descripcion">Description</string>
+	<string name="editar">Edit</string>
+	<string name="editar_aviso">Edit Alert</string>
+	<string name="editar_lugar">Edit Point</string>
+	<string name="editar_ruta">Edit Route</string>
+	<string name="eliminar">Remove</string>
+	<string name="en_zona_aviso">Inside Alert Zone</string>
+	<string name="enter">Enter</string>
+	<string name="enter_lbl">Input login</string>
+	<string name="error_eliminar">Fault at deleting: %s</string>
+	<string name="error_guardar">There was a problem when saving the data</string>
+	<string name="fecha">Date</string>
+	<string name="fecha_desde">From</string>
+	<string name="fecha_hasta">to</string>
+	<string name="fin">End</string>
+	<string name="guardar">Save</string>
 	<string name="ini">Ini</string>
-	<string name="fin">Fin</string>
-	<string name="fecha_desde">Del</string>
-	<string name="fecha_hasta">al</string>
+	<string name="lugares">Points</string>
+	<string name="nombre">Name</string>
+	<string name="nueva_ruta">New Route</string>
+	<string name="nuevo">New</string>
+	<string name="nuevo_aviso">New Alert</string>
+	<string name="nuevo_lugar">New Point</string>
+	<string name="ok_eliminar">The record was deleted</string>
+	<string name="ok_guardar">The record data was saved</string>
+	<string name="periodo">Period</string>
+	<string name="radio">Radius</string>
+	<string name="recover">Remember</string>
+	<string name="recover_ko">There was a fault when \n recovering the user\'s account</string>
+	<string name="recover_lbl">Recover your password</string>
+	<string name="recover_ok">An email to recover your \n password was sent to you</string>
+	<string name="register">Register</string>
+	<string name="register_bad_pass">Notice that both passwords must be equal!</string>
+	<string name="register_lbl">Create a new account</string>
+	<string name="register_ok">You have just registered! \n Now check your email</string>
+	<string name="rutas">Routes</string>
+	<string name="seguro_eliminar">Are you sure you want to remove?</string>
+	<string name="send">Send</string>
+	<string name="sin_lugar">A location must be stablished…</string>
+	<string name="sin_nombre">A name must be stablished…</string>
+	<string name="sin_posicion">No location</string>
+	<string name="start">Start</string>
+	<string name="stop">Stop</string>
 
-	<string name="ok_eliminar">Se eliminó el registro</string>
-	<string name="error_eliminar">Error al eliminar: %s</string>
-	<string name="ok_guardar">Se guardaron los datos del registro</string>
-	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
-	<string name="sin_nombre">Debe establecer un nombre...</string>
-	<string name="sin_lugar">Debe establecer una posición...</string>
+	<string name="ver_mapa">Show map</string>
 
-	<!-- Strings related to Settings -->
-	<!-- Example General settings -->
-	<string name="pref_header_general">General</string>
-	
-	<string name="pref_title_social_recommendations">Enable social recommendations</string>
-	<string name="pref_description_social_recommendations">Recommendations for people to contact
-		based on your message history
-	</string>
-	
-	<string name="pref_title_display_name">Display name</string>
-	<string name="pref_default_display_name">John Smith</string>
-	
-	<string name="pref_title_add_friends_to_messages">Add friends to messages</string>
-	<string-array name="pref_example_list_titles">
-		<item>Always</item>
-		<item>When possible</item>
-		<item>Never</item>
-	</string-array>
-	<string-array name="pref_example_list_values">
-		<item>1</item>
-		<item>0</item>
-		<item>-1</item>
-	</string-array>
+	<string name="title_activity_act_aviso">Alert</string>
+	<string name="title_activity_act_buscar">Search</string>
+	<string name="title_activity_act_config">Settings</string>
+	<string name="title_activity_act_lugar">Point</string>
+	<string name="title_activity_act_main">Find me!</string>
+	<string name="title_activity_act_maps">Map</string>
+	<string name="title_activity_act_ruta">Route</string>
 
-	<!-- Example settings for Data & Sync -->
-	<string name="pref_header_data_sync">Data &amp; sync</string>
-	
-	<string name="pref_title_sync_frequency">Sync frequency</string>
-	<string-array name="pref_sync_frequency_titles">
-		<item>15 minutes</item>
-		<item>30 minutes</item>
-		<item>1 hour</item>
-		<item>3 hours</item>
-		<item>6 hours</item>
-		<item>Never</item>
-	</string-array>
-	<string-array name="pref_sync_frequency_values">
-		<item>15</item>
-		<item>30</item>
-		<item>60</item>
-		<item>180</item>
-		<item>360</item>
-		<item>-1</item>
-	</string-array>
-	
-	<string name="pref_title_system_sync_settings">System sync settings</string>
+	<string name="pref_header_notifications">Alerts</string>
+	<string name="pref_ringtone">Ringtone</string>
 
-	<!-- Example settings for Notifications -->
-	<string name="pref_header_notifications">Notifications</string>
-	
-	<string name="pref_title_new_message_notifications">New message notifications</string>
-	
-	<string name="pref_title_ringtone">Ringtone</string>
 	<string name="pref_ringtone_silent">Silent</string>
-	
-	<string name="pref_title_vibrate">Vibrate</string>
-	<string name="title_activity_act_buscar">Buscar</string>
-
+	<string name="pref_msg_notif_type">Use PopUps Notif.</string>
+	<string name="pref_vibrate">Vibrate</string>
+	<string name="pref_header_general">About this App…</string>
+	<string name="pref_auto_arranque">Start alert service at boot up</string>
+	<string name="pref_header_data_sync">Data</string>
 </resources>

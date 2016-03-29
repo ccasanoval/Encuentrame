@@ -50,6 +50,7 @@ import java.util.Map;
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: CATEGORIA: hacer vista de lista y CRUD
+//TODO: Develop a web app for points management : connect to backendless by REST API...
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
