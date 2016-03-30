@@ -116,8 +116,6 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 			@Override
 			public void onClick(View v)
 			{
-				//TODO: Save object and start background gps tracking proces
-				//TODO: Show stratus in list (recording...)
 				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
 				startTrackingRecord();
 			}
@@ -128,7 +126,6 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 			@Override
 			public void onClick(View v)
 			{
-				//TODO: Stop process...
 				stopTrackingRecord();
 			}
 		});
@@ -564,7 +561,6 @@ System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault
 	{
 System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 		Util.setTrackingRoute("");
-		//Util.refreshListaRutas();
-		Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
+		Util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
 	}
 }

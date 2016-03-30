@@ -30,11 +30,13 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
+System.err.println("----------------RutaArrayAdapter :0: "+position+" : "+convertView);
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
-
+System.err.println("----------------RutaArrayAdapter :1: "+position+" : "+convertView);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
 		txtNombre.setText(String.format("%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntos().size()));
+System.err.println("----------------RutaArrayAdapter :2: " + position + " : " + txtNombre.getText());
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
 		btnEditar.setOnClickListener(new View.OnClickListener()
@@ -58,9 +60,12 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		String sIdRuta = Util.getTrackingRoute();
 		if(sIdRuta.equals(_rutas[position].getObjectId()))
 		{
+System.err.println("----------------RUTA ACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
 			txtNombre.setTextColor(Color.RED);
 			convertView.setBackgroundColor(Color.YELLOW);
 		}
+		else
+			System.err.println("----------------RUTA INACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
 
 		return convertView;
 	}

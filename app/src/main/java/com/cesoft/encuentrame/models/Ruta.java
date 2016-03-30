@@ -43,43 +43,18 @@ public class Ruta extends Objeto implements Parcelable
         		@Override
         		public int compare(GeoPoint gp1, GeoPoint gp2)
 				{
-					long time1=0, time2=0;
 					Object o1 = gp1.getMetadata(FECHA);
 					Object o2 = gp2.getMetadata(FECHA);
-					if(o1 == null || o2 == null)return 0;//Dont compare...
-					return ((String)o1).compareTo(((String)o2));
-
-					/*if(o1 instanceof String)
-					{
-						time1 = Long.parseLong((String)o1);
-						System.err.println("----"+o1+" is String");
-					}
-					else if(o1 instanceof Long)
-					{
-						time1 = (Long)o1;
-						System.err.println("----"+o1+" is Long");
-					}
-					if(o2 instanceof String)
-					{
-						time2 = Long.parseLong((String)o2);
-						System.err.println("----"+o2+" is String");
-					}
-					else if(o2 instanceof Long)
-					{
-						time2 = (Long)o2;
-						System.err.println("----"+o2+" is Long");
-					}
-					if(time1 == time2)return 0;
-					else if(time1 > time2)return 1;
-					else return -1;*/
-        		}
+					if(o1 == null || o2 == null)return 1;//Dont compare...Supose are different...
+					return String.valueOf(o1).compareTo(String.valueOf(o2));
+     		   	}
     		});
 			return puntos;
 		}
 		public void addPunto(GeoPoint gp){addPunto(gp, new java.util.Date());}
 		public void addPunto(GeoPoint gp, Date d)
 		{
-			gp.addMetadata(FECHA, d.getTime());//Se guarda como string...
+			gp.addMetadata(FECHA, String.valueOf(d.getTime()));//Se guarda como string...
 			puntos.add(gp);
 		}
 		public Date getFechaPunto(GeoPoint gp)
@@ -89,10 +64,8 @@ public class Ruta extends Objeto implements Parcelable
 				long time=0;
 				Object o = gp.getMetadata(FECHA);
 				if(o == null)return null;
-				if(o instanceof String)time = Long.parseLong((String)o);
-				//else if(o instanceof Long)time = (Long)o;//ver cual es...
-				Date d = new Date();d.setTime(time);
-				return d;
+				time = Long.parseLong(String.valueOf(o));//if(o instanceof String)time = Long.parseLong((String)o);
+				return new Date(time);
 			}
 			catch(Exception e){System.err.println("Ruta:getFechaPunto:e:"+e+":::"+gp.getMetadata(FECHA));return null;}
 		}

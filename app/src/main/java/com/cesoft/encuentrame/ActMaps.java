@@ -321,7 +321,16 @@ System.err.println("**********************_iTipo="+_iTipo);
 
 		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
-		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+//		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+
+		boolean twentyFourHourStyle = android.text.format.DateFormat.is24HourFormat(this);
+		DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, java.util.Locale.getDefault());
+		if(df instanceof java.text.SimpleDateFormat)
+		{
+			String pattern = ((java.text.SimpleDateFormat)df).toPattern();
+			if(twentyFourHourStyle)	df = new java.text.SimpleDateFormat(pattern.replace("h", "H"), java.util.Locale.getDefault());
+			else		   			df = new java.text.SimpleDateFormat(pattern.replace("H", "h"), java.util.Locale.getDefault());
+		}
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
@@ -329,7 +338,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 		BitmapDescriptor bm = getNextIcon();
 
 		GeoPoint gpIni = r.getPuntos().get(0);
-		GeoPoint gpFin = r.getPuntos().get(r.getPuntos().size() -1);
+		GeoPoint gpFin = r.getPuntos().get(r.getPuntos().size() - 1);
 		for(GeoPoint pt : r.getPuntos())
 		{
 			MarkerOptions mo = new MarkerOptions();
@@ -344,15 +353,16 @@ System.err.println("showRuta: " + pos);
 			if(pt == gpIni)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-				mo.snippet(INI);
+				mo.snippet(INI + df.format(date));
 				_Map.addMarker(mo.position(pos));
-System.err.println("------- INI " + r.getNombre() + " : "+pos + " : "+ df.format(date));
 			}
 			else if(pt == gpFin)
 			{
-System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format(date));
-				mo.snippet(FIN);
+				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
+				if(disIni < 0.00000001)
+					pos = new LatLng(pos.latitude + 0.001, pos.longitude + 0.001);
 				_Map.addMarker(mo.position(pos));
 			}
 			else
@@ -361,14 +371,14 @@ System.err.println("------- FIN " + r.getNombre() + " : "+pos + " : "+ df.format
 				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
 				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
 				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
-				if(disIni > 0.0001 && disFin > 0.0001)
+				if(disIni > 0.00000001 && disFin > 0.00000001)
 				{
 					System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);
 					_Map.addMarker(mo.position(pos));
 				}
 				else //Punto igual a ini o fin
-					System.err.println("------- NO " + r.getNombre() + " : " + pos + " : " + df.format(date));
+					System.err.println("------- NO " + r.getNombre() + " : " + pos + " : " + df.format(date)+":::::::::::::::"+disIni+"-"+disFin+"----"+(pt.getLatitude() - gpIni.getLatitude())+"...."+(pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()));
 			}
 			po.add(pos);
 		}

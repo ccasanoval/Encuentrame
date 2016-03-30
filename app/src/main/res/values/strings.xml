@@ -36,9 +36,9 @@
 	<string name="fecha">Date</string>
 	<string name="fecha_desde">From</string>
 	<string name="fecha_hasta">to</string>
-	<string name="fin">End</string>
+	<string name="fin">End: </string>
+	<string name="ini">Ini: </string>
 	<string name="guardar">Save</string>
-	<string name="ini">Ini</string>
 	<string name="lugares">Points</string>
 	<string name="nombre">Name</string>
 	<string name="nueva_ruta">New Route</string>
@@ -47,6 +47,7 @@
 	<string name="nuevo_lugar">New Point</string>
 	<string name="ok_eliminar">The record was deleted</string>
 	<string name="ok_guardar">The record data was saved</string>
+	<string name="ok_stop_tracking">The route ends here</string>
 	<string name="periodo">Period</string>
 	<string name="radio">Radius</string>
 	<string name="recover">Remember</string>

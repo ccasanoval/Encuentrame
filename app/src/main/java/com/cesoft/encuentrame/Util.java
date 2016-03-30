@@ -42,7 +42,7 @@ public class Util
 		public static void setRefreshCallback(CesIntLista refresh){_refresh = refresh;}
 		public static void refreshListaRutas()
 		{
-			System.err.println("----------------------Util.refreshListaRutas  = "+_refresh);
+System.err.println("----------------------Util.refreshListaRutas ");
 			if(_refresh!=null)_refresh.onRefreshListaRutas();
 		}
 

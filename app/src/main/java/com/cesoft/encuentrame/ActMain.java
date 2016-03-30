@@ -98,6 +98,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		catch(Exception e){System.err.println("ActMain:onCreate:e:"+e);}
 
 //cargaDatosDebug();//TODO:Debug
+//Util.refreshListaRutas();
 	}
 
 	@Override
@@ -315,6 +316,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
+System.err.println("---------ActMain:onActivityResult:0:");
 			if(data != null)
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
@@ -322,7 +324,9 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 			}
+System.err.println("---------ActMain:onActivityResult:1:");
 			if(resultCode != RESULT_OK)return;
+System.err.println("---------ActMain:onActivityResult:2:"+requestCode);
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
@@ -480,22 +484,39 @@ System.err.println("ActMain:refreshRutas()");
 
 
 		//-------- RUTA --------
-		/*Ruta r = new Ruta();
+		Ruta r = new Ruta();
 		r.setNombre("Ruta 1");
 		r.setDescripcion("Ruta 1 desc");
 
-		r.addPunto(new GeoPoint(40.4610001, -3.5611001));
-		r.addPunto(new GeoPoint(40.4752002, -3.5644002));
-		r.addPunto(new GeoPoint(40.4893003, -3.5677003));
-		r.addPunto(new GeoPoint(40.4940004, -3.5711004));
-		r.addPunto(new GeoPoint(40.5050005, -3.5744005));
-
+		java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try
+		{
+			r.addPunto(new GeoPoint(40.4610001, -3.5611001), format.parse("2016-03-30 8:0:0"));
+			r.addPunto(new GeoPoint(40.4752002, -3.5644002), format.parse("2016-03-30 8:5:0"));
+			r.addPunto(new GeoPoint(40.4893003, -3.5677003), format.parse("2016-03-30 8:10:0"));
+			r.addPunto(new GeoPoint(40.4940004, -3.5711004), format.parse("2016-03-30 8:15:0"));
+			r.addPunto(new GeoPoint(40.5050005, -3.5744005), format.parse("2016-03-30 8:20:0"));
+		} catch (Exception e) {   e.printStackTrace();}
+		System.err.println("************* ruta-----------"+r);
 		r.guardar(new AsyncCallback<Ruta>()
 		{
 			@Override
 			public void handleResponse(Ruta ruta)
 			{
-				System.err.println("************* OK-----------");
+				System.err.println("************* OK-----------"+ruta);
+				Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
+				{
+					@Override
+					public void handleResponse(BackendlessCollection<Ruta> rutaBackendlessCollection)
+					{
+						System.err.println("************* OK OK-----------"+rutaBackendlessCollection.getCurrentPage().size()+" : "+rutaBackendlessCollection.getCurrentPage().get(0));
+					}
+					@Override
+					public void handleFault(BackendlessFault backendlessFault)
+					{
+						System.err.println("*********** OK FAIL-----------" + backendlessFault);
+					}
+				});
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
