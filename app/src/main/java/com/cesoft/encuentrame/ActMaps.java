@@ -321,16 +321,15 @@ System.err.println("**********************_iTipo="+_iTipo);
 
 		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
-//		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-
-		boolean twentyFourHourStyle = android.text.format.DateFormat.is24HourFormat(this);
+		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+		/*boolean twentyFourHourStyle = android.text.format.DateFormat.is24HourFormat(this);
 		DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, java.util.Locale.getDefault());
 		if(df instanceof java.text.SimpleDateFormat)
 		{
 			String pattern = ((java.text.SimpleDateFormat)df).toPattern();
 			if(twentyFourHourStyle)	df = new java.text.SimpleDateFormat(pattern.replace("h", "H"), java.util.Locale.getDefault());
 			else		   			df = new java.text.SimpleDateFormat(pattern.replace("H", "h"), java.util.Locale.getDefault());
-		}
+		}*/
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
