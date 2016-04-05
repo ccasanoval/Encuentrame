@@ -1,7 +1,10 @@
 package com.cesoft.encuentrame;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -10,14 +13,18 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame.models.Aviso;
+import com.cesoft.encuentrame.models.Filtro;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -41,38 +48,47 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Guardar filtro de busqueda? cambiar lupa por embudo?
+//TODO: El icono de buscar arriba en el menu, el otro volver...
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
 	private static final int DELAY_LOCATION = 60000;
 
-	private EditText _txtNombre;
+	private int _iTipo=-1;
 	private Switch _swtActivo;
+	private EditText _txtNombre;
+
+	private EditText _txtFechaIni, _txtFechaFin;
+	private Date _dtFechaIni = new Date(), _dtFechaFin = new Date();
+	private DatePickerDialog _datePickerDialogIni, _datePickerDialogFin;
 
 	private String[] _asRadio = {"-", "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private int[]    _adRadio = { -1,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 	private Spinner _spnRadio;
-	private int _filtroRadio = -1;
+	private int _nRadio = Util.NADA;
 
-	private GoogleApiClient _GoogleApiClient;
-	private LocationRequest _LocationRequest;
+	//private GoogleApiClient _GoogleApiClient;
+	//private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
 	private Circle _circle;
+	private LatLng _pos;
 
-	private int _iTipo=-1;
-
-	private CoordinatorLayout _coordinatorLayout;
+	//private CoordinatorLayout _coordinatorLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_buscar);
-		//setTitle(getString(R.string.nuevo_aviso));
 
-		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
@@ -84,10 +100,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			@Override
 			public void onClick(View view)
 			{
-				//TODO: actualizar vista con este filtro...
+				Filtro filtro = new Filtro(_iTipo, _txtNombre.getText().toString(), _dtFechaIni, _dtFechaFin, _pos, _nRadio);
+System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
+				Util.return2Main(ActBuscar.this, filtro);
 			}
 		});
 
+		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
@@ -99,10 +118,70 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 			{
-				_filtroRadio = _adRadio[position];
-				setMarker();
+				_nRadio = _adRadio[position];
+				setRadio();
 			}
-			@Override public void onNothingSelected(AdapterView<?> parent){}
+			@Override
+			public void onNothingSelected(AdapterView<?> parent)
+			{
+				_nRadio = Util.NADA;
+			}
+		});
+
+		//------------------------------------------------------------------------------------------
+		/// FECHAS
+		Calendar newCalendar = Calendar.getInstance();
+		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", getResources().getConfiguration().locale);
+		_datePickerDialogIni = new DatePickerDialog(this,
+			new DatePickerDialog.OnDateSetListener()
+			{
+				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
+				{
+					Calendar newDate = Calendar.getInstance();
+					newDate.set(year, monthOfYear, dayOfMonth);
+					_dtFechaIni = newDate.getTime();
+					_txtFechaIni.setText(dateFormatter.format(newDate.getTime()));
+				}
+			},
+			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+		_datePickerDialogFin = new DatePickerDialog(this,
+			new DatePickerDialog.OnDateSetListener()
+			{
+				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
+				{
+					Calendar newDate = Calendar.getInstance();
+					newDate.set(year, monthOfYear, dayOfMonth);
+					_dtFechaFin = newDate.getTime();
+					_txtFechaFin.setText(dateFormatter.format(newDate.getTime()));
+				}
+			},
+			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+		_txtFechaIni = (EditText)findViewById(R.id.txtFechaIni);
+		_txtFechaFin = (EditText)findViewById(R.id.txtFechaFin);
+		ImageButton ib = (ImageButton)findViewById(R.id.btnFechaIni);
+		ib.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				_datePickerDialogIni.show();
+				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+				//_txtFechaIni.clearFocus();_txtFechaFin.clearFocus();
+			}
+		});
+		ib = (ImageButton)findViewById(R.id.btnFechaFin);
+		ib.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				_datePickerDialogFin.show();
+				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			}
 		});
 
 		//------------------------------------------------------------------------------------------
@@ -113,12 +192,18 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();*/
-
 		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
 		switch(_iTipo)
 		{
 		case Util.LUGARES:
+			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
 			_swtActivo.setVisibility(View.GONE);
+			break;
+		case Util.RUTAS:
+			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
+			break;
+		case Util.AVISOS:
+			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.avisos)));
 			break;
 		}
 	}
@@ -130,8 +215,44 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActBuscar:onMapReady:setMyLocationEnabled:e:"+se);}
 		Location loc = Util.getLocation();
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
+		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
+		{
+			@Override
+			public void onMapClick(LatLng pos)
+			{
+				setPosLugar(pos);
+			}
+		});
 	}
-
+	//______________________________________________________________________________________________
+	private void setPosLugar(LatLng pos)
+	{
+		_pos = pos;
+		setMarker();
+		setRadio();
+	}
+	private void setMarker()
+	{
+		try
+		{
+			if(_marker != null)_marker.remove();
+			//LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
+			MarkerOptions mo = new MarkerOptions()
+					.position(_pos)
+					.title(getString(R.string.buscar));
+			_marker = _Map.addMarker(mo);
+			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(_pos, 15));
+		}
+		catch(Exception e){System.err.println("ActBuscar:setMarker:e:"+e);}
+	}
+	private void setRadio()
+	{
+		if(_pos == null || _nRadio < 1)return;
+		if(_circle != null)_circle.remove();
+		_circle = _Map.addCircle(new CircleOptions().center(_pos)
+				.radius(_nRadio).strokeColor(Color.TRANSPARENT)
+				.fillColor(0x55AA0000));//Color.BLUE
+	}
 
 	//______________________________________________________________________________________________
 	//// 4 LocationListener
@@ -140,30 +261,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		Util.setLocation(location);
 	}
-	//______________________________________________________________________________________________
-	private void setMarker()
-	{
-		/*try
-		{
-			if(_marker != null)_marker.remove();
-			LatLng pos = new LatLng(_a.getLatitud(), _a.getLongitud());
-			MarkerOptions mo = new MarkerOptions()
-					.position(pos)
-					.title(_a.getNombre()).snippet(_a.getDescripcion());
-			_marker = _Map.addMarker(mo);
-			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
-			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
 
-			if(_circle != null)_circle.remove();
-			_circle = _Map.addCircle(new CircleOptions()
-					.center(pos)
-					.radius(_a.getRadio())
-					.strokeColor(Color.TRANSPARENT)
-					.fillColor(0x55AA0000));//Color.BLUE
-		}
-		catch(Exception e){System.err.println("ActAviso:setMarker:e:"+e);}*/
-	}
 	//______________________________________________________________________________________________
 	/*private void pideGPS()
 	{
@@ -199,16 +297,4 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		});
 	}*/
 
-/*	@Override
-	public void onConnected(Bundle bundle)
-	{
-	}
-	@Override
-	public void onConnectionSuspended(int i)
-	{
-	}
-	@Override
-	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-	{
-	}*/
 }

@@ -30,13 +30,14 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
-System.err.println("----------------RutaArrayAdapter :0: "+position+" : "+convertView);
+		String sIdRuta = Util.getTrackingRoute();
+//System.err.println("----------------RutaArrayAdapter :0: "+position+" ::::  "+(sIdRuta.equals(_rutas[position].getObjectId()))+" :::: "+sIdRuta+"==="+_rutas[position].getObjectId()+"\n"+convertView);
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
-System.err.println("----------------RutaArrayAdapter :1: "+position+" : "+convertView);
+//System.err.println("----------------RutaArrayAdapter :1: "+position+" : "+convertView);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
 		txtNombre.setText(String.format("%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntos().size()));
-System.err.println("----------------RutaArrayAdapter :2: " + position + " : " + txtNombre.getText());
+//System.err.println("----------------RutaArrayAdapter :2: " + position + " : " + txtNombre.getText());
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
 		btnEditar.setOnClickListener(new View.OnClickListener()
@@ -57,15 +58,22 @@ System.err.println("----------------RutaArrayAdapter :2: " + position + " : " + 
 			});
 
 		// Si la ruta se está grabando, resaltar
-		String sIdRuta = Util.getTrackingRoute();
+		//String sIdRuta = Util.getTrackingRoute();
 		if(sIdRuta.equals(_rutas[position].getObjectId()))
 		{
-System.err.println("----------------RUTA ACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
+//System.err.println("----------------RUTA ACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
 			txtNombre.setTextColor(Color.RED);
 			convertView.setBackgroundColor(Color.YELLOW);
 		}
 		else
-			System.err.println("----------------RUTA INACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
+		{
+			if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+				txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem, convertView.getContext().getTheme()));
+			else
+				txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
+			convertView.setBackgroundColor(Color.WHITE);
+//System.err.println("----------------RUTA INACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
+		}
 
 		return convertView;
 	}

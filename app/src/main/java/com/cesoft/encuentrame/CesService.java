@@ -80,7 +80,7 @@ public class CesService extends IntentService
 		try
 		{
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
-			while(true)
+			while(true)//No hay un sistema para listen y not polling??????
 			{
 System.err.println("CesService:loop-------------------------------------------------------------"+java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
 				if( ! Util.isLogged())

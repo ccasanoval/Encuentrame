@@ -322,14 +322,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		/*boolean twentyFourHourStyle = android.text.format.DateFormat.is24HourFormat(this);
-		DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, java.util.Locale.getDefault());
-		if(df instanceof java.text.SimpleDateFormat)
-		{
-			String pattern = ((java.text.SimpleDateFormat)df).toPattern();
-			if(twentyFourHourStyle)	df = new java.text.SimpleDateFormat(pattern.replace("h", "H"), java.util.Locale.getDefault());
-			else		   			df = new java.text.SimpleDateFormat(pattern.replace("H", "h"), java.util.Locale.getDefault());
-		}*/
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
@@ -344,8 +336,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 			mo.title(r.getNombre());
 			Date date = r.getFechaPunto(pt);
 			if(date != null)
-				mo.snippet(df.format(date));
-				//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
+				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
 
 			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
 System.err.println("showRuta: " + pos);
@@ -361,7 +352,7 @@ System.err.println("showRuta: " + pos);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
 				if(disIni < 0.00000001)
-					pos = new LatLng(pos.latitude + 0.001, pos.longitude + 0.001);
+					pos = new LatLng(pos.latitude + 0.00001, pos.longitude + 0.00001);
 				_Map.addMarker(mo.position(pos));
 			}
 			else
@@ -370,7 +361,7 @@ System.err.println("showRuta: " + pos);
 				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
 				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
 				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
-				if(disIni > 0.00000001 && disFin > 0.00000001)
+				if(disIni > 0.000000005 || disFin > 0.000000005)//0.00000001
 				{
 					System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);

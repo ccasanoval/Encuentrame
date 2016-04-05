@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,21 +24,19 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.models.Aviso;
+import com.cesoft.encuentrame.models.Filtro;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
+//TODO: pasar dibujo de rutas de maps a rutas edit...
 //TODO: Dejar ingles como lengua por defecto: mover ingles a carpeta default y crear carpeta español...
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
@@ -178,6 +175,8 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
+		private Filtro[] _filtro = new Filtro[3];
+		private int _sectionNumber = Util.NADA;
 		public PlaceholderFragment(){}
 
 		// Returns a new instance of this fragment for the given section number.
@@ -188,6 +187,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
 			_apf[sectionNumber] = fragment;
+			fragment._sectionNumber = sectionNumber;
 			return fragment;
 		}
 
@@ -198,20 +198,19 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		{
 			Bundle args = getArguments();
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
+System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
 
-			FloatingActionButton fab = (FloatingActionButton)_rootView.findViewById(R.id.fabNuevo);
+			FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
 			fab.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View view)
 				{
-					//Snackbar.make(view, "Replace with your own action: " + _viewPager.getCurrentItem(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
 					Intent i;
-					//switch(_viewPager.getCurrentItem())
-					switch(sectionNumber)
+					switch(sectionNumber)//switch(_viewPager.getCurrentItem())
 					{
 					case Util.LUGARES:
 						i = new Intent(ActMain._this, ActLugar.class);
@@ -313,6 +312,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 				break;
 			}
 		}
+		// Recoge el resultado de startActivityForResult
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
@@ -323,6 +323,11 @@ System.err.println("---------ActMain:onActivityResult:0:");
 				if(sMensaje != null && !sMensaje.isEmpty())
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 				if( ! data.getBooleanExtra(DIRTY, true))return;
+
+				//TODO: Get filter data from ActBuscar y luego se lo pasas a refreshXXX()
+				Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
+				if(filtro != null && filtro.getTipo() != Util.NADA)
+					_filtro[filtro.getTipo()] = data.getParcelableExtra(Filtro.FILTRO);
 			}
 System.err.println("---------ActMain:onActivityResult:1:");
 			if(resultCode != RESULT_OK)return;
@@ -345,16 +350,22 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 		public void onResume()
 		{
   			super.onResume();
-			if(_MessageReceiver != null)
-			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
-  			LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter("ces"));
+System.err.println("---------ActMain:onResume():"+_sectionNumber+" : "+Util.RUTAS);
+			if(_sectionNumber == Util.RUTAS)
+			{
+				//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
+				//if(_MessageReceiver != null)
+				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter("ces"));
+				refreshRutas();
+			}
 		}
 		@Override
 		public void onPause()
 		{
 			if(_MessageReceiver != null)
 			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
-			LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
+			if(_sectionNumber == Util.RUTAS)
+				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
   			super.onPause();
 		}
 		private BroadcastReceiver _MessageReceiver;
@@ -363,6 +374,11 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 		//__________________________________________________________________________________________
 		public void refreshLugares()//TODO: Hacer filtro...
 		{
+			if(_filtro[Util.LUGARES] != null)
+			{
+System.err.println("---------FILTRO:" + _filtro[Util.LUGARES]);
+			}
+			else
 			Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
 			{
 				@Override

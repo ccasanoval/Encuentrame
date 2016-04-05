@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.cesoft.encuentrame.models.Filtro;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -134,14 +135,14 @@ System.err.println("*************"+_l);
 		pideGPS();
 	}
 	//______________________________________________________________________________________________
-	private void return2Main(boolean bDirty, String sMensaje)
+	/*private void return2Main(boolean bDirty, String sMensaje)
 	{
 		Intent data = new Intent();
 		data.putExtra("dirty", bDirty);
 		data.putExtra("mensaje", sMensaje);
 		setResult(android.app.Activity.RESULT_OK, data);
 		finish();
-	}
+	}*/
 	//______________________________________________________________________________________________
 	@Override
 	public void onStart()
@@ -278,7 +279,7 @@ System.err.println("*************"+_l);
 			@Override
 			public void handleResponse(Lugar l)
 			{
-				return2Main(true, getString(R.string.ok_guardar));
+				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar));
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -305,7 +306,7 @@ System.err.println("*************"+_l);
 					@Override
 					public void handleResponse(Long lugar)
 					{
-						return2Main(true, getString(R.string.ok_eliminar));
+						Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar));
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)

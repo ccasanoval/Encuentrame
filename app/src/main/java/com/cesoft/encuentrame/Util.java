@@ -25,6 +25,7 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.cesoft.encuentrame.models.Aviso;
+import com.cesoft.encuentrame.models.Filtro;
 
 import java.util.HashMap;
 
@@ -293,6 +294,14 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, bDirty);
 		intent.putExtra(ActMain.MENSAJE, sMensaje);
+		act.setResult(Activity.RESULT_OK, intent);
+		act.finish();
+	}
+	public static void return2Main(Activity act, Filtro filtro)
+	{
+		Intent intent = new Intent();
+		intent.putExtra(ActMain.DIRTY, true);
+		intent.putExtra(Filtro.FILTRO, filtro);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}

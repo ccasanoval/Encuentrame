@@ -48,45 +48,38 @@
 		android:layout_below="@+id/txtNombre_"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
-		android:layout_width="wrap_content"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="4dp">
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceSmall"
-			android:text="@string/fecha_desde"/>
 		<EditText
 			android:id="@+id/txtFechaIni"
-			android:layout_width="250dp"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_weight="1"
 			android:hint="@string/fecha_desde"
 			android:inputType="date" />
-		<TextView
+		<ImageButton
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceSmall"
-			android:text="@string/fecha_hasta"/>
+			android:id="@+id/btnFechaIni"
+			android:src="@android:drawable/ic_menu_my_calendar"	/>
 		<EditText
 			android:id="@+id/txtFechaFin"
-			android:layout_width="250dp"
-			android:layout_height="wrap_content"
-			android:hint="@string/fecha_hasta"
-			android:inputType="date" />
-		<!-- ImageButton
-			android:id="@+id/imageButton1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignBottom="@+id/editText"
-			android:layout_toRightOf="@+id/editText"
-			android:contentDescription="@string/selectdate"
-			android:cropToPadding="true"
-			android:src="@drawable/calendar_icon" / -->
+			android:layout_weight="1"
+			android:hint="@string/fecha_hasta"
+			android:inputType="date" />
+		<ImageButton
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/btnFechaFin"
+			android:src="@android:drawable/ic_menu_my_calendar"	/>
 	</LinearLayout>
 
 	<LinearLayout
 		android:id="@+id/layRadio"
-		android:layout_below="@+id/txtNombre_"
+		android:layout_below="@+id/layFechas"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"

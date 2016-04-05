@@ -1,0 +1,89 @@
+<resources>
+	<string name="app_name">Encuentrame!</string>
+	<string name="title_activity_act_main">Encuentrame!</string>
+	<string name="title_activity_act_maps">Mapa</string>
+	<string name="title_activity_act_config">Configuración</string>
+	<string name="title_activity_act_ruta">Ruta</string>
+	<string name="title_activity_act_aviso">Aviso</string>
+	<string name="title_activity_act_lugar">Lugar</string>
+	<string name="title_activity_act_buscar">Buscar</string>
+
+	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas.\n\n</string>
+	<string name="app_lice_tit">Licencia:</string>
+	<string name="app_vers_tit">Versión:</string>
+
+	<string name="cuenta">Cuenta</string>
+	<string name="config">Preferencias</string>
+	<string name="lugares">Lugares</string>
+	<string name="rutas">Rutas</string>
+	<string name="avisos">Avisos</string>
+
+	<string name="clave">Clave</string>
+	<string name="clave_confirmar">Confirmar Clave</string>
+	<string name="enter">Entrar</string>
+	<string name="register">Registrate</string>
+	<string name="recover">Recordar</string>
+	<string name="send">Enviar</string>
+
+	<string name="enter_lbl">Introduce tu usuario</string>
+	<string name="register_lbl">Crea una cuenta</string>
+	<string name="recover_lbl">Recupera tu clave</string>
+
+	<string name="recover_ok">Te hemos enviado un correo \n para que recurperes la cuenta</string>
+	<string name="recover_ko">Ocurrió un error al recuperar \n la cuenta de usuario</string>
+	<string name="register_ok">¡Te has registrado con éxito! \n Ahora comprueba tu correo</string>
+	<string name="register_bad_pass">¡Atención, ambas claves deben ser iguales!</string>
+
+	<string name="guardar">Guardar</string>
+	<string name="editar">Editar</string>
+	<string name="eliminar">Eliminar</string>
+	<string name="nuevo">Nuevo</string>
+	<string name="actualizar_posicion">Actualizar posición</string>
+	<string name="ver_mapa">Ver mapa</string>
+	<string name="configuracion">Configuración</string>
+	<string name="buscar">Buscar</string>
+
+	<string name="activo">Activo</string>
+	<string name="nombre">Nombre</string>
+	<string name="descripcion">Descripción</string>
+	<string name="aviso">Mensaje de aviso</string>
+	<string name="categoria">Categoría</string>
+	<string name="fecha">Fecha</string>
+	<string name="sin_posicion">Sin posición</string>
+	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
+	<string name="en_zona_aviso">En zona de aviso</string>
+
+	<string name="nuevo_lugar">Nuevo Lugar</string>
+	<string name="nuevo_aviso">Nuevo Aviso</string>
+	<string name="nueva_ruta">Nueva Ruta</string>
+	<string name="editar_lugar">Editar Lugar</string>
+	<string name="editar_aviso">Editar Aviso</string>
+	<string name="editar_ruta">Editar Ruta</string>
+
+	<string name="radio">Radio</string>
+
+	<string name="periodo">Periodo</string>
+	<string name="start">Iniciar</string>
+	<string name="stop">Detener</string>
+	<string name="ini">Ini: </string>
+	<string name="fin">Fin: </string>
+	<string name="fecha_desde">Del</string>
+	<string name="fecha_hasta">al</string>
+
+	<string name="ok_eliminar">Se eliminó el registro</string>
+	<string name="error_eliminar">Error al eliminar: %s</string>
+	<string name="ok_guardar">Se guardaron los datos del registro</string>
+	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
+	<string name="sin_nombre">Debe establecer un nombre...</string>
+	<string name="sin_lugar">Debe establecer una posición...</string>
+
+	<string name="pref_header_general">General</string>
+	<string name="pref_header_notifications">Avisos</string>
+	<string name="pref_ringtone">Tono</string>
+	<string name="pref_ringtone_silent">Silencio</string>
+	<string name="pref_vibrate">Vibrar</string>
+	<string name="pref_msg_notif_type">Mostrar diálogos PopUp</string>
+	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
+	<string name="ok_stop_tracking">La ruta termina aquí</string>
+	<string name="pref_header_data_sync">Datos</string>
+</resources>
