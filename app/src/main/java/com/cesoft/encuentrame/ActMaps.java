@@ -340,19 +340,20 @@ System.err.println("**********************_iTipo="+_iTipo);
 
 			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
 System.err.println("showRuta: " + pos);
-			if(pt == gpIni)
+			if(pt == gpIni)//It's not possible to establish the z order for the marker...
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
+				mo.rotation(135);
 				_Map.addMarker(mo.position(pos));
 			}
 			else if(pt == gpFin)
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
-				if(disIni < 0.00000001)
-					pos = new LatLng(pos.latitude + 0.00001, pos.longitude + 0.00001);
+				//double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
+				//if(disIni < 0.00000001)pos = new LatLng(pos.latitude + 0.00001, pos.longitude + 0.00001);
+				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else
@@ -361,20 +362,19 @@ System.err.println("showRuta: " + pos);
 				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
 				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
 				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
-				if(disIni > 0.000000005 || disFin > 0.000000005)//0.00000001
+				if(disIni > 0.000000005 || disFin > 0.000000005)
 				{
-					System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
+					//System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);
 					_Map.addMarker(mo.position(pos));
 				}
-				else //Punto igual a ini o fin
-					System.err.println("------- NO " + r.getNombre() + " : " + pos + " : " + df.format(date)+":::::::::::::::"+disIni+"-"+disFin+"----"+(pt.getLatitude() - gpIni.getLatitude())+"...."+(pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()));
+				//Punto igual a ini o fin
+				//else System.err.println("------- NO " + r.getNombre() + " : " + pos + " : " + df.format(date)+":::::::::::::::"+disIni+"-"+disFin+"----"+(pt.getLatitude() - gpIni.getLatitude())+"...."+(pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()));
 			}
 			po.add(pos);
 		}
 		po.width(5).color(_iColor);
-		Polyline line = _Map.addPolyline(po);
-
+		_Map.addPolyline(po);//Polyline line =
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
 	}
 

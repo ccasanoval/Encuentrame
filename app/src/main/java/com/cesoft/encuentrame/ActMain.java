@@ -34,14 +34,14 @@ import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
+import java.util.Date;
 import java.util.Iterator;
 
-//TODO: pasar dibujo de rutas de maps a rutas edit...
-//TODO: Dejar ingles como lengua por defecto: mover ingles a carpeta default y crear carpeta español...
+//TODO: pasar forma de mostrar rutas de maps a rutas edit... lo mismo con lugares y aviso si hay cambios?
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO: icono app : android con gorro de wally?
-//TODO: Main menu => refresh listas, or inside config: refresh data...
+//TODO: Main menu => refresh listas
 //TODO: widget para ruta start/stop... widget para guardar punto...
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
@@ -52,10 +52,11 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
-	private ViewPager _viewPager;
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 	private static ActMain _this;
 	private static CoordinatorLayout _coordinatorLayout;
+
+	private ViewPager _viewPager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -108,24 +109,22 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-		Intent i;
+		Intent i;// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		switch(id)
 		{
 		case R.id.action_config:
-			startActivity(new Intent(this, ActConfig.class));
-			return true;
+				startActivity(new Intent(_this, ActConfig.class));
+				return true;
 		case R.id.action_mapa:
-			i = new Intent(this, ActMaps.class);
-			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
+			i = new Intent(_this, ActMaps.class);
+			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());//_sectionNumber
 			startActivity(i);
 			return true;
 		case R.id.action_buscar:
-			i = new Intent(this, ActBuscar.class);
-			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
-			startActivityForResult(i, Util.LUGARES);//TODO
-			//startActivity(i);
+			i = new Intent(_this, ActBuscar.class);
+			i.putExtra(Filtro.FILTRO, PlaceholderFragment._apf[_viewPager.getCurrentItem()]._filtro);//i.putExtra(Util.TIPO, );
+			startActivityForResult(i, Util.LUGARES);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -170,12 +169,14 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		System.err.println("ActMain:onActivityResult:--------+++++++MAIN++++++++--" + requestCode+":"+resultCode);
 	}*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
+	// LUGARES / RUTAS / AVISOS
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	public static class PlaceholderFragment extends Fragment implements CesIntLista
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
-		private Filtro[] _filtro = new Filtro[3];
+		protected Filtro _filtro = new Filtro(Util.LUGARES, Filtro.NULO, "", null, null, null, 0);
 		private int _sectionNumber = Util.NADA;
 		public PlaceholderFragment(){}
 
@@ -202,6 +203,7 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
+			//_filtro = new Filtro(Util.LUGARES, Filtro.NULO, "", null, null, null, 0);
 
 			FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
 			fab.setOnClickListener(new View.OnClickListener()
@@ -317,6 +319,7 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
 System.err.println("---------ActMain:onActivityResult:0:");
+			Filtro filtro = null;
 			if(data != null)
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
@@ -324,14 +327,15 @@ System.err.println("---------ActMain:onActivityResult:0:");
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 
-				//TODO: Get filter data from ActBuscar y luego se lo pasas a refreshXXX()
-				Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
+				filtro = data.getParcelableExtra(Filtro.FILTRO);
 				if(filtro != null && filtro.getTipo() != Util.NADA)
-					_filtro[filtro.getTipo()] = data.getParcelableExtra(Filtro.FILTRO);
+					_filtro = filtro;
+				else
+					_filtro = new Filtro(requestCode, Filtro.NULO, "", null, null, null, 0);
 			}
-System.err.println("---------ActMain:onActivityResult:1:");
+System.err.println("---------ActMain:onActivityResult:1:"+filtro);
 			if(resultCode != RESULT_OK)return;
-System.err.println("---------ActMain:onActivityResult:2:"+requestCode);
+System.err.println("---------ActMain:onActivityResult:2:" + requestCode);
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
@@ -339,127 +343,187 @@ System.err.println("---------ActMain:onActivityResult:2:"+requestCode);
 			case Util.AVISOS:	refreshAvisos(); break;
 			}
 		}
+
 		// 4 CesIntLista
+		private BroadcastReceiver _MessageReceiver;
+		private static final String RUTA_REFRESH = "ces";
 		public void onRefreshListaRutas()
 		{
 System.err.println("---------ActMain:onRefreshListaRutas():");
 			//ActMain._this.runOnUiThread(new Runnable(){public void run(){refreshRutas();}});//No funciona, ha de hacerse mediante broadcast...
-			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent("ces"));
+			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(RUTA_REFRESH));
 		}
 		@Override
 		public void onResume()
 		{
   			super.onResume();
-System.err.println("---------ActMain:onResume():"+_sectionNumber+" : "+Util.RUTAS);
+System.err.println("---------ActMain:onResume():" + _sectionNumber + " : " + Util.RUTAS);
 			if(_sectionNumber == Util.RUTAS)
 			{
 				//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
 				//if(_MessageReceiver != null)
-				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter("ces"));
+				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
 				refreshRutas();
 			}
 		}
 		@Override
 		public void onPause()
 		{
-			if(_MessageReceiver != null)
+			//if(_MessageReceiver != null)
 			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
 			if(_sectionNumber == Util.RUTAS)
 				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
   			super.onPause();
 		}
-		private BroadcastReceiver _MessageReceiver;
 
 
 		//__________________________________________________________________________________________
-		public void refreshLugares()//TODO: Hacer filtro...
+		public void refreshLugares()
 		{
-			if(_filtro[Util.LUGARES] != null)
+			if(_filtro != null)
 			{
-System.err.println("---------FILTRO:" + _filtro[Util.LUGARES]);
+System.err.println("---------FILTRO:" + _filtro);
+				checkFechas();
+				Lugar.getLista(_acLugar, _filtro);
 			}
 			else
-			Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
-			{
-				@Override
-				public void handleResponse(BackendlessCollection<Lugar> lugares)
-				{
-					int n = lugares.getTotalObjects();
-					System.err.println("---------LUGARES:GET:OK:" + n);
-					if(n < 1)
-						return;
-					Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
-					Lugar[] listaAL = new Lugar[n];
-					int i = 0;
-					while(iterator.hasNext())
-						listaAL[i++] = iterator.next();
-					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
-				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
-				{
-					System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
-				}
-			});
+				Lugar.getLista(_acLugar);
 		}
+		private AsyncCallback<BackendlessCollection<Lugar>> _acLugar = new AsyncCallback<BackendlessCollection<Lugar>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Lugar> lugares)
+			{
+				int n = lugares.getTotalObjects();
+System.err.println("---------LUGARES:GET:OK:" + n);
+				if(n < 1)
+					return;
+				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
+				Lugar[] listaAL = new Lugar[n];
+				int i = 0;
+				while(iterator.hasNext())
+					listaAL[i++] = iterator.next();
+				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+			}
+		};
 		//__________________________________________________________________________________________
 		public void refreshRutas()
 		{
 System.err.println("ActMain:refreshRutas()");
-			Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
+			if(_filtro != null)
 			{
-				@Override
-				public void handleResponse(BackendlessCollection<Ruta> rutas)
-				{
-					int n = rutas.getTotalObjects();
-					System.err.println("---------RUTAS:GET:OK:" + n);
-					if(n < 1)
-						return;
-					Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
-					Ruta[] listaAL = new Ruta[n];
-					int i = 0;
-					while(iterator.hasNext())
-						listaAL[i++] = iterator.next();
-					RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this);
-					_listView.setAdapter(r);
-					r.notifyDataSetChanged();
-				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
-				{
-					System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
-				}
-			});
+				checkFechas();
+				Ruta.getLista(_acRuta, _filtro);
+			}
+			else
+				Ruta.getLista(_acRuta);
 		}
+		AsyncCallback<BackendlessCollection<Ruta>> _acRuta = new AsyncCallback<BackendlessCollection<Ruta>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Ruta> rutas)
+			{
+				int n = rutas.getTotalObjects();
+System.err.println("---------RUTAS:GET:OK:" + n);
+				if(n < 1)
+					return;
+				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
+				Ruta[] listaAL = new Ruta[n];
+				int i = 0;
+				while(iterator.hasNext())
+					listaAL[i++] = iterator.next();
+				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this);
+				_listView.setAdapter(r);
+				r.notifyDataSetChanged();
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
+			}
+		};
 
 		//__________________________________________________________________________________________
 		public void refreshAvisos()
 		{
-			Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
+			if(_filtro != null)
 			{
-				@Override
-				public void handleResponse(BackendlessCollection<Aviso> avisos)
-				{
-					int n = avisos.getTotalObjects();
-					System.err.println("---------AVISOS:GET:OK:" + n);
-					if(n < 1)
-						return;
-					Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
-					Aviso[] listaAL = new Aviso[n];
-					int i = 0;
-					while(iterator.hasNext())
-						listaAL[i++] = iterator.next();
-					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
-				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
-				{
-					System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
-				}
-			});
+				checkFechas();
+				Aviso.getLista(_acAviso, _filtro);
+			}
+			else
+				Aviso.getLista(_acAviso);
+		}
+		private AsyncCallback<BackendlessCollection<Aviso>> _acAviso = new AsyncCallback<BackendlessCollection<Aviso>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Aviso> avisos)
+			{
+				int n = avisos.getTotalObjects();
+System.err.println("---------AVISOS:GET:OK:" + n);
+				if(n < 1)
+					return;
+				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
+				Aviso[] listaAL = new Aviso[n];
+				int i = 0;
+				while(iterator.hasNext())
+					listaAL[i++] = iterator.next();
+				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
+			}
+		};
+		//__________________________________________________________________________________________
+		private void checkFechas()
+		{
+			Date ini = _filtro.getFechaIni();
+			Date fin = _filtro.getFechaFin();
+			if(ini!=null && fin!=null && ini.getTime() > fin.getTime())
+			{
+				_filtro.setFechaIni(fin);
+				_filtro.setFechaFin(ini);
+			}
 		}
 
+
+/*		//__________________________________________________________________________________________
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
+			Intent i;
+			int id = item.getItemId();
+			switch(id)
+			{
+			case R.id.action_config:
+				startActivity(new Intent(_this, ActConfig.class));
+				return true;
+			case R.id.action_mapa:
+				i = new Intent(_this, ActMaps.class);
+				i.putExtra(Util.TIPO, _sectionNumber);
+				startActivity(i);
+				return true;
+			case R.id.action_buscar:
+				i = new Intent(_this, ActBuscar.class);
+				i.putExtra(Filtro.FILTRO, _filtro[_sectionNumber]);//i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
+				startActivityForResult(i, Util.LUGARES);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}*/
 	}
+
+
+
+
 
 
 

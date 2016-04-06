@@ -10,6 +10,7 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
+import com.cesoft.encuentrame.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,6 +168,32 @@ System.err.println("Ruta:eliminar:r:" + this);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
 	}
 	//public static void sortPuntos(GeoPoint[] gp)
+	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res, Filtro filtro)
+	{
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
+		queryOptions.addSortByOption("created ASC");
+		query.setQueryOptions(queryOptions);
+		//--FILTRO
+		StringBuilder sb = new StringBuilder(" 1 = 1 ");
+		if( ! filtro.getNombre().isEmpty())
+			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
+		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		{
+			//TODO: Find by the points inside ???
+			//filtro.getPunto();
+			//filtro.getRadio()
+		}
+		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
+			sb.append(" AND created >= '" + filtro.getFechaIni() + "' ");
+		if(filtro.getFechaFin() != null)
+			sb.append(" AND created <= '" + filtro.getFechaFin() + "' ");
+		if(sb.length() > 0)
+			query.setWhereClause(sb.toString());
+		//--FILTRO
+		Backendless.Persistence.of(Ruta.class).find(query, res);
+	}
 
 }
 //@formatter:on

@@ -6,9 +6,12 @@ import android.os.Parcelable;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.geo.BackendlessGeoQuery;
 import com.backendless.geo.GeoPoint;
+import com.backendless.geo.Units;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
+import com.cesoft.encuentrame.Util;
 
 import weborb.service.ExcludeProperties;
 
@@ -24,7 +27,7 @@ public class Lugar extends Objeto implements Parcelable
 
 	private GeoPoint lugar = new GeoPoint(0,0);
 		public GeoPoint getLugar(){return lugar;}
-		public void setLugar(GeoPoint v){lugar=v;}
+		public void setLugar(GeoPoint v){lugar=v;lugar.addCategory(NOMBRE);}
 		public Double getLatitud(){return lugar.getLatitude();}
 		public Double getLongitud(){return lugar.getLongitude();}
 		public void setLatLon(Double lat, Double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
@@ -38,6 +41,14 @@ public class Lugar extends Objeto implements Parcelable
 
 	//// Backendless
 	//______________________________________________________________________________________________
+	public void eliminar(AsyncCallback<Long> res)
+	{
+		Backendless.Persistence.of(Lugar.class).remove(this, res);
+	}
+	public void guardar(AsyncCallback<Lugar> res)
+	{
+		Backendless.Persistence.save(this, res);
+	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res)
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
@@ -47,15 +58,55 @@ public class Lugar extends Objeto implements Parcelable
 		Backendless.Persistence.of(Lugar.class).find(query, res);
 		//Backendless.Persistence.of(Lugar.class).find(res);
 	}
-
-	public void eliminar(AsyncCallback<Long> res)
+	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res, Filtro filtro)
 	{
-		Backendless.Persistence.of(Lugar.class).remove(this, res);
-	}
+		//TODO: ?????
+		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		{
+			BackendlessGeoQuery geoQuery = new BackendlessGeoQuery();
+			geoQuery.addCategory(NOMBRE);
+			geoQuery.setLatitude(filtro.getPunto().latitude);
+			geoQuery.setLongitude(filtro.getPunto().longitude);
+			geoQuery.setRadius(filtro.getRadio()>0 ? filtro.getRadio() : 1000000.0);
+			geoQuery.setUnits(Units.METERS);
 
-	public void guardar(AsyncCallback<Lugar> res)
-	{
-		Backendless.Persistence.save(this, res);
+			/*HashMap<String, String> metaSearch = new HashMap<String, String>();
+			metaSearch.put( "Cuisine", "French"  );
+			metaSearch.put( "Athmosphere", "Romantic"  );
+			geoQuery.setMetadata( metaSearch );*/
+			BackendlessCollection<GeoPoint> geoPoints = Backendless.Geo.getPoints( geoQuery );
+System.err.println("************************" + geoPoints.getCurrentPage().size());
+		}
+		else
+		{
+		}
+
+
+
+		//TODO:Filtro
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("lugar");
+		query.setQueryOptions(queryOptions);
+		//--FILTRO
+		StringBuilder sb = new StringBuilder(" 1 = 1 ");
+		if( ! filtro.getNombre().isEmpty())
+			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
+		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		{
+			//TODO: Find by the points inside ???
+			//filtro.getPunto();
+			//filtro.getRadio()
+		}
+		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
+			sb.append(" AND created >= '" + filtro.getFechaIni() + "' ");
+		if(filtro.getFechaFin() != null)
+			sb.append(" AND created <= '" + filtro.getFechaFin() + "' ");
+		if(sb.length() > 0)
+			query.setWhereClause(sb.toString());
+		//--FILTRO
+		Backendless.Persistence.of(Lugar.class).find(query, res);
+		//Backendless.Persistence.of(Lugar.class).find(res);
 	}
 
 

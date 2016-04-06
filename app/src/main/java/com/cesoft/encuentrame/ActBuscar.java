@@ -12,6 +12,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -60,25 +62,23 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 {
 	private static final int DELAY_LOCATION = 60000;
 
-	private int _iTipo=-1;
+	private Filtro _filtro;
 	private Switch _swtActivo;
 	private EditText _txtNombre;
 
 	private EditText _txtFechaIni, _txtFechaFin;
-	private Date _dtFechaIni = new Date(), _dtFechaFin = new Date();
 	private DatePickerDialog _datePickerDialogIni, _datePickerDialogFin;
 
-	private String[] _asRadio = {"-", "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private String[] _asRadio = {"-",		 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
 	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 	private Spinner _spnRadio;
-	private int _nRadio = Util.NADA;
 
 	//private GoogleApiClient _GoogleApiClient;
 	//private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
 	private Circle _circle;
-	private LatLng _pos;
+	//private LatLng _pos;
 
 	//private CoordinatorLayout _coordinatorLayout;
 
@@ -92,17 +92,15 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View view)
 			{
-				Filtro filtro = new Filtro(_iTipo, _txtNombre.getText().toString(), _dtFechaIni, _dtFechaFin, _pos, _nRadio);
-System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
-				Util.return2Main(ActBuscar.this, filtro);
+				ActBuscar.this.finish();
 			}
 		});
 
@@ -118,15 +116,16 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 			{
-				_nRadio = _adRadio[position];
+				_filtro.setRadio(_adRadio[position]);
 				setRadio();
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> parent)
 			{
-				_nRadio = Util.NADA;
+				_filtro.setRadio(Util.NADA);
 			}
 		});
+		_spnRadio.setSelection(3);
 
 		//------------------------------------------------------------------------------------------
 		/// FECHAS
@@ -139,7 +138,7 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 				{
 					Calendar newDate = Calendar.getInstance();
 					newDate.set(year, monthOfYear, dayOfMonth);
-					_dtFechaIni = newDate.getTime();
+					_filtro.setFechaIni(newDate.getTime());
 					_txtFechaIni.setText(dateFormatter.format(newDate.getTime()));
 				}
 			},
@@ -152,7 +151,7 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 				{
 					Calendar newDate = Calendar.getInstance();
 					newDate.set(year, monthOfYear, dayOfMonth);
-					_dtFechaFin = newDate.getTime();
+					_filtro.setFechaFin(newDate.getTime());
 					_txtFechaFin.setText(dateFormatter.format(newDate.getTime()));
 				}
 			},
@@ -192,8 +191,17 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();*/
-		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
-		switch(_iTipo)
+		try//TODO: recibir un Filtro para rellenar los campos...
+		{
+			//_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);
+			_filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
+		}
+		catch(Exception e)
+		{
+			System.err.println("ActBuscar:onCreate:e:"+e);
+			Util.return2Main(this, null);
+		}
+		switch(_filtro.getTipo())
 		{
 		case Util.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
@@ -227,7 +235,8 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 	//______________________________________________________________________________________________
 	private void setPosLugar(LatLng pos)
 	{
-		_pos = pos;
+		//_pos = pos;
+		_filtro.setPunto(pos);
 		setMarker();
 		setRadio();
 	}
@@ -238,19 +247,19 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 			if(_marker != null)_marker.remove();
 			//LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
 			MarkerOptions mo = new MarkerOptions()
-					.position(_pos)
+					.position(_filtro.getPunto())
 					.title(getString(R.string.buscar));
 			_marker = _Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(_pos, 15));
+			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(_filtro.getPunto(), 15));
 		}
 		catch(Exception e){System.err.println("ActBuscar:setMarker:e:"+e);}
 	}
 	private void setRadio()
 	{
-		if(_pos == null || _nRadio < 1)return;
+		if(_filtro.getPunto() == null || _filtro.getRadio() < 1)return;
 		if(_circle != null)_circle.remove();
-		_circle = _Map.addCircle(new CircleOptions().center(_pos)
-				.radius(_nRadio).strokeColor(Color.TRANSPARENT)
+		_circle = _Map.addCircle(new CircleOptions().center(_filtro.getPunto())
+				.radius(_filtro.getRadio()).strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
 
@@ -297,4 +306,33 @@ System.err.println("ActBuscar:onCreate:filtro:---------- "+filtro);
 		});
 	}*/
 
+		//____________________________________________________________________________________________________________________________________________________
+	/// MENU
+	//______________________________________________________________________________________________
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		getMenuInflater().inflate(R.menu.menu_buscar, menu);
+		//if(_bNuevo)menu.findItem(R.id.menu_eliminar).setVisible(false);//TODO: cuando te pasen filtro, si es null o vacio haces esto...
+		return true;
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if(item.getItemId() == R.id.menu_buscar)
+			buscar();
+		else if(item.getItemId() == R.id.menu_eliminar)
+			eliminar();
+		return super.onOptionsItemSelected(item);
+	}
+	private void eliminar()
+	{
+		Util.return2Main(this, true, getString(R.string.sin_filtro));
+	}
+	private void buscar()
+	{
+		_filtro.setNombre(_txtNombre.getText().toString());
+System.err.println("ActBuscar:buscar:filtro:---------- " + _filtro);
+		Util.return2Main(this, _filtro);
+	}
 }

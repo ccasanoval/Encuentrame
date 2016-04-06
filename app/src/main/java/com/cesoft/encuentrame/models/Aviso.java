@@ -8,6 +8,7 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
+import com.cesoft.encuentrame.Util;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -135,26 +136,7 @@ public class Aviso extends Objeto
 		//Backendless.Persistence.of(Lugar.class).save(this, ac);
 		Backendless.Persistence.save(this, ac);
 	}
-	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res)
-	{
-		//Backendless.Persistence.of(Aviso.class).find(res);
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Aviso.class).find(query, res);
-	}
-	public static void getActivos(AsyncCallback<BackendlessCollection<Aviso>> res)
-	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		//query.setWhereClause("activo = True");
-		query.setWhereClause("activo > 0");
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Aviso.class).find(query, res);
-		//BackendlessCollection<Aviso> result = Backendless.Persistence.of( Contact.class ).find( dataQuery );
-	}
+
 	public static void getById(String sId, AsyncCallback<Aviso> res)
 	{
 		/*BackendlessDataQuery query = new BackendlessDataQuery();
@@ -168,6 +150,49 @@ public class Aviso extends Objeto
 		relationProps.add("lugar");
 		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);
 System.err.println("-------------------1------------------Aviso:getById:" + sId);
+	}
+	public static void getActivos(AsyncCallback<BackendlessCollection<Aviso>> res)
+	{
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		//query.setWhereClause("activo = True");
+		query.setWhereClause("activo > 0");
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("lugar");
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Aviso.class).find(query, res);
+		//BackendlessCollection<Aviso> result = Backendless.Persistence.of( Contact.class ).find( dataQuery );
+	}
+	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res)
+	{
+		//Backendless.Persistence.of(Aviso.class).find(res);
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("lugar");
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Aviso.class).find(query, res);
+	}
+	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res, Filtro filtro)
+	{
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addSortByOption("created ASC");//TODO: igual en los otros getXXX ?
+		query.setQueryOptions(queryOptions);
+		StringBuilder sb = new StringBuilder(" 1 = 1 ");
+		if( ! filtro.getNombre().isEmpty())
+			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
+		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		{
+			//TODO: Find by the points inside ???
+			//filtro.getPunto();
+			//filtro.getRadio()
+		}
+		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
+			sb.append(" AND created >= " + filtro.getFechaIni().getTime() + " ");
+		if(filtro.getFechaFin() != null)
+			sb.append(" AND created <= " + filtro.getFechaFin().getTime() + " ");
+		if(sb.length() > 0)
+			query.setWhereClause(sb.toString());
+		Backendless.Persistence.of(Aviso.class).find(query, res);
 	}
 
 }

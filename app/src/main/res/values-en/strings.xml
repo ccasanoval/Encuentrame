@@ -79,5 +79,6 @@
 	<string name="title_activity_act_ruta">Route</string>
 	<string name="ok_stop_tracking">The route ends here</string>
 	<string name="pref_header_data_sync">Data</string>
+	<string name="sin_filtro">Search parameters removed</string>
 
 </resources>
