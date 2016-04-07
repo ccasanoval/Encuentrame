@@ -62,10 +62,9 @@ public class Ruta extends Objeto implements Parcelable
 		{
 			try
 			{
-				long time=0;
 				Object o = gp.getMetadata(FECHA);
 				if(o == null)return null;
-				time = Long.parseLong(String.valueOf(o));//if(o instanceof String)time = Long.parseLong((String)o);
+				long time = Long.parseLong(String.valueOf(o));//if(o instanceof String)time = Long.parseLong((String)o);
 				return new Date(time);
 			}
 			catch(Exception e){System.err.println("Ruta:getFechaPunto:e:"+e+":::"+gp.getMetadata(FECHA));return null;}
@@ -170,6 +169,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 	//public static void sortPuntos(GeoPoint[] gp)
 	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res, Filtro filtro)
 	{
+System.err.println("************************ 0 "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
@@ -178,7 +178,11 @@ System.err.println("Ruta:eliminar:r:" + this);
 		//--FILTRO
 		StringBuilder sb = new StringBuilder(" 1 = 1 ");
 		if( ! filtro.getNombre().isEmpty())
-			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
+		{
+			sb.append(" AND nombre like = '%");
+			sb.append(filtro.getNombre());
+			sb.append("%' ");
+		}
 		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
 			//TODO: Find by the points inside ???
@@ -186,9 +190,17 @@ System.err.println("Ruta:eliminar:r:" + this);
 			//filtro.getRadio()
 		}
 		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-			sb.append(" AND created >= '" + filtro.getFechaIni() + "' ");
+		{
+			sb.append(" AND created >= '");
+			sb.append(filtro.getFechaIni());
+			sb.append("' ");
+		}
 		if(filtro.getFechaFin() != null)
-			sb.append(" AND created <= '" + filtro.getFechaFin() + "' ");
+		{
+			sb.append(" AND created <= '");//TODO: quitar '
+			sb.append(filtro.getFechaFin());
+			sb.append("' ");
+		}
 		if(sb.length() > 0)
 			query.setWhereClause(sb.toString());
 		//--FILTRO

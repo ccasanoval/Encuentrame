@@ -37,16 +37,13 @@ import com.cesoft.encuentrame.models.Ruta;
 import java.util.Date;
 import java.util.Iterator;
 
-//TODO: pasar forma de mostrar rutas de maps a rutas edit... lo mismo con lugares y aviso si hay cambios?
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
 //TODO: icono app : android con gorro de wally?
-//TODO: Main menu => refresh listas
 //TODO: widget para ruta start/stop... widget para guardar punto...
-//TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
 //TODO: main window=> Number or routes, places and geofences...
-//TODO: CATEGORIA: hacer vista de lista y CRUD
+//TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +77,9 @@ public class ActMain extends AppCompatActivity
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
+		tabLayout.setSelectedTabIndicatorHeight(10);
+		//tabLayout.setSelectedTabIndicatorColor();
+		//tabLayout.setTabTextColors();
 
 		try
 		{
@@ -96,7 +96,6 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		catch(Exception e){System.err.println("ActMain:onCreate:e:"+e);}
 
 //cargaDatosDebug();//TODO:Debug
-//Util.refreshListaRutas();
 	}
 
 	@Override
@@ -122,9 +121,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			startActivity(i);
 			return true;
 		case R.id.action_buscar:
-			i = new Intent(_this, ActBuscar.class);
-			i.putExtra(Filtro.FILTRO, PlaceholderFragment._apf[_viewPager.getCurrentItem()]._filtro);//i.putExtra(Util.TIPO, );
-			startActivityForResult(i, Util.LUGARES);
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()].buscar();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -176,7 +173,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
-		protected Filtro _filtro = new Filtro(Util.LUGARES, Filtro.NULO, "", null, null, null, 0);
+		protected Filtro _filtro;
 		private int _sectionNumber = Util.NADA;
 		public PlaceholderFragment(){}
 
@@ -203,7 +200,8 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
-			//_filtro = new Filtro(Util.LUGARES, Filtro.NULO, "", null, null, null, 0);
+
+			_filtro = new Filtro(_sectionNumber);
 
 			FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
 			fab.setOnClickListener(new View.OnClickListener()
@@ -271,6 +269,7 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 		@Override
 		public void onItemEdit(tipoLista tipo, Objeto obj)
 		{
+System.err.println("ActMain:onItemEdit:"+obj);
 			Intent i;
 			switch(tipo)
 			{
@@ -314,11 +313,17 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 				break;
 			}
 		}
+		public void buscar()
+		{
+			Intent i = new Intent(ActMain._this, ActBuscar.class);
+			i.putExtra(Filtro.FILTRO, _filtro);
+			startActivityForResult(i, Util.BUSCAR);
+		}
 		// Recoge el resultado de startActivityForResult
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
-System.err.println("---------ActMain:onActivityResult:0:");
+System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ requestCode);
 			Filtro filtro = null;
 			if(data != null)
 			{
@@ -331,11 +336,10 @@ System.err.println("---------ActMain:onActivityResult:0:");
 				if(filtro != null && filtro.getTipo() != Util.NADA)
 					_filtro = filtro;
 				else
-					_filtro = new Filtro(requestCode, Filtro.NULO, "", null, null, null, 0);
+					_filtro = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
 			}
-System.err.println("---------ActMain:onActivityResult:1:"+filtro);
 			if(resultCode != RESULT_OK)return;
-System.err.println("---------ActMain:onActivityResult:2:" + requestCode);
+System.err.println("----++++++++++++++++++-----ActMain:onActivityResult:1: "+filtro);
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
@@ -357,11 +361,8 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 		public void onResume()
 		{
   			super.onResume();
-System.err.println("---------ActMain:onResume():" + _sectionNumber + " : " + Util.RUTAS);
 			if(_sectionNumber == Util.RUTAS)
 			{
-				//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
-				//if(_MessageReceiver != null)
 				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
 				refreshRutas();
 			}
@@ -380,7 +381,7 @@ System.err.println("---------ActMain:onResume():" + _sectionNumber + " : " + Uti
 		//__________________________________________________________________________________________
 		public void refreshLugares()
 		{
-			if(_filtro != null)
+			if(_filtro.isOn())
 			{
 System.err.println("---------FILTRO:" + _filtro);
 				checkFechas();
@@ -411,11 +412,12 @@ System.err.println("---------LUGARES:GET:OK:" + n);
 				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 			}
 		};
+
 		//__________________________________________________________________________________________
 		public void refreshRutas()
 		{
 System.err.println("ActMain:refreshRutas()");
-			if(_filtro != null)
+			if(_filtro.isOn())
 			{
 				checkFechas();
 				Ruta.getLista(_acRuta, _filtro);
@@ -451,7 +453,7 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 		//__________________________________________________________________________________________
 		public void refreshAvisos()
 		{
-			if(_filtro != null)
+			if(_filtro.isOn())
 			{
 				checkFechas();
 				Aviso.getLista(_acAviso, _filtro);
@@ -481,6 +483,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
 			}
 		};
+
 		//__________________________________________________________________________________________
 		private void checkFechas()
 		{
@@ -492,33 +495,6 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				_filtro.setFechaFin(ini);
 			}
 		}
-
-
-/*		//__________________________________________________________________________________________
-		@Override
-		public boolean onOptionsItemSelected(MenuItem item)
-		{
-			// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-			Intent i;
-			int id = item.getItemId();
-			switch(id)
-			{
-			case R.id.action_config:
-				startActivity(new Intent(_this, ActConfig.class));
-				return true;
-			case R.id.action_mapa:
-				i = new Intent(_this, ActMaps.class);
-				i.putExtra(Util.TIPO, _sectionNumber);
-				startActivity(i);
-				return true;
-			case R.id.action_buscar:
-				i = new Intent(_this, ActBuscar.class);
-				i.putExtra(Filtro.FILTRO, _filtro[_sectionNumber]);//i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
-				startActivityForResult(i, Util.LUGARES);
-				return true;
-			}
-			return super.onOptionsItemSelected(item);
-		}*/
 	}
 
 

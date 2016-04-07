@@ -63,7 +63,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private static final int DELAY_LOCATION = 60000;
 
 	private Filtro _filtro;
-	private Switch _swtActivo;
+	//private Switch _swtActivo;
 	private EditText _txtNombre;
 
 	private EditText _txtFechaIni, _txtFechaFin;
@@ -72,6 +72,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private String[] _asRadio = {"-",		 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
 	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 	private Spinner _spnRadio;
+	private Spinner _spnActivo;
 
 	//private GoogleApiClient _GoogleApiClient;
 	//private LocationRequest _LocationRequest;
@@ -106,9 +107,41 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
-		_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
+
+		ArrayAdapter<String> adapter;
+		//_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
+		_spnActivo = (Spinner)findViewById(R.id.spnActivo);
+		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"TODOS", "ACTIVOS", "INACTIVOS"});//TODO getString
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		_spnActivo.setAdapter(adapter);
+		_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		{
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			{
+				switch(position)
+				{
+				case 1:
+					_filtro.setActivo(Filtro.ACTIVO);
+					break;
+				case 2:
+					_filtro.setActivo(Filtro.INACTIVO);
+					break;
+				default:
+					_filtro.setActivo(Util.NADA);
+					break;
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent)
+			{
+				_filtro.setRadio(Util.NADA);
+			}
+		});
+		//
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
+		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnRadio.setAdapter(adapter);
 		_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -193,8 +226,44 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		pideGPS();*/
 		try//TODO: recibir un Filtro para rellenar los campos...
 		{
-			//_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);
 			_filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
+			//-----
+			//_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);
+			_txtNombre.setText(_filtro.getNombre());
+			//-----
+			//_swtActivo.setChecked(_filtro.getActivo() == Filtro.ACTIVO);
+			switch(_filtro.getActivo())
+			{
+			case Filtro.ACTIVO:		_spnActivo.setSelection(1);break;
+			case Filtro.INACTIVO:	_spnActivo.setSelection(2);break;
+			default:				_spnActivo.setSelection(0);break;
+			}
+			//-----
+			Calendar cal = Calendar.getInstance();
+			Date dt = _filtro.getFechaIni();
+			if(dt != null)
+			{
+				cal.setTime(dt);
+				_txtFechaIni.setText(dateFormatter.format(dt));
+				_datePickerDialogIni.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+			}
+			//
+			dt = _filtro.getFechaFin();
+			if(dt != null)
+			{
+				cal.setTime(dt);
+				_txtFechaFin.setText(dateFormatter.format(dt));
+				_datePickerDialogFin.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+			}
+			//-----
+			for(int i=0; i < _adRadio.length; i++)
+			{
+				if(_adRadio[i] == _filtro.getRadio())
+				{
+					_spnRadio.setSelection(i);
+					break;
+				}
+			}
 		}
 		catch(Exception e)
 		{
@@ -205,10 +274,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		{
 		case Util.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
-			_swtActivo.setVisibility(View.GONE);
+			_spnActivo.setVisibility(View.GONE);
+			findViewById(R.id.layActivo).setVisibility(View.GONE);
 			break;
 		case Util.RUTAS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
+_spnActivo.setVisibility(View.VISIBLE);
+findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 			break;
 		case Util.AVISOS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.avisos)));
@@ -313,7 +385,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_buscar, menu);
-		//if(_bNuevo)menu.findItem(R.id.menu_eliminar).setVisible(false);//TODO: cuando te pasen filtro, si es null o vacio haces esto...
+		if(!_filtro.isOn())menu.findItem(R.id.menu_eliminar).setVisible(false);
 		return true;
 	}
 	@Override
@@ -331,8 +403,16 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	}
 	private void buscar()
 	{
-		_filtro.setNombre(_txtNombre.getText().toString());
-System.err.println("ActBuscar:buscar:filtro:---------- " + _filtro);
-		Util.return2Main(this, _filtro);
+		if(_filtro.isValid())
+		{
+			_filtro.turnOn();
+			_filtro.setNombre(_txtNombre.getText().toString());
+	System.err.println("ActBuscar:buscar:filtro:---------- " + _filtro);
+			Util.return2Main(this, _filtro);
+		}
+		else
+		{
+			Util.return2Main(this, true, getString(R.string.sin_filtro));
+		}
 	}
 }

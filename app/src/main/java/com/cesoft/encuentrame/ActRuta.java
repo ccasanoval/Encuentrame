@@ -42,6 +42,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -192,16 +194,6 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
 	}
-	//______________________________________________________________________________________________
-	/*private void return2Main(boolean bDirty, String sMensaje)
-	{
-		/*Intent data = new Intent();
-		data.putExtra("dirty", bDirty);
-		data.putExtra("mensaje", sMensaje);
-		setResult(android.app.Activity.RESULT_OK, data);
-		finish();
-		Util.return2Main(this, bDirty, sMensaje);
-	}*/
 
 	//______________________________________________________________________________________________
 	@Override
@@ -427,13 +419,13 @@ System.err.println("ActRuta:eliminar:handleResponse:"+l);
 		}
 		else if(_r.getPuntos().size() > 0)
 		{
-			showMarkers();
+			showRuta();//showMarkers();
 			GeoPoint pos = _r.getPuntos().get(0);
 			LatLng pos2 = new LatLng(pos.getLatitude(), pos.getLongitude());
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));
 		}
 	}
-	private void showMarkers()
+	/*private void showMarkers()
 	{
 		PolylineOptions po = new PolylineOptions();
 		for(GeoPoint pt : _r.getPuntos())
@@ -446,7 +438,7 @@ System.err.println("showMarkers: " + pos);
 		}
 		po.width(5).color(Color.RED);
 		Polyline line = _Map.addPolyline(po);
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	private void pideGPS()
@@ -511,7 +503,7 @@ System.err.println("showMarkers: " + pos);
 				Util.setTrackingRoute(r.getObjectId());
 				/// Obtener posicion y guardar primer punto
 				Location loc = Util.getLocation();
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
+				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
 				r.guardar(new AsyncCallback<Ruta>()
 				{
 					@Override
@@ -525,8 +517,7 @@ System.err.println("showMarkers: " + pos);
 						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:handleFault:"+backendlessFault);
 					}
 				});
-System.err.println("ActRuta:startTrackingRecord-----------6:" + r);
-
+				//TODO: try geofence for tracking again????
 				/// Crear geofence con pos actual
 				RutaPto rp = new RutaPto();
 				rp.setIdRuta(r.getObjectId());
@@ -537,7 +528,6 @@ System.err.println("ActRuta:startTrackingRecord-----------6:" + r);
 					{
 System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
 						//CesService.cargarGeoTracking();
-System.err.println("ActRuta:startTrackingRecord-----------9:");
 						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
 					}
 					@Override public void handleFault(BackendlessFault backendlessFault)
@@ -551,7 +541,7 @@ System.err.println("ActRuta:startTrackingRecord-----------9:");
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
+				System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
 				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
@@ -562,5 +552,60 @@ System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault
 System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 		Util.setTrackingRoute("");
 		Util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
+	}
+
+	private void showRuta()
+	{
+		if(_r.getPuntos().size() < 1)return;
+
+		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
+		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+
+		String INI = getString(R.string.ini);
+		String FIN = getString(R.string.fin);
+		PolylineOptions po = new PolylineOptions();
+
+		GeoPoint gpIni = _r.getPuntos().get(0);
+		GeoPoint gpFin = _r.getPuntos().get(_r.getPuntos().size() - 1);
+		for(GeoPoint pt : _r.getPuntos())
+		{
+			MarkerOptions mo = new MarkerOptions();
+			mo.title(_r.getNombre());
+			Date date = _r.getFechaPunto(pt);
+			if(date != null)
+				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
+
+			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
+System.err.println("showRuta: " + pos);
+			if(pt == gpIni)
+			{
+				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+				mo.snippet(INI + df.format(date));
+				mo.rotation(135);
+				_Map.addMarker(mo.position(pos));
+			}
+			else if(pt == gpFin)
+			{
+				mo.snippet(FIN + df.format(date));
+				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+				mo.rotation(45);
+				_Map.addMarker(mo.position(pos));
+			}
+			else
+			{
+				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
+				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
+				if(disIni > 0.000000005 || disFin > 0.000000005)
+				{
+					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+					_Map.addMarker(mo.position(pos));
+				}
+			}
+			po.add(pos);
+		}
+		po.width(5).color(Color.BLUE);
+		_Map.addPolyline(po);
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
 	}
 }

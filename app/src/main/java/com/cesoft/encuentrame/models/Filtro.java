@@ -3,7 +3,6 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.Util;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -16,15 +15,24 @@ import java.util.Date;
 public class Filtro implements Parcelable
 {
 	public static final String FILTRO = "filtro";
-	public static final int NULO = -1;
+	public static final int TODOS = -1;
 	public static final int INACTIVO = 0;
 	public static final int ACTIVO = 1;
 
+	private boolean _onOff = false;
+		public boolean isOn(){return _onOff;}
+		public void turnOn(){_onOff =true;}
+		public void turnOff(){_onOff =false;}
+		public boolean isValid()
+		{
+			return !(_activo == TODOS && _nombre.isEmpty() && _fechaIni == null && _fechaFin == null && _punto.latitude == 0 && _punto.longitude == 0);
+		}
+
 	private int		_tipo = Util.NADA;
-	private int 	_activo = Filtro.NULO;
-	private String	_nombre;
+	private int 	_activo = Filtro.TODOS;
+	private String	_nombre = "";
 	private Date	_fechaIni, _fechaFin;
-	private LatLng	_punto;
+	private LatLng	_punto = new LatLng(0,0);
 	private int		_radio = Util.NADA;
 
 	public int getTipo(){return _tipo;}
@@ -58,7 +66,7 @@ public class Filtro implements Parcelable
 			_activo = v;
 			break;
 		default:
-			_activo = Filtro.NULO;
+			_activo = Filtro.TODOS;
 			break;
 		}
 	}
@@ -84,9 +92,15 @@ public class Filtro implements Parcelable
 	}
 
 	//______________________________________________________________________________________________
-	//public Filtro(){}
+	public Filtro(int tipo)
+	{
+		turnOff();
+		setTipo(tipo);
+		//Filtro(Util.LUGARES, Filtro.TODOS, "", null, null, null, Util.NADA);
+	}
 	public Filtro(int tipo, int activo, String nombre, Date fechaIni, Date fechaFin, LatLng punto, int radio)
 	{
+		turnOn();
 		setTipo(tipo);
 		setActivo(activo);
 		setNombre(nombre);
@@ -100,7 +114,9 @@ public class Filtro implements Parcelable
 	public String toString()
 	{
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		return String.format("%d, %d, %s, %.5f/%.5f %d, %s - %s", _tipo, _activo, _nombre, _punto.latitude, _punto.longitude, _radio, _fechaIni==null?"null":df.format(_fechaIni), _fechaFin==null?"null":df.format(_fechaFin));
+		return String.format("%b %d, %d, '%s', %.5f/%.5f %d, %s - %s",
+				_onOff, _tipo, _activo, _nombre, _punto.latitude, _punto.longitude, _radio,
+				_fechaIni==null?"null":df.format(_fechaIni), _fechaFin==null?"null":df.format(_fechaFin));
 	}
 
 	//______________________________________________________________________________________________

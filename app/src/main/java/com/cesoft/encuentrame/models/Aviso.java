@@ -25,6 +25,7 @@ public class Aviso extends Objeto
 {
 	public transient static final String NOMBRE = "aviso";
 	public transient static final String RADIO = "radio";//TRANSIENT so not to include in backendless
+	public transient static final String LUGAR = "lugar";
 
 	public Aviso(){}
 
@@ -34,7 +35,7 @@ public class Aviso extends Objeto
 		public void setActivo(boolean b){activo=b;}
 
 	protected Date fechaActivo;
-		public void desactivarPorHoy(AsyncCallback<Aviso> ac)
+		public void desactivarPorHoy(AsyncCallback<Aviso> ac)//TODO: Desactivar por hoy, tambien desactivar todos los avisos... incluso: modo avion para app completa
 		{
 			fechaActivo = Calendar.getInstance().getTime();
 			Backendless.Persistence.save(this, ac);
@@ -57,7 +58,7 @@ public class Aviso extends Objeto
 		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
 		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
 
-		public int getRadio()//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence
+		public int getRadio()//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
 		{
 			if(lugar == null)return 0;
 			Object o = lugar.getMetadata(RADIO);
@@ -99,7 +100,9 @@ public class Aviso extends Objeto
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
+System.err.println("----------------Aviso:from parcel 1:" + this);
 		setRadio(in.readInt());
+System.err.println("----------------Aviso:from parcel 2:" + this);
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -112,6 +115,7 @@ public class Aviso extends Objeto
 		dest.writeDouble(lugar.getLatitude());
 		dest.writeDouble(lugar.getLongitude());
 		dest.writeInt(getRadio());
+System.err.println("----------------Aviso:writeToParcel:"+lugar);
 	}
 	@Override
 	public int describeContents(){return 0;}
@@ -157,7 +161,7 @@ System.err.println("-------------------1------------------Aviso:getById:" + sId)
 		//query.setWhereClause("activo = True");
 		query.setWhereClause("activo > 0");
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
+		queryOptions.addRelated(LUGAR);
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Aviso.class).find(query, res);
 		//BackendlessCollection<Aviso> result = Backendless.Persistence.of( Contact.class ).find( dataQuery );
@@ -167,16 +171,18 @@ System.err.println("-------------------1------------------Aviso:getById:" + sId)
 		//Backendless.Persistence.of(Aviso.class).find(res);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
+		queryOptions.addRelated(LUGAR);
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Aviso.class).find(query, res);
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res, Filtro filtro)
 	{
+System.err.println("************************ 0 "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addSortByOption("created ASC");//TODO: igual en los otros getXXX ?
 		query.setQueryOptions(queryOptions);
+		queryOptions.addRelated(LUGAR);
 		StringBuilder sb = new StringBuilder(" 1 = 1 ");
 		if( ! filtro.getNombre().isEmpty())
 			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
@@ -192,6 +198,7 @@ System.err.println("-------------------1------------------Aviso:getById:" + sId)
 			sb.append(" AND created <= " + filtro.getFechaFin().getTime() + " ");
 		if(sb.length() > 0)
 			query.setWhereClause(sb.toString());
+System.err.println("---------getLista:filtro:"+filtro+" :::::::::::::"+sb.toString());
 		Backendless.Persistence.of(Aviso.class).find(query, res);
 	}
 

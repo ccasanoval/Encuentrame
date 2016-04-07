@@ -114,13 +114,20 @@ public class ActConfig extends AppCompatPreferenceActivity
 	}
 
 	// Binds a preference's summary to its value. More specifically, when the preference's value is changed, its summary (line of text below the preference title)
-	// * is updated to reflect the value. The summary is also immediately updated upon calling this method. The exact display format is dependent on the type of preference.
+	// is updated to reflect the value. The summary is also immediately updated upon calling this method. The exact display format is dependent on the type of preference.
 	private static void bindPreferenceSummaryToValue(Preference preference)
 	{
-		// Set the listener to watch for value changes.
-		preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-		// Trigger the listener immediately with the preference's current value.
-		sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+		try
+		{
+			// Set the listener to watch for value changes.
+			preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+			// Trigger the listener immediately with the preference's current value.
+			sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+		}
+		catch(Exception e)
+		{
+			System.err.println("ActConfig:bindPreferenceSummaryToValue:e:"+e);
+		}
 	}
 
 	// This method stops fragment injection in malicious applications. Make sure to deny any unknown fragments here.

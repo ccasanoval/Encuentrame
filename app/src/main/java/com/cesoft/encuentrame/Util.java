@@ -33,7 +33,7 @@ import java.util.HashMap;
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
-	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2;
+	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9;
 	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
@@ -302,6 +302,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, true);
 		intent.putExtra(Filtro.FILTRO, filtro);
+System.err.println("-----util:return2Main:"+filtro);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}

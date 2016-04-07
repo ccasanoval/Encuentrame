@@ -60,6 +60,7 @@ public class Lugar extends Objeto implements Parcelable
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res, Filtro filtro)
 	{
+System.err.println("************************ 0 "+filtro);
 		//TODO: ?????
 		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
@@ -75,10 +76,11 @@ public class Lugar extends Objeto implements Parcelable
 			metaSearch.put( "Athmosphere", "Romantic"  );
 			geoQuery.setMetadata( metaSearch );*/
 			BackendlessCollection<GeoPoint> geoPoints = Backendless.Geo.getPoints( geoQuery );
-System.err.println("************************" + geoPoints.getCurrentPage().size());
+System.err.println("************************ 1 " + geoPoints.getCurrentPage().size());
 		}
 		else
 		{
+System.err.println("************************ 1");
 		}
 
 
