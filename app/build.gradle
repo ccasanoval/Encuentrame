@@ -19,7 +19,7 @@ android {
         }
     }
 
-    signingConfigs {
+    /*signingConfigs {
         debug {
             storeFile file("ceskeystore.jks")
             storePassword "colt1911"
@@ -27,16 +27,36 @@ android {
             keyPassword "colt1911"
         }
         release {
-            storeFile file("ceskeystore.jks")
+            storeFile file('C:/usr/a/ceskeystore.jks')
             storePassword "colt1911"
             keyAlias "ces"
             keyPassword "colt1911"
         }
+        https://developer.android.com/intl/es/tools/publishing/app-signing.html
+        storePassword System.getenv("KSTOREPWD")
+        keyPassword System.getenv("KEYPWD")
+    }*/
+    if(project.hasProperty('keyAlias'))
+    {
+        signingConfigs.release.keyAlias = keyAlias
     }
+    if(project.hasProperty('keyPassword'))
+    {
+        signingConfigs.release.keyPassword = keyPassword
+    }
+    if(project.hasProperty('storePassword'))
+    {
+        signingConfigs.release.storePassword = storePassword
+    }
+    if(project.hasProperty('storeFile'))
+    {
+        signingConfigs.release.storeFile = storeFile
+    }
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:design:23.2.0'
     compile 'com.google.android.gms:play-services:8.4.0'
