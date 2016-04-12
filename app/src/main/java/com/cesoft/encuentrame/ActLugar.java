@@ -1,11 +1,11 @@
 package com.cesoft.encuentrame;
 
+import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.cesoft.encuentrame.models.Filtro;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -281,6 +280,7 @@ System.err.println("*************"+_l);
 			{
 				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar));
 			}
+			@SuppressLint("StringFormatInvalid")
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{

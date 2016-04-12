@@ -17,9 +17,9 @@ import com.cesoft.encuentrame.models.Aviso;
 public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 {
 	private final Aviso[] _avisos;
-	private CesIntLista _inter;
+	private IListaItemClick _inter;
 
-	public AvisoArrayAdapter(Context context, Aviso[] avisos, CesIntLista inter)
+	public AvisoArrayAdapter(Context context, Aviso[] avisos, IListaItemClick inter)
 	{
 		super(context, -1, avisos);
 		_avisos = avisos;
@@ -43,7 +43,7 @@ public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 				@Override
 				public void onClick(View v)
 				{
-					_inter.onItemEdit(CesIntLista.tipoLista.AVISO, _avisos[position]);
+					_inter.onItemEdit(Util.AVISOS, _avisos[position]);
 				}
 			});
 		btnMapa.setOnClickListener(new View.OnClickListener()
@@ -51,7 +51,7 @@ public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 				@Override
 				public void onClick(View v)
 				{
-					_inter.onItemMap(CesIntLista.tipoLista.AVISO, _avisos[position]);
+					_inter.onItemMap(Util.AVISOS, _avisos[position]);
 				}
 			});
 

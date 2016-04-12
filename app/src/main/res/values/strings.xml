@@ -16,6 +16,7 @@
 	<string name="aviso">Alert message</string>
 	<string name="avisos">Alerts</string>
 	<string name="buscar">Search</string>
+	<string name="cargando">Loading…</string>
 	<string name="sin_filtro">Search parameters removed</string>
 	<string name="categoria">Category</string>
 	<string name="clave">Password</string>

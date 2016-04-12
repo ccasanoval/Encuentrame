@@ -25,6 +25,7 @@ public class Filtro implements Parcelable
 		public void turnOff(){_onOff =false;}
 		public boolean isValid()
 		{
+System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" **** "+_fechaFin+" *** "+_punto);
 			return !(_activo == TODOS && _nombre.isEmpty() && _fechaIni == null && _fechaFin == null && _punto.latitude == 0 && _punto.longitude == 0);
 		}
 
@@ -114,7 +115,7 @@ public class Filtro implements Parcelable
 	public String toString()
 	{
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		return String.format("%b %d, %d, '%s', %.5f/%.5f %d, %s - %s",
+		return String.format("%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s",
 				_onOff, _tipo, _activo, _nombre, _punto.latitude, _punto.longitude, _radio,
 				_fechaIni==null?"null":df.format(_fechaIni), _fechaFin==null?"null":df.format(_fechaFin));
 	}
@@ -123,6 +124,7 @@ public class Filtro implements Parcelable
 	// 4 PARCELABLE
 	protected Filtro(Parcel in)
 	{
+		_onOff = in.readInt() > 0;
 		_tipo = in.readInt();
 		_activo = in.readInt();
 		_nombre = in.readString();
@@ -138,6 +140,7 @@ public class Filtro implements Parcelable
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
+		dest.writeInt(_onOff?1:0);
 		dest.writeInt(_tipo);
 		dest.writeInt(_activo);
 		dest.writeString(_nombre);

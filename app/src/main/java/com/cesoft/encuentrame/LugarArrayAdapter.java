@@ -1,13 +1,11 @@
 package com.cesoft.encuentrame;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame.models.Lugar;
@@ -19,9 +17,9 @@ import com.cesoft.encuentrame.models.Lugar;
 public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 {
 	private final Lugar[] _lugares;
-	private CesIntLista _inter;
+	private IListaItemClick _inter;
 
-	public LugarArrayAdapter(Context context, Lugar[] lugares, CesIntLista inter)
+	public LugarArrayAdapter(Context context, Lugar[] lugares, IListaItemClick inter)
 	{
 		super(context, -1, lugares);
 		_lugares = lugares;
@@ -45,7 +43,7 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 				@Override
 				public void onClick(View v)
 				{
-					_inter.onItemEdit(CesIntLista.tipoLista.LUGAR, _lugares[position]);
+					_inter.onItemEdit(Util.LUGARES, _lugares[position]);
 				}
 			});
 		btnMapa.setOnClickListener(new View.OnClickListener()
@@ -53,7 +51,7 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 				@Override
 				public void onClick(View v)
 				{
-					_inter.onItemMap(CesIntLista.tipoLista.LUGAR, _lugares[position]);
+					_inter.onItemMap(Util.LUGARES, _lugares[position]);
 				}
 			});
 

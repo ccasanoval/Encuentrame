@@ -1,5 +1,7 @@
 package com.cesoft.encuentrame;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -15,10 +17,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.async.callback.BackendlessCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,10 +32,9 @@ public class ActLogin extends AppCompatActivity
 {
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
 	private static ActLogin _win;
-	/**
-	 * The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
-	 * If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
-	 */
+
+	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
+	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
 
 	@Override
@@ -101,7 +104,7 @@ public class ActLogin extends AppCompatActivity
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		public PlaceholderFragment(){}
 
-		AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()//DefaultCallback<BackendlessUser>(ActLogin._win)
+		AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()//LoginBECallback<BackendlessUser>(ActLogin._win)
 		{
 			@Override
 			public void handleResponse(BackendlessUser backendlessUser)
@@ -187,7 +190,7 @@ public class ActLogin extends AppCompatActivity
 						user.setPassword(txtPassword.getText().toString());
 						user.setEmail(txtEmail.getText().toString());
 						user.setProperty("name", txtLogin.getText().toString());
-						Backendless.UserService.register(user, new DefaultCallback<BackendlessUser>(ActLogin._win)
+						Backendless.UserService.register(user, new LoginBECallback<BackendlessUser>(ActLogin._win)
 						{
 							@Override
 							public void handleResponse(BackendlessUser backendlessUser)
@@ -240,4 +243,32 @@ public class ActLogin extends AppCompatActivity
 			return rootView;
 		}
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	public static class LoginBECallback<T> extends BackendlessCallback<T>
+	{
+		Context context;
+		ProgressDialog progressDialog;
+
+		public LoginBECallback(Context context)
+		{
+			this.context = context;
+			progressDialog = ProgressDialog.show(context, "", context.getString(R.string.cargando), true);
+		}
+
+		@Override
+		public void handleResponse(T response)
+		{
+			progressDialog.cancel();
+		}
+
+		@Override
+		public void handleFault(BackendlessFault fault)
+		{
+			progressDialog.cancel();
+			Toast.makeText(context, fault.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
+
 }

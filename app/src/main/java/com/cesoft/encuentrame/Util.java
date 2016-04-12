@@ -33,14 +33,21 @@ import java.util.HashMap;
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
+	/*public enum Tipo
+	{
+		NADA(-1), LUGAR(1), RUTA(2), AVISO(3), BUSCAR(9);
+		private int value;
+		private Tipo(int value){this.value = value;}
+		public int getValue(){return value;}
+	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9;
 	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
 	//______________________________________________________________________________________________
-	private static CesIntLista _refresh;
-		public static void setRefreshCallback(CesIntLista refresh){_refresh = refresh;}
+	private static IListaItemClick _refresh;
+		public static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
 		public static void refreshListaRutas()
 		{
 System.err.println("----------------------Util.refreshListaRutas ");
@@ -302,7 +309,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, true);
 		intent.putExtra(Filtro.FILTRO, filtro);
-System.err.println("-----util:return2Main:"+filtro);
+System.err.println("-----util:return2Main:filtro:"+filtro);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}

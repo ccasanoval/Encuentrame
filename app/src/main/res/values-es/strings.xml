@@ -74,8 +74,8 @@
 	<string name="error_eliminar">Error al eliminar: %s</string>
 	<string name="ok_guardar">Se guardaron los datos del registro</string>
 	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
-	<string name="sin_nombre">Debe establecer un nombre...</string>
-	<string name="sin_lugar">Debe establecer una posición...</string>
+	<string name="sin_nombre">Debe establecer un nombre…</string>
+	<string name="sin_lugar">Debe establecer una posición…</string>
 
 	<string name="pref_header_general">General</string>
 	<string name="pref_header_notifications">Avisos</string>
@@ -87,4 +87,5 @@
 	<string name="ok_stop_tracking">La ruta termina aquí</string>
 	<string name="pref_header_data_sync">Datos</string>
 	<string name="sin_filtro">Se eliminaron los parámetros de búsqueda</string>
+	<string name="cargando">Cargando…</string>
 </resources>

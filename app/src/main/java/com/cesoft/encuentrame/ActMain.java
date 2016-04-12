@@ -168,7 +168,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// LUGARES / RUTAS / AVISOS
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	public static class PlaceholderFragment extends Fragment implements CesIntLista
+	public static class PlaceholderFragment extends Fragment implements IListaItemClick
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
@@ -264,26 +264,26 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
 			return _rootView;
 		}
 
-		//// implements CesIntLista
+		//// implements IListaItemClick
 		//______________________________________________________________________________________________
 		@Override
-		public void onItemEdit(tipoLista tipo, Objeto obj)
+		public void onItemEdit(int tipo, Objeto obj)
 		{
 System.err.println("ActMain:onItemEdit:"+obj);
 			Intent i;
 			switch(tipo)
 			{
-			case LUGAR:
+			case Util.LUGARES:
 				i = new Intent(ActMain._this, ActLugar.class);
 				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, Util.LUGARES);
 				break;
-			case RUTA:
+			case Util.RUTAS:
 				i = new Intent(ActMain._this, ActRuta.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, Util.RUTAS);
 				break;
-			case AVISO:
+			case Util.AVISOS:
 				i = new Intent(ActMain._this, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, Util.AVISOS);
@@ -291,22 +291,22 @@ System.err.println("ActMain:onItemEdit:"+obj);
 			}
 		}
 		@Override
-		public void onItemMap(tipoLista tipo, Objeto obj)
+		public void onItemMap(int tipo, Objeto obj)
 		{
 			Intent i;
 			switch(tipo)
 			{
-			case LUGAR:
+			case Util.LUGARES:
 				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, Util.LUGARES);
 				break;
-			case RUTA:
+			case Util.RUTAS:
 				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, Util.RUTAS);
 				break;
-			case AVISO:
+			case Util.AVISOS:
 				i = new Intent(ActMain._this, ActMaps.class);
 				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, Util.AVISOS);
@@ -329,7 +329,7 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
 				if(sMensaje != null && !sMensaje.isEmpty())
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+					Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();//getString(R.string.ok_guardar)
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 
 				filtro = data.getParcelableExtra(Filtro.FILTRO);
@@ -339,16 +339,24 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 					_filtro = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
 			}
 			if(resultCode != RESULT_OK)return;
-System.err.println("----++++++++++++++++++-----ActMain:onActivityResult:1: "+filtro);
+System.err.println("----++++++++++++++++++-----ActMain:onActivityResult:1: "+requestCode+" VS "+(filtro==null?"null":filtro.getTipo())+" :::"+filtro);
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
 			case Util.RUTAS:	refreshRutas(); break;
 			case Util.AVISOS:	refreshAvisos(); break;
+			case Util.BUSCAR:
+				switch(_filtro.getTipo())
+				{
+				case Util.LUGARES:	refreshLugares(); break;
+				case Util.RUTAS:	refreshRutas(); break;
+				case Util.AVISOS:	refreshAvisos(); break;
+				}
+				break;
 			}
 		}
 
-		// 4 CesIntLista
+		// 4 IListaItemClick
 		private BroadcastReceiver _MessageReceiver;
 		private static final String RUTA_REFRESH = "ces";
 		public void onRefreshListaRutas()

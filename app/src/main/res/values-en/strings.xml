@@ -55,8 +55,8 @@
 	<string name="rutas">Routes</string>
 	<string name="seguro_eliminar">Are you sure you want to remove?</string>
 	<string name="send">Send</string>
-	<string name="sin_lugar">A location must be stablished...</string>
-	<string name="sin_nombre">A name must be stablished...</string>
+	<string name="sin_lugar">A location must be stablished…</string>
+	<string name="sin_nombre">A name must be stablished…</string>
 	<string name="sin_posicion">No location</string>
 	<string name="start">Start</string>
 	<string name="stop">Stop</string>
@@ -80,5 +80,6 @@
 	<string name="ok_stop_tracking">The route ends here</string>
 	<string name="pref_header_data_sync">Data</string>
 	<string name="sin_filtro">Search parameters removed</string>
+	<string name="cargando">Loading…</string>
 
 </resources>

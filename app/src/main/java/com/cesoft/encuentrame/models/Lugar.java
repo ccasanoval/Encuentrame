@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.BackendlessGeoQuery;
 import com.backendless.geo.GeoPoint;
 import com.backendless.geo.Units;
@@ -15,6 +16,7 @@ import com.cesoft.encuentrame.Util;
 
 import weborb.service.ExcludeProperties;
 
+//https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,42 +62,17 @@ public class Lugar extends Objeto implements Parcelable
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res, Filtro filtro)
 	{
-System.err.println("************************ 0 "+filtro);
-		//TODO: ?????
-		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
-		{
-			BackendlessGeoQuery geoQuery = new BackendlessGeoQuery();
-			geoQuery.addCategory(NOMBRE);
-			geoQuery.setLatitude(filtro.getPunto().latitude);
-			geoQuery.setLongitude(filtro.getPunto().longitude);
-			geoQuery.setRadius(filtro.getRadio()>0 ? filtro.getRadio() : 1000000.0);
-			geoQuery.setUnits(Units.METERS);
-
-			/*HashMap<String, String> metaSearch = new HashMap<String, String>();
-			metaSearch.put( "Cuisine", "French"  );
-			metaSearch.put( "Athmosphere", "Romantic"  );
-			geoQuery.setMetadata( metaSearch );*/
-			BackendlessCollection<GeoPoint> geoPoints = Backendless.Geo.getPoints( geoQuery );
-System.err.println("************************ 1 " + geoPoints.getCurrentPage().size());
-		}
-		else
-		{
-System.err.println("************************ 1");
-		}
-
-
-
-		//TODO:Filtro
+System.err.println("************************ 0: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
 		//--FILTRO
-		StringBuilder sb = new StringBuilder(" 1 = 1 ");
+		StringBuilder sb = new StringBuilder();//" created = created "
 		if( ! filtro.getNombre().isEmpty())
-			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
-		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+			sb.append(" nombre LIKE '%" + filtro.getNombre() + "%' ");
+/*		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
+			String whereClause = "distance( 30.26715, -97.74306, coordinates.latitude, coordinates.longitude ) < mi(200)";
 			//TODO: Find by the points inside ???
 			//filtro.getPunto();
 			//filtro.getRadio()
@@ -104,11 +81,14 @@ System.err.println("************************ 1");
 			sb.append(" AND created >= '" + filtro.getFechaIni() + "' ");
 		if(filtro.getFechaFin() != null)
 			sb.append(" AND created <= '" + filtro.getFechaFin() + "' ");
-		if(sb.length() > 0)
-			query.setWhereClause(sb.toString());
+		*/
+System.err.println("************************ 9: "+sb.toString()+" : nombre LIKE '%test2%' :"+sb.equals("nombre LIKE '%test2%'"));
+		//if(sb.length() > 0)
+		//	query.setWhereClause(sb.toString());
+		query.setWhereClause("nombre LIKE '%test2%'");
 		//--FILTRO
+		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Lugar.class).find(query, res);
-		//Backendless.Persistence.of(Lugar.class).find(res);
 	}
 
 

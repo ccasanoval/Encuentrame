@@ -1,19 +1,16 @@
 package com.cesoft.encuentrame;
 
-import android.Manifest;
-import android.app.Activity;
+import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -336,6 +333,7 @@ System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps fai
 				//return2Main(true, getString(R.string.ok_guardar));
 				openMain(true, getString(R.string.ok_guardar));
 			}
+			@SuppressLint("StringFormatInvalid")
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{

@@ -403,15 +403,16 @@ findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 	}
 	private void buscar()
 	{
+		_filtro.setNombre(_txtNombre.getText().toString());
 		if(_filtro.isValid())
 		{
 			_filtro.turnOn();
-			_filtro.setNombre(_txtNombre.getText().toString());
-	System.err.println("ActBuscar:buscar:filtro:---------- " + _filtro);
+System.err.println("ActBuscar:buscar:filtro:---------------------------------------------- " + _filtro);
 			Util.return2Main(this, _filtro);
 		}
 		else
 		{
+			_filtro.turnOff();
 			Util.return2Main(this, true, getString(R.string.sin_filtro));
 		}
 	}

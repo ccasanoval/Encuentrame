@@ -18,9 +18,9 @@ import com.cesoft.encuentrame.models.Ruta;
 public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
 	private final Ruta[] _rutas;
-	private CesIntLista _inter;
+	private IListaItemClick _inter;
 
-	public RutaArrayAdapter(Context context, Ruta[] rutas, CesIntLista inter)
+	public RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
 	{
 		super(context, -1, rutas);
 		_rutas = rutas;
@@ -45,7 +45,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 				@Override
 				public void onClick(View v)
 				{
-					_inter.onItemEdit(CesIntLista.tipoLista.RUTA, _rutas[position]);
+					_inter.onItemEdit(Util.RUTAS, _rutas[position]);
 				}
 			});
 		btnMapa.setOnClickListener(new View.OnClickListener()
@@ -53,7 +53,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 				@Override
 				public void onClick(View v)
 				{
-					_inter.onItemMap(CesIntLista.tipoLista.RUTA, _rutas[position]);
+					_inter.onItemMap(Util.RUTAS, _rutas[position]);
 				}
 			});
 
