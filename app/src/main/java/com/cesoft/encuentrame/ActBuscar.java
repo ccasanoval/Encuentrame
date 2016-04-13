@@ -4,12 +4,8 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
-import android.media.Image;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -22,28 +18,13 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.Switch;
-import android.widget.TextView;
 
-import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -53,17 +34,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Guardar filtro de busqueda? cambiar lupa por embudo?
 //TODO: El icono de buscar arriba en el menu, el otro volver...
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
-	private static final int DELAY_LOCATION = 60000;
+	//private static final int DELAY_LOCATION = 60000;
 
 	private Filtro _filtro;
-	//private Switch _swtActivo;
 	private EditText _txtNombre;
 
 	private EditText _txtFechaIni, _txtFechaFin;
@@ -71,15 +50,12 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 	private String[] _asRadio = {"-",		 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
 	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
-	private Spinner _spnRadio;
-	private Spinner _spnActivo;
 
 	//private GoogleApiClient _GoogleApiClient;
 	//private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
 	private Circle _circle;
-	//private LatLng _pos;
 
 	//private CoordinatorLayout _coordinatorLayout;
 
@@ -110,7 +86,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 		ArrayAdapter<String> adapter;
 		//_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
-		_spnActivo = (Spinner)findViewById(R.id.spnActivo);
+		Spinner _spnActivo = (Spinner)findViewById(R.id.spnActivo);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"TODOS", "ACTIVOS", "INACTIVOS"});//TODO getString
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnActivo.setAdapter(adapter);
@@ -140,7 +116,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			}
 		});
 		//
-		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
+		Spinner _spnRadio = (Spinner)findViewById(R.id.spnRadio);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnRadio.setAdapter(adapter);
@@ -274,13 +250,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		{
 		case Util.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
-			_spnActivo.setVisibility(View.GONE);
+			//_spnActivo.setVisibility(View.GONE);
 			findViewById(R.id.layActivo).setVisibility(View.GONE);
 			break;
 		case Util.RUTAS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
-_spnActivo.setVisibility(View.VISIBLE);
-findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
+			//_spnActivo.setVisibility(View.VISIBLE);
+			//findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 			break;
 		case Util.AVISOS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.avisos)));

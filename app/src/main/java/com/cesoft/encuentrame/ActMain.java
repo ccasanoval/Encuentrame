@@ -37,9 +37,8 @@ import com.cesoft.encuentrame.models.Ruta;
 import java.util.Date;
 import java.util.Iterator;
 
-//TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: CONFIF: hacer vista de configuracion : usr/pwd de backendless, start at boot, dont ask for password->save login and password, delay to tracking routes, geofence radius?...
-//TODO: icono app : android con gorro de wally?
+//TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: widget para ruta start/stop... widget para guardar punto...
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
 //TODO: main window=> Number or routes, places and geofences...
@@ -470,7 +469,7 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 		};
 
 		//__________________________________________________________________________________________
-		public void refreshAvisos()//TODO: a veces se actualiza y no utiliza filtro???????????????? El filtro se ha borrado
+		public void refreshAvisos()
 		{
 			if(_aFiltro[_sectionNumber].isOn())
 			{

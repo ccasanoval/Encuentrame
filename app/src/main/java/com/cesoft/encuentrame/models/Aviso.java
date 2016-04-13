@@ -16,6 +16,7 @@ import java.util.Date;
 
 import weborb.service.ExcludeProperties;//import weborb.service.ExcludeProperty;
 
+//https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,32 +144,21 @@ System.err.println("----------------Aviso:writeToParcel:"+lugar);
 
 	public static void getById(String sId, AsyncCallback<Aviso> res)
 	{
-		/*BackendlessDataQuery query = new BackendlessDataQuery();
-		query.setWhereClause("objectId = "+sId);
-		//query.setWhereClause("activo > 0");
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Aviso.class).find(query, res);*/
 		ArrayList<String> relationProps = new ArrayList<>();
 		relationProps.add("lugar");
 		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);
-System.err.println("-------------------1------------------Aviso:getById:" + sId);
 	}
 	public static void getActivos(AsyncCallback<BackendlessCollection<Aviso>> res)
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
-		//query.setWhereClause("activo = True");
 		query.setWhereClause("activo > 0");
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addRelated(LUGAR);
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Aviso.class).find(query, res);
-		//BackendlessCollection<Aviso> result = Backendless.Persistence.of( Contact.class ).find( dataQuery );
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res)
 	{
-		//Backendless.Persistence.of(Aviso.class).find(res);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addRelated(LUGAR);
@@ -184,7 +174,7 @@ System.err.println("Aviso:getLista:filtro: "+filtro);
 		queryOptions.addRelated("lugar");
 		query.setQueryOptions(queryOptions);
 		//--FILTRO
-		StringBuilder sb = new StringBuilder();//" created = created "
+		StringBuilder sb = new StringBuilder();
 		if( ! filtro.getNombre().isEmpty())
 		{
 			sb.append(" nombre LIKE '%");
@@ -197,7 +187,7 @@ System.err.println("Aviso:getLista:filtro: "+filtro);
 			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, lugar.latitude, lugar.longitude ) < km(%f) ",
 					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
 		}
-		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
+		if(filtro.getFechaIni() != null)
 		{
 			if(sb.length() > 0)sb.append(" AND ");
 			sb.append(" created >= ");
