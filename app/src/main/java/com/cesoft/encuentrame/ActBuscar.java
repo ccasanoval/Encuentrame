@@ -224,7 +224,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();*/
-		try//TODO: recibir un Filtro para rellenar los campos...
+		try
 		{
 			_filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
 			//-----
@@ -303,6 +303,7 @@ findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 				setPosLugar(pos);
 			}
 		});
+		setMarker();
 	}
 	//______________________________________________________________________________________________
 	private void setPosLugar(LatLng pos)
@@ -317,6 +318,7 @@ findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 		try
 		{
 			if(_marker != null)_marker.remove();
+			if(_filtro.getPunto() == null || (_filtro.getPunto().latitude == 0 && _filtro.getPunto().longitude == 0))return;
 			//LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
 			MarkerOptions mo = new MarkerOptions()
 					.position(_filtro.getPunto())
@@ -328,8 +330,8 @@ findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 	}
 	private void setRadio()
 	{
-		if(_filtro.getPunto() == null || _filtro.getRadio() < 1)return;
 		if(_circle != null)_circle.remove();
+		if(_filtro.getPunto() == null || _filtro.getRadio() < 1)return;
 		_circle = _Map.addCircle(new CircleOptions().center(_filtro.getPunto())
 				.radius(_filtro.getRadio()).strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
@@ -399,7 +401,9 @@ findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
 	}
 	private void eliminar()
 	{
-		Util.return2Main(this, true, getString(R.string.sin_filtro));
+		_filtro.turnOff();
+		Util.return2Main(this, _filtro);
+		//Util.return2Main(this, true, getString(R.string.sin_filtro));
 	}
 	private void buscar()
 	{
@@ -412,8 +416,7 @@ System.err.println("ActBuscar:buscar:filtro:------------------------------------
 		}
 		else
 		{
-			_filtro.turnOff();
-			Util.return2Main(this, true, getString(R.string.sin_filtro));
+			eliminar();
 		}
 	}
 }

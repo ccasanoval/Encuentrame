@@ -94,8 +94,6 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			//if( ! getIntent().getBooleanExtra(DIRTY, true))return;
 		}
 		catch(Exception e){System.err.println("ActMain:onCreate:e:"+e);}
-
-//cargaDatosDebug();//TODO:Debug
 	}
 
 	@Override
@@ -168,12 +166,14 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// LUGARES / RUTAS / AVISOS
 	////////////////////////////////////////////////////////////////////////////////////////////////
+	private static Filtro[] _aFiltro = new Filtro[3];
 	public static class PlaceholderFragment extends Fragment implements IListaItemClick
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
+		//private static Filtro[] _aFiltro = new Filtro[3];
 
-		protected Filtro _filtro;
+		//protected Filtro _filtro;
 		private int _sectionNumber = Util.NADA;
 		public PlaceholderFragment(){}
 
@@ -196,12 +196,14 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		{
 			Bundle args = getArguments();
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber);
+System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber+" ::: "+_aFiltro[_sectionNumber]);
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
 
-			_filtro = new Filtro(_sectionNumber);
+			if(_aFiltro[_sectionNumber] == null)
+				_aFiltro[_sectionNumber] = new Filtro(_sectionNumber);
+
 
 			FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
 			fab.setOnClickListener(new View.OnClickListener()
@@ -316,7 +318,7 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		public void buscar()
 		{
 			Intent i = new Intent(ActMain._this, ActBuscar.class);
-			i.putExtra(Filtro.FILTRO, _filtro);
+			i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
 			startActivityForResult(i, Util.BUSCAR);
 		}
 		// Recoge el resultado de startActivityForResult
@@ -324,7 +326,6 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
 System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ requestCode);
-			Filtro filtro = null;
 			if(data != null)
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
@@ -332,27 +333,31 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 					Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();//getString(R.string.ok_guardar)
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 
-				filtro = data.getParcelableExtra(Filtro.FILTRO);
+				Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
 				if(filtro != null && filtro.getTipo() != Util.NADA)
-					_filtro = filtro;
-				else
-					_filtro = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
+				{
+					_aFiltro[_sectionNumber] = filtro;
+					if( ! filtro.isOn())
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.sin_filtro), Snackbar.LENGTH_LONG).show();
+				}
+				//else		_aFiltro[_sectionNumber] = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
 			}
 			if(resultCode != RESULT_OK)return;
-System.err.println("----++++++++++++++++++-----ActMain:onActivityResult:1: "+requestCode+" VS "+(filtro==null?"null":filtro.getTipo())+" :::"+filtro);
+System.err.println("----++++++++++++++++++-----ActMain:onActivityResult:1: ");
+			if(requestCode == Util.BUSCAR)requestCode=_aFiltro[_sectionNumber].getTipo();
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
 			case Util.RUTAS:	refreshRutas(); break;
 			case Util.AVISOS:	refreshAvisos(); break;
-			case Util.BUSCAR:
+			/*case Util.BUSCAR:
 				switch(_filtro.getTipo())
 				{
 				case Util.LUGARES:	refreshLugares(); break;
 				case Util.RUTAS:	refreshRutas(); break;
 				case Util.AVISOS:	refreshAvisos(); break;
 				}
-				break;
+				break;*/
 			}
 		}
 
@@ -389,11 +394,11 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 		//__________________________________________________________________________________________
 		public void refreshLugares()
 		{
-			if(_filtro.isOn())
+			if(_aFiltro[_sectionNumber].isOn())
 			{
-System.err.println("---------FILTRO:" + _filtro);
+System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				checkFechas();
-				Lugar.getLista(_acLugar, _filtro);
+				Lugar.getLista(_acLugar, _aFiltro[_sectionNumber]);
 			}
 			else
 				Lugar.getLista(_acLugar);
@@ -406,7 +411,10 @@ System.err.println("---------FILTRO:" + _filtro);
 				int n = lugares.getTotalObjects();
 System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
-					return;
+				{
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
+					//return;
+				}
 				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 				Lugar[] listaAL = new Lugar[n];
 				int i = 0;
@@ -425,10 +433,10 @@ System.err.println("---------LUGARES:GET:OK:" + n);
 		public void refreshRutas()
 		{
 System.err.println("ActMain:refreshRutas()");
-			if(_filtro.isOn())
+			if(_aFiltro[_sectionNumber].isOn())
 			{
 				checkFechas();
-				Ruta.getLista(_acRuta, _filtro);
+				Ruta.getLista(_acRuta, _aFiltro[_sectionNumber]);
 			}
 			else
 				Ruta.getLista(_acRuta);
@@ -441,7 +449,10 @@ System.err.println("ActMain:refreshRutas()");
 				int n = rutas.getTotalObjects();
 System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
-					return;
+				{
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
+					//return;
+				}
 				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
 				Ruta[] listaAL = new Ruta[n];
 				int i = 0;
@@ -459,12 +470,12 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 		};
 
 		//__________________________________________________________________________________________
-		public void refreshAvisos()
+		public void refreshAvisos()//TODO: a veces se actualiza y no utiliza filtro???????????????? El filtro se ha borrado
 		{
-			if(_filtro.isOn())
+			if(_aFiltro[_sectionNumber].isOn())
 			{
 				checkFechas();
-				Aviso.getLista(_acAviso, _filtro);
+				Aviso.getLista(_acAviso, _aFiltro[_sectionNumber]);
 			}
 			else
 				Aviso.getLista(_acAviso);
@@ -477,7 +488,10 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 				int n = avisos.getTotalObjects();
 System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)
-					return;
+				{
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
+					//return;
+				}
 				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
 				Aviso[] listaAL = new Aviso[n];
 				int i = 0;
@@ -495,170 +509,13 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 		//__________________________________________________________________________________________
 		private void checkFechas()
 		{
-			Date ini = _filtro.getFechaIni();
-			Date fin = _filtro.getFechaFin();
+			Date ini = _aFiltro[_sectionNumber].getFechaIni();
+			Date fin = _aFiltro[_sectionNumber].getFechaFin();
 			if(ini!=null && fin!=null && ini.getTime() > fin.getTime())
 			{
-				_filtro.setFechaIni(fin);
-				_filtro.setFechaFin(ini);
+				_aFiltro[_sectionNumber].setFechaIni(fin);
+				_aFiltro[_sectionNumber].setFechaFin(ini);
 			}
 		}
 	}
-
-
-
-
-
-
-
-//TODO:DEBUG
-	private void cargaDatosDebug()
-	{
-		//-------- LUGAR --------
-		/*
-		Lugar l = new Lugar();
-		l.setNombre("Lugar 3");
-		l.setDescripcion("Lug Desc 3");
-		l.setLugar(new GeoPoint(40.4676353, -3.5608333));
-		l.guardar(new AsyncCallback<Lugar>()
-		{
-			@Override
-			public void handleResponse(Lugar lugar){System.err.println("************* L3-----------" + lugar);}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:L3-----------"+backendlessFault);}
-		});
-
-		/**/
-
-		/*
-		//-------- AVISO --------
-		Aviso a = new Aviso();
-		a.setNombre("Aviso 1");
-		a.setDescripcion("Aviso 1: Recoge la nota del buzon muerto1");
-		GeoPoint l = new GeoPoint(40.4676111, -3.5608111);
-		a.setLugar(l, 2000);//l.setDistance(1000);	//l.setRa(Aviso.RADIO, 1000);
-		a.guardar(new AsyncCallback<Aviso>()
-		{
-			@Override
-			public void handleResponse(Aviso aviso){System.err.println("************* A5-----------" + aviso);}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault){System.err.println("*********** FAIL:A5-----------"+backendlessFault);}
-		});
-		/**/
-
-
-		//-------- RUTA --------
-		Ruta r = new Ruta();
-		r.setNombre("Ruta 1");
-		r.setDescripcion("Ruta 1 desc");
-
-		java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		try
-		{
-			r.addPunto(new GeoPoint(40.4610001, -3.5611001), format.parse("2016-03-30 8:0:0"));
-			r.addPunto(new GeoPoint(40.4752002, -3.5644002), format.parse("2016-03-30 8:5:0"));
-			r.addPunto(new GeoPoint(40.4893003, -3.5677003), format.parse("2016-03-30 8:10:0"));
-			r.addPunto(new GeoPoint(40.4940004, -3.5711004), format.parse("2016-03-30 8:15:0"));
-			r.addPunto(new GeoPoint(40.5050005, -3.5744005), format.parse("2016-03-30 8:20:0"));
-		} catch (Exception e) {   e.printStackTrace();}
-		System.err.println("************* ruta-----------"+r);
-		r.guardar(new AsyncCallback<Ruta>()
-		{
-			@Override
-			public void handleResponse(Ruta ruta)
-			{
-				System.err.println("************* OK-----------"+ruta);
-				Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
-				{
-					@Override
-					public void handleResponse(BackendlessCollection<Ruta> rutaBackendlessCollection)
-					{
-						System.err.println("************* OK OK-----------"+rutaBackendlessCollection.getCurrentPage().size()+" : "+rutaBackendlessCollection.getCurrentPage().get(0));
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("*********** OK FAIL-----------" + backendlessFault);
-					}
-				});
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("*********** FAIL-----------" + backendlessFault);
-			}
-		});
-				/*System.err.println("************* R1-----------" + ruta);
-				Map<String, Object> meta = new HashMap<>();
-				meta.put(Ruta.NOMBRE, ruta);
-				try
-				{
-					Backendless.Geo.savePoint(40.4676555, -3.5608555, meta, new AsyncCallback<GeoPoint>()
-					{
-						@Override
-						public void handleResponse(GeoPoint geoPoint)
-						{
-							System.out.println("*************  pto1-----------" + geoPoint.getObjectId());
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.out.println("*********** FAIL: pto1-----------" + backendlessFault);
-						}
-					});
-					Backendless.Geo.savePoint(40.4676599, -3.5608599, meta, new AsyncCallback<GeoPoint>()
-					{
-						@Override
-						public void handleResponse(GeoPoint geoPoint)
-						{
-							System.out.println("************* pto2-----------" + geoPoint.getObjectId());
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.out.println("*********** FAIL: pto2-----------" + backendlessFault);
-						}
-					});
-					Backendless.Geo.savePoint(40.4676699, -3.5608699, meta, new AsyncCallback<GeoPoint>()
-					{
-						@Override
-						public void handleResponse(GeoPoint geoPoint)
-						{
-							System.out.println("*************  pto3-----------" + geoPoint.getObjectId());
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.out.println("*********** FAIL: pto3-----------" + backendlessFault);
-						}
-					});
-					Backendless.Geo.savePoint(40.4676799, -3.5608799, meta, new AsyncCallback<GeoPoint>()
-					{
-						@Override
-						public void handleResponse(GeoPoint geoPoint)
-						{
-							System.out.println("************* pto4-----------" + geoPoint.getObjectId());
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.out.println("*********** FAIL: pto4-----------" + backendlessFault);
-						}
-					});
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("*********** FAIL:R1-----------" + backendlessFault);
-			}
-		});
-		/**/
-
-	}
 }
-

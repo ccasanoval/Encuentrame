@@ -177,28 +177,48 @@ System.err.println("-------------------1------------------Aviso:getById:" + sId)
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res, Filtro filtro)
 	{
-System.err.println("************************ 0 "+filtro);
+System.err.println("Aviso:getLista:filtro: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addSortByOption("created ASC");//TODO: igual en los otros getXXX ?
+		queryOptions.addSortByOption("created ASC");
+		queryOptions.addRelated("lugar");
 		query.setQueryOptions(queryOptions);
-		queryOptions.addRelated(LUGAR);
-		StringBuilder sb = new StringBuilder(" 1 = 1 ");
+		//--FILTRO
+		StringBuilder sb = new StringBuilder();//" created = created "
 		if( ! filtro.getNombre().isEmpty())
-			sb.append(" AND nombre like = '%" + filtro.getNombre() + "%' ");
-		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
-			//TODO: Find by the points inside ???
-			//filtro.getPunto();
-			//filtro.getRadio()
+			sb.append(" nombre LIKE '%");
+			sb.append(filtro.getNombre());
+			sb.append("%' ");
+		}
+		if(filtro.getRadio() > 0 && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, lugar.latitude, lugar.longitude ) < km(%f) ",
+					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
 		}
 		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-			sb.append(" AND created >= " + filtro.getFechaIni().getTime() + " ");
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created >= ");
+			sb.append(filtro.getFechaIni().getTime());
+		}
 		if(filtro.getFechaFin() != null)
-			sb.append(" AND created <= " + filtro.getFechaFin().getTime() + " ");
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created <= ");
+			sb.append(filtro.getFechaFin().getTime());
+		}
+		if(filtro.getActivo() != Util.NADA)
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" activo = ");
+			sb.append(filtro.getActivo()==Filtro.ACTIVO?"true":"false");
+		}
+System.err.println("Aviso:getLista:SQL: "+sb.toString());
 		if(sb.length() > 0)
 			query.setWhereClause(sb.toString());
-System.err.println("---------getLista:filtro:"+filtro+" :::::::::::::"+sb.toString());
+		//--FILTRO
 		Backendless.Persistence.of(Aviso.class).find(query, res);
 	}
 

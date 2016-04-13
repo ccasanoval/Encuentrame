@@ -62,6 +62,8 @@
 	<string name="stop">Stop</string>
 	<string name="ver_mapa">Show map</string>
 
+	<string name="lista_vacia">Empty list…</string>
+
 	<string name="pref_msg_notif_type">Use PopUps Notif.</string>
 	<string name="pref_vibrate">Vibrate</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>

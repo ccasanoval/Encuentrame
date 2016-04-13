@@ -62,32 +62,42 @@ public class Lugar extends Objeto implements Parcelable
 	}
 	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res, Filtro filtro)
 	{
-System.err.println("************************ 0: "+filtro);
+System.err.println("Lugar:getLista:filtro: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addSortByOption("created ASC");
 		queryOptions.addRelated("lugar");
+		query.setQueryOptions(queryOptions);
 		//--FILTRO
 		StringBuilder sb = new StringBuilder();//" created = created "
 		if( ! filtro.getNombre().isEmpty())
-			sb.append(" nombre LIKE '%" + filtro.getNombre() + "%' ");
-/*		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
-			String whereClause = "distance( 30.26715, -97.74306, coordinates.latitude, coordinates.longitude ) < mi(200)";
-			//TODO: Find by the points inside ???
-			//filtro.getPunto();
-			//filtro.getRadio()
+			sb.append(" nombre LIKE '%");
+			sb.append(filtro.getNombre());
+			sb.append("%' ");
+		}
+		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, lugar.latitude, lugar.longitude ) < km(%f) ",
+					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
 		}
 		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-			sb.append(" AND created >= '" + filtro.getFechaIni() + "' ");
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created >= ");
+			sb.append(filtro.getFechaIni().getTime());
+		}
 		if(filtro.getFechaFin() != null)
-			sb.append(" AND created <= '" + filtro.getFechaFin() + "' ");
-		*/
-System.err.println("************************ 9: "+sb.toString()+" : nombre LIKE '%test2%' :"+sb.equals("nombre LIKE '%test2%'"));
-		//if(sb.length() > 0)
-		//	query.setWhereClause(sb.toString());
-		query.setWhereClause("nombre LIKE '%test2%'");
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created <= ");
+			sb.append(filtro.getFechaFin().getTime());
+		}
+System.err.println("Lugar:getLista:SQL: "+sb.toString());
+		if(sb.length() > 0)
+			query.setWhereClause(sb.toString());
 		//--FILTRO
-		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Lugar.class).find(query, res);
 	}
 

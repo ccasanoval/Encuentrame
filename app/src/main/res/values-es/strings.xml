@@ -88,4 +88,5 @@
 	<string name="pref_header_data_sync">Datos</string>
 	<string name="sin_filtro">Se eliminaron los parámetros de búsqueda</string>
 	<string name="cargando">Cargando…</string>
+	<string name="lista_vacia">Lista vacía…</string>
 </resources>

@@ -169,38 +169,45 @@ System.err.println("Ruta:eliminar:r:" + this);
 	//public static void sortPuntos(GeoPoint[] gp)
 	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res, Filtro filtro)
 	{
-System.err.println("************************ 0 "+filtro);
+System.err.println("Ruta:getLista:filtro: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
 		queryOptions.addSortByOption("created ASC");
+		queryOptions.addRelated("puntos");
 		query.setQueryOptions(queryOptions);
 		//--FILTRO
-		StringBuilder sb = new StringBuilder(" 1 = 1 ");
+		StringBuilder sb = new StringBuilder();//" created = created "
 		if( ! filtro.getNombre().isEmpty())
 		{
-			sb.append(" AND nombre like = '%");
+			sb.append(" nombre LIKE '%");
 			sb.append(filtro.getNombre());
 			sb.append("%' ");
 		}
-		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
+		if(filtro.getRadio() > 0 && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
-			//TODO: Find by the points inside ???
-			//filtro.getPunto();
-			//filtro.getRadio()
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, puntos.latitude, puntos.longitude ) < km(%f) ",
+					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
 		}
 		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
 		{
-			sb.append(" AND created >= '");
-			sb.append(filtro.getFechaIni());
-			sb.append("' ");
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created >= ");
+			sb.append(filtro.getFechaIni().getTime());
 		}
 		if(filtro.getFechaFin() != null)
 		{
-			sb.append(" AND created <= '");//TODO: quitar '
-			sb.append(filtro.getFechaFin());
-			sb.append("' ");
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created <= ");
+			sb.append(filtro.getFechaFin().getTime());
 		}
+		if(filtro.getActivo() != Util.NADA)
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" activo = ");
+			sb.append(filtro.getActivo()==Filtro.ACTIVO?"true":"false");
+		}
+System.err.println("Ruta:getLista:SQL: "+sb.toString());
 		if(sb.length() > 0)
 			query.setWhereClause(sb.toString());
 		//--FILTRO
