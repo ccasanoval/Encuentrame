@@ -27,7 +27,6 @@ import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Create several users and test user access to each object...
-//TODO: Cuando se cierra app, no funciona backendless pero lo necesito para servicio...services must be able to connect and retrieve avisos and save tracking...
 public class ActLogin extends AppCompatActivity
 {
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;

@@ -3,12 +3,12 @@ package com.cesoft.encuentrame;
 import java.text.DateFormat;
 import java.util.Date;
 
+import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -36,17 +36,14 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import com.backendless.async.callback.AsyncCallback;
@@ -55,8 +52,7 @@ import com.backendless.geo.GeoPoint;
 
 import com.cesoft.encuentrame.models.Ruta;
 
-//TODO: Cuando es nuevo borrar boton menu guardar... porque lo unico que toca es grabar nueva ruta...
-//TODO: por que no refresca lista de rutas cuando empieza a grabar...
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 //, ResultCallback<Status>, GoogleMap.OnCameraChangeListener,
@@ -335,7 +331,8 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 				public void handleFault(BackendlessFault backendlessFault)
 				{
 					System.err.println("ActRuta:guardar:handleFault:f:" + backendlessFault);
-					Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+					//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+					Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
 				}
 			});
 	}
@@ -411,7 +408,7 @@ System.err.println("ActRuta:eliminar:handleResponse:"+l);
 	{
 		_Map = googleMap;
 		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){;}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
 
 		if(_bNuevo)
 		{
@@ -455,7 +452,7 @@ System.err.println("showMarkers: " + pos);
 			public void onResult(@NonNull LocationSettingsResult result)
 			{
 				final Status status = result.getStatus();
-				final LocationSettingsStates le = result.getLocationSettingsStates();
+				//final LocationSettingsStates le = result.getLocationSettingsStates();
 				switch(status.getStatusCode())
 				{
 				case LocationSettingsStatusCodes.SUCCESS:
@@ -542,7 +539,8 @@ System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
 			public void handleFault(BackendlessFault backendlessFault)
 			{
 				System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
-				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
 			}
 		});
 	}

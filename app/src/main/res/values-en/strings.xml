@@ -4,7 +4,7 @@
 
 	<string name="app_lice_tit">Licence</string>
 	<string name="app_vers_tit">Version:</string>
-	<string name="app_desc">\nApplication for the managemente of your personal points of interest. It counts with geo-position alerts and geo-tracking.\n\n</string>
+	<string name="app_desc">\nApp for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can share your geo-data easily.\n\n</string>
 
 	<string name="activo">Active</string>
 	<string name="actualizar_posicion">Refresh location</string>
@@ -84,4 +84,6 @@
 	<string name="sin_filtro">Search parameters removed</string>
 	<string name="cargando">Loading…</string>
 
+	<string name="activos">ACTIVE</string>
+	<string name="inactivos">INACTIVE</string>
 </resources>

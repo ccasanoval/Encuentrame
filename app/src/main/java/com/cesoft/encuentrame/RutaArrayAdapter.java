@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.cesoft.encuentrame.models.Ruta;
 
+import java.util.Locale;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +38,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
 //System.err.println("----------------RutaArrayAdapter :1: "+position+" : "+convertView);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-		txtNombre.setText(String.format("%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntos().size()));
+		txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntos().size()));
 //System.err.println("----------------RutaArrayAdapter :2: " + position + " : " + txtNombre.getText());
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
@@ -70,9 +72,9 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
 				txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem, convertView.getContext().getTheme()));
 			else
+				//noinspection deprecation
 				txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
 			convertView.setBackgroundColor(Color.WHITE);
-//System.err.println("----------------RUTA INACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
 		}
 
 		return convertView;

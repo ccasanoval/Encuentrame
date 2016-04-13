@@ -33,7 +33,6 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
 
-//System.err.println("----------------------"+position+" : "+_lugares[position]);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
 		txtNombre.setText(_lugares[position].getNombre());
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
@@ -56,13 +55,6 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 			});
 
 		return convertView;
-
-		/*
-		LayoutInflater inflater = (LayoutInflater)_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.lista, parent, false);
-
-		//if(s.startsWith("iPhone"))imageView.setImageResource(R.drawable.no);
-		return rowView;*/
 	}
 
 }

@@ -8,7 +8,7 @@
 	<string name="title_activity_act_lugar">Lugar</string>
 	<string name="title_activity_act_buscar">Buscar</string>
 
-	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas.\n\n</string>
+	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas. Podrás compartir tus geo-datos fácilmente, pues serán almacenados en la nube.\n\n</string>
 	<string name="app_lice_tit">Licencia:</string>
 	<string name="app_vers_tit">Versión:</string>
 
@@ -89,4 +89,7 @@
 	<string name="sin_filtro">Se eliminaron los parámetros de búsqueda</string>
 	<string name="cargando">Cargando…</string>
 	<string name="lista_vacia">Lista vacía…</string>
+
+	<string name="activos">ACTIVOS</string>
+	<string name="inactivos">INACTIVOS</string>
 </resources>

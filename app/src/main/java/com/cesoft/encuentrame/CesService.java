@@ -3,20 +3,14 @@ package com.cesoft.encuentrame;
 import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
-import android.support.design.widget.Snackbar;
 
-import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.BackendlessGeoQuery;
 import com.backendless.geo.GeoPoint;
-import com.backendless.persistence.BackendlessDataQuery;
-import com.backendless.persistence.QueryOptions;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Ruta;
-import com.cesoft.encuentrame.models.RutaPto;
 import com.google.android.gms.location.Geofence;
 
 import java.util.ArrayList;
@@ -35,13 +29,12 @@ public class CesService extends IntentService
 {
 	private static final int GEOFEN_DWELL_TIME = 2*60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
-	private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
+	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
-	private static CesGeofenceStore _GeofenceStoreAvisos;//, _GeofenceStoreTracking;
+	private static CesGeofenceStore _GeofenceStoreAvisos;
 	private static CesService _this;
 
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
-	//private static ArrayList<GeoPoint> _listaGeoTracking = new ArrayList<>();
 
 	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
 	{
@@ -49,7 +42,7 @@ public class CesService extends IntentService
 		public void handleResponse(BackendlessUser backendlessUser)
 		{
 			System.err.println("ENTER--------(desde CesService)---------" + backendlessUser);
-			//TODO: hacer listener para avisar a todos que ya tenemos usuario... (a login para que pase a main...)
+			//TODO: hacer OBSERVER para avisar a todos que ya tenemos usuario... (a login para que pase a main...)
 		}
 		@Override
 		public void handleFault(BackendlessFault backendlessFault)
@@ -80,6 +73,7 @@ public class CesService extends IntentService
 		try
 		{
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
+			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
 			{
 System.err.println("CesService:loop-------------------------------------------------------------"+java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
@@ -98,7 +92,7 @@ System.err.println("CesService:loop---------------------------------------------
 					//cargarGeoTracking();//cargarListaGeoTracking();
 					tmLoad = System.currentTimeMillis();
 				}
-				saveGeoTracking();//TODO: periodo...
+				saveGeoTracking();
 				Thread.sleep(DELAY_LOAD / 3);
 			}
 		}
@@ -151,16 +145,13 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 								bDirty = true;
 							i++;
 						}
-if(bDirty)
-{
-	System.err.println("Aviso="+a.getObjectId()+" : "+a.getNombre()+":"+a.getDescripcion() + "\t Geof=" + gf.getRequestId());
-}
+if(bDirty)System.err.println("Aviso="+a.getObjectId()+" : "+a.getNombre()+":"+a.getDescripcion() + "\t Geof=" + gf.getRequestId());
 					}
 					if(bDirty)
 					{
 System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 						_listaGeoAvisos = aAvisos;
-						_GeofenceStoreAvisos = new CesGeofenceStore(_this, aGeofences);//Se puede añadri en lugar de crear desde cero?
+						_GeofenceStoreAvisos = new CesGeofenceStore(_this, aGeofences);//Se puede añadir en lugar de crear desde cero?
 					}
 				}
 				@Override

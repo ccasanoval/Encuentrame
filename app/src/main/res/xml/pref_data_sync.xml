@@ -4,6 +4,10 @@
 		android:defaultValue="true"
 		android:key="is_auto_arranque"
 		android:title="@string/pref_auto_arranque"/>
-	<!-- Exportar e importar -->
+	<!-- TODO: Exportar e importar -->
 
+	<SwitchPreference
+		android:defaultValue="true"
+		android:key="is_save_login"
+		android:title="@string/pref_save_login"/>
 </PreferenceScreen>

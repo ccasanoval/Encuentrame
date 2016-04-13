@@ -3,7 +3,8 @@ package com.cesoft.encuentrame;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
-
+import android.graphics.Color;
+import android.view.View;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,22 +24,10 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.net.URL;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Iterator;
-
-import android.graphics.Color;
-import android.view.View;
 
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
@@ -297,8 +286,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 	}
 	private void showAviso(Aviso a)
 	{
-		BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
-
+		//BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
 		LatLng pos = new LatLng(a.getLatitud(), a.getLongitud());
 		MarkerOptions mo = new MarkerOptions()
 				.position(pos)

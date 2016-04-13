@@ -29,7 +29,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -43,6 +42,8 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 import com.cesoft.encuentrame.models.Lugar;
+
+import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
@@ -180,7 +181,7 @@ System.err.println("*************"+_l);
 			try
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
-			}catch(SecurityException se){}
+			}catch(SecurityException ignored){}
 		}
 	}
 	private void stopTracking()
@@ -211,7 +212,7 @@ System.err.println("*************"+_l);
 	}
 
 	//______________________________________________________________________________________________
-	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format("%.5f/%.5f", lat, lon));}
+	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
 	private void setValores()
 	{
 		_txtNombre.setText(_l.getNombre());
@@ -341,7 +342,7 @@ System.err.println("*************"+_l);
 	{
 		_Map = googleMap;
 		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override
@@ -376,7 +377,7 @@ System.err.println("*************"+_l);
 	private void setPosLugar(double lat, double lon)
 	{
 		_l.setLatLon(lat, lon);
-		_lblPosicion.setText(String.format("%.5f/%.5f", _l.getLatitud(), _l.getLongitud()));
+		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", _l.getLatitud(), _l.getLongitud()));
 		setMarker();
 	}
 	private void setMarker()
@@ -413,7 +414,7 @@ System.err.println("*************"+_l);
      		public void onResult(@NonNull LocationSettingsResult result)
 			{
          		final Status status = result.getStatus();
-         		final LocationSettingsStates le = result.getLocationSettingsStates();
+         		//final LocationSettingsStates le = result.getLocationSettingsStates();
          		switch(status.getStatusCode())
 				{
              	case LocationSettingsStatusCodes.SUCCESS:

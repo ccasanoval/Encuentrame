@@ -36,8 +36,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Guardar filtro de busqueda? cambiar lupa por embudo?
-//TODO: El icono de buscar arriba en el menu, el otro volver...
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
 	//private static final int DELAY_LOCATION = 60000;
@@ -87,7 +85,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		ArrayAdapter<String> adapter;
 		//_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
 		Spinner _spnActivo = (Spinner)findViewById(R.id.spnActivo);
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"TODOS", "ACTIVOS", "INACTIVOS"});//TODO getString
+		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnActivo.setAdapter(adapter);
 		_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -176,6 +174,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			{
 				_datePickerDialogIni.show();
 				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				//noinspection ConstantConditions
 				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 				//_txtFechaIni.clearFocus();_txtFechaFin.clearFocus();
 			}
@@ -188,6 +187,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			{
 				_datePickerDialogFin.show();
 				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				//noinspection ConstantConditions
 				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 			}
 		});
