@@ -59,8 +59,6 @@ public class ActLogin extends AppCompatActivity
 		}
 		*/
 		startService(new Intent(this, CesService.class));
-		//Backendless.initApp(this, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
-		//Util.initBackendless(this);
 		_win = this;
 	}
 
@@ -97,34 +95,20 @@ public class ActLogin extends AppCompatActivity
 		}
 	}
 
+	private void goMain()
+	{
+		Intent intent = new Intent(getBaseContext(), ActMain.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+		finish();
+	}
+
 	//----------------------------------------------------------------------------------------------
 	public static class PlaceholderFragment extends Fragment
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		public PlaceholderFragment(){}
-
-		AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()//LoginBECallback<BackendlessUser>(ActLogin._win)
-		{
-			@Override
-			public void handleResponse(BackendlessUser backendlessUser)
-			{
-				//super.handleResponse(backendlessUser);
-				System.err.println("ENTER-----------------" + backendlessUser);
-				goMain();
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.out.println("ActLogin:Backendless reported an error: " + backendlessFault.getMessage());
-			}
-		};
-		private void goMain()
-		{
-			Intent intent = new Intent(_win.getBaseContext(), ActMain.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-			_win.finish();
-		}
+		//AsyncCallback<BackendlessUser> resLogin = new LoginBECallback<>(_win);
 
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber)
@@ -139,17 +123,11 @@ public class ActLogin extends AppCompatActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			Bundle args = getArguments();
-			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
+			if(Util.isLogged())_win.goMain();
+
+			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
-
-			if(Util.isLogged())
-			{
-				goMain();
-			}
-//Util.login(resLogin);//Si hay usr & pwd guardadas, hacemos login automatico... //TODO: hacer boton borrar cuenta en config
-
-			TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
+			final TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
 			final EditText txtLogin = (EditText)rootView.findViewById(R.id.txtLogin);txtLogin.requestFocus();
 			final EditText txtPassword = (EditText)rootView.findViewById(R.id.txtPassword);
 			final EditText txtPassword2 = (EditText)rootView.findViewById(R.id.txtPassword2);
@@ -168,7 +146,7 @@ public class ActLogin extends AppCompatActivity
 					@Override
 					public void onClick(View v)
 					{
-						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), resLogin);
+						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginBECallback<BackendlessUser>(_win));
 					}
 				});
 				break;
@@ -189,7 +167,7 @@ public class ActLogin extends AppCompatActivity
 						user.setPassword(txtPassword.getText().toString());
 						user.setEmail(txtEmail.getText().toString());
 						user.setProperty("name", txtLogin.getText().toString());
-						Backendless.UserService.register(user, new LoginBECallback<BackendlessUser>(ActLogin._win)
+						Backendless.UserService.register(user, new RegisterBECallback<BackendlessUser>(_win)
 						{
 							@Override
 							public void handleResponse(BackendlessUser backendlessUser)
@@ -227,7 +205,6 @@ public class ActLogin extends AppCompatActivity
 								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
 								if(t!=null)t.select();
 							}
-
 							public void handleFault(BackendlessFault fault)
 							{
 								System.err.println("RECOVER-----------------FAILED:" + fault + " : " + fault.getCode());
@@ -244,30 +221,69 @@ public class ActLogin extends AppCompatActivity
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	public static class LoginBECallback<T> extends BackendlessCallback<T>
-	{
-		Context context;
-		ProgressDialog progressDialog;
 
-		public LoginBECallback(Context context)
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	public static class RegisterBECallback<T> extends BackendlessCallback<T>
+	{
+		private Context context;
+		private ProgressDialog progressDialog;
+		public RegisterBECallback(Context context)
 		{
 			this.context = context;
 			progressDialog = ProgressDialog.show(context, "", context.getString(R.string.cargando), true);
 		}
-
 		@Override
 		public void handleResponse(T response)
 		{
 			progressDialog.cancel();
 		}
-
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
+			System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault.getCode());
 			progressDialog.cancel();
 			Toast.makeText(context, fault.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	public static class LoginBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
+	{
+		private ActLogin win;
+		private ProgressDialog progressDialog;
+
+		public LoginBECallback(ActLogin win)
+		{
+			this.win = win;
+			progressDialog = ProgressDialog.show(win, "", win.getString(R.string.cargando), true);
+			//TODO: Hacer temporizador para quitar dialogo carga...
+			/*
+			Runnable mRunnable;
+Handler mHandler=new Handler();
+mRunnable=new Runnable() {
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                yourLayoutObject.setVisibility(View.INVISIBLE); //If you want just hide the View. But it will retain space occupied by the View.
+                yourLayoutObject.setVisibility(View.GONE); //This will remove the View. and free s the space occupied by the View
+            }
+        };
+			*/
+		}
+		@Override
+		public void handleResponse(BackendlessUser backendlessUser)
+		{
+			//super.handleResponse(backendlessUser);
+			System.err.println("ENTER--------------------" + backendlessUser);
+			//TODO: Observers!!!!!!!!!!!!!!!!!!!!!!!!!!!! para pasar de pantalla de login... y cerrar icono de espera...
+			win.goMain();
+		}
+		@Override
+		public void handleFault(BackendlessFault backendlessFault)
+		{
+			//TODO: Nunca llega aqui, no tiene timeout ni falla!!!!!!! Hacer uno...
+			System.out.println("ActLogin:Backendless reported an error:---------------------------------------------------------------- " + backendlessFault.getMessage());
+		}
+	};
 
 }

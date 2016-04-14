@@ -22,15 +22,15 @@ android {
     /*signingConfigs {
         debug {
             storeFile file("ceskeystore.jks")
-            storePassword "colt1911"
+            storePassword "colt"
             keyAlias "ces"
-            keyPassword "colt1911"
+            keyPassword "colt"
         }
         release {
             storeFile file('C:/usr/a/ceskeystore.jks')
-            storePassword "colt1911"
+            storePassword "colt"
             keyAlias "ces"
-            keyPassword "colt1911"
+            keyPassword "colt"
         }
         https://developer.android.com/intl/es/tools/publishing/app-signing.html
         storePassword System.getenv("KSTOREPWD")
@@ -57,9 +57,9 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
     compile 'com.google.android.gms:play-services:8.4.0'
-    compile 'com.android.support:support-v4:23.2.0'
+    compile 'com.android.support:support-v4:23.3.0'
     compile 'org.jetbrains:annotations:13.0'
 }

@@ -28,4 +28,10 @@
 		android:key="notifications_new_message_vibrate"
 		android:title="@string/pref_vibrate"/>
 
+	<SwitchPreference
+		android:defaultValue="true"
+		android:dependency="notifications_new_message"
+		android:key="notifications_new_message_lights"
+		android:title="@string/pref_lights"/>
+
 </PreferenceScreen>

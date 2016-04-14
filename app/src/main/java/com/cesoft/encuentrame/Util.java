@@ -24,6 +24,7 @@ import android.support.v4.app.NotificationCompat;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
 
@@ -42,6 +43,9 @@ public class Util
 	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9;
 	public static final String TIPO = "tipo";
+	private static final String PREF_LOGIN = "login";
+	private static final String PREF_PWD = "password";
+	private static final String PREF_SAVE_LOGIN = "save_login";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
@@ -170,6 +174,12 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//private static int _idNotificacion = 1;
 	private static void showNotificacion(Context c, String titulo, Aviso a, Intent intent)
 	{
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+		String sSound = prefs.getString("notifications_new_message_ringtone", "");
+		Boolean bVibrate = prefs.getBoolean("notifications_new_message_vibrate", false);
+		Boolean bLights = prefs.getBoolean("notifications_new_message_lights", false);
+System.err.println("------showNotificacion: sound:"+sSound+" vibrate:"+bVibrate+" lights:"+bLights);
+
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
@@ -181,8 +191,13 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 				.setContentTitle(titulo)
 				.setContentText(a.getNombre()+":"+a.getDescripcion())
 				.setDefaults(Notification.DEFAULT_ALL)
+				.setVibrate(bVibrate ? new long[]{1000L} : null)
+		        .setLights(0xFFFF0000, 3000, 3000)//LED android.graphics.Color.RED
 				.setContentIntent(PendingIntent.getActivity(c, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true);
+		if( ! sSound.isEmpty())
+			notificationBuilder.setSound(Uri.parse(sSound));
+		//visibility 	int: One of VISIBILITY_PRIVATE (the default), VISIBILITY_PUBLIC, or VISIBILITY_SECRET.
 		NotificationManager notificationManager = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		notificationManager.notify(idNotificacion, notificationBuilder.build());
@@ -329,44 +344,67 @@ System.err.println("-----util:return2Main:filtro:"+filtro);
 	// LOGIN
 	public static String getUsuario()
 	{
-		//TODO: Check preferences...
-		return "quake1978";
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		return prefs.getString(PREF_LOGIN, "");
 	}
 	public static String getClave()
 	{
-		//TODO: Check preferences...
-		return "colt1911";
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		return prefs.getString(PREF_PWD, "");
 	}
-	public static boolean login(AsyncCallback<BackendlessUser> res)
-	{
-		String usr = getUsuario();
-		String pwd = getClave();
-		if( ! usr.isEmpty() && ! pwd.isEmpty())
-		{
-System.err.println("Util.login: "+usr);
-			login(usr, pwd, res);
-			return true;
-		}
-System.err.println("Util.login: no hay usr y pwd en settings..."+usr+" / "+pwd);
-		return false;
-	}
-	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
+	public static void login(AsyncCallback<BackendlessUser> res)
 	{
 		BackendlessUser bu = Backendless.UserService.CurrentUser();
 		if(bu != null)
 		{
 			res.handleResponse(bu);
-System.err.println("Util.login: Usuario ya logado: "+bu);
+			return;
 		}
-		else
+		String userId = UserTokenStorageFactory.instance().getStorage().get();
+ 		if(userId != null && !userId.isEmpty())
 		{
-			Backendless.UserService.login(usr, pwd, res);
-System.err.println("Util.login: logando...");
+System.err.println("Util.login2: ::::::::::::::::::::::::::::::::"+userId+"+++");
+			try
+			{
+				Backendless.UserService.findById(userId, res);
+				return;
+			}
+			catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		}
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
+		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+		String usr = getUsuario();
+		String pwd = getClave();
+System.err.println("Util.login2: "+usr);
+login(usr, pwd, res);
+		/*
+		if( ! usr.isEmpty() && ! pwd.isEmpty())
+		{
+			login(usr, pwd, res);
+			return;
+		}*/
+System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
+		return;
+	}
+	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
+	{
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));
+System.err.println("Util.login1: logando...");
 	}
 	public static boolean isLogged()
 	{
 		BackendlessUser usr = Backendless.UserService.CurrentUser();
 		return (usr != null);
+	}
+	public static void saveLogin(String usr, String pwd)
+	{
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+		SharedPreferences.Editor e = prefs.edit();
+		e.putString(PREF_LOGIN, usr);
+		e.putString(PREF_PWD, pwd);
 	}
 }

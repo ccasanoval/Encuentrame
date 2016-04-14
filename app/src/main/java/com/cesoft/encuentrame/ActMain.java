@@ -37,6 +37,17 @@ import com.cesoft.encuentrame.models.Ruta;
 import java.util.Date;
 import java.util.Iterator;
 
+/*
+GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.  Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
+Scheduler not set. Not logging error/warn.
+Uploading is not possible. App measurement disabled
+
+https://developers.google.com/identity/sign-in/android/start?hl=en
+https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=Default%20Demo%20App&cntpkg=com.google.samples.quickstart.signin&cnturl=https:%2F%2Fdevelopers.google.com%2Fidentity%2Fsign-in%2Fandroid%2Fstart%3Fconfigured%3Dtrue&cntlbl=Continue%20with%20Try%20Sign-In
+Registered SHA-1s:
+74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
+*/
+
 //TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: widget para ruta start/stop... widget para guardar punto...

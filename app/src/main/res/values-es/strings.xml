@@ -76,19 +76,24 @@
 	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
 	<string name="sin_nombre">Debe establecer un nombre…</string>
 	<string name="sin_lugar">Debe establecer una posición…</string>
+	<string name="sin_filtro">Se eliminaron los parámetros de búsqueda</string>
+	<string name="ok_stop_tracking">La ruta termina aquí</string>
+	<string name="cargando">Cargando…</string>
+	<string name="lista_vacia">Lista vacía…</string>
 
-	<string name="pref_header_general">General</string>
+
+	<string name="pref_header_data_sync">Datos</string>
+	<string name="pref_save_login">Guardar usuario y contraseña</string>
+	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
+
 	<string name="pref_header_notifications">Avisos</string>
+	<string name="pref_msg_notif_type">Mostrar diálogos PopUp</string>
 	<string name="pref_ringtone">Tono</string>
 	<string name="pref_ringtone_silent">Silencio</string>
 	<string name="pref_vibrate">Vibrar</string>
-	<string name="pref_msg_notif_type">Mostrar diálogos PopUp</string>
-	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
-	<string name="ok_stop_tracking">La ruta termina aquí</string>
-	<string name="pref_header_data_sync">Datos</string>
-	<string name="sin_filtro">Se eliminaron los parámetros de búsqueda</string>
-	<string name="cargando">Cargando…</string>
-	<string name="lista_vacia">Lista vacía…</string>
+	<string name="pref_lights">Luces</string>
+
+	<string name="pref_header_general">General</string>
 
 	<string name="activos">ACTIVOS</string>
 	<string name="inactivos">INACTIVOS</string>

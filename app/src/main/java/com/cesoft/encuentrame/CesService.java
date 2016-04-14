@@ -33,7 +33,6 @@ public class CesService extends IntentService
 
 	private static CesGeofenceStore _GeofenceStoreAvisos;
 	private static CesService _this;
-
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
 	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
@@ -41,13 +40,13 @@ public class CesService extends IntentService
 		@Override
 		public void handleResponse(BackendlessUser backendlessUser)
 		{
-			System.err.println("ENTER--------(desde CesService)---------" + backendlessUser);
+			System.err.println("ENTER-----------(desde CesService)-----------" + backendlessUser);
 			//TODO: hacer OBSERVER para avisar a todos que ya tenemos usuario... (a login para que pase a main...)
 		}
 		@Override
 		public void handleFault(BackendlessFault backendlessFault)
 		{
-			System.out.println("CesService:Login:f: " + backendlessFault.getMessage());
+			System.out.println("CesService:Login:f: -------------------------------------------------- " + backendlessFault.getMessage());
 		}
 	};
 
@@ -63,7 +62,8 @@ public class CesService extends IntentService
 		_this = this;
 		Util.initBackendless(this);
 		Util.setSvcContext(this);
-		boolean b = Util.login(resLogin);
+		Util.login(resLogin);
+System.out.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
 	//______________________________________________________________________________________________
