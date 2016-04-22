@@ -74,7 +74,7 @@
 	<string name="title_activity_act_maps">Map</string>
 	<string name="title_activity_act_ruta">Route</string>
 
-	<string name="pref_header_data_sync">Data</string>
+	<string name="pref_header_opciones">Options</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
 	<string name="pref_save_login">Save login &amp; password</string>
 
@@ -85,8 +85,11 @@
 	<string name="pref_vibrate">Vibrate</string>
 	<string name="pref_lights">Lights</string>
 
-	<string name="pref_header_general">About this App…</string>
-
 	<string name="activos">ACTIVE</string>
 	<string name="inactivos">INACTIVE</string>
+	<string name="pref_header_logout">Logout</string>
+	<string name="pref_header_logout_sum">End current user session</string>
+	<string name="pref_header_about">About this App…</string>
+	<string name="pref_header_notifications_sum">Alerts settings...</string>
+	<string name="pref_header_opciones_sum">Settings...</string>
 </resources>

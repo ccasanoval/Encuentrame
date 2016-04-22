@@ -3,6 +3,7 @@ package com.cesoft.encuentrame;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,20 @@ public class ActLogin extends AppCompatActivity
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
 
+	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
+	{
+		@Override
+		public void handleResponse(BackendlessUser backendlessUser)
+		{
+			System.err.println("ActLogin:222ENTER-----------(desde CesService)-----------" + backendlessUser);
+		}
+		@Override
+		public void handleFault(BackendlessFault fault)
+		{
+			System.out.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
+		}
+	};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -58,8 +73,12 @@ public class ActLogin extends AppCompatActivity
 			public static final String VER = "v1";
 		}
 		*/
-		startService(new Intent(this, CesService.class));
 		_win = this;
+		startService(new Intent(this, CesService.class));
+System.err.println("ActLogin--------1:"+Util.isLogged()+" 2:"+Util.getUsuario());
+		if( ! Util.isLogged()){Util.initBackendless(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
+System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
+		if(Util.isLogged())goMain();
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
@@ -222,7 +241,7 @@ public class ActLogin extends AppCompatActivity
 
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////// REGISTER /////////////////////////////////////////////////////////////
 	public static class RegisterBECallback<T> extends BackendlessCallback<T>
 	{
 		private Context context;
@@ -240,50 +259,50 @@ public class ActLogin extends AppCompatActivity
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
-			System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault.getCode());
+System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault.getCode());
 			progressDialog.cancel();
 			Toast.makeText(context, fault.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////// LOGIN //////////////////////////////////////////////////////////
 	public static class LoginBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
 	{
 		private ActLogin win;
 		private ProgressDialog progressDialog;
 
+private Handler handler = new Handler();
+private Runnable runnable = new Runnable() {
+   @Override
+   public void run()
+   {
+	   System.err.println("ActLogin: RUNNNNNNNNNNNNNNNNNN-----------------------------------------------------------------------------------------");
+      	//handler.postDelayed(this, 100);
+   }
+};
 		public LoginBECallback(ActLogin win)
 		{
 			this.win = win;
 			progressDialog = ProgressDialog.show(win, "", win.getString(R.string.cargando), true);
-			//TODO: Hacer temporizador para quitar dialogo carga...
-			/*
-			Runnable mRunnable;
-Handler mHandler=new Handler();
-mRunnable=new Runnable() {
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                yourLayoutObject.setVisibility(View.INVISIBLE); //If you want just hide the View. But it will retain space occupied by the View.
-                yourLayoutObject.setVisibility(View.GONE); //This will remove the View. and free s the space occupied by the View
-            }
-        };
-			*/
+//TODO: Hacer temporizador para quitar dialogo carga...
+handler.postDelayed(runnable, 5000);
 		}
 		@Override
 		public void handleResponse(BackendlessUser backendlessUser)
 		{
 			//super.handleResponse(backendlessUser);
-			System.err.println("ENTER--------------------" + backendlessUser);
+			progressDialog.cancel();
+System.err.println("ENTER--------------------" + backendlessUser);
 			//TODO: Observers!!!!!!!!!!!!!!!!!!!!!!!!!!!! para pasar de pantalla de login... y cerrar icono de espera...
 			win.goMain();
 		}
 		@Override
-		public void handleFault(BackendlessFault backendlessFault)
+		public void handleFault(BackendlessFault fault)
 		{
+			progressDialog.cancel();
 			//TODO: Nunca llega aqui, no tiene timeout ni falla!!!!!!! Hacer uno...
-			System.out.println("ActLogin:Backendless reported an error:---------------------------------------------------------------- " + backendlessFault.getMessage());
+System.out.println("ActLogin:Backendless reported an error:---------------------------------------------------------------- " + fault.getMessage());
 		}
-	};
+	}
 
 }

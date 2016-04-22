@@ -2,11 +2,13 @@ package com.cesoft.encuentrame;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -24,6 +26,7 @@ import android.support.v4.app.NotificationCompat;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
@@ -46,6 +49,7 @@ public class Util
 	private static final String PREF_LOGIN = "login";
 	private static final String PREF_PWD = "password";
 	private static final String PREF_SAVE_LOGIN = "save_login";
+	private static final String PREF_END_SESSION = "end_session";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
@@ -70,6 +74,39 @@ System.err.println("----------------------Util.refreshListaRutas ");
 	{
 System.err.println("---------------Util.initBackendless c = "+c);
 		Backendless.initApp(c, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
+	}
+	private static SharedPreferences.OnSharedPreferenceChangeListener _pref_listener = new SharedPreferences.OnSharedPreferenceChangeListener()
+	{
+		public void onSharedPreferenceChanged(SharedPreferences prefs, String key)
+		{
+			System.err.println("-----------------------------------------------Util.initPrefs: "+key+" : "+prefs.getBoolean(key, false));
+			if(PREF_SAVE_LOGIN.equals(key))
+			{
+				if( ! prefs.getBoolean(PREF_END_SESSION, false))
+					logout();
+				else if( ! prefs.getBoolean(PREF_SAVE_LOGIN, false))
+				{
+					//TODO: Preguntar si quiere borrar credenciales????
+				/*	AlertDialog.Builder dialog = new AlertDialog.Builder(_app);
+					dialog.setTitle("¿Cerrar sesión?");//getString(R.string.eliminar));
+					dialog.setMessage(getString(R.string.seguro_eliminar));
+		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{*/
+					borrarLogin();
+				}
+			}
+		}
+	};
+	public static void initPrefs()
+	{
+		SharedPreferences login = PreferenceManager.getDefaultSharedPreferences(_app.getApplicationContext());
+		login.registerOnSharedPreferenceChangeListener(_pref_listener);
+//TODO: Borrar login guardado, y hacer logout??
+if( ! login.getBoolean(PREF_SAVE_LOGIN, false))	System.err.println("------------------------------------------Util.initPrefs: Borrar login guardado, y hacer logout??");
+
 	}
 
 	//______________________________________________________________________________________________
@@ -344,14 +381,19 @@ System.err.println("-----util:return2Main:filtro:"+filtro);
 	// LOGIN
 	public static String getUsuario()
 	{
+		if(_svcContext == null)return null;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		return prefs.getString(PREF_LOGIN, "");
 	}
 	public static String getClave()
 	{
+		if(_svcContext == null)return null;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		return prefs.getString(PREF_PWD, "");
+		//}catch(Exception e){System.err.println("Util:getClave:e:"+e);}
+		//return "";
 	}
+	//-------
 	public static void login(AsyncCallback<BackendlessUser> res)
 	{
 		BackendlessUser bu = Backendless.UserService.CurrentUser();
@@ -372,13 +414,16 @@ System.err.println("Util.login2: ::::::::::::::::::::::::::::::::"+userId+"+++")
 			catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		}
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		try
+		{
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+			if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		String usr = getUsuario();
 		String pwd = getClave();
 System.err.println("Util.login2: "+usr);
-login(usr, pwd, res);
+		login(usr, pwd, res);
 		/*
 		if( ! usr.isEmpty() && ! pwd.isEmpty())
 		{
@@ -388,23 +433,77 @@ login(usr, pwd, res);
 System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
 		return;
 	}
+	//-------
 	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));
+		Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));//NO NEED FOR saveLogin() ON prefs
 System.err.println("Util.login1: logando...");
 	}
+	//-------
 	public static boolean isLogged()
 	{
-		BackendlessUser usr = Backendless.UserService.CurrentUser();
-		return (usr != null);
+System.err.println("Util.isLogged: A");
+
+		try{
+			BackendlessUser usr = Backendless.UserService.CurrentUser();
+			if(usr != null) return true;
+		}catch(Exception e){System.err.println("Util.isLogged:A:e:"+e);}
+
+System.err.println("Util.isLogged: B");
+
+		try{
+			boolean isValidLogin = Backendless.UserService.isValidLogin();
+			if(isValidLogin) return true;
+		}catch(Exception e){System.err.println("Util.isLogged:B:e:"+e);}
+
+System.err.println("Util.isLogged: C");
+
+		try{
+			String userId = UserTokenStorageFactory.instance().getStorage().get();
+ 			if(userId != null && !userId.isEmpty()) return true;
+		}catch(Exception e){System.err.println("Util.isLogged:C:e:"+e);}
+
+System.err.println("Util.isLogged: D");
+		//...
+		return false;
 	}
-	public static void saveLogin(String usr, String pwd)
+
+	/*public static void saveLogin(String usr, String pwd)
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, usr);
 		e.putString(PREF_PWD, pwd);
+		e.apply();
+	}*/
+	public static void borrarLogin()
+	{
+		// Lo contrario a Backendless.UserService.login(usr, pwd, res,   true  );
+		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+		SharedPreferences.Editor e = prefs.edit();
+		e.putString(PREF_LOGIN, "");
+		e.putString(PREF_PWD, "");
+		e.apply();*/
+	}
+
+	static final AsyncCallback<Void> _logoutResponder = new AsyncCallback<Void>()
+	{
+	    @Override
+    	public void handleResponse(Void aVoid)
+    	{
+        	System.out.println( "Is user logged in? - " + Backendless.UserService.isValidLogin());
+    	}
+	    @Override
+	    public void handleFault(BackendlessFault backendlessFault)
+    	{
+        	System.out.println( "Server reported an error " + backendlessFault.getMessage() );
+    	}
+	};
+	public static void logout()
+	{
+		Backendless.UserService.logout(_logoutResponder);
 	}
 }

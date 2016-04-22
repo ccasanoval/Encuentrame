@@ -78,6 +78,7 @@ public class ActMain extends AppCompatActivity
 		setSupportActionBar(toolbar);
 
 		Util.setApplication(getApplication());
+		Util.initPrefs();
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -206,7 +207,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		{
 			Bundle args = getArguments();
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber+" ::: "+_aFiltro[_sectionNumber]);
+System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber+" ::: "+(_sectionNumber < 0 ?"null":_aFiltro[_sectionNumber]));
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());

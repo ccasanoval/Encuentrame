@@ -27,14 +27,29 @@ import java.util.List;
  * Android Design: Settings</a> for design guidelines and the <a href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
+//TODO: No funciona flechita de volver...
+//TODO: poner en Organizate la barra de arriba...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActConfig extends AppCompatPreferenceActivity
+public class ActConfig extends ActConfigBase
 {
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setupActionBar();
+	}
+
+	@Override
+	public void onHeaderClick(Header header, int position)
+	{
+		super.onHeaderClick(header, position);
+		if(header.id == R.id.pref_logout)
+		{
+			Util.logout();
+			//int pid = android.os.Process.myPid();
+        	//android.os.Process.killProcess(pid);
+        	System.exit(0);
+		}
 	}
 
 	private void setupActionBar()
@@ -126,13 +141,18 @@ public class ActConfig extends AppCompatPreferenceActivity
 		catch(Exception e)
 		{
 			System.err.println("ActConfig:bindPreferenceSummaryToValue:e:"+e);
+			System.err.println("ActConfig:bindPreferenceSummaryToValue:e:title:"+preference.getTitle());
 		}
 	}
 
 	// This method stops fragment injection in malicious applications. Make sure to deny any unknown fragments here.
 	protected boolean isValidFragment(String fragmentName)
 	{
-		return PreferenceFragment.class.getName().equals(fragmentName) || GeneralPreferenceFragment.class.getName().equals(fragmentName) || DataSyncPreferenceFragment.class.getName().equals(fragmentName) || NotificationPreferenceFragment.class.getName().equals(fragmentName);
+		return PreferenceFragment.class.getName().equals(fragmentName)
+				|| GeneralPreferenceFragment.class.getName().equals(fragmentName)
+				|| OpcionesPreferenceFragment.class.getName().equals(fragmentName)
+				|| NotificationPreferenceFragment.class.getName().equals(fragmentName)
+				;
 	}
 
 	//-------------------------------- GENERAL --------------------------------
@@ -148,10 +168,9 @@ public class ActConfig extends AppCompatPreferenceActivity
 			setHasOptionsMenu(true);
 			// Bind the summaries of EditText/List/Dialog/Ringtone preferences to their values.
 			// When their values change, their summaries are updated to reflect the new value, per the Android Design guidelines.
-			bindPreferenceSummaryToValue(findPreference("example_text"));
-			bindPreferenceSummaryToValue(findPreference("example_list"));
+			//bindPreferenceSummaryToValue(findPreference("example_text"));
+			//bindPreferenceSummaryToValue(findPreference("example_list"));
 		}
-
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
@@ -193,10 +212,10 @@ public class ActConfig extends AppCompatPreferenceActivity
 		}
 	}
 
-	//-------------------------------- DATA SYNC --------------------------------
+	//-------------------------------- OPCIONES --------------------------------
 	// This fragment shows data and sync preferences only. It is used when the activity is showing a two-pane settings UI.
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public static class DataSyncPreferenceFragment extends PreferenceFragment
+	public static class OpcionesPreferenceFragment extends PreferenceFragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -206,7 +225,7 @@ public class ActConfig extends AppCompatPreferenceActivity
 			setHasOptionsMenu(true);
 			// Bind the summaries of EditText/List/Dialog/Ringtone preferences to their values.
 			// When their values change, their summaries are updated to reflect the new value, per the Android Design guidelines.
-			bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+			//bindPreferenceSummaryToValue(findPreference("sync_frequency"));//TODO:?
 		}
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)

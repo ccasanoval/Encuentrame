@@ -82,7 +82,7 @@
 	<string name="lista_vacia">Lista vacía…</string>
 
 
-	<string name="pref_header_data_sync">Datos</string>
+	<string name="pref_header_opciones">Opciones</string>
 	<string name="pref_save_login">Guardar usuario y contraseña</string>
 	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
 
@@ -93,8 +93,11 @@
 	<string name="pref_vibrate">Vibrar</string>
 	<string name="pref_lights">Luces</string>
 
-	<string name="pref_header_general">General</string>
-
 	<string name="activos">ACTIVOS</string>
 	<string name="inactivos">INACTIVOS</string>
+	<string name="pref_header_logout">Salir</string>
+	<string name="pref_header_logout_sum">Cerrar la sesión actual</string>
+	<string name="pref_header_about">Sobre esta App..</string>
+	<string name="pref_header_notifications_sum">Configuración de avisos...</string>
+	<string name="pref_header_opciones_sum">Configuraciones...</string>
 </resources>

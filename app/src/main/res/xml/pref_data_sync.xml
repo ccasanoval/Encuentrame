@@ -10,4 +10,5 @@
 		android:defaultValue="true"
 		android:key="save_login"
 		android:title="@string/pref_save_login"/>
+
 </PreferenceScreen>
