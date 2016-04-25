@@ -36,20 +36,16 @@ android {
         storePassword System.getenv("KSTOREPWD")
         keyPassword System.getenv("KEYPWD")
     }*/
-    if(project.hasProperty('keyAlias'))
-    {
+    if (project.hasProperty('keyAlias')) {
         signingConfigs.release.keyAlias = keyAlias
     }
-    if(project.hasProperty('keyPassword'))
-    {
+    if (project.hasProperty('keyPassword')) {
         signingConfigs.release.keyPassword = keyPassword
     }
-    if(project.hasProperty('storePassword'))
-    {
+    if (project.hasProperty('storePassword')) {
         signingConfigs.release.storePassword = storePassword
     }
-    if(project.hasProperty('storeFile'))
-    {
+    if (project.hasProperty('storeFile')) {
         signingConfigs.release.storeFile = storeFile
     }
 
@@ -62,4 +58,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.android.support:support-v4:23.3.0'
     compile 'org.jetbrains:annotations:13.0'
+    compile 'com.google.android.gms:play-services-ads:8.4.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
 }

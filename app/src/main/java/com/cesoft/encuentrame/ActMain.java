@@ -27,7 +27,6 @@ import android.widget.TextView;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
 import com.cesoft.encuentrame.models.Lugar;
@@ -38,7 +37,8 @@ import java.util.Date;
 import java.util.Iterator;
 
 /*
-GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.  Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
+GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
+Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
 Scheduler not set. Not logging error/warn.
 Uploading is not possible. App measurement disabled
 
@@ -48,6 +48,11 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
+//
+//TODO: repasar blanco del sombrero
+//TODO: Google auth? Firebase as MBAAS
+//TODO: dialogo que pida activar gps! si no esta activo
+//TODO: Muestra mensaje de lista vacia si alguna lista esta vacia al iniciar, incluso cuando el panel no es el que tiene la lista vacia... arreglar para solo mostrar msg si estas en dicho  panel
 //TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: widget para ruta start/stop... widget para guardar punto...
@@ -182,9 +187,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
-		//private static Filtro[] _aFiltro = new Filtro[3];
 
-		//protected Filtro _filtro;
 		private int _sectionNumber = Util.NADA;
 		public PlaceholderFragment(){}
 
@@ -212,6 +215,15 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber+" 
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
 
+			if(_sectionNumber < 0)
+			{
+System.err.println("------ActMain:onCreateView:_sectionNumber < 0 : "+_sectionNumber);
+				Intent intent = new Intent(_this.getBaseContext(), ActLogin.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				_this.startActivity(intent);
+				_this.finish();
+				return null;
+			}
 			if(_aFiltro[_sectionNumber] == null)
 				_aFiltro[_sectionNumber] = new Filtro(_sectionNumber);
 
@@ -423,6 +435,7 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
+					if(_sectionNumber == Util.LUGARES)
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
 					//return;
 				}
@@ -436,7 +449,7 @@ System.err.println("---------LUGARES:GET:OK:" + n);
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);
 			}
 		};
 
@@ -461,6 +474,7 @@ System.err.println("ActMain:refreshRutas()");
 System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
 				{
+					if(_sectionNumber == Util.RUTAS)
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
 					//return;
 				}
@@ -500,6 +514,7 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)
 				{
+					if(_sectionNumber == Util.AVISOS)
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
 					//return;
 				}

@@ -28,7 +28,7 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 //TODO: No funciona flechita de volver...
-//TODO: poner en Organizate la barra de arriba...
+//TODO: Organizate poner la barra de arriba como aqui...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActConfig extends ActConfigBase
 {
@@ -48,7 +48,7 @@ public class ActConfig extends ActConfigBase
 			Util.logout();
 			//int pid = android.os.Process.myPid();
         	//android.os.Process.killProcess(pid);
-        	System.exit(0);
+        	//System.exit(0);
 		}
 	}
 
@@ -155,6 +155,21 @@ public class ActConfig extends ActConfigBase
 				;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+System.err.println("-----------Actconfig:onOptionsItemSelected:0: "+(item.getItemId() == android.R.id.home));
+		int id = item.getItemId();
+		if(id == android.R.id.home)
+		{
+			finish();
+			//startActivity(new Intent(this, ActMain.class));
+			//Util.goMain
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 	//-------------------------------- GENERAL --------------------------------
 	// This fragment shows general preferences only. It is used when the activity is showing a two-pane settings UI.
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -174,6 +189,7 @@ public class ActConfig extends ActConfigBase
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
+System.err.println("-----------Actconfig:onOptionsItemSelected:GENERAL:"+(item.getItemId() == android.R.id.home));
 			int id = item.getItemId();
 			if(id == android.R.id.home)
 			{

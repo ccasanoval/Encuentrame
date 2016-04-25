@@ -52,8 +52,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame.models.Aviso;
 
-//TODO:Cuando arranca no tiene la posición actual en el mapa......
-//TODO: dialogo que pida activar gps! si no esta activo
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
@@ -67,8 +65,8 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private EditText _txtDescripcion;
 	private Switch  _swtActivo;
 
-	private String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private static final String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private static final int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 	private Spinner _spnRadio;
 
 	private GoogleApiClient _GoogleApiClient;
@@ -142,7 +140,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		try
 		{
 			_a = getIntent().getParcelableExtra(Aviso.NOMBRE);
-System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);//TODO: if keeps failing pass only ID and I get it from db....
+//System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 			_bDesdeNotificacion = getIntent().getBooleanExtra("notificacion", false);
 			setValores();
 		}

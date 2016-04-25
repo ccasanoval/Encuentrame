@@ -3,7 +3,7 @@
 	<header
 		android:id="@+id/pref_logout"
 		android:key="@string/pref_header_logout"
-		android:icon="@drawable/ic_info_black_24dp"
+		android:icon="@drawable/ic_exit_24dp"
 		android:summary="@string/pref_header_logout_sum"
 		android:title="@string/pref_header_logout"/>
 

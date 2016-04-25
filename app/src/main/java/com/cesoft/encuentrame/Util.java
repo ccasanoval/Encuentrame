@@ -436,9 +436,12 @@ System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd)
 	//-------
 	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));//NO NEED FOR saveLogin() ON prefs
+		if(_svcContext != null)
+		{
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+			Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));//NO NEED FOR saveLogin() ON prefs
 System.err.println("Util.login1: logando...");
+		}
 	}
 	//-------
 	public static boolean isLogged()
@@ -489,21 +492,22 @@ System.err.println("Util.isLogged: D");
 		e.apply();*/
 	}
 
-	static final AsyncCallback<Void> _logoutResponder = new AsyncCallback<Void>()
-	{
-	    @Override
-    	public void handleResponse(Void aVoid)
-    	{
-        	System.out.println( "Is user logged in? - " + Backendless.UserService.isValidLogin());
-    	}
-	    @Override
-	    public void handleFault(BackendlessFault backendlessFault)
-    	{
-        	System.out.println( "Server reported an error " + backendlessFault.getMessage() );
-    	}
-	};
 	public static void logout()
 	{
-		Backendless.UserService.logout(_logoutResponder);
+		Backendless.UserService.logout(new AsyncCallback<Void>()
+		{
+			@Override
+			public void handleResponse(Void aVoid)
+			{
+				System.out.println("********************************************* Is user logged in? - " + Backendless.UserService.isValidLogin());
+				System.exit(0);
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.out.println("********************************************** Server reported an error " + backendlessFault.getMessage() );
+				System.exit(0);
+			}
+		});
 	}
 }

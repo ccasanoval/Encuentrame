@@ -27,7 +27,6 @@ import com.backendless.async.callback.BackendlessCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Create several users and test user access to each object...
 public class ActLogin extends AppCompatActivity
 {
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
@@ -122,12 +121,25 @@ System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario())
 		finish();
 	}
 
+	private ProgressDialog _progressDialog;
+	public void iniEspera()
+	{
+		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+		//if(v!=null)v.setEnabled(false);
+	}
+	public void finEspera()
+	{
+		if(_progressDialog!=null)_progressDialog.dismiss();
+		//if(v!=null)v.setEnabled(true);
+	}
+
+	//----------------------------------------------------------------------------------------------
+	//
 	//----------------------------------------------------------------------------------------------
 	public static class PlaceholderFragment extends Fragment
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		public PlaceholderFragment(){}
-		//AsyncCallback<BackendlessUser> resLogin = new LoginBECallback<>(_win);
 
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber)
@@ -139,10 +151,12 @@ System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario())
 			return fragment;
 		}
 
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			if(Util.isLogged())_win.goMain();
+			//if(Util.isLogged())_win.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
+System.err.print("-------------------------------------LOGIN:onCreateView.........................................................................");
 
 			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
@@ -165,6 +179,13 @@ System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario())
 					@Override
 					public void onClick(View v)
 					{
+						rootView.post(new Runnable()
+						{
+							public void run()
+							{
+								_win.iniEspera();
+							}
+						});
 						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginBECallback<BackendlessUser>(_win));
 					}
 				});
@@ -193,12 +214,15 @@ System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario())
 							{
 								super.handleResponse(backendlessUser);
 								System.err.println("REGISTER-----------------" + backendlessUser);
-								//startActivity( new Intent(_win.getBaseContext(), ActLogin.class ) );
-								//_win.finish();
 								Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
-								//startActivity(new Intent(_win.getBaseContext(), ActMain.class));//NO: tiene que comprobar el correo
 								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
 								if(t!=null)t.select();
+							}
+							@Override
+							public void handleFault(BackendlessFault fault)
+							{
+								System.err.println("REGISTER-----------------FAILED:" + fault + " : " + fault.getCode());
+								Snackbar.make(rootView, getString(R.string.register_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
 							}
 						});
 					}
@@ -268,40 +292,36 @@ System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault
 	////////////////////////////////////// LOGIN //////////////////////////////////////////////////////////
 	public static class LoginBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
 	{
-		private ActLogin win;
-		private ProgressDialog progressDialog;
-
-private Handler handler = new Handler();
-private Runnable runnable = new Runnable() {
-   @Override
-   public void run()
-   {
-	   System.err.println("ActLogin: RUNNNNNNNNNNNNNNNNNN-----------------------------------------------------------------------------------------");
-      	//handler.postDelayed(this, 100);
-   }
-};
+		private ActLogin _win;
+		private Handler _handler = new Handler();
+		private Runnable _runnable = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if(Util.isLogged())_win.goMain();
+				_win.finEspera();
+			}
+		};
 		public LoginBECallback(ActLogin win)
 		{
-			this.win = win;
-			progressDialog = ProgressDialog.show(win, "", win.getString(R.string.cargando), true);
-//TODO: Hacer temporizador para quitar dialogo carga...
-handler.postDelayed(runnable, 5000);
+			_win = win;
+			_handler.postDelayed(_runnable, 6000);//Temporizador para quitar dialogo carga si Backendless no retorna... que no lo hace cuando le mandas cuenta incorrecta
 		}
 		@Override
 		public void handleResponse(BackendlessUser backendlessUser)
 		{
 			//super.handleResponse(backendlessUser);
-			progressDialog.cancel();
-System.err.println("ENTER--------------------" + backendlessUser);
-			//TODO: Observers!!!!!!!!!!!!!!!!!!!!!!!!!!!! para pasar de pantalla de login... y cerrar icono de espera...
-			win.goMain();
+			_win.finEspera();
+System.err.println("ENTER------------------------------------------------------------------------------------" + backendlessUser);
+			_win.goMain();
 		}
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
-			progressDialog.cancel();
-			//TODO: Nunca llega aqui, no tiene timeout ni falla!!!!!!! Hacer uno...
-System.out.println("ActLogin:Backendless reported an error:---------------------------------------------------------------- " + fault.getMessage());
+			_win.finEspera();
+			//NOTE: Nunca llega aqui, no tiene timeout ni falla con login incorrecto!!!!!! Hago algo mal con Backendless??????
+System.out.println("ActLogin:Backendless reported an error:------------------------------------------------------------------------ " + fault.getMessage());
 		}
 	}
 

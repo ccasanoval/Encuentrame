@@ -64,14 +64,14 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
 	private Spinner _spnTrackingDelay;
-	private String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
-	private int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
+	private static final String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
+	private static final int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
 
 	private GoogleMap _Map;
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
 
-	CoordinatorLayout _coordinatorLayout;
+	private CoordinatorLayout _coordinatorLayout;
 
 
 	//______________________________________________________________________________________________

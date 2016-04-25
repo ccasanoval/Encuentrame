@@ -134,15 +134,7 @@ System.err.println("*************"+_l);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
 	}
-	//______________________________________________________________________________________________
-	/*private void return2Main(boolean bDirty, String sMensaje)
-	{
-		Intent data = new Intent();
-		data.putExtra("dirty", bDirty);
-		data.putExtra("mensaje", sMensaje);
-		setResult(android.app.Activity.RESULT_OK, data);
-		finish();
-	}*/
+
 	//______________________________________________________________________________________________
 	@Override
 	public void onStart()

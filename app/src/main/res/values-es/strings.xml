@@ -100,4 +100,6 @@
 	<string name="pref_header_about">Sobre esta App..</string>
 	<string name="pref_header_notifications_sum">Configuración de avisos...</string>
 	<string name="pref_header_opciones_sum">Configuraciones...</string>
+	<string name="login_error">Error al abrir la sesión</string>
+	<string name="register_ko">Ocurrió un error al \n registrar el usuario \n Inténtelo de nuevo, por favor.</string>
 </resources>
