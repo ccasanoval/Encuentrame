@@ -29,6 +29,7 @@ import com.backendless.exceptions.BackendlessFault;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
 {
+	private static final int OK=0, KO=1, TO=2;
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
 	private static ActLogin _win;
 
@@ -46,7 +47,7 @@ public class ActLogin extends AppCompatActivity
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
-			System.out.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
+			System.err.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
 		}
 	};
 
@@ -122,14 +123,28 @@ System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario())
 	}
 
 	private ProgressDialog _progressDialog;
-	public void iniEspera()
+	public void iniEsperaLogin()
 	{
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
 		//if(v!=null)v.setEnabled(false);
 	}
-	public void finEspera()
+	public void finEsperaLogin(int i)
 	{
+		switch(i)
+		{
+		case OK:
+			//Toast.makeText(this, getString(R.string.login_ok), Toast.LENGTH_LONG).show();
+			break;
+		case KO:
+			Toast.makeText(this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+			break;
+		case TO:
+			if(_progressDialog.isShowing())
+			Toast.makeText(this, getString(R.string.login_timeout), Toast.LENGTH_LONG).show();
+			break;
+		}
 		if(_progressDialog!=null)_progressDialog.dismiss();
+System.err.println("+++++++++++++++++++++++++++++++++++++++++++++ finEsperaLogin ++++"+i+"+++++++++++++++++++++++++++++++++++++++++");
 		//if(v!=null)v.setEnabled(true);
 	}
 
@@ -155,8 +170,8 @@ System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario())
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			//if(Util.isLogged())_win.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
-System.err.print("-------------------------------------LOGIN:onCreateView.........................................................................");
+			if(Util.isLogged())_win.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
+System.err.println("-------------------------------------LOGIN:onCreateView.........................................................................");
 
 			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
@@ -179,14 +194,14 @@ System.err.print("-------------------------------------LOGIN:onCreateView.......
 					@Override
 					public void onClick(View v)
 					{
-						rootView.post(new Runnable()
+						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginBECallback<BackendlessUser>(_win));
+						/*rootView.post(new Runnable()
 						{
 							public void run()
 							{
-								_win.iniEspera();
+								_win.iniEsperaLogin();
 							}
-						});
-						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginBECallback<BackendlessUser>(_win));
+						});*/
 					}
 				});
 				break;
@@ -300,28 +315,31 @@ System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault
 			public void run()
 			{
 				if(Util.isLogged())_win.goMain();
-				_win.finEspera();
+System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
+				_win.finEsperaLogin(TO);
 			}
 		};
 		public LoginBECallback(ActLogin win)
 		{
 			_win = win;
 			_handler.postDelayed(_runnable, 6000);//Temporizador para quitar dialogo carga si Backendless no retorna... que no lo hace cuando le mandas cuenta incorrecta
+			_win.iniEsperaLogin();
 		}
 		@Override
 		public void handleResponse(BackendlessUser backendlessUser)
 		{
-			//super.handleResponse(backendlessUser);
-			_win.finEspera();
 System.err.println("ENTER------------------------------------------------------------------------------------" + backendlessUser);
+			//super.handleResponse(backendlessUser);
+			_win.finEsperaLogin(OK);
 			_win.goMain();
 		}
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
-			_win.finEspera();
 			//NOTE: Nunca llega aqui, no tiene timeout ni falla con login incorrecto!!!!!! Hago algo mal con Backendless??????
-System.out.println("ActLogin:Backendless reported an error:------------------------------------------------------------------------ " + fault.getMessage());
+System.err.println("ENTER ERROR------------------------------------------------------------------------ 1");
+System.err.println("ENTER ERROR------------------------------------------------------------------------ " + fault.getMessage());
+			_win.finEsperaLogin(KO);
 		}
 	}
 

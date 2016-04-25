@@ -45,10 +45,10 @@ public class ActConfig extends ActConfigBase
 		super.onHeaderClick(header, position);
 		if(header.id == R.id.pref_logout)
 		{
-			Util.logout();
-			//int pid = android.os.Process.myPid();
-        	//android.os.Process.killProcess(pid);
-        	//System.exit(0);
+			Util.logout();		//int pid = android.os.Process.myPid();   	//android.os.Process.killProcess(pid);
+			getParent().finish();
+			finish();
+			//TODO: pasar flag a main que diga q termine y que abra login
 		}
 	}
 
@@ -158,13 +158,10 @@ public class ActConfig extends ActConfigBase
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-System.err.println("-----------Actconfig:onOptionsItemSelected:0: "+(item.getItemId() == android.R.id.home));
 		int id = item.getItemId();
 		if(id == android.R.id.home)
 		{
 			finish();
-			//startActivity(new Intent(this, ActMain.class));
-			//Util.goMain
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

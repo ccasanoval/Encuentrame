@@ -48,7 +48,9 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
-//
+//TODO: RECOVER-----------------FAILED:BackendlessFault{ code: '3020', message: 'Cannot perform password recovery. Unable to find a user with the specified identity.' } : 3020
+//RECOVER-----------------OK:null  No quiere email sino nombre de usuario!! preferiria email...
+
 //TODO: repasar blanco del sombrero
 //TODO: Google auth? Firebase as MBAAS
 //TODO: dialogo que pida activar gps! si no esta activo
@@ -61,6 +63,7 @@ Registered SHA-1s:
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
+//BACKENDLESS: Permisos de objeto: Owner: ALL, AuthUser: NEW+UPDATE+DEL, Otros: NADA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -435,7 +438,8 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_sectionNumber == Util.LUGARES)
+					//if(_sectionNumber == Util.LUGARES)
+					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
 					//return;
 				}
@@ -474,7 +478,8 @@ System.err.println("ActMain:refreshRutas()");
 System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_sectionNumber == Util.RUTAS)
+					//if(_sectionNumber == Util.RUTAS)
+					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
 					//return;
 				}
@@ -514,7 +519,8 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_sectionNumber == Util.AVISOS)
+					//if(_sectionNumber == Util.AVISOS)
+					if(_this._viewPager.getCurrentItem() == Util.AVISOS)
 					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
 					//return;
 				}

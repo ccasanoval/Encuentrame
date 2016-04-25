@@ -46,7 +46,7 @@ public class CesService extends IntentService
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
-			System.out.println("CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
+			System.err.println("CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
 		}
 	};
 
@@ -63,7 +63,7 @@ public class CesService extends IntentService
 		Util.initBackendless(this);
 		Util.setSvcContext(this);
 		Util.login(resLogin);
-System.out.println("CesService:onCreate:-------------------------------------------------- ");
+System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
 	//______________________________________________________________________________________________

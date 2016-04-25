@@ -55,7 +55,8 @@
 	<string name="recover">Remember</string>
 	<string name="recover_ko">There was a fault while \n recovering the user\'s account</string>
 	<string name="recover_lbl">Recover your password</string>
-	<string name="login_error">Login Error</string>
+	<string name="login_error">Wrong user or password</string>
+	<string name="login_timeout">Login timeout</string>
 	<string name="recover_ok">An email to recover your \n password was sent to you</string>
 	<string name="register">Register</string>
 	<string name="register_bad_pass">Notice that both passwords must be equal!</string>
@@ -87,12 +88,12 @@
 	<string name="pref_header_logout_sum">End current user session</string>
 
 	<string name="pref_header_opciones">Options</string>
-	<string name="pref_header_opciones_sum">Settings...</string>
+	<string name="pref_header_opciones_sum">Settings…</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
 	<string name="pref_save_login">Save login &amp; password</string>
 
 	<string name="pref_header_notifications">Alerts</string>
-	<string name="pref_header_notifications_sum">Alerts settings...</string>
+	<string name="pref_header_notifications_sum">Alerts settings…</string>
 	<string name="pref_ringtone">Ringtone</string>
 	<string name="pref_ringtone_silent">Silent</string>
 	<string name="pref_msg_notif_type">Use PopUps Notif.</string>

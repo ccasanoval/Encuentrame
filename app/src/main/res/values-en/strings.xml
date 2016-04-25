@@ -90,8 +90,9 @@
 	<string name="pref_header_logout">Logout</string>
 	<string name="pref_header_logout_sum">End current user session</string>
 	<string name="pref_header_about">About this App…</string>
-	<string name="pref_header_notifications_sum">Alerts settings...</string>
-	<string name="pref_header_opciones_sum">Settings...</string>
-	<string name="login_error">Login Error</string>
+	<string name="pref_header_notifications_sum">Alerts settings…</string>
+	<string name="pref_header_opciones_sum">Settings…</string>
+	<string name="login_error">Wrong user or password</string>
 	<string name="register_ko">There was a fault while \n registering the user \n Try again, please.</string>
+	<string name="login_timeout">Login timeout</string>
 </resources>

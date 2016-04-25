@@ -83,20 +83,20 @@ System.err.println("---------------Util.initBackendless c = "+c);
 			if(PREF_SAVE_LOGIN.equals(key))
 			{
 				if( ! prefs.getBoolean(PREF_END_SESSION, false))
-					logout();
-				else if( ! prefs.getBoolean(PREF_SAVE_LOGIN, false))
 				{
-					//TODO: Preguntar si quiere borrar credenciales????
-				/*	AlertDialog.Builder dialog = new AlertDialog.Builder(_app);
+					AlertDialog.Builder dialog = new AlertDialog.Builder(_app);
 					dialog.setTitle("¿Cerrar sesión?");//getString(R.string.eliminar));
-					dialog.setMessage(getString(R.string.seguro_eliminar));
-		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{*/
-					borrarLogin();
+					dialog.setMessage("¿Cerrar sesión?");
+					dialog.setPositiveButton("Cerrar", new DialogInterface.OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog, int which)
+						{
+							logout();
+						}
+					});
 				}
+				//else if( ! prefs.getBoolean(PREF_SAVE_LOGIN, false))borrarLogin();
 			}
 		}
 	};
@@ -104,9 +104,6 @@ System.err.println("---------------Util.initBackendless c = "+c);
 	{
 		SharedPreferences login = PreferenceManager.getDefaultSharedPreferences(_app.getApplicationContext());
 		login.registerOnSharedPreferenceChangeListener(_pref_listener);
-//TODO: Borrar login guardado, y hacer logout??
-if( ! login.getBoolean(PREF_SAVE_LOGIN, false))	System.err.println("------------------------------------------Util.initPrefs: Borrar login guardado, y hacer logout??");
-
 	}
 
 	//______________________________________________________________________________________________
@@ -336,15 +333,6 @@ System.err.println("------showNotificacion: sound:"+sSound+" vibrate:"+bVibrate+
  		return sp.getString(ID_TRACKING, "");
 	}
 
-	/*public static void showSnackbar()
-	{
-		_app.getBaseContext().runOnUiThread(new Runnable(){public void run(){
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_eliminar), Snackbar.LENGTH_LONG).show();
-        						//Toast.makeText(activity, "Hello, world!", Toast.LENGTH_SHORT).show();
-						}});
-	}*/
-
-
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
 	//______________________________________________________________________________________________
@@ -431,7 +419,6 @@ System.err.println("Util.login2: "+usr);
 			return;
 		}*/
 System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
-		return;
 	}
 	//-------
 	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
@@ -446,21 +433,21 @@ System.err.println("Util.login1: logando...");
 	//-------
 	public static boolean isLogged()
 	{
-System.err.println("Util.isLogged: A");
+System.err.print("Util.isLogged: A    ");
 
 		try{
 			BackendlessUser usr = Backendless.UserService.CurrentUser();
 			if(usr != null) return true;
 		}catch(Exception e){System.err.println("Util.isLogged:A:e:"+e);}
 
-System.err.println("Util.isLogged: B");
+System.err.print("Util.isLogged: B    ");
 
 		try{
 			boolean isValidLogin = Backendless.UserService.isValidLogin();
 			if(isValidLogin) return true;
 		}catch(Exception e){System.err.println("Util.isLogged:B:e:"+e);}
 
-System.err.println("Util.isLogged: C");
+System.err.print("Util.isLogged: C    ");
 
 		try{
 			String userId = UserTokenStorageFactory.instance().getStorage().get();
@@ -480,17 +467,17 @@ System.err.println("Util.isLogged: D");
 		e.putString(PREF_LOGIN, usr);
 		e.putString(PREF_PWD, pwd);
 		e.apply();
-	}*/
+	}
 	public static void borrarLogin()
 	{
 		// Lo contrario a Backendless.UserService.login(usr, pwd, res,   true  );
-		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, "");
 		e.putString(PREF_PWD, "");
-		e.apply();*/
-	}
+		e.apply();
+	}*/
 
 	public static void logout()
 	{
@@ -499,14 +486,14 @@ System.err.println("Util.isLogged: D");
 			@Override
 			public void handleResponse(Void aVoid)
 			{
-				System.out.println("********************************************* Is user logged in? - " + Backendless.UserService.isValidLogin());
-				System.exit(0);
+				System.err.println("********************************************* Is user logged in? - " + Backendless.UserService.isValidLogin());
+				//System.exit(0);
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				System.out.println("********************************************** Server reported an error " + backendlessFault.getMessage() );
-				System.exit(0);
+				System.err.println("********************************************** Server reported an error " + backendlessFault.getMessage() );
+				//System.exit(0);
 			}
 		});
 	}

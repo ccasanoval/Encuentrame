@@ -83,7 +83,7 @@ public class Aviso extends Objeto
 		if(this == o)return true;
 		if(!(o instanceof Aviso))return false;
 		Aviso a = (Aviso)o;
-
+System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 		return getObjectId().equals(a.getObjectId())
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud() && getRadio() == a.getRadio()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
