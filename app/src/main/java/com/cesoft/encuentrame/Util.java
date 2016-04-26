@@ -2,13 +2,11 @@ package com.cesoft.encuentrame;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -22,6 +20,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
@@ -44,12 +43,11 @@ public class Util
 		private Tipo(int value){this.value = value;}
 		public int getValue(){return value;}
 	}*/
-	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9;
+	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
 	public static final String TIPO = "tipo";
 	private static final String PREF_LOGIN = "login";
 	private static final String PREF_PWD = "password";
 	private static final String PREF_SAVE_LOGIN = "save_login";
-	private static final String PREF_END_SESSION = "end_session";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
@@ -212,7 +210,9 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		String sSound = prefs.getString("notifications_new_message_ringtone", "");
 		Boolean bVibrate = prefs.getBoolean("notifications_new_message_vibrate", false);
 		Boolean bLights = prefs.getBoolean("notifications_new_message_lights", false);
-System.err.println("------showNotificacion: sound:"+sSound+" vibrate:"+bVibrate+" lights:"+bLights);
+		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
+
+System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"+bVibrate+"     lights:"+bLights);
 
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
@@ -224,30 +224,31 @@ System.err.println("------showNotificacion: sound:"+sSound+" vibrate:"+bVibrate+
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(titulo)
 				.setContentText(a.getNombre()+":"+a.getDescripcion())
-				.setDefaults(Notification.DEFAULT_ALL)
-				.setVibrate(bVibrate ? new long[]{1000L} : null)
-		        .setLights(0xFFFF0000, 3000, 3000)//LED android.graphics.Color.RED
 				.setContentIntent(PendingIntent.getActivity(c, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
-				.setAutoCancel(true);
-		if( ! sSound.isEmpty())
-			notificationBuilder.setSound(Uri.parse(sSound));
+				.setAutoCancel(true)
+				//.setDefaults(Notification.DEFAULT_ALL)
+				;
+		if( ! sSound.isEmpty())		notificationBuilder.setSound(Uri.parse(sSound));
+		else						notificationBuilder.setSound(null);
+
+		if(bLights)					//notificationBuilder.setLights(android.graphics.Color.RED, 500, 500);			//notificationBuilder.setLights(0xff00ff00, 300, 500);
+			showLights(c, android.graphics.Color.RED);//TODO: no funciona, llamar directamente a luces
+		else						notificationBuilder.setLights(0, 0, 0);
+
+		if(bVibrate)				//notificationBuilder.setVibrate(new long[]{1000L});//TODO: no funciona, llamar directamente a vibrar
+			vibrate(c);
+		else						notificationBuilder.setVibrate(null);
+
+			//notificationBuilder.setSound(Uri.parse(sSound));
 		//visibility 	int: One of VISIBILITY_PRIVATE (the default), VISIBILITY_PUBLIC, or VISIBILITY_SECRET.
 		NotificationManager notificationManager = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
-
 		notificationManager.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
 
 		//http://stackoverflow.com/questions/18094791/android-notification-pendingintent-open-activity-per-notification-click
 		/*
-		NotificationCompat.Builder b = new NotificationCompat.Builder(c);
-       b.setNumber(g_push.Counter)
-        .setLargeIcon(BitmapFactory.decodeResource(c.getResources(), R.drawable.list_avatar))
-        .setSmallIcon(R.drawable.ic_stat_example)
-        .setAutoCancel(true)
-        .setContentTitle(pushCount > 1 ? c.getString(R.string.stat_messages_title) + pushCount : title)
-        .setContentText(pushCount > 1 ? push.ProfileID : mess)
+       setNumber(g_push.Counter)
         .setWhen(g_push.Timestamp)
-        .setContentIntent(PendingIntent.getActivity(c, 0, it, PendingIntent.FLAG_UPDATE_CURRENT))
         .setDeleteIntent(PendingIntent.getBroadcast(c, 0, new Intent(ACTION_CLEAR_NOTIFICATION), PendingIntent.FLAG_CANCEL_CURRENT))
         .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
         .setSound(Uri.parse(prefs.getString(
@@ -405,20 +406,14 @@ System.err.println("Util.login2: ::::::::::::::::::::::::::::::::"+userId+"+++")
 		try
 		{
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
+//System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
 			if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
 		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		String usr = getUsuario();
 		String pwd = getClave();
-System.err.println("Util.login2: "+usr);
+//System.err.println("Util.login2: "+usr);
 		login(usr, pwd, res);
-		/*
-		if( ! usr.isEmpty() && ! pwd.isEmpty())
-		{
-			login(usr, pwd, res);
-			return;
-		}*/
-System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
+//System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
 	}
 	//-------
 	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
@@ -434,21 +429,18 @@ System.err.println("Util.login1: logando...");
 	public static boolean isLogged()
 	{
 System.err.print("Util.isLogged: A    ");
-
 		try{
 			BackendlessUser usr = Backendless.UserService.CurrentUser();
 			if(usr != null) return true;
 		}catch(Exception e){System.err.println("Util.isLogged:A:e:"+e);}
 
 System.err.print("Util.isLogged: B    ");
-
 		try{
 			boolean isValidLogin = Backendless.UserService.isValidLogin();
 			if(isValidLogin) return true;
 		}catch(Exception e){System.err.println("Util.isLogged:B:e:"+e);}
 
 System.err.print("Util.isLogged: C    ");
-
 		try{
 			String userId = UserTokenStorageFactory.instance().getStorage().get();
  			if(userId != null && !userId.isEmpty()) return true;
@@ -486,19 +478,17 @@ System.err.println("Util.isLogged: D");
 			@Override
 			public void handleResponse(Void aVoid)
 			{
-				System.err.println("LOGOUT************************* Is user logged in? - " + Backendless.UserService.isValidLogin()+" "+act);
+				//System.err.println("LOGOUT************************* Is user logged in? - " + Backendless.UserService.isValidLogin()+" "+act);
 				//System.exit(0);
 				Intent intent = new Intent(act.getBaseContext(), ActLogin.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				if(act != null)
-				{
-					act.startActivity(intent);
-					act.finish();
-				}
+				act.startActivity(intent);
+				act.finish();
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
+				Toast.makeText(act, "Logout: " + backendlessFault.getMessage(), Toast.LENGTH_LONG).show();//R.string.logout_err
 				System.err.println("Util:logout:e: " + backendlessFault.getMessage());
 				//System.exit(0);
 			}

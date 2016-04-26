@@ -81,6 +81,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
+		if(fab != null)
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -95,6 +96,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
+		if(btnActPos != null)
 		btnActPos.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -271,7 +273,7 @@ System.err.println("*************"+_l);
 			@Override
 			public void handleResponse(Lugar l)
 			{
-				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar));
+				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
 			}
 			@SuppressLint("StringFormatInvalid")
 			@Override
@@ -299,7 +301,7 @@ System.err.println("*************"+_l);
 					@Override
 					public void handleResponse(Long lugar)
 					{
-						Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar));
+						Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)

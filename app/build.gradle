@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.cesoft.encuentrame"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -28,14 +28,15 @@ android {
         }
         release {
             storeFile file('C:/usr/a/ceskeystore.jks')
-            storePassword "colt"
+            storePassword "col"
             keyAlias "ces"
-            keyPassword "colt"
+            keyPassword "col"
         }
         https://developer.android.com/intl/es/tools/publishing/app-signing.html
         storePassword System.getenv("KSTOREPWD")
         keyPassword System.getenv("KEYPWD")
     }*/
+    //---------------------------------------------------------
     if (project.hasProperty('keyAlias')) {
         signingConfigs.release.keyAlias = keyAlias
     }
@@ -48,17 +49,29 @@ android {
     if (project.hasProperty('storeFile')) {
         signingConfigs.release.storeFile = storeFile
     }
+    //---------------------------------------------------------
+    if (project.hasProperty('keyAlias')) {
+        signingConfigs.debug.keyAlias = keyAlias
+    }
+    if (project.hasProperty('keyPassword')) {
+        signingConfigs.debug.keyPassword = keyPassword
+    }
+    if (project.hasProperty('storePassword')) {
+        signingConfigs.debug.storePassword = storePassword
+    }
+    if (project.hasProperty('storeFile')) {
+        signingConfigs.debug.storeFile = storeFile
+    }
 
+    return true
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
-    compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.android.support:support-v4:23.3.0'
     compile 'org.jetbrains:annotations:13.0'
-    compile 'com.google.android.gms:play-services-ads:8.4.0'
-    compile 'com.google.android.gms:play-services-auth:8.4.0'
+    compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
 }

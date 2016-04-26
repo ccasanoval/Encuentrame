@@ -90,6 +90,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 		//------------------------------------------------------------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
+		if(btnActPos != null)
 		btnActPos.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -103,6 +104,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
+		if(fab != null)
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -116,7 +118,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
-		_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
+		_swtActivo = (Switch)findViewById(R.id.bActivo);if(_swtActivo!=null)_swtActivo.setChecked(true);
 		_spnRadio = (Spinner)findViewById(R.id.spnRadio);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -329,7 +331,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 				CesService.cargarListaGeoAvisos();
 				System.err.println("ActAviso:guardar:handleResponse:" + a);
 				//return2Main(true, getString(R.string.ok_guardar));
-				openMain(true, getString(R.string.ok_guardar));
+				openMain(true, getString(R.string.ok_guardar_aviso));
 			}
 			@SuppressLint("StringFormatInvalid")
 			@Override
@@ -360,7 +362,7 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 					{
 						System.err.println("ActAviso:eliminar:handleResponse:" + l);
 						//return2Main(true, getString(R.string.ok_eliminar));
-						openMain(true, getString(R.string.ok_eliminar));
+						openMain(true, getString(R.string.ok_eliminar_aviso));
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)

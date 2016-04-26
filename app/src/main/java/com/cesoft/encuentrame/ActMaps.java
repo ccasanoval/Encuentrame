@@ -100,7 +100,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void handleResponse(Lugar l)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_lugar), Snackbar.LENGTH_LONG).show();
 							Intent data = new Intent();
 							data.putExtra(Lugar.NOMBRE, _l);
 							setResult(Activity.RESULT_OK, data);
@@ -120,7 +120,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void handleResponse(Aviso a)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar), Snackbar.LENGTH_LONG).show();
+							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_aviso), Snackbar.LENGTH_LONG).show();
 							Intent data = new Intent();
 							data.putExtra(Aviso.NOMBRE, _a);
 							setResult(Activity.RESULT_OK, data);

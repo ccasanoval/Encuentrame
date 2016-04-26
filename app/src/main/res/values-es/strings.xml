@@ -70,9 +70,10 @@
 	<string name="fecha_desde">Del</string>
 	<string name="fecha_hasta">al</string>
 
-	<string name="ok_eliminar">Se eliminó el registro</string>
 	<string name="error_eliminar">Error al eliminar: %s</string>
-	<string name="ok_guardar">Se guardaron los datos del registro</string>
+	<string name="ok_guardar_lugar">Se guardaron los datos del lugar</string>
+	<string name="ok_guardar_aviso">Se guardaron los datos del aviso</string>
+	<string name="ok_guardar_ruta">Se guardaron los datos de la ruta</string>
 	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
 	<string name="sin_nombre">Debe establecer un nombre…</string>
 	<string name="sin_lugar">Debe establecer una posición…</string>
@@ -103,4 +104,7 @@
 	<string name="login_error">Usuario o contraseña incorrectas</string>
 	<string name="register_ko">Ocurrió un error al \n registrar el usuario \n Inténtelo de nuevo, por favor.</string>
 	<string name="login_timeout">Tiempo de espera excedido</string>
+	<string name="ok_eliminar_aviso">Se eliminó el lugar</string>
+	<string name="ok_eliminar_lugar">Se eliminó el aviso</string>
+	<string name="ok_eliminar_ruta">Se eliminó la ruta</string>
 </resources>

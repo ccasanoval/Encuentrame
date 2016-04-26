@@ -109,6 +109,7 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 		});
 		//-----------
 		ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
+		if(btnStart != null)
 		btnStart.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -119,6 +120,7 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 			}
 		});
 		ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
+		if(btnStop != null)
 		btnStop.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -131,6 +133,7 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
+		if(fab != null)
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -158,7 +161,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		if(_bNuevo)
 		{
 			setTitle(getString(R.string.nueva_ruta));
-			btnStop.setVisibility(View.GONE);
+			if(btnStop!=null)btnStop.setVisibility(View.GONE);
 			//findViewById(R.id.layStartStop).setVisibility(View.VISIBLE);
 			try
 			{
@@ -171,12 +174,16 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		else
 		{
 			setTitle(getString(R.string.editar_ruta));
-			btnStart.setVisibility(View.GONE);
-			findViewById(R.id.layPeriodo).setVisibility(View.GONE);
+			if(btnStart!=null)btnStart.setVisibility(View.GONE);
+			View layPeriodo = findViewById(R.id.layPeriodo);
+			if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 			//si está activo muestra btnStop
 			String sId = Util.getTrackingRoute();
+			View layStartStop = findViewById(R.id.layStartStop);
 			if( ! sId.equals(_r.getObjectId()))
-				findViewById(R.id.layStartStop).setVisibility(View.GONE);
+			{
+				if(layStartStop!=null)layStartStop.setVisibility(View.GONE);
+			}
 			else
 				_txtNombre.setTextColor(Color.RED);
 		}
@@ -267,7 +274,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
-		if(date != null)lblFecha.setText(dateFormat.format(date));
+		if(date != null && lblFecha!= null)lblFecha.setText(dateFormat.format(date));
 	}
 
 	//______________________________________________________________________________________________
@@ -325,7 +332,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 				{
 					System.err.println("ActRuta:guardar:" + r);
 					//return2Main(true, getString(R.string.ok_guardar));
-					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
+					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				@Override
 				public void handleFault(BackendlessFault backendlessFault)
@@ -366,7 +373,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 					public void handleResponse(Long l)
 					{
 System.err.println("ActRuta:eliminar:handleResponse:"+l);
-						Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar));
+						Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
 						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){Snackbar.make(_coordinatorLayout, , Snackbar.LENGTH_LONG).show();}});
 					}
 					@Override
@@ -488,7 +495,7 @@ System.err.println("showMarkers: " + pos);
 			public void handleResponse(Ruta r)
 			{
 				Util.setTrackingRoute(r.getObjectId());
-				Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
+				Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 
 				/*
 				/// Si hay una ruta activa, se cierra ¿Avisar?

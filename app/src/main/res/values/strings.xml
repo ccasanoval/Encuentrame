@@ -47,8 +47,11 @@
 	<string name="nuevo">New</string>
 	<string name="nuevo_aviso">New Alert</string>
 	<string name="nuevo_lugar">New Point</string>
-	<string name="ok_eliminar">The record was deleted</string>
-	<string name="ok_guardar">The record data was saved</string>
+	<!-- string name="ok_eliminar">The record was deleted</string -->
+	<!-- string name="ok_guardar">The record data was saved</string -->
+	<string name="ok_eliminar_lugar">The Point was deleted</string>
+	<string name="ok_eliminar_aviso">The Alert was deleted</string>
+	<string name="ok_eliminar_ruta">The Route was deleted</string>
 	<string name="ok_stop_tracking">The route ends here</string>
 	<string name="periodo">Period</string>
 	<string name="radio">Radius</string>
@@ -104,4 +107,7 @@
 
 	<string name="activos">ACTIVE</string>
 	<string name="inactivos">INACTIVE</string>
+	<string name="ok_guardar_aviso">The Alert was saved</string>
+	<string name="ok_guardar_lugar">The Point was saved</string>
+	<string name="ok_guardar_ruta">The Route was saved</string>
 </resources>

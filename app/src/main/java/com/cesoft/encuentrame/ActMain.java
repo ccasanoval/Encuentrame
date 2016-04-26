@@ -48,11 +48,15 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
-//TODO: RECOVER-----------------FAILED:BackendlessFault{ code: '3020', message: 'Cannot perform password recovery. Unable to find a user with the specified identity.' } : 3020
-//RECOVER-----------------OK:null  No quiere email sino nombre de usuario!! preferiria email...
+//TODO: Cuando se tumba, mostrar otro arrangement
+//http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
+// small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
-//TODO: Google auth? Firebase as MBAAS?
-//TODO: dialogo que pida activar gps! si no esta activo
+//TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
+//http://developer.android.com/intl/es/training/basics/fragments/index.html
+
+//TODO: Cambiar : se guardaron los datos del 'registro' por 'lugar', 'ruta' o 'aviso'...
+//TODO: Google auth?
 //TODO: Muestra mensaje de lista vacia si alguna lista esta vacia al iniciar, incluso cuando el panel no es el que tiene la lista vacia... arreglar para solo mostrar msg si estas en dicho  panel
 //TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
 //TODO: mostrar fecha de creacion y modificacion en vistas...
@@ -61,12 +65,20 @@ Registered SHA-1s:
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
+
+//TODO: Version cambiando Backendless por Firebase as MBAAS
+
+//TODO: Release
+//http://developer.android.com/intl/es/tools/publishing/app-signing.html
+
+//TODO: dialogo que pida activar gps! si no esta activo
+//http://stackoverflow.com/questions/29801368/how-to-show-enable-location-dialog-like-google-maps
+
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 //BACKENDLESS: Permisos de objeto: Owner: ALL, AuthUser: NEW+UPDATE+DEL, Otros: NADA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
-	public static final int CONFIG = 6969;
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 	private static ActMain _this;
 	private static CoordinatorLayout _coordinatorLayout;
@@ -93,10 +105,14 @@ public class ActMain extends AppCompatActivity
 
 		// Set up the ViewPager with the sections adapter.
 		_viewPager = (ViewPager)findViewById(R.id.container);
+		if(_viewPager != null)
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
-		tabLayout.setupWithViewPager(_viewPager);
-		tabLayout.setSelectedTabIndicatorHeight(10);
+		if(tabLayout != null)
+		{
+			tabLayout.setupWithViewPager(_viewPager);
+			tabLayout.setSelectedTabIndicatorHeight(10);
+		}
 		//tabLayout.setSelectedTabIndicatorColor();
 		//tabLayout.setTabTextColors();
 
@@ -130,7 +146,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		switch(id)
 		{
 		case R.id.action_config:
-				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), CONFIG);
+				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), Util.CONFIG);
 				return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
@@ -175,11 +191,6 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			}
 			return null;
 		}
-	}
-
-	protected void goLogin()
-	{
-		Util.logout(_this);
 	}
 
 /*	Si está este, no se llama al de PlaceholderFragment
@@ -350,9 +361,11 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
-			if(requestCode == CONFIG)
+			if(resultCode != RESULT_OK)return;
+
+			if(requestCode == Util.CONFIG)
 			{
-				ActMain._this.goLogin();
+				Util.logout(ActMain._this);
 				return;
 			}
 
@@ -373,22 +386,13 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 				}
 				//else		_aFiltro[_sectionNumber] = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
 			}
-			if(resultCode != RESULT_OK)return;
-System.err.println("----++++++++++++++++++-----ActMain:onActivityResult:1: ");
+
 			if(requestCode == Util.BUSCAR)requestCode=_aFiltro[_sectionNumber].getTipo();
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
 			case Util.RUTAS:	refreshRutas(); break;
 			case Util.AVISOS:	refreshAvisos(); break;
-			/*case Util.BUSCAR:
-				switch(_filtro.getTipo())
-				{
-				case Util.LUGARES:	refreshLugares(); break;
-				case Util.RUTAS:	refreshRutas(); break;
-				case Util.AVISOS:	refreshAvisos(); break;
-				}
-				break;*/
 			}
 		}
 
@@ -414,8 +418,6 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 		@Override
 		public void onPause()
 		{
-			//if(_MessageReceiver != null)
-			//if(_apf[ActMain.RUTAS] != null && _apf[ActMain.RUTAS].getContext() !=null && LocalBroadcastManager.getInstance(_apf[ActMain.RUTAS].getContext()) != null)
 			if(_sectionNumber == Util.RUTAS)
 				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).unregisterReceiver(_MessageReceiver);
   			super.onPause();
@@ -443,10 +445,8 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
-					//if(_sectionNumber == Util.LUGARES)
 					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
-					//return;
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 				Lugar[] listaAL = new Lugar[n];
@@ -483,9 +483,8 @@ System.err.println("ActMain:refreshRutas()");
 System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
 				{
-					//if(_sectionNumber == Util.RUTAS)
-					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
+					if(_this._viewPager.getCurrentItem() == Util.RUTAS)//if(_sectionNumber == Util.RUTAS)
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 					//return;
 				}
 				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
@@ -524,10 +523,8 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)
 				{
-					//if(_sectionNumber == Util.AVISOS)
-					if(_this._viewPager.getCurrentItem() == Util.AVISOS)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_LONG).show();
-					//return;
+					if(_this._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
+					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
 				Aviso[] listaAL = new Aviso[n];

@@ -60,9 +60,14 @@ public class ActLogin extends AppCompatActivity
 		SectionsPagerAdapter SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
 		ViewPager viewPager = (ViewPager)findViewById(R.id.container);
+		if(viewPager != null)
 		viewPager.setAdapter(SectionsPagerAdapter);
 		_tabLayout = (TabLayout)findViewById(R.id.tabs);
-		_tabLayout.setupWithViewPager(viewPager);
+		if(_tabLayout != null)
+		{
+			_tabLayout.setupWithViewPager(viewPager);
+			_tabLayout.setSelectedTabIndicatorHeight(10);
+		}
 
 		/* NOT IN GIT FOR SECURITY REASONS
 		package com.cesoft.encuentrame;
@@ -222,7 +227,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 						user.setPassword(txtPassword.getText().toString());
 						user.setEmail(txtEmail.getText().toString());
 						user.setProperty("name", txtLogin.getText().toString());
-						Backendless.UserService.register(user, new RegisterBECallback<BackendlessUser>(_win)
+						Backendless.UserService.register(user, new RegisterBECallback<BackendlessUser>(_win));/*
 						{
 							@Override
 							public void handleResponse(BackendlessUser backendlessUser)
@@ -241,7 +246,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 								//Snackbar.make(rootView, getString(R.string.register_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
 								Toast.makeText(rootView.getContext(), R.string.register_ko, Toast.LENGTH_LONG).show();
 							}
-						});
+						});*/
 					}
 				});
 				break;
@@ -319,6 +324,7 @@ System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault
 	////////////////////////////////////// LOGIN //////////////////////////////////////////////////////////
 	public static class LoginBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
 	{
+		private static final int LOGIN_TIMEOUT = 9000;
 		private ActLogin _win;
 		private Handler _handler = new Handler();
 		private Runnable _runnable = new Runnable()
@@ -326,21 +332,20 @@ System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault
 			@Override
 			public void run()
 			{
-				//if(Util.isLogged())_win.goMain();
-System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
+//System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
 				_win.finEsperaLogin(TO);
 			}
 		};
 		public LoginBECallback(ActLogin win)
 		{
 			_win = win;
-			_handler.postDelayed(_runnable, 6000);//Temporizador para quitar dialogo carga si Backendless no retorna... que no lo hace cuando le mandas cuenta incorrecta
+			_handler.postDelayed(_runnable, LOGIN_TIMEOUT);//Temporizador para quitar dialogo carga si Backendless no retorna... que no lo hace cuando le mandas cuenta incorrecta
 			_win.iniEsperaLogin();
 		}
 		@Override
 		public void handleResponse(BackendlessUser backendlessUser)
 		{
-System.err.println("ENTER------------------------------------------------------------------------------------" + backendlessUser);
+//System.err.println("ENTER------------------------------------------------------------------------------------" + backendlessUser);
 			//super.handleResponse(backendlessUser);
 			_win.finEsperaLogin(OK);
 			_win.goMain();
@@ -349,8 +354,8 @@ System.err.println("ENTER-------------------------------------------------------
 		public void handleFault(BackendlessFault fault)
 		{
 			//NOTE: Nunca llega aqui, no tiene timeout ni falla con login incorrecto!!!!!! Hago algo mal con Backendless??????
-System.err.println("ENTER ERROR------------------------------------------------------------------------ 1");
-System.err.println("ENTER ERROR------------------------------------------------------------------------ " + fault.getMessage());
+//System.err.println("ENTER ERROR------------------------------------------------------------------------ 1");
+//System.err.println("ENTER ERROR------------------------------------------------------------------------ " + fault.getMessage());
 			_win.finEsperaLogin(KO);
 		}
 	}
