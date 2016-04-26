@@ -2,26 +2,17 @@ package com.cesoft.encuentrame.models;
 
 import android.os.Parcel;
 
-import com.backendless.Backendless;
-import com.backendless.BackendlessCollection;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.geo.GeoPoint;
-import com.backendless.persistence.BackendlessDataQuery;
-import com.backendless.persistence.QueryOptions;
 import com.cesoft.encuentrame.Util;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import weborb.service.ExcludeProperties;//import weborb.service.ExcludeProperty;
-
 //https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //ExcludeProperty(propertyName = "latitud")
-@ExcludeProperties(propertyNames = { "latitud, longitud" })
 public class Aviso extends Objeto
 {
 	public transient static final String NOMBRE = "aviso";

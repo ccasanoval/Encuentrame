@@ -36,6 +36,8 @@ import com.cesoft.encuentrame.models.Ruta;
 import java.util.Date;
 import java.util.Iterator;
 
+//Version Firebase
+
 /*
 GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
 Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
@@ -65,8 +67,6 @@ Registered SHA-1s:
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
-
-//TODO: Version cambiando Backendless por Firebase as MBAAS
 
 //TODO: Release
 //http://developer.android.com/intl/es/tools/publishing/app-signing.html

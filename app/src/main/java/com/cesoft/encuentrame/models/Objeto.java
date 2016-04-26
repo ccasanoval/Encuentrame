@@ -2,22 +2,21 @@ package com.cesoft.encuentrame.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import java.util.Date;
 
-import weborb.service.ExcludeProperty;
+import com.firebase.client.Firebase;
+
+import java.util.Date;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//import weborb.service.ExcludeProperty;
-@ExcludeProperty(propertyName = "fecha")
 public class Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "objeto";//TRANSIENT so not to include in backendless
 
 	public Objeto(){}
 
-	//Backendless
+	//General
 	protected String objectId;
 	protected Date created;
 	protected Date updated;
@@ -41,29 +40,6 @@ public class Objeto implements Parcelable
 	{
 		return "ID:"+getObjectId()+", NOM:"+(nombre==null?"":nombre) + ", DESC:"+(descripcion==null?"":descripcion);
 	}
-
-	//______________________________________________________________________________________________
-	/*@Override public boolean equals(Object o)
-	{
-		// Return true if the objects are identical. (This is just an optimization, not required for correctness.)
-		if(this == o)return true;
-
-		// Return false if the other object has the wrong type.
-		// This type may be an interface depending on the interface's specification.
-		if(!(o instanceof Objeto))return false;
-
-		// Cast to the appropriate type.
-		// This will succeed because of the instanceof, and lets us access private fields.
-		Objeto lhs = (Objeto)o;
-
-		// Check each field. Primitive fields, reference fields, and nullable reference
-		// fields are all treated differently.
-		if(getObjectId() == null && lhs.getObjectId() == null)
-			return getNombre().equals(lhs.getNombre()) && getDescripcion().equals(lhs.getDescripcion());
-		return getObjectId().equals(lhs.getObjectId());
-	}*/
-
-
 
 	// PARCELABLE
 	//______________________________________________________________________________________________
@@ -99,4 +75,24 @@ public class Objeto implements Parcelable
 		}
 	};
 
+
+	//Firebase
+	//https://www.firebase.com/docs/android/guide/saving-data.html
+	public void save()
+	{
+		Firebase ref = new Firebase("https://blazing-heat-3755.firebaseio.com/");
+		Firebase alanRef = ref.child(NOMBRE).child(getObjectId());
+		alanRef.setValue(this);
+		//alansRef.child("nombre").setValue("Alan Turing");
+		//alansRef.child("descripcion").setValue("1912");
+		/*
+		    Firebase usersRef = ref.child("users");
+    Map<String, String> alanisawesomeMap = new HashMap<String, String>();
+    alanisawesomeMap.put("birthYear", "1912");
+    alanisawesomeMap.put("fullName", "Alan Turing");
+    Map<String, Map<String, String>> users = new HashMap<String, Map<String, String>>();
+    users.put("alanisawesome", alanisawesomeMap);
+    usersRef.setValue(users);
+		* */
+	}
 }

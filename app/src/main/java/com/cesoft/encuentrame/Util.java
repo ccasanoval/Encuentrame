@@ -29,6 +29,7 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
+import com.firebase.client.Firebase;
 
 import java.util.HashMap;
 
@@ -68,11 +69,15 @@ System.err.println("----------------------Util.refreshListaRutas ");
 		public static Application getApplication(){return _app;}
 	private static Context _svcContext;
 		public static void setSvcContext(Context c){_svcContext = c;}
-	public static void initBackendless(Context c)
+	public static void initFirebase(Context c)
+	{
+		Firebase.setAndroidContext(c);
+	}
+	/*public static void initBackendless(Context c)
 	{
 System.err.println("---------------Util.initBackendless c = "+c);
 		Backendless.initApp(c, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
-	}
+	}*/
 	/*private static SharedPreferences.OnSharedPreferenceChangeListener _pref_listener = new SharedPreferences.OnSharedPreferenceChangeListener()
 	{
 		public void onSharedPreferenceChanged(SharedPreferences prefs, String key)

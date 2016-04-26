@@ -20,11 +20,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.backendless.Backendless;
-import com.backendless.BackendlessUser;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.async.callback.BackendlessCallback;
-import com.backendless.exceptions.BackendlessFault;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
@@ -81,7 +76,7 @@ public class ActLogin extends AppCompatActivity
 		_win = this;
 		startService(new Intent(this, CesService.class));
 System.err.println("ActLogin--------1:"+Util.isLogged()+" 2:"+Util.getUsuario());
-		if( ! Util.isLogged()){Util.initBackendless(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
+		if( ! Util.isLogged()){Util.initFirebase(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
 System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
 		if(Util.isLogged())goMain();
 	}

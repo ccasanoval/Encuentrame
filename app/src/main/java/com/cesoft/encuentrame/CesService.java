@@ -1,20 +1,15 @@
 package com.cesoft.encuentrame;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
 
-import com.backendless.BackendlessCollection;
-import com.backendless.BackendlessUser;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Ruta;
 import com.google.android.gms.location.Geofence;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,21 +30,6 @@ public class CesService extends IntentService
 	private static CesService _this;
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
-	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
-	{
-		@Override
-		public void handleResponse(BackendlessUser backendlessUser)
-		{
-			System.err.println("ENTER-----------(desde CesService)-----------" + backendlessUser);
-			//TODO: hacer OBSERVER para avisar a todos que ya tenemos usuario... (a login para que pase a main...)
-		}
-		@Override
-		public void handleFault(BackendlessFault fault)
-		{
-			System.err.println("CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
-		}
-	};
-
 	//______________________________________________________________________________________________
 	public CesService()
 	{
@@ -60,7 +40,7 @@ public class CesService extends IntentService
 	{
 		super.onCreate();
 		_this = this;
-		Util.initBackendless(this);
+		Util.initFirebase(this);
 		Util.setSvcContext(this);
 		Util.login(resLogin);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
