@@ -73,7 +73,17 @@ System.err.println("**********************_iTipo="+_iTipo);
 		mapFragment.getMapAsync(this);
 
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
-		if(_iTipo != Util.NADA || _r != null)
+		FloatingActionButton fabVolver = (FloatingActionButton)findViewById(R.id.btnVolver);
+		fabVolver.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View view)
+				{
+					Util.return2Main(ActMaps.this, false, "");
+				}
+			});
+		if(_iTipo != Util.NADA || _r != null)fab.setVisibility(View.GONE);
+		/*if(_iTipo != Util.NADA || _r != null)
 		{
 			fab.setImageResource(getResources().getIdentifier("@android:drawable/ic_menu_revert", null, null));
 			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -87,7 +97,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 				}
 			});
 		}
-		else
+		else*/
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override

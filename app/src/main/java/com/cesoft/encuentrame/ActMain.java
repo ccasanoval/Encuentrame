@@ -48,16 +48,13 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
-//TODO: Cuando se tumba, mostrar otro arrangement
-//http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
-// small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
 //TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
+//https://www.firebase.com/docs/android/guide/
 //http://developer.android.com/intl/es/training/basics/fragments/index.html
 
-//TODO: Cambiar : se guardaron los datos del 'registro' por 'lugar', 'ruta' o 'aviso'...
+//TODO: Egg?
 //TODO: Google auth?
-//TODO: Muestra mensaje de lista vacia si alguna lista esta vacia al iniciar, incluso cuando el panel no es el que tiene la lista vacia... arreglar para solo mostrar msg si estas en dicho  panel
 //TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
 //TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: widget para ruta start/stop... widget para guardar punto...
@@ -66,13 +63,16 @@ Registered SHA-1s:
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
 
-//TODO: Version cambiando Backendless por Firebase as MBAAS
+//TODO: Version cambiando Backendless por Firebase as MBAAS (Hacer branck)
+//https://github.com/Kunena/Kunena-Forum/wiki/Create-a-new-branch-with-git-and-manage-branches
 
 //TODO: Release
 //http://developer.android.com/intl/es/tools/publishing/app-signing.html
-
 //TODO: dialogo que pida activar gps! si no esta activo
 //http://stackoverflow.com/questions/29801368/how-to-show-enable-location-dialog-like-google-maps
+//TODO: Preparar para tablet
+//http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
+// small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 //BACKENDLESS: Permisos de objeto: Owner: ALL, AuthUser: NEW+UPDATE+DEL, Otros: NADA
