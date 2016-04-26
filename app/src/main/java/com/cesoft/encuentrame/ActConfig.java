@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -17,6 +18,8 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
+
+import com.cesoft.encuentrame.models.Filtro;
 
 import java.util.List;
 
@@ -45,10 +48,11 @@ public class ActConfig extends ActConfigBase
 		super.onHeaderClick(header, position);
 		if(header.id == R.id.pref_logout)
 		{
-			Util.logout();		//int pid = android.os.Process.myPid();   	//android.os.Process.killProcess(pid);
-			getParent().finish();
+System.err.println("ActConfig:onHeaderClick:-------------------------------------------");
+			//Util.logout();		//int pid = android.os.Process.myPid();   	//android.os.Process.killProcess(pid);
+			//Util.return2Main(ActConfig.this, true, getString(R.string.ok_guardar));
+			setResult(Activity.RESULT_OK, new Intent());
 			finish();
-			//TODO: pasar flag a main que diga q termine y que abra login
 		}
 	}
 

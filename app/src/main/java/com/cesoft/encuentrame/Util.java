@@ -75,7 +75,7 @@ System.err.println("----------------------Util.refreshListaRutas ");
 System.err.println("---------------Util.initBackendless c = "+c);
 		Backendless.initApp(c, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
 	}
-	private static SharedPreferences.OnSharedPreferenceChangeListener _pref_listener = new SharedPreferences.OnSharedPreferenceChangeListener()
+	/*private static SharedPreferences.OnSharedPreferenceChangeListener _pref_listener = new SharedPreferences.OnSharedPreferenceChangeListener()
 	{
 		public void onSharedPreferenceChanged(SharedPreferences prefs, String key)
 		{
@@ -92,7 +92,7 @@ System.err.println("---------------Util.initBackendless c = "+c);
 						@Override
 						public void onClick(DialogInterface dialog, int which)
 						{
-							logout();
+							logout(null, 0);
 						}
 					});
 				}
@@ -104,7 +104,7 @@ System.err.println("---------------Util.initBackendless c = "+c);
 	{
 		SharedPreferences login = PreferenceManager.getDefaultSharedPreferences(_app.getApplicationContext());
 		login.registerOnSharedPreferenceChangeListener(_pref_listener);
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	// LOCATION
@@ -479,20 +479,27 @@ System.err.println("Util.isLogged: D");
 		e.apply();
 	}*/
 
-	public static void logout()
+	public static void logout(final Activity act)
 	{
 		Backendless.UserService.logout(new AsyncCallback<Void>()
 		{
 			@Override
 			public void handleResponse(Void aVoid)
 			{
-				System.err.println("********************************************* Is user logged in? - " + Backendless.UserService.isValidLogin());
+				System.err.println("LOGOUT************************* Is user logged in? - " + Backendless.UserService.isValidLogin()+" "+act);
 				//System.exit(0);
+				Intent intent = new Intent(act.getBaseContext(), ActLogin.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				if(act != null)
+				{
+					act.startActivity(intent);
+					act.finish();
+				}
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
-				System.err.println("********************************************** Server reported an error " + backendlessFault.getMessage() );
+				System.err.println("Util:logout:e: " + backendlessFault.getMessage());
 				//System.exit(0);
 			}
 		});

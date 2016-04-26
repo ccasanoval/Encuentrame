@@ -229,7 +229,8 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 							{
 								super.handleResponse(backendlessUser);
 								System.err.println("REGISTER-----------------" + backendlessUser);
-								Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+								//Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+								Toast.makeText(rootView.getContext(), R.string.register_ok, Toast.LENGTH_LONG).show();
 								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
 								if(t!=null)t.select();
 							}
@@ -237,7 +238,8 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 							public void handleFault(BackendlessFault fault)
 							{
 								System.err.println("REGISTER-----------------FAILED:" + fault + " : " + fault.getCode());
-								Snackbar.make(rootView, getString(R.string.register_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+								//Snackbar.make(rootView, getString(R.string.register_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+								Toast.makeText(rootView.getContext(), R.string.register_ko, Toast.LENGTH_LONG).show();
 							}
 						});
 					}
@@ -245,7 +247,9 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 				break;
 
 			case RECOVER://-------------------------------------------------------------------------
-				txtLogin.setVisibility(View.GONE);
+				//txtLogin.setVisibility(View.GONE);
+				txtEmail.setVisibility(View.GONE);
+				//
 				txtPassword.setVisibility(View.GONE);
 				txtPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.recover_lbl));
@@ -254,19 +258,22 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						Backendless.UserService.restorePassword(txtEmail.getText().toString(), new AsyncCallback<Void>()
+						//Backendless.UserService.restorePassword(txtEmail.getText().toString(), new AsyncCallback<Void>()
+						Backendless.UserService.restorePassword(txtLogin.getText().toString(), new AsyncCallback<Void>()
 						{
 							public void handleResponse(Void response)
 							{
 								System.err.println("RECOVER-----------------OK:" + response);
-								Snackbar.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+								//Snackbar.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+								Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
 								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
 								if(t!=null)t.select();
 							}
 							public void handleFault(BackendlessFault fault)
 							{
 								System.err.println("RECOVER-----------------FAILED:" + fault + " : " + fault.getCode());
-								Snackbar.make(rootView, getString(R.string.recover_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+								//Snackbar.make(rootView, getString(R.string.recover_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+								Toast.makeText(rootView.getContext(), R.string.recover_ko, Toast.LENGTH_LONG).show();
 							}
 						});
 					}
@@ -281,7 +288,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 
 
 	/////////////////////////////////// REGISTER /////////////////////////////////////////////////////////////
-	public static class RegisterBECallback<T> extends BackendlessCallback<T>
+	public static class RegisterBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
 	{
 		private Context context;
 		private ProgressDialog progressDialog;
@@ -291,16 +298,21 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 			progressDialog = ProgressDialog.show(context, "", context.getString(R.string.cargando), true);
 		}
 		@Override
-		public void handleResponse(T response)
+		public void handleResponse(BackendlessUser usr)
 		{
+			System.err.println("REGISTER-----------------" + usr);
+			//Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+			Toast.makeText(context, R.string.register_ok, Toast.LENGTH_LONG).show();
+			TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+			if(t!=null)t.select();
 			progressDialog.cancel();
 		}
 		@Override
 		public void handleFault(BackendlessFault fault)
 		{
-System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault.getCode());
+System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault.getCode() + " : " + fault.getMessage());
+			Toast.makeText(context, R.string.register_ko + "\n"+fault.getMessage(), Toast.LENGTH_LONG).show();//TODO:mejorar cadena...
 			progressDialog.cancel();
-			Toast.makeText(context, fault.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -314,7 +326,7 @@ System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault
 			@Override
 			public void run()
 			{
-				if(Util.isLogged())_win.goMain();
+				//if(Util.isLogged())_win.goMain();
 System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
 				_win.finEsperaLogin(TO);
 			}

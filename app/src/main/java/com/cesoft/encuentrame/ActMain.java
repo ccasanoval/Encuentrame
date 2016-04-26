@@ -51,8 +51,7 @@ Registered SHA-1s:
 //TODO: RECOVER-----------------FAILED:BackendlessFault{ code: '3020', message: 'Cannot perform password recovery. Unable to find a user with the specified identity.' } : 3020
 //RECOVER-----------------OK:null  No quiere email sino nombre de usuario!! preferiria email...
 
-//TODO: repasar blanco del sombrero
-//TODO: Google auth? Firebase as MBAAS
+//TODO: Google auth? Firebase as MBAAS?
 //TODO: dialogo que pida activar gps! si no esta activo
 //TODO: Muestra mensaje de lista vacia si alguna lista esta vacia al iniciar, incluso cuando el panel no es el que tiene la lista vacia... arreglar para solo mostrar msg si estas en dicho  panel
 //TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
@@ -67,6 +66,7 @@ Registered SHA-1s:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
+	public static final int CONFIG = 6969;
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 	private static ActMain _this;
 	private static CoordinatorLayout _coordinatorLayout;
@@ -86,7 +86,7 @@ public class ActMain extends AppCompatActivity
 		setSupportActionBar(toolbar);
 
 		Util.setApplication(getApplication());
-		Util.initPrefs();
+		//Util.initPrefs();
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -130,10 +130,10 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		switch(id)
 		{
 		case R.id.action_config:
-				startActivity(new Intent(_this, ActConfig.class));
+				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), CONFIG);
 				return true;
 		case R.id.action_mapa:
-			i = new Intent(_this, ActMaps.class);
+			i = new Intent(this, ActMaps.class);
 			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());//_sectionNumber
 			startActivity(i);
 			return true;
@@ -175,6 +175,11 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			}
 			return null;
 		}
+	}
+
+	protected void goLogin()
+	{
+		Util.logout(_this);
 	}
 
 /*	Si está este, no se llama al de PlaceholderFragment
@@ -220,7 +225,7 @@ System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber+" 
 
 			if(_sectionNumber < 0)
 			{
-System.err.println("------ActMain:onCreateView:_sectionNumber < 0 : "+_sectionNumber);
+System.err.println("----------------------------ActMain:onCreateView:_sectionNumber < 0 : "+_sectionNumber);
 				Intent intent = new Intent(_this.getBaseContext(), ActLogin.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				_this.startActivity(intent);
@@ -237,20 +242,16 @@ System.err.println("------ActMain:onCreateView:_sectionNumber < 0 : "+_sectionNu
 				@Override
 				public void onClick(View view)
 				{
-					Intent i;
 					switch(sectionNumber)//switch(_viewPager.getCurrentItem())
 					{
 					case Util.LUGARES:
-						i = new Intent(ActMain._this, ActLugar.class);
-						startActivityForResult(i, Util.LUGARES);
+						startActivityForResult(new Intent(ActMain._this, ActLugar.class), Util.LUGARES);
 						break;
 					case Util.RUTAS:
-						i = new Intent(ActMain._this, ActRuta.class);
-						startActivityForResult(i, Util.RUTAS);
+						startActivityForResult(new Intent(ActMain._this, ActRuta.class), Util.RUTAS);
 						break;
 					case Util.AVISOS:
-						i = new Intent(ActMain._this, ActAviso.class);
-						startActivityForResult(i, Util.AVISOS);
+						startActivityForResult(new Intent(ActMain._this, ActAviso.class), Util.AVISOS);
 						break;
 					}
 				}
@@ -262,12 +263,10 @@ System.err.println("------ActMain:onCreateView:_sectionNumber < 0 : "+_sectionNu
 				textView.setText(getString(R.string.lugares));
 				refreshLugares();
 				break;
-
 			case Util.RUTAS://---------------------------------------------------------------------------
 				textView.setText(getString(R.string.rutas));
 				refreshRutas();
 				break;
-
 			case Util.AVISOS://--------------------------------------------------------------------------
 				textView.setText(getString(R.string.avisos));
 				refreshAvisos();
@@ -351,6 +350,12 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		@Override
 		public void onActivityResult(int requestCode, int resultCode, Intent data)
 		{
+			if(requestCode == CONFIG)
+			{
+				ActMain._this.goLogin();
+				return;
+			}
+
 System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ requestCode);
 			if(data != null)
 			{
