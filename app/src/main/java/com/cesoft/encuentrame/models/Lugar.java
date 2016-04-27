@@ -3,76 +3,147 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.backendless.Backendless;
-import com.backendless.BackendlessCollection;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.geo.GeoPoint;
-import com.backendless.persistence.BackendlessDataQuery;
-import com.backendless.persistence.QueryOptions;
 import com.cesoft.encuentrame.Util;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+//TODO:
+//Robert Kiyosaki
+//Raimon Samsó / El código del dinero
 
-import weborb.service.ExcludeProperties;
-
-//https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@ExcludeProperties(propertyNames = { "latitud, longitud" })
 public class Lugar extends Objeto implements Parcelable
 {
-	public transient static final String NOMBRE = "lugar";//TRANSIENT so not to include in backendless
+	public static final String NOMBRE = "lugar";
+
+	private Firebase _datos;
+	private GeoLocation _lugar = new GeoLocation(0,0);
+
+	public double getLatitud(){return _lugar.latitude;}
+	public double getLongitud(){return _lugar.longitude;}
+	public void setLatLon(double lat, double lon){_lugar = new GeoLocation(lat,lon);}
 
 	public Lugar(){}
-
-	private GeoPoint lugar = new GeoPoint(0,0);
-		public GeoPoint getLugar(){return lugar;}
-		public void setLugar(GeoPoint v){lugar=v;lugar.addCategory(NOMBRE);}
-		public Double getLatitud(){return lugar.getLatitude();}
-		public Double getLongitud(){return lugar.getLongitude();}
-		public void setLatLon(Double lat, Double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
-		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
-		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
-
+	public Lugar(Firebase datos)
+	{
+		_datos = datos;
+	}
 	public String toString()
 	{
-		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude());
+		return super.toString() + ", POS:"+(_lugar.latitude+"/"+_lugar.longitude);
 	}
 
-	//// Backendless
+	//// Firebase
 	//______________________________________________________________________________________________
-	public void eliminar(AsyncCallback<Long> res)
+	public void eliminar(Firebase.CompletionListener listener)
 	{
-		Backendless.Persistence.of(Lugar.class).remove(this, res);
+		if(_datos != null)
+		{
+			_datos.setValue(null, listener);
+		}
+		else if(_id != null)
+		{
+			Firebase ref = new Firebase(FIREBASE);
+			_datos = ref.child(NOMBRE).child(getId());
+			_datos.setValue(null, listener);
+		}
 	}
-	public void guardar(AsyncCallback<Lugar> res)
+	public void guardar(Firebase.CompletionListener listener)
 	{
-		Backendless.Persistence.save(this, res);
+		if(_datos != null)
+		{
+			_datos.setValue(this, listener);
+		}
+		else
+		{
+			Firebase ref = new Firebase(FIREBASE);
+			if(_id != null)
+				_datos = ref.child(NOMBRE).child(getId());
+			else
+				_datos = ref.child(NOMBRE).push();
+			_datos.setValue(this, listener);
+		}
 	}
-	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res)
+	public static void getLista(ValueEventListener listener)
 	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Lugar.class).find(query, res);
-		//Backendless.Persistence.of(Lugar.class).find(res);
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		ref.addValueEventListener(listener);
+		//ref.addListenerForSingleValueEvent(listener);
+/*new ValueEventListener()
+{
+	@Override public void onDataChange(DataSnapshot snapshot)
+	{
+		System.out.println("There are " + snapshot.getChildrenCount() + " blog posts");
+		for(DataSnapshot l : snapshot.getChildren())
+		{
+			Lugar lugar = l.getValue(Lugar.class);
+		}
 	}
-	//https://backendless.com/documentation/data/android/data_search_and_query.htm
-	public static void getLista(AsyncCallback<BackendlessCollection<Lugar>> res, Filtro filtro)
+	@Override public void onCancelled(FirebaseError firebaseError) {}
+}*/
+	}
+
+
+	public static void getListaByPos(ValueEventListener listener, Filtro filtro)
+	{
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		GeoFire geoFire = new GeoFire(ref);
+
+		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 0.6);
+
+geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+    @Override
+    public void onKeyEntered(String key, GeoLocation location) {
+        System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+    }
+
+    @Override
+    public void onKeyExited(String key) {
+        System.out.println(String.format("Key %s is no longer in the search area", key));
+    }
+
+    @Override
+    public void onKeyMoved(String key, GeoLocation location) {
+        System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
+    }
+
+    @Override
+    public void onGeoQueryReady() {
+        System.out.println("All initial data has been loaded and events have been fired!");
+    }
+
+    @Override
+    public void onGeoQueryError(FirebaseError error) {
+        System.err.println("There was an error with this query: " + error);
+    }
+});
+	}
+
+	public static void getLista(ValueEventListener listener, Filtro filtro)
 	{
 System.err.println("Lugar:getLista:filtro: "+filtro);
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addSortByOption("created ASC");
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
+
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		Query queryRef;// = ref.orderByChild("height").equalTo(25);
+
+		//LIKE '%ABC%' https://www.firebase.com/blog/2014-01-02-queries-part-two.html
+
+
+		//TODO-----------------------------------------------------------------------------------------------------
 		//--FILTRO
 		StringBuilder sb = new StringBuilder();//" created = created "
 		if( ! filtro.getNombre().isEmpty())
 		{
-			sb.append(" nombre LIKE '%");
-			sb.append(filtro.getNombre());
-			sb.append("%' ");
+			//ref.orderByChild("nombre").equalTo(filtro.getNombre());
+			ref.equalTo(filtro.getNombre(), "nombre");
+			//sb.append(" nombre LIKE '%");			sb.append(filtro.getNombre());			sb.append("%' ");
 		}
 		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
 		{
@@ -93,10 +164,9 @@ System.err.println("Lugar:getLista:filtro: "+filtro);
 			sb.append(filtro.getFechaFin().getTime());
 		}
 System.err.println("Lugar:getLista:SQL: "+sb.toString());
-		if(sb.length() > 0)
-			query.setWhereClause(sb.toString());
+		//if(sb.length() > 0)
 		//--FILTRO
-		Backendless.Persistence.of(Lugar.class).find(query, res);
+
 	}
 
 
@@ -106,20 +176,15 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 	{
 		super(in);
 		//
-		lugar = new GeoPoint();
-		lugar.setObjectId(in.readString());
-		lugar.setLatitude(in.readDouble());
-		lugar.setLongitude(in.readDouble());
-//System.err.println("Lugar:read Parcel:++++++++++++++++B: "+this);
+		setLatLon(in.readDouble(), in.readDouble());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
 		//
-		dest.writeString(lugar.getObjectId());
-		dest.writeDouble(lugar.getLatitude());
-		dest.writeDouble(lugar.getLongitude());
+		dest.writeDouble(getLatitud());
+		dest.writeDouble(getLongitud());
 	}
 
 	@Override
@@ -142,3 +207,67 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 	};
 
 }
+
+/*TODO: como lo hace firebase?
+https://github.com/firebase/geofire-java
+https://geofire-java.firebaseapp.com/docs/
+
+GeoFire geoFire = new GeoFire(new Firebase("https://<your-firebase>.firebaseio.com/"));
+geoFire.setLocation("firebase-hq", new GeoLocation(37.7853889, -122.4056973), new GeoFire.CompletionListener() {
+    @Override
+    public void onComplete(String key, FirebaseError error) {
+        if (error != null)
+            System.err.println("There was an error saving the location to GeoFire: " + error);
+         else
+            System.out.println("Location saved on server successfully!");
+    }});
+
+geoFire.removeLocation("firebase-hq");
+
+geoFire.getLocation("firebase-hq", new LocationCallback() {
+    @Override
+    public void onLocationResult(String key, GeoLocation location) {
+        if (location != null)             System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
+         else            System.out.println(String.format("There is no location for key %s in GeoFire", key));
+    }
+
+    @Override
+    public void onCancelled(FirebaseError firebaseError) {        System.err.println("There was an error getting the GeoFire location: " + firebaseError);    }
+});
+
+GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 0.6);
+
+geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+    @Override
+    public void onKeyEntered(String key, GeoLocation location) {
+        System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+    }
+
+    @Override
+    public void onKeyExited(String key) {
+        System.out.println(String.format("Key %s is no longer in the search area", key));
+    }
+
+    @Override
+    public void onKeyMoved(String key, GeoLocation location) {
+        System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
+    }
+
+    @Override
+    public void onGeoQueryReady() {
+        System.out.println("All initial data has been loaded and events have been fired!");
+    }
+
+    @Override
+    public void onGeoQueryError(FirebaseError error) {
+        System.err.println("There was an error with this query: " + error);
+    }
+});
+
+removeGeoQueryEventListener to remove a single event listener or removeAllListeners
+
+GeoQuery search area can be changed with setCenter and setRadius
+
+
+
+*/
