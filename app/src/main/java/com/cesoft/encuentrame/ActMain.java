@@ -1,5 +1,8 @@
 package com.cesoft.encuentrame;
 
+import java.util.Date;
+import java.util.Iterator;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,17 +27,15 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.backendless.BackendlessCollection;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
-import java.util.Date;
-import java.util.Iterator;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 //Version Firebase
 
@@ -50,12 +51,15 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
-//TODO: Cuando se tumba, mostrar otro arrangement
-//http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
-// small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
+//TODO:ROOT:Logica de Login metida dentro de objeto actualizacion...
+
+//TODO:Login con google OAuth....
+//TODO:Login: borrar cuenta.. Esta seguro? confirmar por email?
 
 //TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
 //http://developer.android.com/intl/es/training/basics/fragments/index.html
+//http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
+// small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
 //TODO: Cambiar : se guardaron los datos del 'registro' por 'lugar', 'ruta' o 'aviso'...
 //TODO: Google auth?
@@ -365,7 +369,7 @@ System.err.println("ActMain:onItemEdit:"+obj);
 
 			if(requestCode == Util.CONFIG)
 			{
-				Util.logout(ActMain._this);
+				Util.logout();
 				return;
 			}
 
@@ -423,7 +427,6 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
   			super.onPause();
 		}
 
-
 		//__________________________________________________________________________________________
 		public void refreshLugares()
 		{
@@ -436,29 +439,30 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 			else
 				Lugar.getLista(_acLugar);
 		}
-		private AsyncCallback<BackendlessCollection<Lugar>> _acLugar = new AsyncCallback<BackendlessCollection<Lugar>>()
+		private ValueEventListener _acLugar = new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Lugar> lugares)
+			public void onDataChange(DataSnapshot lugares)
 			{
-				int n = lugares.getTotalObjects();
-System.err.println("---------LUGARES:GET:OK:" + n);
+				long n = lugares.getChildrenCount();
+				System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
-				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
-				Lugar[] listaAL = new Lugar[n];
 				int i = 0;
-				while(iterator.hasNext())
-					listaAL[i++] = iterator.next();
+				Lugar[] listaAL = new Lugar[(int)n];
+				for(DataSnapshot l : lugares.getChildren())
+				{
+					listaAL[i++] = l.getValue(Lugar.class);
+				}
 				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);
+				System.err.println("---------LUGARES:GET:ERROR:" + err);
 			}
 		};
 
@@ -474,32 +478,32 @@ System.err.println("ActMain:refreshRutas()");
 			else
 				Ruta.getLista(_acRuta);
 		}
-		AsyncCallback<BackendlessCollection<Ruta>> _acRuta = new AsyncCallback<BackendlessCollection<Ruta>>()
+		private ValueEventListener _acRuta = new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Ruta> rutas)
+			public void onDataChange(DataSnapshot rutas)
 			{
-				int n = rutas.getTotalObjects();
-System.err.println("---------RUTAS:GET:OK:" + n);
+				long n = rutas.getChildrenCount();
+				System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.RUTAS)//if(_sectionNumber == Util.RUTAS)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
-					//return;
+					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
-				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
-				Ruta[] listaAL = new Ruta[n];
 				int i = 0;
-				while(iterator.hasNext())
-					listaAL[i++] = iterator.next();
+				Ruta[] listaAL = new Ruta[(int)n];
+				for(DataSnapshot l : rutas.getChildren())
+				{
+					listaAL[i++] = l.getValue(Ruta.class);
+				}
 				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
+				System.err.println("---------RUTAS:GET:ERROR:" + err);
 			}
 		};
 
@@ -514,29 +518,30 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 			else
 				Aviso.getLista(_acAviso);
 		}
-		private AsyncCallback<BackendlessCollection<Aviso>> _acAviso = new AsyncCallback<BackendlessCollection<Aviso>>()
+		private ValueEventListener _acAviso = new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Aviso> avisos)
+			public void onDataChange(DataSnapshot avisos)
 			{
-				int n = avisos.getTotalObjects();
-System.err.println("---------AVISOS:GET:OK:" + n);
+				long n = avisos.getChildrenCount();
+				System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					if(_this._viewPager.getCurrentItem() == Util.AVISOS)
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
-				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
-				Aviso[] listaAL = new Aviso[n];
 				int i = 0;
-				while(iterator.hasNext())
-					listaAL[i++] = iterator.next();
+				Aviso[] listaAL = new Aviso[(int)n];
+				for(DataSnapshot l : avisos.getChildren())
+				{
+					listaAL[i++] = l.getValue(Aviso.class);
+				}
 				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
+				System.err.println("---------AVISOS:GET:ERROR:" + err);
 			}
 		};
 

@@ -4,9 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.cesoft.encuentrame.models.Aviso;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
@@ -64,21 +65,21 @@ System.err.println("CesGeofenceReceiver:onReceive:------------------------------
 	//______________________________________________________________________________________________
 	protected void showAviso(final Context context, String sId, final String sTitle)
 	{
-//System.err.println("CesServiceAvisoGeo:showAviso-----------------------------" + sId + " : " + sTitle);
-		Aviso.getById(sId, new AsyncCallback<Aviso>()
+		Aviso.getById(sId, new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(Aviso a)
+			public void onDataChange(DataSnapshot aviso)
 			{
+				Aviso a = aviso.getValue(Aviso.class);
 				Intent i = new Intent(context, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, a);
 				i.putExtra("notificacion", true);
 				Util.showAviso(context, sTitle, a, i);
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("CesGeofenceReceiver:showAviso:e:" + backendlessFault);
+				System.err.println("CesGeofenceReceiver:showAviso:e:" + err);
 			}
 		});
 	}

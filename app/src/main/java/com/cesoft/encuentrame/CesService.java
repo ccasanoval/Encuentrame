@@ -6,9 +6,16 @@ import java.util.Iterator;
 import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
+import android.support.design.widget.Snackbar;
 
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Ruta;
+import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.location.Geofence;
 
 
@@ -30,6 +37,20 @@ public class CesService extends IntentService
 	private static CesService _this;
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
+	Firebase.AuthResultHandler loginListener = new Firebase.AuthResultHandler()
+	{
+		@Override
+		public void onAuthenticated(AuthData usr)
+		{
+			System.err.println("CesService:onCreate:onAuthenticated:"+usr);
+		}
+		@Override
+		public void onAuthenticationError(FirebaseError err)
+		{
+			System.err.println("CesService:onCreate:onAuthenticated:e:"+err);
+		}
+	};
+
 	//______________________________________________________________________________________________
 	public CesService()
 	{
@@ -42,7 +63,7 @@ public class CesService extends IntentService
 		_this = this;
 		Util.initFirebase(this);
 		Util.setSvcContext(this);
-		Util.login(resLogin);
+		Util.login(loginListener);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
@@ -60,8 +81,7 @@ System.err.println("CesService:loop---------------------------------------------
 				if( ! Util.isLogged())
 				{
 					System.err.println("CesService:loop---sin usuario");
-					Util.login(resLogin);
-					//try{Backendless.UserService.login("quake1978", "colt1911");}catch(Exception e){System.err.println("e:" + e);}
+					Util.login(loginListener);
 					Thread.sleep(DELAY_LOAD / 3);
 					continue;
 				}
@@ -88,14 +108,14 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 			//TODO: si so n los mismos no hay necesidad de recrearlos: comprobar...
 			//_listaGeoAvisos.clear();
 
-			Aviso.getActivos(new AsyncCallback<BackendlessCollection<Aviso>>()
+			Aviso.getActivos(new ValueEventListener()
 			{
 				@Override
-				public void handleResponse(BackendlessCollection<Aviso> avisos)
+				public void onDataChange(DataSnapshot avisos)
 				{
 					//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 					boolean bDirty = false;
-					int n = avisos.getTotalObjects();
+					long n = avisos.getChildrenCount();
 					if(n != _listaGeoAvisos.size())
 					{
 						if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
@@ -104,14 +124,13 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 					}
 					ArrayList<Geofence> aGeofences = new ArrayList<>();
 					ArrayList<Aviso> aAvisos = new ArrayList<>();
-					Iterator<Aviso> it = avisos.getCurrentPage().iterator();
 					int i=0;
-					while(it.hasNext())
+					for(DataSnapshot l : avisos.getChildren())
 					{
-						Aviso a = it.next();
+						Aviso a = l.getValue(Aviso.class);
 						aAvisos.add(a);
-						Geofence gf = new Geofence.Builder().setRequestId(a.getObjectId())
-								.setCircularRegion(a.getLatitud(), a.getLongitud(), a.getRadio())
+						Geofence gf = new Geofence.Builder().setRequestId(a.getId())
+								.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
 								.setExpirationDuration(Geofence.NEVER_EXPIRE)
 								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
 								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
@@ -125,7 +144,7 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 								bDirty = true;
 							i++;
 						}
-if(bDirty)System.err.println("Aviso="+a.getObjectId()+" : "+a.getNombre()+":"+a.getDescripcion() + "\t Geof=" + gf.getRequestId());
+if(bDirty)System.err.println("Aviso="+a.getId()+" : "+a.getNombre()+":"+a.getDescripcion() + "\t Geof=" + gf.getRequestId());
 					}
 					if(bDirty)
 					{
@@ -135,9 +154,9 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 					}
 				}
 				@Override
-				public void handleFault(BackendlessFault backendlessFault)
+				public void onCancelled(FirebaseError err)
 				{
-					System.err.println("CesService:cargarListaGeoAvisos:f:"+backendlessFault);
+					System.err.println("CesService:cargarListaGeoAvisos:f:"+err);
 				}
 			});
 		}
@@ -162,15 +181,15 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 		if(sId.isEmpty())return;
 
 		//Backendless.Persistence.of(Ruta.class).findById(sId, new AsyncCallback<Ruta>()
-		Ruta.getById(sId, new AsyncCallback<BackendlessCollection<Ruta>>()
+		Ruta.getById(sId, new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Ruta> ar)
+			public void onDataChange(DataSnapshot rutas)
 			{
 				System.err.println("CesService:saveGeoTracking:Ruta.getById");
-				if(ar.getCurrentPage().size() < 1)
-					return;
-				Ruta r = ar.getCurrentPage().get(0);
+				if(rutas.getChildrenCount() < 1)return;
+				Ruta r = rutas.getValue(Ruta.class);
+
 				final Location loc = Util.getLocation();
 				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
 				if( ! _sId.equals(sId))
@@ -202,136 +221,32 @@ System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s 
 System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
 
 				//TODO: añadir geofence por si quisiera funcionar...?
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
+				r.addPunto(new GeoLocation(loc.getLatitude(), loc.getLongitude()));
 System.err.println("CesService:saveGeoTracking:guardar0000:----------------------:" + r);
-				r.guardar(new AsyncCallback<Ruta>()
+				r.guardar(new Firebase.CompletionListener()
 				{
 					@Override
-					public void handleResponse(Ruta r)
+					public void onComplete(FirebaseError err, Firebase firebase)
 					{
-						System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + r);
+						if(err != null)
+							System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + err);
+						else
+							System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + firebase);
 						Util.refreshListaRutas();//Refrescar lista rutas en main..
 
 						_locLastSaved = loc;
 						_tmLastSaved = System.currentTimeMillis();
 					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + backendlessFault);
-					}
 				});
 			}
-
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:" + backendlessFault);
+				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:" + err);
 			}
 		});
 
 	}
-
-	//TODO: por que no funciona tracking con geofence?????
-	/*//______________________________________________________________________________________________
-	public static void cargarGeoTracking()
-	{
-System.err.println("CesService:cargarGeoTracking---------------------------------0--------");
-		if(_GeofenceStoreTracking != null)_GeofenceStoreTracking.clear();//TODO: si es el mismo no hay necesidad de recrearlo: comprobar...
-		//TODO: Investigar posibilidades de Backendless.Geo
-
-		RutaPto.getTrackingPto(new AsyncCallback<RutaPto>()
-		{
-			@Override
-			public void handleResponse(RutaPto ptoTrackin)
-			{
-//System.err.println("CesService:cargarGeoTracking-----------------------------------------:" + ptoTrackin);
-				if(Util.getTrackingRoute().isEmpty())
-				{
-					System.err.println("CesService:cargarGeoTracking-----------------------------------------:No hay ruta activa:Eliminando..." + ptoTrackin);
-					ptoTrackin.removeTrackingPto(new AsyncCallback<Long>()
-					{
-						@Override
-						public void handleResponse(Long aLong)
-						{
-							System.err.println("CesService:cargarGeoTracking-----------------------------------------:Eliminado:"+aLong);
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.err.println("CesService:cargarGeoTracking-----------------------------------------:Eliminado FALLO:" + backendlessFault);
-						}
-					});
-					return;
-				}
-System.err.println("CesService:cargarGeoTracking---------------------------------pto.loc--------:" + ptoTrackin.getLatitud()+","+ ptoTrackin.getLongitud());
-				Geofence gf = new Geofence.Builder()
-					.setRequestId(ptoTrackin.getObjectId())
-					.setCircularRegion(ptoTrackin.getLatitud(), ptoTrackin.getLongitud(), RADIO_TRACKING)
-					.setExpirationDuration(Geofence.NEVER_EXPIRE)
-					.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-					.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER)
-					.build();
-				ArrayList<Geofence> aGeofences = new ArrayList<>();
-				aGeofences.add(gf);
-				_GeofenceStoreTracking = new CesGeofenceStore(CesService._this, aGeofences);
-	System.err.println("CesService:cargarGeoTracking-----------------------------------------:Se añadio la geofence para tracking:"+gf);
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("CesService:cargarGeoTracking-----------------------------------------:Sin puntos");
-				//TODO:Si hubiese ruta activa habria que crear el punto...
-				//TODO: hay que añadir fecha a los puntos...
-				Util.setTrackingRoute("");//TODO:refrescar lista de rutas para quitar ruta activa...
-				return;
-			}
-		});
-	}*/
-	//______________________________________________________________________________________________
-	//TODO: Varias rutas al mismo tiempo, si tendrían los mismos puntos?
-	/*private void cargarListaGeoTracking()
-	{
-		try
-		{
-			if(_GeofenceStoreTracking != null)_GeofenceStoreTracking.clear();
-
-			//BackendlessDataQuery query = new BackendlessDataQuery();
-			Backendless.Persistence.of(GeoPoint.class).find(new AsyncCallback<BackendlessCollection<GeoPoint>>()
-			{
-				@Override
-				public void handleResponse(BackendlessCollection<GeoPoint> gs)
-				{
-					int n = gs.getTotalObjects();
-					if(n < 1)return;
-					ArrayList<Geofence> aGeofences = new ArrayList<>();
-					Iterator<GeoPoint> it = gs.getCurrentPage().iterator();
-					while(it.hasNext())
-					{
-						GeoPoint g = it.next();
-						//_listaGeoTracking.add(g);
-if(g.getLatitude() == null)return;
-						aGeofences.add(new Geofence.Builder().setRequestId(g.getObjectId())
-							.setCircularRegion(g.getLatitude(), g.getLongitude(), RADIO_TRACKING)
-							.setExpirationDuration(Geofence.NEVER_EXPIRE)
-							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
-							.build());
-					}
-					_GeofenceStoreTracking = new CesGeofenceStore(CesService.this, aGeofences);
-				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
-				{
-					System.err.println("CesService:cargarListaGeoTracking:e:" + backendlessFault);//BackendlessFault{ code: '2024', message: 'Wrong entity name: name must not have a symbol '.'' }
-				}
-			});
-		}
-		catch(Exception e)
-		{
-			System.err.println("CesService:cargarListaGeoTracking:e:"+e);
-			//_lista.clear();
-		}
-	}*/
 
 }
 

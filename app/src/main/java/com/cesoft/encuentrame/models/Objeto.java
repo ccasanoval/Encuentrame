@@ -3,8 +3,6 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.firebase.client.Firebase;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +237,6 @@ ref.addChildEventListener(new ChildEventListener() {
     // Retrieve new posts as they are added to the database
     @Override
     public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
-    //todo:check that its not null
         BlogPost newPost = snapshot.getValue(BlogPost.class);
         System.out.println("Author: " + newPost.getAuthor());
         System.out.println("Title: " + newPost.getTitle());

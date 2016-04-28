@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -18,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -37,9 +38,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 
 import com.cesoft.encuentrame.models.Lugar;
 
@@ -268,19 +266,21 @@ System.err.println("*************"+_l);
 		}
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
-		_l.guardar(new AsyncCallback<Lugar>()
+		_l.guardar(new Firebase.CompletionListener()
 		{
 			@Override
-			public void handleResponse(Lugar l)
+			public void onComplete(FirebaseError err, Firebase firebase)
 			{
-				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
-			}
-			@SuppressLint("StringFormatInvalid")
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("ActLugar:guardar:handleFault:f:" + backendlessFault);
-				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				if(err == null)
+				{
+					Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
+				}
+				else
+				{
+					System.err.println("ActLugar:guardar:handleFault:f:" + err);
+					Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), err.getMessage()), Snackbar.LENGTH_LONG).show();
+					//Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				}
 			}
 		});
 	}
@@ -296,18 +296,20 @@ System.err.println("*************"+_l);
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_l.eliminar(new AsyncCallback<Long>()
+				_l.eliminar(new Firebase.CompletionListener()
 				{
 					@Override
-					public void handleResponse(Long lugar)
+					public void onComplete(FirebaseError err, Firebase firebase)
 					{
-						Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("ActLugar:eliminar:handleFault:f:"+backendlessFault);
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						if(err == null)
+						{
+							Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
+						}
+						else
+						{
+							System.err.println("ActLugar:eliminar:handleFault:f:"+err);
+							Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), err.getCode()), Snackbar.LENGTH_LONG).show();
+						}
 					}
 				});
 			}

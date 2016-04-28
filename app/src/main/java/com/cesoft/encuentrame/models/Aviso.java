@@ -3,6 +3,14 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 
 import com.cesoft.encuentrame.Util;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.Firebase;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,58 +23,49 @@ import java.util.Date;
 //ExcludeProperty(propertyName = "latitud")
 public class Aviso extends Objeto
 {
-	public transient static final String NOMBRE = "aviso";
-	public transient static final String RADIO = "radio";//TRANSIENT so not to include in backendless
-	public transient static final String LUGAR = "lugar";
+	public static final String NOMBRE = "aviso";
 
 	public Aviso(){}
 
 	//______________________________________________________________________________________________
-	protected boolean activo = true;
-		public boolean isActivo(){return activo;}
-		public void setActivo(boolean b){activo=b;}
+	protected boolean _activo = true;
+		public boolean isActivo(){return _activo;}
+		public void setActivo(boolean b){_activo=b;}
 
 	protected Date fechaActivo;
-		public void desactivarPorHoy(AsyncCallback<Aviso> ac)//TODO: Desactivar por hoy, tambien desactivar todos los avisos... incluso: modo avion para app completa
+		public void desactivarPorHoy()//TODO: Desactivar por hoy, tambien desactivar todos los avisos... incluso: modo avion para app completa
 		{
 			fechaActivo = Calendar.getInstance().getTime();
-			Backendless.Persistence.save(this, ac);
+			//Backendless.Persistence.save(this, ac);
 		}
-		public void reactivarPorHoy(AsyncCallback<Aviso> ac)
+		public void reactivarPorHoy()
 		{
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.DATE, -2);
 			fechaActivo = cal.getTime();
-			Backendless.Persistence.save(this, ac);
+			//Backendless.Persistence.save(this, ac);
 		}
 
-	private GeoPoint lugar = new GeoPoint(0,0);
-		public GeoPoint getLugar(){return lugar;}
-		public void setLugar(GeoPoint v){lugar=v;}
+	private Firebase _datos;
+
+	private GeoLocation _lugar = new GeoLocation(0,0);
+		public GeoLocation getLugar(){return _lugar;}
+		public void setLugar(GeoLocation v){_lugar=v;}
 		//public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
-		public double getLatitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLatitude();}
-		public double getLongitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLongitude();}
-		public void setLatLon(double lat, double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
+		public double getLatitud(){if(_lugar==null)return 0.0;return _lugar.latitude;}
+		public double getLongitud(){if(_lugar==null)return 0.0;return _lugar.longitude;}
+		public void setLatLon(double lat, double lon){_lugar = new GeoLocation(lat, lon);}
 		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
 		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
+	private double _radio;//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
+		public double getRadio(){return _radio;}
+		public void setRadio(double radio){if(radio >= 0 && radio < 10000)_radio=radio;}
 
-		public int getRadio()//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
-		{
-			if(lugar == null)return 0;
-			Object o = lugar.getMetadata(RADIO);
-			if(o == null)return 0;
-			if(String.class == o.getClass())
-				return Integer.parseInt((String)o);
-			else if(Integer.class == o.getClass()) return (Integer)o;
-			else return 0;
-			//return (Integer)lugar.getMetadata(RADIO);
-		}
-		public void setRadio(int v){lugar.addMetadata(RADIO, v);}
 
 	//______________________________________________________________________________________________
 	public String toString()
 	{
-		return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio()+" "+lugar.getObjectId());
+		return super.toString() +", ACT:"+_activo+", POS:"+(_lugar==null?"null":_lugar.latitude+"/"+_lugar.longitude+":"+getRadio()+" "+getId());
 	}
 	//______________________________________________________________________________________________
 	@Override public boolean equals(Object o)
@@ -75,7 +74,7 @@ public class Aviso extends Objeto
 		if(!(o instanceof Aviso))return false;
 		Aviso a = (Aviso)o;
 System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
-		return getObjectId().equals(a.getObjectId())
+		return getId().equals(a.getId())
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud() && getRadio() == a.getRadio()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
 	}
@@ -88,12 +87,9 @@ System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 		super(in);
 		//
 		setActivo(in.readByte() > 0);
-		//lugar = new GeoPoint(0,0);
-		lugar.setObjectId(in.readString());
-		lugar.setLatitude(in.readDouble());
-		lugar.setLongitude(in.readDouble());
-System.err.println("----------------Aviso:from parcel 1:" + this);
-		setRadio(in.readInt());
+		setId(in.readString());
+		setLatLon(in.readDouble(), in.readDouble());
+		setRadio(in.readDouble());
 System.err.println("----------------Aviso:from parcel 2:" + this);
 	}
 	@Override
@@ -102,12 +98,11 @@ System.err.println("----------------Aviso:from parcel 2:" + this);
 		super.writeToParcel(dest, flags);
 		//
 		dest.writeByte(isActivo()?(byte)1:0);
-		if(lugar == null)lugar = new GeoPoint(0,0);
-		dest.writeString(lugar.getObjectId());
-		dest.writeDouble(lugar.getLatitude());
-		dest.writeDouble(lugar.getLongitude());
-		dest.writeInt(getRadio());
-System.err.println("----------------Aviso:writeToParcel:"+lugar);
+		dest.writeString(getId());
+		dest.writeDouble(_lugar.latitude);
+		dest.writeDouble(_lugar.longitude);
+		dest.writeDouble(getRadio());
+System.err.println("----------------Aviso:writeToParcel:"+this);
 	}
 	@Override
 	public int describeContents(){return 0;}
@@ -120,50 +115,79 @@ System.err.println("----------------Aviso:writeToParcel:"+lugar);
 	};
 
 
-	//// BACKENDLESS
+	//// FIREBASE
 	//
-	public void eliminar(AsyncCallback<Long> ac)
+	public void eliminar(Firebase.CompletionListener listener)
 	{
-		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
-		Backendless.Persistence.of(Aviso.class).remove(this, ac);
+		if(_datos != null)
+		{
+			_datos.setValue(null, listener);
+		}
+		else if(_id != null)
+		{
+			Firebase ref = new Firebase(FIREBASE);
+			_datos = ref.child(NOMBRE).child(getId());
+			_datos.setValue(null, listener);
+		}
 	}
-	public void guardar(AsyncCallback<Aviso> ac)
+	public void guardar(Firebase.CompletionListener listener)
 	{
-		//Backendless.Persistence.of(Lugar.class).save(this, ac);
-		Backendless.Persistence.save(this, ac);
+		if(_datos != null)
+		{
+			_datos.setValue(this, listener);
+		}
+		else
+		{
+			Firebase ref = new Firebase(FIREBASE);
+			if(_id != null)
+			{
+				_datos = ref.child(NOMBRE).child(getId());
+			}
+			else
+			{
+				_datos = ref.child(NOMBRE).push();
+				setId(_datos.getKey());
+			}
+			_datos.setValue(this, listener);
+		}
 	}
 
-	public static void getById(String sId, AsyncCallback<Aviso> res)
+	public static void getById(String sId, ValueEventListener listener)
 	{
-		ArrayList<String> relationProps = new ArrayList<>();
-		relationProps.add("lugar");
-		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);
+		Firebase ref = new Firebase(FIREBASE);
+		Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
+		queryRef.addListenerForSingleValueEvent(listener);
+    	//queryRef.addChildEventListener(listener);
 	}
-	public static void getActivos(AsyncCallback<BackendlessCollection<Aviso>> res)
+	public static void getActivos(ValueEventListener listener)
 	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		query.setWhereClause("activo > 0");
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated(LUGAR);
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Aviso.class).find(query, res);
+		Firebase ref = new Firebase(FIREBASE);
+		Query queryRef = ref.orderByChild("_activo").equalTo(1);
+		queryRef.addListenerForSingleValueEvent(listener);
+    	//queryRef.addChildEventListener(listener);
 	}
-	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res)
+	public static void getLista(ValueEventListener listener)
 	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated(LUGAR);
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Aviso.class).find(query, res);
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		ref.addValueEventListener(listener);
+		//ref.addListenerForSingleValueEvent(listener);
 	}
-	public static void getLista(AsyncCallback<BackendlessCollection<Aviso>> res, Filtro filtro)
+	public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
 	{
+System.err.println("-----------------------------------------Aviso:getListaByPos:");
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		GeoFire geoFire = new GeoFire(ref);
+		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio());
+		geoQuery.addGeoQueryEventListener(listener);
+	}
+	public static void getLista(ValueEventListener listener, Filtro filtro)
+	{
+//TODO-----------------------------------------------------------------------------------------------------
+getLista(listener);
+if(1==1)return;
 System.err.println("Aviso:getLista:filtro: "+filtro);
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addSortByOption("created ASC");
-		queryOptions.addRelated("lugar");
-		query.setQueryOptions(queryOptions);
+
+
 		//--FILTRO
 		StringBuilder sb = new StringBuilder();
 		if( ! filtro.getNombre().isEmpty())
@@ -197,10 +221,9 @@ System.err.println("Aviso:getLista:filtro: "+filtro);
 			sb.append(filtro.getActivo()==Filtro.ACTIVO?"true":"false");
 		}
 System.err.println("Aviso:getLista:SQL: "+sb.toString());
-		if(sb.length() > 0)
-			query.setWhereClause(sb.toString());
+		//if(sb.length() > 0)			query.setWhereClause(sb.toString());
 		//--FILTRO
-		Backendless.Persistence.of(Aviso.class).find(query, res);
+		//Backendless.Persistence.of(Aviso.class).find(query, res);
 	}
 
 }

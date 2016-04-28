@@ -4,15 +4,12 @@ import java.util.List;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.location.Location;
 
-import com.backendless.Backendless;
-import com.backendless.geo.GeoPoint;
-import com.cesoft.encuentrame.models.Ruta;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 
 import com.cesoft.encuentrame.models.Aviso;
 
@@ -75,64 +72,21 @@ System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------
 	//______________________________________________________________________________________________
 	protected void showAviso(String sId, final String sTitle)
 	{
-//System.err.println("CesServiceAvisoGeo:showAviso-----------------------------" + sId + " : " + sTitle);
-		Aviso.getById(sId, new AsyncCallback<Aviso>()
+		Aviso.getById(sId, new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(Aviso a)
+			public void onDataChange(DataSnapshot aviso)
 			{
+				Aviso a = aviso.getValue(Aviso.class);
 				Intent i = new Intent(CesServiceAvisoGeo.this, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, a);
 				Util.showAviso(CesServiceAvisoGeo.this, sTitle, a, i);
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("CesServiceAvisoGeo:showAviso:e:"+backendlessFault);
+				System.err.println("CesServiceAvisoGeo:showAviso:e:"+err);
 			}
 		});
 	}
-
-	//______________________________________________________________________________________________
-	/*protected void addTrackingPoint(Geofence geof)
-	{
-		//GeoPoint.getById(sId);
-System.err.println("CesServiceAvisoGeo:addTrackingPoint-----------*****************************************------------"+geof);
-		//TODO: Hallar posicion, borrar este geofence y crear otro con centro en posicion...
-
-		GeoPoint geoPoint = Backendless.Persistence.of(GeoPoint.class).findFirst();
-		if(geoPoint == null)
-		{
-			System.err.println("CesServiceAvisoGeo:addTrackingPoint: No hay geofence de tracking en BBDD...");
-			CesService.cargarGeoTracking();
-			return;
-		}
-		String sId = Util.getTrackingRoute();
-		Backendless.Persistence.of(GeoPoint.class).remove(geoPoint);
-		if(sId.isEmpty())
-		{
-			System.err.println("CesServiceAvisoGeo:addTrackingPoint: No hay ruta activa...");
-			CesService.cargarGeoTracking();
-		}
-		else
-		{
-			//TODO: comprobar maximo numero de puntos... si max cerrar ruta
-			Location loc = Util.getLocation();
-System.err.println("CesServiceAvisoGeo:addTrackingPoint:------------loc----------:" + loc.getLatitude()+", "+loc.getLongitude());
-			Ruta r = Backendless.Persistence.of(Ruta.class).findById(sId);
-			r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
-			r.guardar(new AsyncCallback<Ruta>()
-				{
-					@Override public void handleResponse(Ruta ruta)
-					{
-System.err.println("CesServiceAvisoGeo:addTrackingPoint:----------------------:" + ruta);
-					}
-					@Override public void handleFault(BackendlessFault backendlessFault){}
-				});
-			/// Crear geofence con pos actual
-			GeoPoint gp = new GeoPoint(loc.getLatitude(), loc.getLongitude());
-			Backendless.Persistence.of(GeoPoint.class).save(gp);
-			CesService.cargarGeoTracking();
-		}
-	}*/
 }

@@ -25,6 +25,9 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -46,16 +49,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
-
 import com.cesoft.encuentrame.models.Ruta;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
-//, ResultCallback<Status>, GoogleMap.OnCameraChangeListener,
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -180,7 +178,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			//si está activo muestra btnStop
 			String sId = Util.getTrackingRoute();
 			View layStartStop = findViewById(R.id.layStartStop);
-			if( ! sId.equals(_r.getObjectId()))
+			if( ! sId.equals(_r.getId()))
 			{
 				if(layStartStop!=null)layStartStop.setVisibility(View.GONE);
 			}
@@ -273,8 +271,9 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		//
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
-		if(date != null && lblFecha!= null)lblFecha.setText(dateFormat.format(date));
+//TODO:
+//		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
+//		if(date != null && lblFecha!= null)lblFecha.setText(dateFormat.format(date));
 	}
 
 	//______________________________________________________________________________________________
@@ -324,26 +323,25 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
-		guardar(
-			new AsyncCallback<Ruta>()
+		guardar(new Firebase.CompletionListener()
+		{
+			@Override
+			public void onComplete(FirebaseError err, Firebase firebase)
 			{
-				@Override
-				public void handleResponse(Ruta r)
+				if(err == null)
 				{
-					System.err.println("ActRuta:guardar:" + r);
-					//return2Main(true, getString(R.string.ok_guardar));
+					System.err.println("ActRuta:guardar:"+firebase);
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
+				else
 				{
-					System.err.println("ActRuta:guardar:handleFault:f:" + backendlessFault);
-					//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+					System.err.println("ActRuta:guardar:handleFault:f:" + err);
 					Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
 				}
-			});
+			}
+		});
 	}
-	private void guardar(AsyncCallback<Ruta> res)
+	private void guardar(Firebase.CompletionListener res)
 	{
 		if(_txtNombre.getText().toString().isEmpty())
 		{
@@ -367,22 +365,21 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_r.eliminar(new AsyncCallback<Long>()
+				_r.eliminar(new Firebase.CompletionListener()
 				{
 					@Override
-					public void handleResponse(Long l)
+					public void onComplete(FirebaseError err, Firebase firebase)
 					{
-System.err.println("ActRuta:eliminar:handleResponse:"+l);
-						Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
-						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){Snackbar.make(_coordinatorLayout, , Snackbar.LENGTH_LONG).show();}});
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("ActRuta:eliminar:handleFault:f:" + backendlessFault);
-						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault), Snackbar.LENGTH_LONG).show();
-						//}});
+						if(err == null)
+						{
+							System.err.println("ActRuta:eliminar:handleResponse:"+firebase);
+							Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
+						}
+						else
+						{
+							System.err.println("ActRuta:eliminar:handleFault:f:" + err);
+							Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), err.getMessage()), Snackbar.LENGTH_LONG).show();
+						}
 					}
 				});
 			}
@@ -424,8 +421,8 @@ System.err.println("ActRuta:eliminar:handleResponse:"+l);
 		else if(_r.getPuntos().size() > 0)
 		{
 			showRuta();//showMarkers();
-			GeoPoint pos = _r.getPuntos().get(0);
-			LatLng pos2 = new LatLng(pos.getLatitude(), pos.getLongitude());
+			GeoLocation pos = _r.getPuntos().get(0);
+			LatLng pos2 = new LatLng(pos.latitude, pos.longitude);
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));
 		}
 	}
@@ -489,65 +486,21 @@ System.err.println("showMarkers: " + pos);
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
-		guardar(new AsyncCallback<Ruta>()
+		guardar(new Firebase.CompletionListener()
 		{
 			@Override
-			public void handleResponse(Ruta r)
+			public void onComplete(FirebaseError err, Firebase ruta)
 			{
-				Util.setTrackingRoute(r.getObjectId());
-				Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
-
-				/*
-				/// Si hay una ruta activa, se cierra ¿Avisar?
-				//TODO: Guardar varias rutas al mismo tiempo ???
-				String sId = Util.getTrackingRoute();
-				//if( ! sId.isEmpty())//No hace falta borrar punto anterior ...
-
-				/// Activar tracking, guardar ruta activa
-				Util.setTrackingRoute(r.getObjectId());
-				/// Obtener posicion y guardar primer punto
-				Location loc = Util.getLocation();
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
-				r.guardar(new AsyncCallback<Ruta>()
+				if(err == null)
 				{
-					@Override
-					public void handleResponse(Ruta ruta)
-					{
-						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:"+ruta);
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:handleFault:"+backendlessFault);
-					}
-				});
-				//TODO: try geofence for tracking again????
-				/// Crear geofence con pos actual
-				RutaPto rp = new RutaPto();
-				rp.setIdRuta(r.getObjectId());
-				rp.setLatLon(loc.getLatitude(), loc.getLongitude());
-				rp.saveTrackingPto(new AsyncCallback<RutaPto>()
+					Util.setTrackingRoute(ruta.getKey());
+					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+				}
+				else
 				{
-					@Override public void handleResponse(RutaPto rutaPto)
-					{
-System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
-						//CesService.cargarGeoTracking();
-						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
-					}
-					@Override public void handleFault(BackendlessFault backendlessFault)
-					{
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
-						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
-					}
-				});
-				*/
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
-				//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
-				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+					System.err.println("ActRuta:startTrackingRecord:handleFault:" + err);
+					Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				}
 			}
 		});
 	}
@@ -563,17 +516,15 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 	{
 		if(_r.getPuntos().size() < 1)return;
 
-		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
 
-		GeoPoint gpIni = _r.getPuntos().get(0);
-		GeoPoint gpFin = _r.getPuntos().get(_r.getPuntos().size() - 1);
-		for(GeoPoint pt : _r.getPuntos())
+		GeoLocation gpIni = _r.getPuntos().get(0);
+		GeoLocation gpFin = _r.getPuntos().get(_r.getPuntos().size() - 1);
+		for(GeoLocation pt : _r.getPuntos())
 		{
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(_r.getNombre());
@@ -581,7 +532,7 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 			if(date != null)
 				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
 
-			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
+			LatLng pos = new LatLng(pt.latitude, pt.longitude);
 System.err.println("showRuta: " + pos);
 			if(pt == gpIni)
 			{
@@ -599,8 +550,8 @@ System.err.println("showRuta: " + pos);
 			}
 			else
 			{
-				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
-				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
+				double disIni = (pt.latitude - gpIni.latitude)*(pt.latitude - gpIni.latitude) + (pt.longitude - gpIni.longitude)*(pt.longitude - gpIni.longitude);
+				double disFin = (pt.latitude - gpFin.latitude)*(pt.latitude - gpFin.latitude) + (pt.longitude - gpFin.longitude)*(pt.longitude - gpFin.longitude);
 				if(disIni > 0.000000005 || disFin > 0.000000005)
 				{
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -611,6 +562,6 @@ System.err.println("showRuta: " + pos);
 		}
 		po.width(5).color(Color.BLUE);
 		_Map.addPolyline(po);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.latitude, gpIni.longitude), 15));
 	}
 }

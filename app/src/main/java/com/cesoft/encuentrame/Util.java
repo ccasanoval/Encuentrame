@@ -20,15 +20,10 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
-import com.backendless.Backendless;
-import com.backendless.BackendlessUser;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
+import com.cesoft.encuentrame.models.Login;
 import com.firebase.client.Firebase;
 
 import java.util.HashMap;
@@ -46,9 +41,6 @@ public class Util
 	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
 	public static final String TIPO = "tipo";
-	private static final String PREF_LOGIN = "login";
-	private static final String PREF_PWD = "password";
-	private static final String PREF_SAVE_LOGIN = "save_login";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
@@ -69,8 +61,10 @@ System.err.println("----------------------Util.refreshListaRutas ");
 		public static Application getApplication(){return _app;}
 	private static Context _svcContext;
 		public static void setSvcContext(Context c){_svcContext = c;}
+		//public static Context getSvcContext(){return _svcContext;}
 	public static void initFirebase(Context c)
 	{
+		Login.setSvcContext(c);
 		Firebase.setAndroidContext(c);
 	}
 	/*public static void initBackendless(Context c)
@@ -223,7 +217,7 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
 
-		Integer idNotificacion = Integer.parseInt(a.getObjectId().substring(0,6).replace('-','0'), 16);
+		Integer idNotificacion = Integer.parseInt(a.getId().substring(0,6).replace('-','0'), 16);
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
@@ -370,133 +364,4 @@ System.err.println("-----util:return2Main:filtro:"+filtro);
 		act.finish();
 	}
 
-
-	//______________________________________________________________________________________________
-	// LOGIN
-	public static String getUsuario()
-	{
-		if(_svcContext == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		return prefs.getString(PREF_LOGIN, "");
-	}
-	public static String getClave()
-	{
-		if(_svcContext == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		return prefs.getString(PREF_PWD, "");
-		//}catch(Exception e){System.err.println("Util:getClave:e:"+e);}
-		//return "";
-	}
-	//-------
-	public static void login(AsyncCallback<BackendlessUser> res)
-	{
-		BackendlessUser bu = Backendless.UserService.CurrentUser();
-		if(bu != null)
-		{
-			res.handleResponse(bu);
-			return;
-		}
-		String userId = UserTokenStorageFactory.instance().getStorage().get();
- 		if(userId != null && !userId.isEmpty())
-		{
-System.err.println("Util.login2: ::::::::::::::::::::::::::::::::"+userId+"+++");
-			try
-			{
-				Backendless.UserService.findById(userId, res);
-				return;
-			}
-			catch(Exception e){System.err.println("Util.login2:e:"+e);}
-		}
-
-		try
-		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-//System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
-			if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
-		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
-		String usr = getUsuario();
-		String pwd = getClave();
-//System.err.println("Util.login2: "+usr);
-		login(usr, pwd, res);
-//System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
-	}
-	//-------
-	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
-	{
-		if(_svcContext != null)
-		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-			Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));//NO NEED FOR saveLogin() ON prefs
-System.err.println("Util.login1: logando...");
-		}
-	}
-	//-------
-	public static boolean isLogged()
-	{
-System.err.print("Util.isLogged: A    ");
-		try{
-			BackendlessUser usr = Backendless.UserService.CurrentUser();
-			if(usr != null) return true;
-		}catch(Exception e){System.err.println("Util.isLogged:A:e:"+e);}
-
-System.err.print("Util.isLogged: B    ");
-		try{
-			boolean isValidLogin = Backendless.UserService.isValidLogin();
-			if(isValidLogin) return true;
-		}catch(Exception e){System.err.println("Util.isLogged:B:e:"+e);}
-
-System.err.print("Util.isLogged: C    ");
-		try{
-			String userId = UserTokenStorageFactory.instance().getStorage().get();
- 			if(userId != null && !userId.isEmpty()) return true;
-		}catch(Exception e){System.err.println("Util.isLogged:C:e:"+e);}
-
-System.err.println("Util.isLogged: D");
-		//...
-		return false;
-	}
-
-	/*public static void saveLogin(String usr, String pwd)
-	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
-		SharedPreferences.Editor e = prefs.edit();
-		e.putString(PREF_LOGIN, usr);
-		e.putString(PREF_PWD, pwd);
-		e.apply();
-	}
-	public static void borrarLogin()
-	{
-		// Lo contrario a Backendless.UserService.login(usr, pwd, res,   true  );
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
-		SharedPreferences.Editor e = prefs.edit();
-		e.putString(PREF_LOGIN, "");
-		e.putString(PREF_PWD, "");
-		e.apply();
-	}*/
-
-	public static void logout(final Activity act)
-	{
-		Backendless.UserService.logout(new AsyncCallback<Void>()
-		{
-			@Override
-			public void handleResponse(Void aVoid)
-			{
-				//System.err.println("LOGOUT************************* Is user logged in? - " + Backendless.UserService.isValidLogin()+" "+act);
-				//System.exit(0);
-				Intent intent = new Intent(act.getBaseContext(), ActLogin.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				act.startActivity(intent);
-				act.finish();
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				Toast.makeText(act, "Logout: " + backendlessFault.getMessage(), Toast.LENGTH_LONG).show();//R.string.logout_err
-				System.err.println("Util:logout:e: " + backendlessFault.getMessage());
-				//System.exit(0);
-			}
-		});
-	}
 }

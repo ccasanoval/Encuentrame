@@ -20,6 +20,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.AuthData;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+
+import java.util.Map;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
@@ -32,17 +37,18 @@ public class ActLogin extends AppCompatActivity
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
 
-	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
+	Firebase.AuthResultHandler resLogin = new Firebase.AuthResultHandler()
 	{
 		@Override
-		public void handleResponse(BackendlessUser backendlessUser)
+		public void onAuthenticated(AuthData usr)
 		{
-			System.err.println("ActLogin:222ENTER-----------(desde CesService)-----------" + backendlessUser);
+			//System.out.println("User ID: " + usr.getUid() + ", Provider: " + usr.getProvider());
+			System.err.println("ActLogin:222ENTER-----------(desde CesService)-----------" + usr);
 		}
 		@Override
-		public void handleFault(BackendlessFault fault)
+		public void onAuthenticationError(FirebaseError err)
 		{
-			System.err.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
+			System.err.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + err.getMessage());
 		}
 	};
 
@@ -194,14 +200,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginBECallback<BackendlessUser>(_win));
-						/*rootView.post(new Runnable()
-						{
-							public void run()
-							{
-								_win.iniEsperaLogin();
-							}
-						});*/
+						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginCallback(_win));
 					}
 				});
 				break;
@@ -218,30 +217,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 							Snackbar.make(rootView, getString(R.string.register_bad_pass), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
 							return;
 						}
-						BackendlessUser user = new BackendlessUser();
-						user.setPassword(txtPassword.getText().toString());
-						user.setEmail(txtEmail.getText().toString());
-						user.setProperty("name", txtLogin.getText().toString());
-						Backendless.UserService.register(user, new RegisterBECallback<BackendlessUser>(_win));/*
-						{
-							@Override
-							public void handleResponse(BackendlessUser backendlessUser)
-							{
-								super.handleResponse(backendlessUser);
-								System.err.println("REGISTER-----------------" + backendlessUser);
-								//Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
-								Toast.makeText(rootView.getContext(), R.string.register_ok, Toast.LENGTH_LONG).show();
-								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
-								if(t!=null)t.select();
-							}
-							@Override
-							public void handleFault(BackendlessFault fault)
-							{
-								System.err.println("REGISTER-----------------FAILED:" + fault + " : " + fault.getCode());
-								//Snackbar.make(rootView, getString(R.string.register_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
-								Toast.makeText(rootView.getContext(), R.string.register_ko, Toast.LENGTH_LONG).show();
-							}
-						});*/
+						Util.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(), new RegisterCallback(_win));
 					}
 				});
 				break;
@@ -258,24 +234,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						//Backendless.UserService.restorePassword(txtEmail.getText().toString(), new AsyncCallback<Void>()
-						Backendless.UserService.restorePassword(txtLogin.getText().toString(), new AsyncCallback<Void>()
-						{
-							public void handleResponse(Void response)
-							{
-								System.err.println("RECOVER-----------------OK:" + response);
-								//Snackbar.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
-								Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
-								if(t!=null)t.select();
-							}
-							public void handleFault(BackendlessFault fault)
-							{
-								System.err.println("RECOVER-----------------FAILED:" + fault + " : " + fault.getCode());
-								//Snackbar.make(rootView, getString(R.string.recover_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
-								Toast.makeText(rootView.getContext(), R.string.recover_ko, Toast.LENGTH_LONG).show();
-							}
-						});
+						Util.restoreUser(txtLogin.getText().toString(), new RestoreCallback(_win));
 					}
 				});
 				break;
@@ -287,37 +246,8 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 
 
 
-	/////////////////////////////////// REGISTER /////////////////////////////////////////////////////////////
-	public static class RegisterBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
-	{
-		private Context context;
-		private ProgressDialog progressDialog;
-		public RegisterBECallback(Context context)
-		{
-			this.context = context;
-			progressDialog = ProgressDialog.show(context, "", context.getString(R.string.cargando), true);
-		}
-		@Override
-		public void handleResponse(BackendlessUser usr)
-		{
-			System.err.println("REGISTER-----------------" + usr);
-			//Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
-			Toast.makeText(context, R.string.register_ok, Toast.LENGTH_LONG).show();
-			TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
-			if(t!=null)t.select();
-			progressDialog.cancel();
-		}
-		@Override
-		public void handleFault(BackendlessFault fault)
-		{
-System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault.getCode() + " : " + fault.getMessage());
-			Toast.makeText(context, R.string.register_ko + "\n"+fault.getMessage(), Toast.LENGTH_LONG).show();//TODO:mejorar cadena...
-			progressDialog.cancel();
-		}
-	}
-
-	////////////////////////////////////// LOGIN //////////////////////////////////////////////////////////
-	public static class LoginBECallback<BackendlessUser> extends BackendlessCallback<BackendlessUser>
+	////////////////////////////////////// LOGIN ///////////////////////////////////////////////////
+	public static class LoginCallback implements Firebase.AuthResultHandler
 	{
 		private static final int LOGIN_TIMEOUT = 9000;
 		private ActLogin _win;
@@ -327,31 +257,86 @@ System.err.println("ActLogin:RegisterBECallback:FAILED:" + fault + " : " + fault
 			@Override
 			public void run()
 			{
-//System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
+System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
 				_win.finEsperaLogin(TO);
 			}
 		};
-		public LoginBECallback(ActLogin win)
+		public LoginCallback(ActLogin win)
 		{
 			_win = win;
 			_handler.postDelayed(_runnable, LOGIN_TIMEOUT);//Temporizador para quitar dialogo carga si Backendless no retorna... que no lo hace cuando le mandas cuenta incorrecta
 			_win.iniEsperaLogin();
 		}
+
 		@Override
-		public void handleResponse(BackendlessUser backendlessUser)
+		public void onAuthenticated(AuthData usr)
 		{
-//System.err.println("ENTER------------------------------------------------------------------------------------" + backendlessUser);
-			//super.handleResponse(backendlessUser);
 			_win.finEsperaLogin(OK);
 			_win.goMain();
 		}
 		@Override
-		public void handleFault(BackendlessFault fault)
+		public void onAuthenticationError(FirebaseError err)
 		{
-			//NOTE: Nunca llega aqui, no tiene timeout ni falla con login incorrecto!!!!!! Hago algo mal con Backendless??????
-//System.err.println("ENTER ERROR------------------------------------------------------------------------ 1");
-//System.err.println("ENTER ERROR------------------------------------------------------------------------ " + fault.getMessage());
 			_win.finEsperaLogin(KO);
+		}
+	}
+
+	/////////////////////////////////// REGISTER ///////////////////////////////////////////////////
+	public static class RegisterCallback implements Firebase.ValueResultHandler
+	{
+		private Context context;
+		private ProgressDialog progressDialog;
+		public RegisterCallback(Context context)
+		{
+			this.context = context;
+			progressDialog = ProgressDialog.show(context, "", context.getString(R.string.cargando), true);
+		}
+
+		@Override
+		public void onSuccess(Object result)
+		{
+System.err.println("REGISTER-----------------" + result);
+			//Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+			Toast.makeText(context, R.string.register_ok, Toast.LENGTH_LONG).show();
+			TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+			if(t!=null)t.select();
+			progressDialog.cancel();
+		}
+
+		@Override
+		public void onError(FirebaseError err)
+		{
+			System.err.println("ActLogin:RegisterBECallback:FAILED:" + err + " : " + err.getCode() + " : " + err.getMessage());
+			Toast.makeText(context, R.string.register_ko + "\n"+err.getMessage(), Toast.LENGTH_LONG).show();//TODO:mejorar cadena...
+			progressDialog.cancel();
+		}
+	}
+
+	/////////////////////////////////// RESTORE ////////////////////////////////////////////////////
+	public static class RestoreCallback implements Firebase.ResultHandler
+	{
+		private Context context;
+		private ProgressDialog progressDialog;
+		public RestoreCallback(Context context)
+		{
+			this.context = context;
+			progressDialog = ProgressDialog.show(context, "", context.getString(R.string.cargando), true);
+		}
+		@Override
+		public void onSuccess()
+		{
+			System.err.println("RECOVER-----------------OK:");
+			//Snackbar.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+			Toast.makeText(context, R.string.recover_ok, Toast.LENGTH_LONG).show();
+			TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+			if(t!=null)t.select();
+		}
+		@Override
+		public void onError(FirebaseError err)
+		{
+			System.err.println("RECOVER-----------------FAILED:" + err + " : " + err.getCode());
+			//Snackbar.make(rootView, getString(R.string.recover_ko), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
+			Toast.makeText(context, R.string.recover_ko, Toast.LENGTH_LONG).show();
 		}
 	}
 

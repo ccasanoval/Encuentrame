@@ -167,6 +167,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_txtFechaIni = (EditText)findViewById(R.id.txtFechaIni);
 		_txtFechaFin = (EditText)findViewById(R.id.txtFechaFin);
 		ImageButton ib = (ImageButton)findViewById(R.id.btnFechaIni);
+		if(ib != null)
 		ib.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -180,6 +181,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			}
 		});
 		ib = (ImageButton)findViewById(R.id.btnFechaFin);
+		if(ib != null)
 		ib.setOnClickListener(new View.OnClickListener()
 		{
 			@Override

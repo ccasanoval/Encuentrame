@@ -4,8 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.cesoft.encuentrame.Util;
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
@@ -40,7 +40,7 @@ public class Lugar extends Objeto implements Parcelable
 		return super.toString() + ", POS:"+(_lugar.latitude+"/"+_lugar.longitude);
 	}
 
-	//// Firebase
+	//// FIREBASE
 	//______________________________________________________________________________________________
 	public void eliminar(Firebase.CompletionListener listener)
 	{
@@ -55,7 +55,7 @@ public class Lugar extends Objeto implements Parcelable
 			_datos.setValue(null, listener);
 		}
 	}
-	public void guardar(Firebase.CompletionListener listener)
+	public void guardar(Firebase.CompletionListener listener)//TODO: todos igual, llevar a objeto?
 	{
 		if(_datos != null)
 		{
@@ -65,11 +65,27 @@ public class Lugar extends Objeto implements Parcelable
 		{
 			Firebase ref = new Firebase(FIREBASE);
 			if(_id != null)
+			{
 				_datos = ref.child(NOMBRE).child(getId());
+			}
 			else
+			{
 				_datos = ref.child(NOMBRE).push();
+				setId(_datos.getKey());
+			}
 			_datos.setValue(this, listener);
 		}
+	}
+	public static void getById(String sId, ChildEventListener listener)
+	{
+		Firebase ref = new Firebase(FIREBASE);
+		Query queryRef = ref.orderByKey().limitToFirst(1);
+    	queryRef.addChildEventListener(listener);
+		//ref.addListenerForSingleValueEvent(listener);
+			/*new ChildEventListener() {
+		ArrayList<String> relationProps = new ArrayList<>();
+		relationProps.add("lugar");
+		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);*/
 	}
 	public static void getLista(ValueEventListener listener)
 	{
@@ -91,43 +107,43 @@ public class Lugar extends Objeto implements Parcelable
 	}
 
 
-	public static void getListaByPos(ValueEventListener listener, Filtro filtro)
+	public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
 	{
+System.err.println("-----------------------------------------Lugar:getListaByPos:");
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
 		GeoFire geoFire = new GeoFire(ref);
-
-		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 0.6);
-
-geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-    @Override
+		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio());
+		geoQuery.addGeoQueryEventListener(listener);
+/*    @Override
     public void onKeyEntered(String key, GeoLocation location) {
         System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
     }
-
     @Override
     public void onKeyExited(String key) {
         System.out.println(String.format("Key %s is no longer in the search area", key));
     }
-
     @Override
     public void onKeyMoved(String key, GeoLocation location) {
         System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
     }
-
     @Override
     public void onGeoQueryReady() {
         System.out.println("All initial data has been loaded and events have been fired!");
     }
-
     @Override
     public void onGeoQueryError(FirebaseError error) {
         System.err.println("There was an error with this query: " + error);
     }
-});
+});*/
 	}
 
 	public static void getLista(ValueEventListener listener, Filtro filtro)
 	{
+//TODO-----------------------------------------------------------------------------------------------------
+getLista(listener);
+if(1==1)return;
+
+
 System.err.println("Lugar:getLista:filtro: "+filtro);
 
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
@@ -136,7 +152,7 @@ System.err.println("Lugar:getLista:filtro: "+filtro);
 		//LIKE '%ABC%' https://www.firebase.com/blog/2014-01-02-queries-part-two.html
 
 
-		//TODO-----------------------------------------------------------------------------------------------------
+
 		//--FILTRO
 		StringBuilder sb = new StringBuilder();//" created = created "
 		if( ! filtro.getNombre().isEmpty())

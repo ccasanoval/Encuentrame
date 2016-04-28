@@ -1,24 +1,21 @@
 package com.cesoft.encuentrame.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.backendless.Backendless;
-import com.backendless.BackendlessCollection;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
-import com.backendless.persistence.BackendlessDataQuery;
-import com.backendless.persistence.QueryOptions;
-import com.cesoft.encuentrame.Util;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-//@formatter:off
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.cesoft.encuentrame.Util;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.Firebase;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoLocation;
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,31 +32,34 @@ public class Ruta extends Objeto implements Parcelable
 		public boolean isActivo(){return activo;}
 		public void setActivo(boolean b){activo = b;}*/
 
-	private List<GeoPoint> puntos = new ArrayList<>();
-		public List<GeoPoint> getPuntos()
+	private Firebase _datos;
+
+	private List<GeoLocation> puntos = new ArrayList<>();
+		public List<GeoLocation> getPuntos()
 		{
-			Collections.sort(puntos, new Comparator<GeoPoint>()
+			/*Collections.sort(puntos, new Comparator<GeoLocation>()
 			{
         		@Override
-        		public int compare(GeoPoint gp1, GeoPoint gp2)
+        		public int compare(GeoLocation gp1, GeoLocation gp2)
 				{
 					Object o1 = gp1.getMetadata(FECHA);
 					Object o2 = gp2.getMetadata(FECHA);
 					if(o1 == null || o2 == null)return 1;//Dont compare...Supose are different...
 					return String.valueOf(o1).compareTo(String.valueOf(o2));
      		   	}
-    		});
+    		});*/
 			return puntos;
 		}
-		public void addPunto(GeoPoint gp){addPunto(gp, new java.util.Date());}
-		public void addPunto(GeoPoint gp, Date d)
+		public void addPunto(GeoLocation gp){addPunto(gp, new java.util.Date());}
+		public void addPunto(GeoLocation gp, Date d)
 		{
-			gp.addMetadata(FECHA, String.valueOf(d.getTime()));//Se guarda como string...
+			//TODO
+			//gp.addMetadata(FECHA, String.valueOf(d.getTime()));//Se guarda como string...
 			puntos.add(gp);
 		}
-		public Date getFechaPunto(GeoPoint gp)
+		public Date getFechaPunto(GeoLocation gp)
 		{
-			try
+			/*try
 			{
 				Object o = gp.getMetadata(FECHA);
 				if(o == null)return null;
@@ -67,6 +67,8 @@ public class Ruta extends Objeto implements Parcelable
 				return new Date(time);
 			}
 			catch(Exception e){System.err.println("Ruta:getFechaPunto:e:"+e+":::"+gp.getMetadata(FECHA));return null;}
+			*/
+			return new Date();//TODO
 		}
 
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
@@ -88,12 +90,13 @@ public class Ruta extends Objeto implements Parcelable
 		int n = in.readInt();
 		for(int i=0; i < n; i++)
 		{
-			String id = in.readString();
+			//String id = in.readString();
 			double lat = in.readDouble();
 			double lon = in.readDouble();
-			GeoPoint gp = new GeoPoint(lat, lon);
-			gp.addMetadata(FECHA, in.readLong());
-			gp.setObjectId(id);
+			GeoLocation gp = new GeoLocation(lat, lon);
+			//gp.addMetadata(FECHA, in.readLong());
+			//gp.setObjectId(id);
+			//TODO
 			puntos.add(gp);
 		}
 	}
@@ -103,12 +106,13 @@ public class Ruta extends Objeto implements Parcelable
 		super.writeToParcel(dest, flags);
 		//
 		dest.writeInt(puntos.size());
-		for(GeoPoint p : puntos)
+		for(GeoLocation p : puntos)
 		{
-			dest.writeString(p.getObjectId());
-			dest.writeDouble(p.getLatitude());
-			dest.writeDouble(p.getLongitude());
-			try{dest.writeLong(Long.parseLong((String)p.getMetadata(FECHA)));}catch(Exception e){dest.writeLong(0);System.err.println("-----"+p.getMetadata(FECHA)+":e:"+e);}
+			//TODO
+			//dest.writeString(p.getObjectId());
+			dest.writeDouble(p.latitude);
+			dest.writeDouble(p.longitude);
+			//try{dest.writeLong(Long.parseLong((String)p.getMetadata(FECHA)));}catch(Exception e){dest.writeLong(0);System.err.println("-----"+p.getMetadata(FECHA)+":e:"+e);}
 		}
 	}
 	@Override
@@ -122,51 +126,68 @@ public class Ruta extends Objeto implements Parcelable
 	};
 
 
-	//// BACKENDLESS
-	public void eliminar(AsyncCallback<Long> ac)
+	//// FIREBASE
+	//
+	public void eliminar(Firebase.CompletionListener listener)
 	{
 System.err.println("Ruta:eliminar:r:" + this);
-		for(GeoPoint gp : puntos)//Si borro directamente la ruta me dice: ClassCastException: com.backendless.geo.GeoPoint cannot be cast to java.util.Map
+		if(_datos != null)
 		{
-			Backendless.Geo.removePoint(gp, new AsyncCallback<Void>()
-			{
-				@Override public void handleResponse(Void response){}
-				@Override public void handleFault(BackendlessFault fault){}
-			});
+			_datos.setValue(null, listener);
+		}
+		else if(_id != null)
+		{
+			Firebase ref = new Firebase(FIREBASE);
+			_datos = ref.child(NOMBRE).child(getId());
+			_datos.setValue(null, listener);
 		}
 		puntos.clear();
-		/*Backendless.Persistence.save(this, new AsyncCallback<Ruta>()
+	}
+	public void guardar(Firebase.CompletionListener listener)
+	{
+		if(_datos != null)
 		{
-			@Override public void handleResponse(Ruta ruta){}
-			@Override public void handleFault(BackendlessFault backendlessFault){}
-		});*/
-		Backendless.Persistence.of(Ruta.class).remove(this, ac);
+			_datos.setValue(this, listener);
+		}
+		else
+		{
+			Firebase ref = new Firebase(FIREBASE);
+			if(_id != null)
+			{
+				_datos = ref.child(NOMBRE).child(getId());
+			}
+			else
+			{
+				_datos = ref.child(NOMBRE).push();
+				setId(_datos.getKey());
+			}
+			_datos.setValue(this, listener);
+		}
 	}
-	public void guardar(AsyncCallback<Ruta> ac)
+	public static void getById(String sId, ValueEventListener listener)
 	{
-		//Backendless.Persistence.of(Lugar.class).save(this, ac);
-		Backendless.Persistence.save(this, ac);
+		Firebase ref = new Firebase(FIREBASE);
+		Query queryRef = ref.orderByKey().limitToFirst(1);
+		queryRef.addListenerForSingleValueEvent(listener);
+    	//queryRef.addChildEventListener(listener);
+		//ref.addListenerForSingleValueEvent(listener);
 	}
-	public static void getById(String sId, AsyncCallback<BackendlessCollection<Ruta>> res)
+	public static void getLista(ValueEventListener listener)
 	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
-		query.setWhereClause("objectId = '" + sId + "'");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Ruta.class).find(query, res);
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		ref.addValueEventListener(listener);
+		//ref.addListenerForSingleValueEvent(listener);
 	}
-	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res)
+
+	public static void getLista(ValueEventListener listener, Filtro filtro)
 	{
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
-		queryOptions.addSortByOption("created ASC");
-		query.setQueryOptions(queryOptions);
-		Backendless.Persistence.of(Ruta.class).find(query, res);
+//TODO-----------------------------------------------------------------------------------------------------
+getLista(listener);
+if(1==1)return;
 	}
+
 	//public static void sortPuntos(GeoPoint[] gp)
-	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res, Filtro filtro)
+	/*public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res, Filtro filtro)
 	{
 System.err.println("Ruta:getLista:filtro: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
@@ -211,7 +232,6 @@ System.err.println("Ruta:getLista:SQL: "+sb.toString());
 			query.setWhereClause(sb.toString());
 		//--FILTRO
 		Backendless.Persistence.of(Ruta.class).find(query, res);
-	}
+	}*/
 
 }
-//@formatter:on

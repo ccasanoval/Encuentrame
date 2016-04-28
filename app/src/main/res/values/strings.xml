@@ -34,7 +34,7 @@
 	<string name="enter">Enter</string>
 	<string name="enter_lbl">Input login</string>
 	<string name="error_eliminar">Fault at deleting: %s</string>
-	<string name="error_guardar">There was a problem when saving the data</string>
+	<string name="error_guardar">There was a problem when saving the data: %s</string>
 	<string name="fecha">Date</string>
 	<string name="fecha_desde">From</string>
 	<string name="fecha_hasta">to</string>

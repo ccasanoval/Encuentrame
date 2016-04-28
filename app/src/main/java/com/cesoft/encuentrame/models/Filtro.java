@@ -8,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 05/04/2016.
@@ -99,7 +100,7 @@ System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" ***
 		setTipo(tipo);
 		//Filtro(Util.LUGARES, Filtro.TODOS, "", null, null, null, Util.NADA);
 	}
-	public Filtro(int tipo, int activo, String nombre, Date fechaIni, Date fechaFin, LatLng punto, int radio)
+	/*public Filtro(int tipo, int activo, String nombre, Date fechaIni, Date fechaFin, LatLng punto, int radio)
 	{
 		turnOn();
 		setTipo(tipo);
@@ -109,13 +110,13 @@ System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" ***
 		setFechaFin(fechaFin);
 		setPunto(punto);
 		setRadio(radio);
-	}
+	}*/
 	//______________________________________________________________________________________________
 	@Override
 	public String toString()
 	{
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		return String.format("%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s",
+		return String.format(Locale.ENGLISH, "%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s",
 				_onOff, _tipo, _activo, _nombre, _punto.latitude, _punto.longitude, _radio,
 				_fechaIni==null?"null":df.format(_fechaIni), _fechaFin==null?"null":df.format(_fechaFin));
 	}

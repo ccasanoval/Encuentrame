@@ -61,7 +61,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 
 		// Si la ruta se está grabando, resaltar
 		//String sIdRuta = Util.getTrackingRoute();
-		if(sIdRuta.equals(_rutas[position].getObjectId()))
+		if(sIdRuta.equals(_rutas[position].getId()))
 		{
 //System.err.println("----------------RUTA ACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
 			txtNombre.setTextColor(Color.RED);
