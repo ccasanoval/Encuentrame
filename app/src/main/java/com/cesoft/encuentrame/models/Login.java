@@ -40,7 +40,7 @@ public class Login
 	public static void saveLogin(String usr, String pwd)
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+		if(prefs.getBoolean(PREF_SAVE_LOGIN, true))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, usr);
 		e.putString(PREF_PWD, pwd);
@@ -48,9 +48,8 @@ public class Login
 	}
 	public static void delLogin()
 	{
-		// Lo contrario a Backendless.UserService.login(usr, pwd, res,   true  );
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
+		//if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, "");
 		e.putString(PREF_PWD, "");
@@ -64,7 +63,7 @@ public class Login
 		{
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
-			if(prefs.getBoolean(PREF_SAVE_LOGIN, false))
+			if(prefs.getBoolean(PREF_SAVE_LOGIN, true))
 			{
 				delLogin();
 				return;

@@ -12,6 +12,8 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+
+import java.util.Locale;
 //TODO:
 //Robert Kiyosaki
 //Raimon Samsó / El código del dinero
@@ -24,20 +26,22 @@ public class Lugar extends Objeto implements Parcelable
 	public static final String NOMBRE = "lugar";
 
 	private Firebase _datos;
-	private GeoLocation _lugar = new GeoLocation(0,0);
 
-	public double getLatitud(){return _lugar.latitude;}
-	public double getLongitud(){return _lugar.longitude;}
-	public void setLatLon(double lat, double lon){_lugar = new GeoLocation(lat,lon);}
+	//______________________________________________________________________________________________
+	private double latitud, longitud;
+		public double getLatitud(){return latitud;}
+		public double getLongitud(){return longitud;}
+		public void setLatitud(double v){latitud=v;}//TODO: validacion
+		public void setLongitud(double v){longitud=v;}
+	//public void setLatLon(double lat, double lon){_lugar = new GeoLocation(lat,lon);}
 
+	//______________________________________________________________________________________________
 	public Lugar(){}
-	public Lugar(Firebase datos)
-	{
-		_datos = datos;
-	}
+	@Override
 	public String toString()
 	{
-		return super.toString() + ", POS:"+(_lugar.latitude+"/"+_lugar.longitude);
+		return String.format(Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud);
 	}
 
 	//// FIREBASE
@@ -48,7 +52,7 @@ public class Lugar extends Objeto implements Parcelable
 		{
 			_datos.setValue(null, listener);
 		}
-		else if(_id != null)
+		else if(getId() != null)
 		{
 			Firebase ref = new Firebase(FIREBASE);
 			_datos = ref.child(NOMBRE).child(getId());
@@ -64,7 +68,7 @@ public class Lugar extends Objeto implements Parcelable
 		else
 		{
 			Firebase ref = new Firebase(FIREBASE);
-			if(_id != null)
+			if(getId() != null)
 			{
 				_datos = ref.child(NOMBRE).child(getId());
 			}
@@ -91,19 +95,6 @@ public class Lugar extends Objeto implements Parcelable
 	{
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
 		ref.addValueEventListener(listener);
-		//ref.addListenerForSingleValueEvent(listener);
-/*new ValueEventListener()
-{
-	@Override public void onDataChange(DataSnapshot snapshot)
-	{
-		System.out.println("There are " + snapshot.getChildrenCount() + " blog posts");
-		for(DataSnapshot l : snapshot.getChildren())
-		{
-			Lugar lugar = l.getValue(Lugar.class);
-		}
-	}
-	@Override public void onCancelled(FirebaseError firebaseError) {}
-}*/
 	}
 
 
@@ -192,7 +183,9 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 	{
 		super(in);
 		//
-		setLatLon(in.readDouble(), in.readDouble());
+		setLatitud(in.readDouble());
+		setLongitud(in.readDouble());
+		//setLatLon(, in.readDouble());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)

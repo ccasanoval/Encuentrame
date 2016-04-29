@@ -9,6 +9,7 @@ import android.location.Location;
 import android.support.design.widget.Snackbar;
 
 import com.cesoft.encuentrame.models.Aviso;
+import com.cesoft.encuentrame.models.Login;
 import com.cesoft.encuentrame.models.Ruta;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
@@ -63,7 +64,7 @@ public class CesService extends IntentService
 		_this = this;
 		Util.initFirebase(this);
 		Util.setSvcContext(this);
-		Util.login(loginListener);
+		Login.login(loginListener);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
@@ -78,10 +79,10 @@ System.err.println("CesService:onCreate:----------------------------------------
 			while(true)//No hay un sistema para listen y not polling??????
 			{
 System.err.println("CesService:loop-------------------------------------------------------------"+java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
-				if( ! Util.isLogged())
+				if( ! Login.isLogged())
 				{
 					System.err.println("CesService:loop---sin usuario");
-					Util.login(loginListener);
+					Login.login(loginListener);
 					Thread.sleep(DELAY_LOAD / 3);
 					continue;
 				}

@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame.models.Login;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -81,10 +82,10 @@ public class ActLogin extends AppCompatActivity
 		*/
 		_win = this;
 		startService(new Intent(this, CesService.class));
-System.err.println("ActLogin--------1:"+Util.isLogged()+" 2:"+Util.getUsuario());
-		if( ! Util.isLogged()){Util.initFirebase(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
-System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
-		if(Util.isLogged())goMain();
+System.err.println("ActLogin--------1:"+ Login.isLogged()+" 2:"+Login.getUsuario());
+		if( ! Login.isLogged()){Util.initFirebase(this);Login.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
+System.err.println("ActLogin--------3:"+Login.isLogged()+" 4:"+Login.getUsuario());
+		if(Login.isLogged())goMain();
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
@@ -176,7 +177,7 @@ System.err.println("+++++++++++++++++++++++++++++++++++++++++++++ finEsperaLogin
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			if(Util.isLogged())_win.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
+			if(Login.isLogged())_win.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
 System.err.println("-------------------------------------LOGIN:onCreateView.........................................................................");
 
 			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
@@ -191,7 +192,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 			switch(sectionNumber)
 			{
 			case ENTER://---------------------------------------------------------------------------
-				txtLogin.setText(Util.getUsuario());
+				txtLogin.setText(Login.getUsuario());
 				txtEmail.setVisibility(View.GONE);
 				txtPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));
@@ -200,7 +201,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginCallback(_win));
+						Login.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginCallback(_win));
 					}
 				});
 				break;
@@ -217,7 +218,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 							Snackbar.make(rootView, getString(R.string.register_bad_pass), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
 							return;
 						}
-						Util.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(), new RegisterCallback(_win));
+						Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(), new RegisterCallback(_win));
 					}
 				});
 				break;
@@ -234,7 +235,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						Util.restoreUser(txtLogin.getText().toString(), new RestoreCallback(_win));
+						Login.restoreUser(txtLogin.getText().toString(), new RestoreCallback(_win));
 					}
 				});
 				break;
@@ -257,7 +258,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 			@Override
 			public void run()
 			{
-System.err.println("LOGIN TIME OUT------------------------------------------" + Util.isLogged());
+System.err.println("LOGIN TIME OUT------------------------------------------" + Login.isLogged());
 				_win.finEsperaLogin(TO);
 			}
 		};

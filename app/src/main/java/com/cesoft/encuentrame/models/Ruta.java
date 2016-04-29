@@ -135,7 +135,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 		{
 			_datos.setValue(null, listener);
 		}
-		else if(_id != null)
+		else if(getId() != null)
 		{
 			Firebase ref = new Firebase(FIREBASE);
 			_datos = ref.child(NOMBRE).child(getId());
@@ -152,7 +152,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 		else
 		{
 			Firebase ref = new Firebase(FIREBASE);
-			if(_id != null)
+			if(getId() != null)
 			{
 				_datos = ref.child(NOMBRE).child(getId());
 			}

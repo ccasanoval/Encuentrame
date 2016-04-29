@@ -12,9 +12,9 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 //https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,15 +25,26 @@ public class Aviso extends Objeto
 {
 	public static final String NOMBRE = "aviso";
 
-	public Aviso(){}
+	private Firebase _datos;
 
 	//______________________________________________________________________________________________
-	protected boolean _activo = true;
-		public boolean isActivo(){return _activo;}
-		public void setActivo(boolean b){_activo=b;}
+	protected boolean activo = true;
+		public boolean isActivo(){return activo;}
+		public void setActivo(boolean v){activo=v;}
 
-	protected Date fechaActivo;
-		public void desactivarPorHoy()//TODO: Desactivar por hoy, tambien desactivar todos los avisos... incluso: modo avion para app completa
+	private double latitud, longitud;
+		public double getLatitud(){return latitud;}
+		public double getLongitud(){return longitud;}
+		public void setLatitud(double v){latitud=v;}//TODO: validacion
+		public void setLongitud(double v){longitud=v;}
+
+	private double radio;//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
+		public double getRadio(){return radio;}
+		public void setRadio(double v){if(v >= 0 && v < 10000)radio=v;}
+
+	//TODO: Desactivar por hoy, tambien desactivar todos los avisos... incluso: modo avion para app completa
+	/*protected Date fechaActivo;
+		public void desactivarPorHoy()
 		{
 			fechaActivo = Calendar.getInstance().getTime();
 			//Backendless.Persistence.save(this, ac);
@@ -44,29 +55,17 @@ public class Aviso extends Objeto
 			cal.add(Calendar.DATE, -2);
 			fechaActivo = cal.getTime();
 			//Backendless.Persistence.save(this, ac);
-		}
-
-	private Firebase _datos;
-
-	private GeoLocation _lugar = new GeoLocation(0,0);
-		public GeoLocation getLugar(){return _lugar;}
-		public void setLugar(GeoLocation v){_lugar=v;}
-		//public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
-		public double getLatitud(){if(_lugar==null)return 0.0;return _lugar.latitude;}
-		public double getLongitud(){if(_lugar==null)return 0.0;return _lugar.longitude;}
-		public void setLatLon(double lat, double lon){_lugar = new GeoLocation(lat, lon);}
-		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
-		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
-	private double _radio;//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
-		public double getRadio(){return _radio;}
-		public void setRadio(double radio){if(radio >= 0 && radio < 10000)_radio=radio;}
-
+		}*/
 
 	//______________________________________________________________________________________________
+	public Aviso(){}
+	@Override
 	public String toString()
 	{
-		return super.toString() +", ACT:"+_activo+", POS:"+(_lugar==null?"null":_lugar.latitude+"/"+_lugar.longitude+":"+getRadio()+" "+getId());
+		return String.format(Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', radio='%f', activo='%b'}",
+				getId(), nombre, descripcion, latitud, longitud, radio, activo);
 	}
+
 	//______________________________________________________________________________________________
 	@Override public boolean equals(Object o)
 	{
@@ -88,7 +87,8 @@ System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 		//
 		setActivo(in.readByte() > 0);
 		setId(in.readString());
-		setLatLon(in.readDouble(), in.readDouble());
+		setLatitud(in.readDouble());
+		setLongitud(in.readDouble());
 		setRadio(in.readDouble());
 System.err.println("----------------Aviso:from parcel 2:" + this);
 	}
@@ -99,8 +99,8 @@ System.err.println("----------------Aviso:from parcel 2:" + this);
 		//
 		dest.writeByte(isActivo()?(byte)1:0);
 		dest.writeString(getId());
-		dest.writeDouble(_lugar.latitude);
-		dest.writeDouble(_lugar.longitude);
+		dest.writeDouble(getLatitud());
+		dest.writeDouble(getLongitud());
 		dest.writeDouble(getRadio());
 System.err.println("----------------Aviso:writeToParcel:"+this);
 	}
@@ -123,7 +123,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 		{
 			_datos.setValue(null, listener);
 		}
-		else if(_id != null)
+		else if(getId() != null)
 		{
 			Firebase ref = new Firebase(FIREBASE);
 			_datos = ref.child(NOMBRE).child(getId());
@@ -139,7 +139,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 		else
 		{
 			Firebase ref = new Firebase(FIREBASE);
-			if(_id != null)
+			if(getId() != null)
 			{
 				_datos = ref.child(NOMBRE).child(getId());
 			}

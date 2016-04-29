@@ -12,7 +12,11 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.backendless.BackendlessCollection;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,9 +33,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.text.DateFormat;
 import java.util.Date;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Ruta;
@@ -95,41 +96,45 @@ System.err.println("**********************_iTipo="+_iTipo);
 			{
 				if(_l != null)
 				{
-					_l.guardar(new AsyncCallback<Lugar>()
+					_l.guardar(new Firebase.CompletionListener()
 					{
 						@Override
-						public void handleResponse(Lugar l)
+						public void onComplete(FirebaseError err, Firebase firebase)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_lugar), Snackbar.LENGTH_LONG).show();
-							Intent data = new Intent();
-							data.putExtra(Lugar.NOMBRE, _l);
-							setResult(Activity.RESULT_OK, data);
-							finish();
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							if(err != null)
+							{
+								Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_lugar), Snackbar.LENGTH_LONG).show();
+								Intent data = new Intent();
+								data.putExtra(Lugar.NOMBRE, _l);
+								setResult(Activity.RESULT_OK, data);
+								finish();
+							}
+							else
+							{
+								Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							}
 						}
 					});
 				}
 				if(_a != null)
 				{
-					_a.guardar(new AsyncCallback<Aviso>()
+					_a.guardar(new Firebase.CompletionListener()
 					{
 						@Override
-						public void handleResponse(Aviso a)
+						public void onComplete(FirebaseError err, Firebase firebase)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_aviso), Snackbar.LENGTH_LONG).show();
-							Intent data = new Intent();
-							data.putExtra(Aviso.NOMBRE, _a);
-							setResult(Activity.RESULT_OK, data);
-							finish();
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							if(err != null)
+							{
+								Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_aviso), Snackbar.LENGTH_LONG).show();
+								Intent data = new Intent();
+								data.putExtra(Aviso.NOMBRE, _a);
+								setResult(Activity.RESULT_OK, data);
+								finish();
+							}
+							else
+							{
+								Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							}
 						}
 					});
 				}
@@ -160,7 +165,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 		else if(_r != null)		/// RUTA
 		{
 			if(_r.getPuntos().size() > 0)
-				setPosLugar(_r.getPuntos().get(0).getLatitude(), _r.getPuntos().get(0).getLongitude());
+				setPosLugar(_r.getPuntos().get(0).latitude, _r.getPuntos().get(0).longitude);
 			showRuta(_r);
 		}
 		else
@@ -189,12 +194,16 @@ System.err.println("**********************_iTipo="+_iTipo);
 		_loc.setLongitude(lon);
 		if(_l != null)
 		{
-			_l.setLatLon(lat, lon);
+			_l.setLatitud(lat);
+			_l.setLongitud(lon);
 			setMarker(_l.getNombre(), _l.getDescripcion());
 		}
 		else if(_a != null)
 		{
-			_a.setLatLon(lat, lon);
+			_a.setLatitud(lat);
+			_a.setLongitud(lon);
+			//_a.setLatitud(lat);
+			//_a.setLongitud(lon);
 			setMarker(_a.getNombre(), _a.getDescripcion());
 			setMarkerRadius();
 		}
@@ -316,9 +325,9 @@ System.err.println("**********************_iTipo="+_iTipo);
 		PolylineOptions po = new PolylineOptions();
 		BitmapDescriptor bm = getNextIcon();
 
-		GeoPoint gpIni = r.getPuntos().get(0);
-		GeoPoint gpFin = r.getPuntos().get(r.getPuntos().size() - 1);
-		for(GeoPoint pt : r.getPuntos())
+		GeoLocation gpIni = r.getPuntos().get(0);
+		GeoLocation gpFin = r.getPuntos().get(r.getPuntos().size() - 1);
+		for(GeoLocation pt : r.getPuntos())
 		{
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
@@ -326,7 +335,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 			if(date != null)
 				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
 
-			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
+			LatLng pos = new LatLng(pt.latitude, pt.longitude);
 System.err.println("showRuta: " + pos);
 			if(pt == gpIni)//It's not possible to establish the z order for the marker...
 			{
@@ -348,8 +357,8 @@ System.err.println("showRuta: " + pos);
 			{
 				//else if((pt.getLatitude() != gpIni.getLatitude() || pt.getLongitude() != gpIni.getLongitude()) && (pt.getLatitude() != gpFin.getLatitude() || pt.getLongitude() != gpFin.getLongitude()))
 				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
-				double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
-				double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
+				double disIni = (pt.latitude - gpIni.latitude)*(pt.latitude - gpIni.latitude) + (pt.longitude - gpIni.longitude)*(pt.longitude - gpIni.longitude);
+				double disFin = (pt.latitude - gpFin.latitude)*(pt.latitude - gpFin.latitude) + (pt.longitude - gpFin.longitude)*(pt.longitude - gpFin.longitude);
 				if(disIni > 0.00000001 || disFin > 0.00000001)
 				{
 					//System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
@@ -363,7 +372,7 @@ System.err.println("showRuta: " + pos);
 		}
 		po.width(5).color(_iColor);
 		_Map.addPolyline(po);//Polyline line =
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.latitude, gpIni.longitude), 15));
 	}
 
 
@@ -371,63 +380,62 @@ System.err.println("showRuta: " + pos);
 
 	private void showLugares()
 	{
-		Lugar.getLista(new AsyncCallback<BackendlessCollection<Lugar>>()
+		Lugar.getLista(new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Lugar> lugares)
+			public void onDataChange(DataSnapshot lugares)
 			{
-				int n = lugares.getTotalObjects();
+				long n = lugares.getChildrenCount();
 				System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)return;
-				for(Lugar lugar : lugares.getCurrentPage())
-					showLugar(lugar);
+				for(DataSnapshot lugar : lugares.getChildren())
+					showLugar(lugar.getValue(Lugar.class));
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("---------LUGARES:GET:ERROR:" + backendlessFault);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				System.err.println("---------LUGARES:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 			}
 		});
 	}
 	private void showAvisos()
 	{
-		Aviso.getLista(new AsyncCallback<BackendlessCollection<Aviso>>()
+		Aviso.getLista(new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Aviso> avisos)
+			public void onDataChange(DataSnapshot avisos)
 			{
-				int n = avisos.getTotalObjects();
+				long n = avisos.getChildrenCount();
 				System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)return;
-				for(Aviso aviso : avisos.getCurrentPage())
-					showAviso(aviso);
+				for(DataSnapshot aviso : avisos.getChildren())
+					showAviso(aviso.getValue(Aviso.class));
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("---------AVISOS:GET:ERROR:" + backendlessFault);
+				System.err.println("---------AVISOS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 			}
 		});
 	}
 	private void showRutas()
 	{
-		Ruta.getLista(new AsyncCallback<BackendlessCollection<Ruta>>()
+		Ruta.getLista(new ValueEventListener()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Ruta> rutas)
+			public void onDataChange(DataSnapshot rutas)
 			{
-				int n = rutas.getTotalObjects();
+				long n = rutas.getChildrenCount();
 				System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)return;
-				for(Ruta ruta : rutas.getCurrentPage())
-					showRuta(ruta);
+				for(DataSnapshot ruta : rutas.getChildren())
+					showRuta(ruta.getValue(Ruta.class));
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void onCancelled(FirebaseError err)
 			{
-				System.err.println("---------RUTAS:GET:ERROR:" + backendlessFault);
+				System.err.println("---------RUTAS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 			}
 		});
 	}
-
 }

@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
+import com.cesoft.encuentrame.models.Login;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
@@ -369,7 +370,7 @@ System.err.println("ActMain:onItemEdit:"+obj);
 
 			if(requestCode == Util.CONFIG)
 			{
-				Util.logout();
+				Login.logout();
 				return;
 			}
 

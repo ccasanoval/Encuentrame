@@ -351,7 +351,11 @@ System.err.println("*************"+_l);
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
 			Location loc = Util.getLocation();
-			if(loc != null)_l.setLatLon(loc.getLatitude(), loc.getLongitude());
+			if(loc != null)
+			{
+				_l.setLatitud(loc.getLatitude());
+				_l.setLongitud(loc.getLongitude());
+			}
 		}
 		setPosLugar(_l.getLatitud(), _l.getLongitud());
 	}
@@ -372,7 +376,8 @@ System.err.println("*************"+_l);
 	}
 	private void setPosLugar(double lat, double lon)
 	{
-		_l.setLatLon(lat, lon);
+		_l.setLatitud(lat);
+		_l.setLongitud(lon);
 		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", _l.getLatitud(), _l.getLongitud()));
 		setMarker();
 	}

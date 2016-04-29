@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,8 +23,8 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -323,24 +322,26 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_a.setActivo(_swtActivo.isChecked());
 		//_a.reactivarPorHoy();
 		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
-		_a.guardar(new AsyncCallback<Aviso>()
+		_a.guardar(new Firebase.CompletionListener()
 		{
 			@Override
-			public void handleResponse(Aviso a)
+			public void onComplete(FirebaseError err, Firebase aviso)
 			{
-				CesService.cargarListaGeoAvisos();
-				System.err.println("ActAviso:guardar:handleResponse:" + a);
-				//return2Main(true, getString(R.string.ok_guardar));
-				openMain(true, getString(R.string.ok_guardar_aviso));
-			}
-			@SuppressLint("StringFormatInvalid")
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("ActAviso:guardar:handleFault:f:" + backendlessFault);
-				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				if(err == null)
+				{
+					CesService.cargarListaGeoAvisos();
+					System.err.println("ActAviso:guardar:handleResponse:" + aviso);
+					//return2Main(true, getString(R.string.ok_guardar));
+					openMain(true, getString(R.string.ok_guardar_aviso));
+				}
+				else
+				{
+					System.err.println("ActAviso:guardar:handleFault:f:" + err);
+					Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), err), Snackbar.LENGTH_LONG).show();
+				}
 			}
 		});
+
 System.err.println("ActAviso:guardar:-------------------------------------------fin");
 	}
 
@@ -355,20 +356,22 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_a.eliminar(new AsyncCallback<Long>()
+				_a.eliminar(new Firebase.CompletionListener()
 				{
 					@Override
-					public void handleResponse(Long l)
+					public void onComplete(FirebaseError err, Firebase firebase)
 					{
-						System.err.println("ActAviso:eliminar:handleResponse:" + l);
-						//return2Main(true, getString(R.string.ok_eliminar));
-						openMain(true, getString(R.string.ok_eliminar_aviso));
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("ActAviso:eliminar:handleFault:f:"+backendlessFault);
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						if(err != null)
+						{
+							System.err.println("ActAviso:eliminar:handleResponse:" + firebase);
+							//return2Main(true, getString(R.string.ok_eliminar));
+							openMain(true, getString(R.string.ok_eliminar_aviso));
+						}
+						else
+						{
+							System.err.println("ActAviso:eliminar:handleFault:f:"+err);
+							Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), err.getCode()), Snackbar.LENGTH_LONG).show();
+						}
 					}
 				});
 			}
@@ -431,7 +434,8 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 	}
 	private void setPosLugar(double lat, double lon)
 	{
-		_a.setLatLon(lat, lon);
+		_a.setLatitud(lat);
+		_a.setLongitud(lon);
 		_lblPosicion.setText(String.format("%.5f/%.5f", _a.getLatitud(), _a.getLongitud()));
 		setMarker();
 	}
