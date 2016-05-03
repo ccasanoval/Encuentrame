@@ -63,15 +63,16 @@ public class Login
 		{
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
-			if(prefs.getBoolean(PREF_SAVE_LOGIN, true))
+			if( ! prefs.getBoolean(PREF_SAVE_LOGIN, true))
 			{
+System.err.println("Util.login2:PREF_SAVE_LOGIN = false");
 				delLogin();
 				return;
 			}
 		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		String usr = getUsuario();
 		String pwd = getClave();
-//System.err.println("Util.login2: "+usr);
+System.err.println("Util.login2: "+usr+":"+pwd);
 		login(usr, pwd, listerner);
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
 	}
@@ -113,9 +114,14 @@ System.err.println("Util.login1: logando...");
 
 		if(_svcContext != null)
 		{
+System.err.println("--------------------login:");
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 			if(prefs.getBoolean(PREF_SAVE_LOGIN, true))
+			{
+System.err.println("--------------------login:saveLogin("+usr+", "+pwd+")");
+				if(usr != null && !usr.isEmpty())
 				saveLogin(usr, pwd);
+			}
 			else
 				delLogin();
 		}
@@ -128,7 +134,7 @@ System.err.println("Util.login1: logando...");
 	//-------
 	public static void logout()
 	{
-		Firebase ref = new Firebase(Objeto.FIREBASE);//TODO: Mas limpio: objeto autenticacion....
+		Firebase ref = new Firebase(Objeto.FIREBASE);
 		ref.unauth();
 		_idUser = null;
 	}

@@ -73,10 +73,21 @@ System.err.println("**********************_iTipo="+_iTipo);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
+		//Volver
+		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnVolver);
+		fab.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View view)
+				{
+					Util.return2Main(ActMaps.this, false, "");
+				}
+			});
+		//Guardar
+		fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
 		if(_iTipo != Util.NADA || _r != null)
 		{
-			fab.setImageResource(getResources().getIdentifier("@android:drawable/ic_menu_revert", null, null));
+			/*fab.setImageResource(getResources().getIdentifier("@android:drawable/ic_menu_revert", null, null));
 			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
 				fab.setForegroundGravity(android.view.Gravity.RIGHT + android.view.Gravity.BOTTOM);
 			fab.setOnClickListener(new View.OnClickListener()
@@ -86,7 +97,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 				{
 					Util.return2Main(ActMaps.this, false, "");
 				}
-			});
+			});*/
 		}
 		else
 		fab.setOnClickListener(new View.OnClickListener()

@@ -23,31 +23,13 @@ import com.firebase.geofire.GeoLocation;
 //TODO: config : Radious of geofence (si se utilizase ruta por geofence)....
 public class Ruta extends Objeto implements Parcelable
 {
-	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to be included in backendless
-	public transient static final String FECHA = "fecha";//TRANSIENT so not to be included in backendless
-
-	public Ruta(){}
-
-	/*private boolean activo = false;
-		public boolean isActivo(){return activo;}
-		public void setActivo(boolean b){activo = b;}*/
+	public static final String NOMBRE = "ruta";
 
 	private Firebase _datos;
 
 	private List<GeoLocation> puntos = new ArrayList<>();
 		public List<GeoLocation> getPuntos()
 		{
-			/*Collections.sort(puntos, new Comparator<GeoLocation>()
-			{
-        		@Override
-        		public int compare(GeoLocation gp1, GeoLocation gp2)
-				{
-					Object o1 = gp1.getMetadata(FECHA);
-					Object o2 = gp2.getMetadata(FECHA);
-					if(o1 == null || o2 == null)return 1;//Dont compare...Supose are different...
-					return String.valueOf(o1).compareTo(String.valueOf(o2));
-     		   	}
-    		});*/
 			return puntos;
 		}
 		public void addPunto(GeoLocation gp){addPunto(gp, new java.util.Date());}
@@ -72,10 +54,13 @@ public class Ruta extends Objeto implements Parcelable
 		}
 
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
-	private int periodo=2*60*1000;
+	/*private int periodo=2*60*1000;
 		public int getPeriodo(){return periodo;}
-		public void setPeriodo(int v){periodo=v;}
+		public void setPeriodo(int v){periodo=v;}*/
 
+	//______________________________________________________________________________________________
+	public Ruta(){}
+	@Override
 	public String toString()
 	{
 		return super.toString() + ", RUT:"+(puntos==null?"null":puntos.size());
@@ -166,8 +151,8 @@ System.err.println("Ruta:eliminar:r:" + this);
 	}
 	public static void getById(String sId, ValueEventListener listener)
 	{
-		Firebase ref = new Firebase(FIREBASE);
-		Query queryRef = ref.orderByKey().limitToFirst(1);
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
 		queryRef.addListenerForSingleValueEvent(listener);
     	//queryRef.addChildEventListener(listener);
 		//ref.addListenerForSingleValueEvent(listener);
@@ -234,4 +219,53 @@ System.err.println("Ruta:getLista:SQL: "+sb.toString());
 		Backendless.Persistence.of(Ruta.class).find(query, res);
 	}*/
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	public static class RutaPunto implements Parcelable
+	{
+		protected String id = null;
+			public String getId(){return id;}
+			public void setId(String v){id = v;}
+
+		protected String idRuta = null;
+			public String getIdRuta(){return idRuta;}
+			public void setIdRuta(String v){idRuta = v;}
+
+		private double lat, lon;
+			public double getLat(){return lat;}
+			public double getLon(){return lon;}
+			public void setLat(double v){lat=v;}
+			public void setLon(double v){lon=v;}
+
+		private Date fecha;
+			public Date getFecha(){return fecha;}
+			public void setFecha(Date v){fecha=v;}
+
+		//// PARCEL
+		protected RutaPunto(Parcel in)
+		{
+			setId(in.readString());
+			setIdRuta(in.readString());
+			setLat(in.readDouble());
+			setLon(in.readDouble());
+			setFecha(new Date(in.readLong()));
+		}
+		@Override
+		public void writeToParcel(Parcel dest, int flags)
+		{
+			dest.writeString(getId());
+			dest.writeString(getIdRuta());
+			dest.writeDouble(getLat());
+			dest.writeDouble(getLon());
+			dest.writeLong(getFecha().getTime());
+		}
+		@Override
+		public int describeContents(){return 0;}
+		public static final Creator<RutaPunto> CREATOR = new Creator<RutaPunto>()
+		{
+			@Override
+			public RutaPunto createFromParcel(Parcel in){return new RutaPunto(in);}
+			@Override
+			public RutaPunto[] newArray(int size){return new RutaPunto[size];}
+		};
+	}
 }

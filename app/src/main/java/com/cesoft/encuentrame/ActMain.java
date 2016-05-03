@@ -1,7 +1,6 @@
 package com.cesoft.encuentrame;
 
 import java.util.Date;
-import java.util.Iterator;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,7 +38,19 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
 //Version Firebase
-
+/*
+{
+    "rules": {
+        ".read": true,
+        ".write": true,
+        "aviso": {
+          ".indexOn": ["activo", "nombre"]
+        },
+        "lugar": {
+          ".indexOn": ["nombre"]
+        }
+    }
+}
 /*
 GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
 Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
@@ -453,12 +464,12 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				int i = 0;
-				Lugar[] listaAL = new Lugar[(int)n];
-				for(DataSnapshot l : lugares.getChildren())
+				Lugar[] aLugares = new Lugar[(int)n];
+				for(DataSnapshot o : lugares.getChildren())
 				{
-					listaAL[i++] = l.getValue(Lugar.class);
+					aLugares[i++] = o.getValue(Lugar.class);
 				}
-				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));//.toArray(new Lugar[0])));
+				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -492,12 +503,12 @@ System.err.println("ActMain:refreshRutas()");
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				int i = 0;
-				Ruta[] listaAL = new Ruta[(int)n];
-				for(DataSnapshot l : rutas.getChildren())
+				Ruta[] aRutas = new Ruta[(int)n];
+				for(DataSnapshot o : rutas.getChildren())
 				{
-					listaAL[i++] = l.getValue(Ruta.class);
+					aRutas[i++] = o.getValue(Ruta.class);
 				}
-				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this);
+				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();
 			}
@@ -532,12 +543,12 @@ System.err.println("ActMain:refreshRutas()");
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				int i = 0;
-				Aviso[] listaAL = new Aviso[(int)n];
-				for(DataSnapshot l : avisos.getChildren())
+				Aviso[] aAviso = new Aviso[(int)n];
+				for(DataSnapshot o : avisos.getChildren())
 				{
-					listaAL[i++] = l.getValue(Aviso.class);
+					aAviso[i++] = o.getValue(Aviso.class);
 				}
-				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), listaAL, PlaceholderFragment.this));
+				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAviso, PlaceholderFragment.this));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -547,6 +558,7 @@ System.err.println("ActMain:refreshRutas()");
 		};
 
 		//__________________________________________________________________________________________
+		//TODO: a otro lugar
 		private void checkFechas()
 		{
 			Date ini = _aFiltro[_sectionNumber].getFechaIni();

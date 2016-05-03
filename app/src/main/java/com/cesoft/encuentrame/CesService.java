@@ -187,9 +187,22 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 			@Override
 			public void onDataChange(DataSnapshot rutas)
 			{
-				System.err.println("CesService:saveGeoTracking:Ruta.getById");
+				System.err.println("CesService:saveGeoTracking:Ruta.getById:"+rutas.getChildrenCount());
 				if(rutas.getChildrenCount() < 1)return;
-				Ruta r = rutas.getValue(Ruta.class);
+
+				Ruta r = null;
+				long n = rutas.getChildrenCount();
+				for(DataSnapshot r_ : rutas.getChildren())
+				{
+					r = r_.getValue(Ruta.class);
+					break;
+				}
+				if(r == null)
+				{
+					System.err.println("CesService:saveGeoTracking:Ruta.getById:NULL---------------");
+					return;
+				}
+				//Ruta r = rutas.getValue(Ruta.class);//TODO: com.firebase.client.FirebaseException: Failed to bounce to type
 
 				final Location loc = Util.getLocation();
 				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());

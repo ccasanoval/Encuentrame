@@ -82,8 +82,8 @@ public class Lugar extends Objeto implements Parcelable
 	}
 	public static void getById(String sId, ChildEventListener listener)
 	{
-		Firebase ref = new Firebase(FIREBASE);
-		Query queryRef = ref.orderByKey().limitToFirst(1);
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
     	queryRef.addChildEventListener(listener);
 		//ref.addListenerForSingleValueEvent(listener);
 			/*new ChildEventListener() {
