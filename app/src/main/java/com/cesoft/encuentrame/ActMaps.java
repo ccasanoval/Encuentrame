@@ -175,8 +175,25 @@ System.err.println("**********************_iTipo="+_iTipo);
 		}
 		else if(_r != null)		/// RUTA
 		{
-			if(_r.getPuntos().size() > 0)
-				setPosLugar(_r.getPuntos().get(0).latitude, _r.getPuntos().get(0).longitude);
+			//if(_r.getPuntos().size() > 0)setPosLugar(_r.getPuntos().get(0).latitude, _r.getPuntos().get(0).longitude);
+		/*	_r.getPuntos(new ValueEventListener()
+			{
+				@Override
+				public void onDataChange(DataSnapshot ds)
+				{
+					for(DataSnapshot o : ds.getChildren())
+					{
+						Ruta.RutaPunto pto = o.getValue(Ruta.RutaPunto.class);
+						setPosLugar(pto.getLat(), pto.getLon());
+					}
+				}
+				@Override
+				public void onCancelled(FirebaseError firebaseError)
+				{
+					//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
+					Snackbar.make(_coordinatorLayout, "Error al obtener los puntos de la ruta", Snackbar.LENGTH_LONG).show();//TODO:
+				}
+			});*///TODO: solo para poner map view position
 			showRuta(_r);
 		}
 		else
@@ -323,12 +340,33 @@ System.err.println("**********************_iTipo="+_iTipo);
 				//.fillColor(0x55AA0000));//Color.BLUE
 		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
 	}
-	private void showRuta(Ruta r)
+	private void showRuta(final Ruta r)
 	{
-		if(r.getPuntos().size() < 1)return;
+		r.getPuntos(new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+				int i = 0;
+				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
+				for(DataSnapshot o : ds.getChildren())
+				{
+					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
+				}
+				showRutaHelper(r, aPts);
+			}
+			@Override
+			public void onCancelled(FirebaseError firebaseError)
+			{
+				//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
+				Snackbar.make(_coordinatorLayout, "Error al obtener los puntos de la ruta", Snackbar.LENGTH_LONG).show();//TODO:
+			}
+		});
+	}
+	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
+	{
+		if(aPts.length < 1)return;
 
-		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-		//DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
 		String INI = getString(R.string.ini);
@@ -336,26 +374,27 @@ System.err.println("**********************_iTipo="+_iTipo);
 		PolylineOptions po = new PolylineOptions();
 		BitmapDescriptor bm = getNextIcon();
 
-		GeoLocation gpIni = r.getPuntos().get(0);
-		GeoLocation gpFin = r.getPuntos().get(r.getPuntos().size() - 1);
-		for(GeoLocation pt : r.getPuntos())
+		Ruta.RutaPunto gpIni = aPts[0];
+		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
+		for(int i=0; i < aPts.length; i++)
 		{
+			Ruta.RutaPunto pto = aPts[i];
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
-			Date date = r.getFechaPunto(pt);
+			Date date = pto.getFecha();
 			if(date != null)
-				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
+				mo.snippet(df.format(date));
 
-			LatLng pos = new LatLng(pt.latitude, pt.longitude);
+			LatLng pos = new LatLng(pto.getLat(), pto.getLon());
 System.err.println("showRuta: " + pos);
-			if(pt == gpIni)//It's not possible to establish the z order for the marker...
+			if(pto.getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
 				mo.rotation(135);
 				_Map.addMarker(mo.position(pos));
 			}
-			else if(pt == gpFin)
+			else if(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -368,8 +407,8 @@ System.err.println("showRuta: " + pos);
 			{
 				//else if((pt.getLatitude() != gpIni.getLatitude() || pt.getLongitude() != gpIni.getLongitude()) && (pt.getLatitude() != gpFin.getLatitude() || pt.getLongitude() != gpFin.getLongitude()))
 				//else if(Location.distanceBetween(pt.getLatitude(), pt.getLongitude(), gpIni.getLatitude(), gpFin.getLongitude()))
-				double disIni = (pt.latitude - gpIni.latitude)*(pt.latitude - gpIni.latitude) + (pt.longitude - gpIni.longitude)*(pt.longitude - gpIni.longitude);
-				double disFin = (pt.latitude - gpFin.latitude)*(pt.latitude - gpFin.latitude) + (pt.longitude - gpFin.longitude)*(pt.longitude - gpFin.longitude);
+				double disIni = (pto.getLat() - gpIni.getLat())*(pto.getLat() - gpIni.getLat()) + (pto.getLon() - gpIni.getLon())*(pto.getLon() - gpIni.getLon());
+				double disFin = (pto.getLat() - gpFin.getLat())*(pto.getLat() - gpFin.getLat()) + (pto.getLon() - gpFin.getLon())*(pto.getLon() - gpFin.getLon());
 				if(disIni > 0.00000001 || disFin > 0.00000001)
 				{
 					//System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
@@ -383,7 +422,7 @@ System.err.println("showRuta: " + pos);
 		}
 		po.width(5).color(_iColor);
 		_Map.addPolyline(po);//Polyline line =
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.latitude, gpIni.longitude), 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLat(), gpIni.getLon()), 15));
 	}
 
 

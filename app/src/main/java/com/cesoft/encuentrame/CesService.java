@@ -235,7 +235,6 @@ System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s 
 System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
 
 				//TODO: añadir geofence por si quisiera funcionar...?
-				r.addPunto(new GeoLocation(loc.getLatitude(), loc.getLongitude()));
 System.err.println("CesService:saveGeoTracking:guardar0000:----------------------:" + r);
 				r.guardar(new Firebase.CompletionListener()
 				{
@@ -243,9 +242,25 @@ System.err.println("CesService:saveGeoTracking:guardar0000:---------------------
 					public void onComplete(FirebaseError err, Firebase firebase)
 					{
 						if(err != null)
+						{
 							System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + err);
+						}
 						else
+						{
 							System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + firebase);
+							//r.addPunto(loc.getLatitude(), loc.getLongitude());
+							Ruta.addPunto(firebase.getKey(), loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
+							{
+								@Override
+								public void onComplete(FirebaseError err, Firebase firebase)
+								{
+									if(err != null)
+										System.err.println("CesService:saveGeoTracking:guardar:pto:err:----------------------:" + err);
+									else
+										System.err.println("CesService:saveGeoTracking:guardar:pto:----------------------:" + firebase);
+								}
+							});
+						}
 						Util.refreshListaRutas();//Refrescar lista rutas en main..
 
 						_locLastSaved = loc;

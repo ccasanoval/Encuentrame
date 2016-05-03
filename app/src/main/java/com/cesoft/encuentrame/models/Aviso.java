@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import com.cesoft.encuentrame.Util;
 import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
@@ -154,10 +155,13 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 
 	public static void getById(String sId, ValueEventListener listener)
 	{
+		Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
+		ref1.addListenerForSingleValueEvent(listener);
+/*
 		Firebase ref = new Firebase(FIREBASE);
 		Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
 		queryRef.addListenerForSingleValueEvent(listener);
-    	//queryRef.addChildEventListener(listener);
+    	//queryRef.addChildEventListener(listener);*/
 	}
 	public static void getActivos(ValueEventListener listener)
 	{

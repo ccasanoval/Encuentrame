@@ -25,8 +25,10 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -89,7 +91,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
 //TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
 findViewById(R.id.layPeriodo).setVisibility(View.GONE);
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
+/*		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnTrackingDelay.setAdapter(adapter);
 		_spnTrackingDelay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -104,7 +106,7 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 			{
 				_r.setPeriodo(2 * 60 * 1000);//TODO:radio por defecto en settings
 			}
-		});
+		});*/
 		//-----------
 		ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
 		if(btnStart != null)
@@ -260,14 +262,14 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	{
 		_txtNombre.setText(_r.getNombre());
 		_txtDescripcion.setText(_r.getDescripcion());
-		for(int i=0; i < _aiDelay.length; i++)
+		/*for(int i=0; i < _aiDelay.length; i++)
 		{
 			if(_r.getPeriodo() == _aiDelay[i])
 			{
 				_spnTrackingDelay.setSelection(i);
 				break;
 			}
-		}
+		}*/
 		//
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
@@ -418,12 +420,12 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		{
 			_Map.moveCamera(CameraUpdateFactory.zoomTo(15));
 		}
-		else if(_r.getPuntos().size() > 0)
+		else// if(_r.getPuntos().size() > 0)
 		{
 			showRuta();//showMarkers();
-			GeoLocation pos = _r.getPuntos().get(0);
-			LatLng pos2 = new LatLng(pos.latitude, pos.longitude);
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));
+			//GeoLocation pos = _r.getPuntos().get(0);
+			//LatLng pos2 = new LatLng(pos.latitude, pos.longitude);
+			//_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));//TODO:Luego en showRuta
 		}
 	}
 	/*private void showMarkers()
@@ -514,7 +516,31 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 
 	private void showRuta()
 	{
-		if(_r.getPuntos().size() < 1)return;
+		_r.getPuntos(new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+				int i = 0;
+				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
+				for(DataSnapshot o : ds.getChildren())
+				{
+					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
+				}
+				showRutaHelper(_r, aPts);
+			}
+			@Override
+			public void onCancelled(FirebaseError firebaseError)
+			{
+				//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
+				Snackbar.make(_coordinatorLayout, "Error al obtener los puntos de la ruta", Snackbar.LENGTH_LONG).show();//TODO:
+			}
+		});
+	}
+
+	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
+	{
+		if(aPts.length < 1)return;
 
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
@@ -522,26 +548,27 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 		String FIN = getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
 
-		GeoLocation gpIni = _r.getPuntos().get(0);
-		GeoLocation gpFin = _r.getPuntos().get(_r.getPuntos().size() - 1);
-		for(GeoLocation pt : _r.getPuntos())
+		Ruta.RutaPunto gpIni = aPts[0];
+		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
+		for(int i=0; i < aPts.length; i++)
 		{
+			Ruta.RutaPunto pto = aPts[i];
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(_r.getNombre());
-			Date date = _r.getFechaPunto(pt);
+			Date date = pto.getFecha();
 			if(date != null)
 				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
 
-			LatLng pos = new LatLng(pt.latitude, pt.longitude);
+			LatLng pos = new LatLng(pto.getLat(), pto.getLon());
 System.err.println("showRuta: " + pos);
-			if(pt == gpIni)
+			if(pto.getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
 				mo.rotation(135);
 				_Map.addMarker(mo.position(pos));
 			}
-			else if(pt == gpFin)
+			else if(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -550,8 +577,8 @@ System.err.println("showRuta: " + pos);
 			}
 			else
 			{
-				double disIni = (pt.latitude - gpIni.latitude)*(pt.latitude - gpIni.latitude) + (pt.longitude - gpIni.longitude)*(pt.longitude - gpIni.longitude);
-				double disFin = (pt.latitude - gpFin.latitude)*(pt.latitude - gpFin.latitude) + (pt.longitude - gpFin.longitude)*(pt.longitude - gpFin.longitude);
+				double disIni = (pto.getLat() - gpIni.getLat())*(pto.getLat() - gpIni.getLat()) + (pto.getLon() - gpIni.getLon())*(pto.getLon() - gpIni.getLon());
+				double disFin = (pto.getLat() - gpFin.getLat())*(pto.getLat() - gpFin.getLat()) + (pto.getLon() - gpFin.getLon())*(pto.getLon() - gpFin.getLon());//TODO: Idem in maps, do something...
 				if(disIni > 0.000000005 || disFin > 0.000000005)
 				{
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -562,6 +589,6 @@ System.err.println("showRuta: " + pos);
 		}
 		po.width(5).color(Color.BLUE);
 		_Map.addPolyline(po);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.latitude, gpIni.longitude), 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLat(), gpIni.getLon()), 15));
 	}
 }

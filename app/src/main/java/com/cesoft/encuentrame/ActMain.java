@@ -51,6 +51,8 @@ import com.firebase.client.ValueEventListener;
         }
     }
 }
+//TODO: listeners con actualizaciones continuas ????
+//TODO: No recuerda la ultima contraseña !!!!!!!!!!!!!!!!!!!!!!
 /*
 GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
 Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
@@ -504,7 +506,7 @@ System.err.println("ActMain:refreshRutas()");
 				}
 				int i = 0;
 				Ruta[] aRutas = new Ruta[(int)n];
-				for(DataSnapshot o : rutas.getChildren())
+				for(DataSnapshot o : rutas.getChildren())//TODO: com.firebase.client.FirebaseException: Failed to bounce to type
 				{
 					aRutas[i++] = o.getValue(Ruta.class);
 				}

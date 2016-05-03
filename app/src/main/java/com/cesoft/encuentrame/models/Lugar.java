@@ -80,9 +80,12 @@ public class Lugar extends Objeto implements Parcelable
 			_datos.setValue(this, listener);
 		}
 	}
-	public static void getById(String sId, ChildEventListener listener)
+	public static void getById(String sId, ValueEventListener listener)
 	{
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
+		ref1.addListenerForSingleValueEvent(listener);
+		/*
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);ChildEventListener
 		Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
     	queryRef.addChildEventListener(listener);
 		//ref.addListenerForSingleValueEvent(listener);
