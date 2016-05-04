@@ -20,7 +20,7 @@ import java.util.List;
 //TODO: En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable : eliminar CesServiceAvisoGeo
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
-
+//TODO: Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{

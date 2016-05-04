@@ -33,13 +33,11 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		String sIdRuta = Util.getTrackingRoute();
-//System.err.println("----------------RutaArrayAdapter :0: "+position+" ::::  "+(sIdRuta.equals(_rutas[position].getObjectId()))+" :::: "+sIdRuta+"==="+_rutas[position].getObjectId()+"\n"+convertView);
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
-//System.err.println("----------------RutaArrayAdapter :1: "+position+" : "+convertView);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-		txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), 1));//_rutas[position].getPuntos().size()));///TODO-------------------
-//System.err.println("----------------RutaArrayAdapter :2: " + position + " : " + txtNombre.getText());
+		txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));
+System.err.println("----------------RutaArrayAdapter:getView:"+_rutas[position].getPuntosCount());//TODO: Error: muestra mal el numero...
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
 		btnEditar.setOnClickListener(new View.OnClickListener()

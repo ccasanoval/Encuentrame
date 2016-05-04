@@ -25,7 +25,6 @@ import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
-import java.util.Map;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
@@ -81,11 +80,17 @@ public class ActLogin extends AppCompatActivity
 		}
 		*/
 		_win = this;
+
+		//Establece observer para que me comunique cuando entra
+		Login.addOnLoginListener(new Firebase.AuthResultHandler()
+		{
+			@Override
+			public void onAuthenticated(AuthData authData){goMain();}
+			@Override
+			public void onAuthenticationError(FirebaseError firebaseError){}
+		});
+		//Crea servicio si no está ya creado, dentro del servicio se llama a login
 		startService(new Intent(this, CesService.class));
-System.err.println("ActLogin--------1:"+ Login.isLogged()+" 2:"+Login.getUsuario());
-		if( ! Login.isLogged()){Util.initFirebase(this);Login.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
-System.err.println("ActLogin--------3:"+Login.isLogged()+" 4:"+Login.getUsuario());
-		if(Login.isLogged())goMain();
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
@@ -272,6 +277,7 @@ System.err.println("LOGIN TIME OUT------------------------------------------" + 
 		@Override
 		public void onAuthenticated(AuthData usr)
 		{
+System.err.println("------------------------------------------" + Login.isLogged());
 			_win.finEsperaLogin(OK);
 			_win.goMain();
 		}

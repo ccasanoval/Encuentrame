@@ -155,6 +155,8 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 
 	public static void getById(String sId, ValueEventListener listener)
 	{
+		//TODO: Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
+		Firebase.setAndroidContext(Util.getApplication().getBaseContext());
 		Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
 		ref1.addListenerForSingleValueEvent(listener);
 /*
@@ -165,16 +167,16 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 	}
 	public static void getActivos(ValueEventListener listener)
 	{
-		Firebase ref = new Firebase(FIREBASE);
-		Query queryRef = ref.orderByChild("_activo").equalTo(1);
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		Query queryRef = ref.orderByChild("activo").equalTo(true);
 		queryRef.addListenerForSingleValueEvent(listener);
     	//queryRef.addChildEventListener(listener);
 	}
 	public static void getLista(ValueEventListener listener)
 	{
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		ref.addValueEventListener(listener);
-		//ref.addListenerForSingleValueEvent(listener);
+		//ref.addValueEventListener(listener);//TODO:Cual mejor?
+		ref.addListenerForSingleValueEvent(listener);
 	}
 	public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
 	{

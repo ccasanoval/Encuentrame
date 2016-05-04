@@ -289,8 +289,8 @@ System.err.println("*************"+_l);
 	private void eliminar()
 	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle(_l.getNombre());//getString(R.string.eliminar));
-		dialog.setMessage(getString(R.string.seguro_eliminar));
+		dialog.setTitle(getString(R.string.seguro_eliminar));
+		dialog.setMessage(_l.getNombre());
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override

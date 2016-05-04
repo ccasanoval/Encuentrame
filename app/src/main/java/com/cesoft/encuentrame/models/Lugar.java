@@ -97,7 +97,8 @@ public class Lugar extends Objeto implements Parcelable
 	public static void getLista(ValueEventListener listener)
 	{
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		ref.addValueEventListener(listener);
+		//ref.addValueEventListener(listener);//TODO: cual es mejor?
+		ref.addListenerForSingleValueEvent(listener);
 	}
 
 

@@ -8,6 +8,7 @@ import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 //TODO: https://www.firebase.com/docs/android/guide/user-auth.html
@@ -39,8 +40,9 @@ public class Login
 	}
 	public static void saveLogin(String usr, String pwd)
 	{
+		if(usr == null || usr.isEmpty())return;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, true))return;
+		if(!prefs.getBoolean(PREF_SAVE_LOGIN, true))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, usr);
 		e.putString(PREF_PWD, pwd);
@@ -49,7 +51,6 @@ public class Login
 	public static void delLogin()
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		//if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, "");
 		e.putString(PREF_PWD, "");
@@ -57,7 +58,12 @@ public class Login
 	}
 
 	//-------
-	public static void login(Firebase.AuthResultHandler listerner)
+	private static ArrayList<Firebase.AuthResultHandler> _observers = new ArrayList<>();
+	public static void addOnLoginListener(Firebase.AuthResultHandler observer)
+	{
+		_observers.add(observer);
+	}
+	public static boolean login(Firebase.AuthResultHandler listerner)
 	{
 		try
 		{
@@ -67,20 +73,22 @@ public class Login
 			{
 System.err.println("Util.login2:PREF_SAVE_LOGIN = false");
 				delLogin();
-				return;
+				return false;
 			}
 		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		String usr = getUsuario();
 		String pwd = getClave();
 System.err.println("Util.login2: "+usr+":"+pwd);
+		if(usr == null || pwd == null || usr.isEmpty() || pwd.isEmpty())return false;
 		login(usr, pwd, listerner);
+		return true;
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
 	}
 	//-------
 	public static void login(String usr, String pwd, final Firebase.AuthResultHandler listerner)
 	{
 System.err.println("Util.login1: logando...");
-		Firebase ref = new Firebase(Objeto.FIREBASE);//TODO: Mas limpio: objeto autenticacion....
+		Firebase ref = new Firebase(Objeto.FIREBASE);
 		ref.authWithPassword(usr, pwd, new Firebase.AuthResultHandler()
 		{
     		@Override
@@ -89,26 +97,22 @@ System.err.println("Util.login1: logando...");
 				listerner.onAuthenticated(authData);
 				_idUser = authData.getUid();
         		System.out.println("User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
+				for(Firebase.AuthResultHandler obs : _observers)
+					obs.onAuthenticated(authData);
     		}
     		@Override
     		public void onAuthenticationError(FirebaseError err)
 			{
 				listerner.onAuthenticationError(err);
         		System.err.println("Util.login1:err:"+err);
-
-				switch(err.getCode())//https://www.firebase.com/docs/android/guide/user-auth.html
+				for(Firebase.AuthResultHandler obs : _observers)
+					obs.onAuthenticationError(err);
+				/*switch(err.getCode())//https://www.firebase.com/docs/android/guide/user-auth.html
 				{
-				case FirebaseError.USER_DOES_NOT_EXIST:
-					// handle a non existing user
-					break;
-				case FirebaseError.INVALID_PASSWORD:
-					// handle an invalid password
-					break;
-				default:
-					// handle other errors
-					break;
-				}
-
+				case FirebaseError.USER_DOES_NOT_EXIST:					break;
+				case FirebaseError.INVALID_PASSWORD:					break;
+				default:					break;
+				}*/
     		}
 		});
 
@@ -129,7 +133,10 @@ System.err.println("--------------------login:saveLogin("+usr+", "+pwd+")");
 	//-------
 	public static boolean isLogged()
 	{
-		return _idUser != null && !_idUser.isEmpty();
+		//return _idUser != null && !_idUser.isEmpty();
+		Firebase ref = new Firebase(Objeto.FIREBASE);
+//System.err.println("-----------isLogged:"+ref.getAuth());
+		return ref.getAuth() != null;
 	}
 	//-------
 	public static void logout()

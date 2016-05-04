@@ -19,8 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,7 +27,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoLocation;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -63,9 +61,9 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private Ruta _r;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
-	private Spinner _spnTrackingDelay;
-	private static final String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
-	private static final int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
+//	private Spinner _spnTrackingDelay;
+//	private static final String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
+//	private static final int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
 
 	private GoogleMap _Map;
 	private LocationRequest _LocationRequest;
@@ -88,7 +86,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
-		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
+		//_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
 //TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
 findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 /*		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
@@ -147,12 +145,10 @@ findViewById(R.id.layPeriodo).setVisibility(View.GONE);
 		try
 		{
 			_r = this.getIntent().getParcelableExtra(Ruta.NOMBRE);
-System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 			setValores();
 		}
 		catch(Exception e)
 		{
-System.err.println("ActRuta:onCreate:e:"+e);
 			_bNuevo = true;
 			_r = new Ruta();
 		}
@@ -221,8 +217,8 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			}
 			catch(SecurityException e)
 			{
-				System.err.println("ActRuta:startTracking:e:"+e);
-				Snackbar.make(_coordinatorLayout, "ActRuta:startTracking:e:"+e, Snackbar.LENGTH_LONG).show();
+				System.err.println("---------------------------------------ActRuta:startTracking:e:"+e);
+				Snackbar.make(_coordinatorLayout, "ActRuta:startTracking:e:"+e, Snackbar.LENGTH_LONG).show();//TODO: mensaje para el usuario
 			}
 		}
 	}
@@ -360,8 +356,8 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	private void eliminar()
 	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle(_r.getNombre());//getString(R.string.eliminar));
-		dialog.setMessage(getString(R.string.seguro_eliminar));
+		dialog.setTitle(getString(R.string.seguro_eliminar));
+		dialog.setMessage(_r.getNombre());
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
@@ -521,6 +517,7 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 			@Override
 			public void onDataChange(DataSnapshot ds)
 			{
+System.err.println("ActRuta:showRuta:onDataChange:-----------:"+ds.getChildrenCount());
 				int i = 0;
 				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
 				for(DataSnapshot o : ds.getChildren())
@@ -530,8 +527,9 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 				showRutaHelper(_r, aPts);
 			}
 			@Override
-			public void onCancelled(FirebaseError firebaseError)
+			public void onCancelled(FirebaseError err)
 			{
+System.err.println("ActRuta:showRuta:onCancelled:-----------:"+err);
 				//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
 				Snackbar.make(_coordinatorLayout, "Error al obtener los puntos de la ruta", Snackbar.LENGTH_LONG).show();//TODO:
 			}
@@ -541,7 +539,7 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
-
+System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
 		String INI = getString(R.string.ini);

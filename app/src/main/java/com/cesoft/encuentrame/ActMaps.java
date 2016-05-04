@@ -175,25 +175,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 		}
 		else if(_r != null)		/// RUTA
 		{
-			//if(_r.getPuntos().size() > 0)setPosLugar(_r.getPuntos().get(0).latitude, _r.getPuntos().get(0).longitude);
-		/*	_r.getPuntos(new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot ds)
-				{
-					for(DataSnapshot o : ds.getChildren())
-					{
-						Ruta.RutaPunto pto = o.getValue(Ruta.RutaPunto.class);
-						setPosLugar(pto.getLat(), pto.getLon());
-					}
-				}
-				@Override
-				public void onCancelled(FirebaseError firebaseError)
-				{
-					//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
-					Snackbar.make(_coordinatorLayout, "Error al obtener los puntos de la ruta", Snackbar.LENGTH_LONG).show();//TODO:
-				}
-			});*///TODO: solo para poner map view position
 			showRuta(_r);
 		}
 		else
@@ -342,16 +323,19 @@ System.err.println("**********************_iTipo="+_iTipo);
 	}
 	private void showRuta(final Ruta r)
 	{
+System.err.println("----------showRuta:"+r);
 		r.getPuntos(new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot ds)
 			{
+System.err.println("----------showRuta:"+ds);
 				int i = 0;
 				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
 				for(DataSnapshot o : ds.getChildren())
 				{
 					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
+System.err.println("----------showRuta:2:"+aPts[i-1]);
 				}
 				showRutaHelper(r, aPts);
 			}
@@ -366,7 +350,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
-
+System.err.println("----------showRutaHelper:1:"+aPts.length);
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
 		String INI = getString(R.string.ini);
@@ -379,6 +363,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 		for(int i=0; i < aPts.length; i++)
 		{
 			Ruta.RutaPunto pto = aPts[i];
+System.err.println("----------showRutaHelper:2:"+pto);
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
 			Date date = pto.getFecha();

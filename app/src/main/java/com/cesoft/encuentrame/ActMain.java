@@ -48,11 +48,13 @@ import com.firebase.client.ValueEventListener;
         },
         "lugar": {
           ".indexOn": ["nombre"]
+        },
+        "ruta_punto": {
+          ".indexOn": ["idRuta"]
         }
     }
 }
 //TODO: listeners con actualizaciones continuas ????
-//TODO: No recuerda la ultima contraseña !!!!!!!!!!!!!!!!!!!!!!
 /*
 GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
 Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
@@ -64,8 +66,6 @@ https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=D
 Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
-
-//TODO:ROOT:Logica de Login metida dentro de objeto actualizacion...
 
 //TODO:Login con google OAuth....
 //TODO:Login: borrar cuenta.. Esta seguro? confirmar por email?
@@ -462,7 +462,7 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
+					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				int i = 0;
@@ -498,17 +498,25 @@ System.err.println("ActMain:refreshRutas()");
 			public void onDataChange(DataSnapshot rutas)
 			{
 				long n = rutas.getChildrenCount();
-				System.err.println("---------RUTAS:GET:OK:" + n);
+				System.err.println("---------RUTAS:GET:OK:" + n);//TODO: Usar text to speach y opcion de config para habilitarlo...
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
+					if(_this._viewPager.getCurrentItem() == Util.RUTAS && _apf[Util.RUTAS].isAdded())
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				int i = 0;
 				Ruta[] aRutas = new Ruta[(int)n];
-				for(DataSnapshot o : rutas.getChildren())//TODO: com.firebase.client.FirebaseException: Failed to bounce to type
+				for(DataSnapshot o : rutas.getChildren())
 				{
-					aRutas[i++] = o.getValue(Ruta.class);
+					try
+					{
+						aRutas[i] = o.getValue(Ruta.class);
+						i++;
+					}
+					catch(Exception e)
+					{
+						System.err.println("---------RUTAS:ValueEventListener:e:"+e+" : "+o);
+					}
 				}
 				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
 				_listView.setAdapter(r);
@@ -541,7 +549,7 @@ System.err.println("ActMain:refreshRutas()");
 				System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.AVISOS)
+					if(_this._viewPager.getCurrentItem() == Util.AVISOS && _apf[Util.AVISOS].isAdded())
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
 				int i = 0;

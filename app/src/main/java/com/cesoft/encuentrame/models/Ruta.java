@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.cesoft.encuentrame.Util;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.FirebaseException;
+import com.firebase.client.MutableData;
 import com.firebase.client.Query;
+import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoLocation;
 
@@ -21,10 +28,10 @@ import com.firebase.geofire.GeoLocation;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Config : max number of points per rute => cuando alcanza el limite corta...
 //TODO: config : Radious of geofence (si se utilizase ruta por geofence)....
+@JsonIgnoreProperties({"_datos"})
 public class Ruta extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "ruta";
-
 	private Firebase _datos;
 
 	//TODO: fecha ini, fecha fin...
@@ -38,7 +45,9 @@ public class Ruta extends Objeto implements Parcelable
 	@Override
 	public String toString()
 	{
-		return super.toString();// + ", RUT:"+(puntos==null?"null":puntos.size());
+		//return super.toString();// + ", RUT:"+(puntos==null?"null":puntos.size());
+		return String.format(Locale.ENGLISH, "Ruta{id='%s', nombre='%s', descripcion='%s', puntosCount='%d'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), puntosCount);
 	}
 
 	//// PARCEL
@@ -46,34 +55,14 @@ public class Ruta extends Objeto implements Parcelable
 	{
 		super(in);
 		//
-		/*puntos.clear();
-		int n = in.readInt();
-		for(int i=0; i < n; i++)
-		{
-			//String id = in.readString();
-			double lat = in.readDouble();
-			double lon = in.readDouble();
-			GeoLocation gp = new GeoLocation(lat, lon);
-			//gp.addMetadata(FECHA, in.readLong());
-			//gp.setObjectId(id);
-			//TODO
-			puntos.add(gp);
-		}*/
+		puntosCount = in.readLong();
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
 		//
-		/*dest.writeInt(puntos.size());
-		for(GeoLocation p : puntos)
-		{
-			//TODO
-			//dest.writeString(p.getObjectId());
-			dest.writeDouble(p.latitude);
-			dest.writeDouble(p.longitude);
-			//try{dest.writeLong(Long.parseLong((String)p.getMetadata(FECHA)));}catch(Exception e){dest.writeLong(0);System.err.println("-----"+p.getMetadata(FECHA)+":e:"+e);}
-		}*/
+		dest.writeLong(puntosCount);
 	}
 	@Override
 	public int describeContents(){return 0;}
@@ -101,8 +90,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 			_datos = ref.child(NOMBRE).child(getId());
 			_datos.setValue(null, listener);
 		}
-		//puntos.clear();
-		//TODO: eliminar puntos relacionados
+		RutaPunto.eliminar(getId());
 	}
 	public void guardar(Firebase.CompletionListener listener)
 	{
@@ -136,8 +124,8 @@ System.err.println("Ruta:eliminar:r:" + this);
 	public static void getLista(ValueEventListener listener)
 	{
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		ref.addValueEventListener(listener);
-		//ref.addListenerForSingleValueEvent(listener);
+		//ref.addValueEventListener(listener);//TODO: cual me viene mejor?
+		ref.addListenerForSingleValueEvent(listener);
 	}
 
 	public static void getLista(ValueEventListener listener, Filtro filtro)
@@ -148,19 +136,87 @@ if(1==1)return;
 	}
 
 
-	public void getPuntos(ValueEventListener listener)
+	private long puntosCount = 0;
+	public long getPuntosCount()//TODO: Se llama demasiado??
 	{
-		RutaPunto.getLista(getId(), listener);
+		Ruta.getPuntosCount(getId(), new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot count)
+			{
+				if(count != null && count.getValue() != null)
+					puntosCount = (Long)count.getValue();
+System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
+			}
+			@Override
+			public void onCancelled(FirebaseError err)
+			{
+System.err.println("---------Ruta:getPuntosCount:e:"+err);
+			}
+		});
+		return puntosCount;
 	}
-	/*public void addPunto(double lat, double lon, Firebase.CompletionListener listener)
+	public static void getPuntosCount(String idRuta, ValueEventListener listener)
 	{
-		RutaPunto pto = new RutaPunto(lat, lon);
-		pto.guardar(listener);
-	}*/
-	public static void addPunto(String idRuta, double lat, double lon, Firebase.CompletionListener listener)
+		Firebase ref = new Firebase(FIREBASE).child(NOMBRE).child(idRuta).child("puntosCount");
+		ref.addListenerForSingleValueEvent(listener);//ref.addValueEventListener(listener);
+	}
+	public void getPuntos(final ValueEventListener listener)
+	{
+System.err.println("---------Ruta:getPuntos:0:"+getId());
+		//RutaPunto.getLista(getId(), listener);
+		RutaPunto.getLista(getId(), new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+System.err.println("---------Ruta:getPuntos:1:"+ds);
+				puntosCount = ds.getChildrenCount();
+System.err.println("---------Ruta:getPuntos:2:"+puntosCount);
+				listener.onDataChange(ds);
+			}
+			@Override
+			public void onCancelled(FirebaseError err)
+			{
+System.err.println("---------Ruta:getPuntos:e:"+err);
+				puntosCount = 0;
+				listener.onCancelled(err);
+			}
+		});
+	}
+
+	public static void addPunto(final String idRuta, double lat, double lon, final Firebase.CompletionListener listener)
 	{
 		RutaPunto pto = new RutaPunto(idRuta, lat, lon);
-		pto.guardar(listener);
+		pto.guardar(new Firebase.CompletionListener()
+		{
+			@Override
+			public void onComplete(FirebaseError err, Firebase firebase)
+			{
+				if(err == null)
+				{
+					Firebase ref = new Firebase(FIREBASE).child(NOMBRE).child(idRuta).child("puntosCount");
+					ref.runTransaction(new Transaction.Handler()
+					{
+						@Override
+						public Transaction.Result doTransaction(MutableData currentData)
+						{
+							if(currentData.getValue() == null)
+								currentData.setValue(1);
+        					else
+            					currentData.setValue((Long)currentData.getValue() + 1);
+							return Transaction.success(currentData);//we can also abort by calling Transaction.abort()
+						}
+						@Override
+						public void onComplete(FirebaseError err, boolean b, DataSnapshot dataSnapshot)
+						{
+							System.err.println("Ruta:addPunto:inc count:e:"+err+" "+b+" "+dataSnapshot);
+						}
+					});
+				}
+				listener.onComplete(err, firebase);
+			}
+		});
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -225,6 +281,25 @@ if(1==1)return;
 		};
 
 		//// FIREBASE
+		public static void eliminar(String idRuta)
+		{
+			Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+			Query queryRef = ref.orderByChild("idRuta").equalTo(idRuta);
+			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
+			{
+				@Override
+				public void onDataChange(DataSnapshot puntos)
+				{
+					puntos.getRef().setValue(null);
+					System.err.println("-----------Ruta:RutaPunto:eliminar:");
+				}
+				@Override
+				public void onCancelled(FirebaseError err)
+				{
+					System.err.println("-----------Ruta:RutaPunto:eliminar:e:"+err);
+				}
+			});
+		}
 		public void guardar(Firebase.CompletionListener listener)
 		{
 			if(_datos != null)
@@ -233,33 +308,30 @@ if(1==1)return;
 			}
 			else
 			{
-				Firebase ref = new Firebase(FIREBASE);
+				Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
 				if(getId() != null)
 				{
-					_datos = ref.child(NOMBRE).child(getId());
+					_datos = ref.child(getId());
 				}
 				else
 				{
-					_datos = ref.child(NOMBRE).push();
+					_datos = ref.push();
 					setId(_datos.getKey());
 				}
 				_datos.setValue(this, listener);
 			}
 		}
-		public static void getById(String sId, ValueEventListener listener)
+		/*public static void getById(String sId, ValueEventListener listener)
 		{
 			Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
 			ref1.addListenerForSingleValueEvent(listener);
-			/*Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-			Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
-			queryRef.addListenerForSingleValueEvent(listener);
-			//queryRef.addChildEventListener(listener);
-			//ref.addListenerForSingleValueEvent(listener);*/
-		}
+		}*/
 		public static void getLista(String sIdRuta, ValueEventListener listener)
 		{
 			Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-			Query queryRef = ref.child("idRuta").equalTo(sIdRuta);
+System.err.println("---------"+NOMBRE);
+			//Query queryRef = ref.child("idRuta").equalTo(sIdRuta);
+			Query queryRef = ref.orderByChild("idRuta").equalTo(sIdRuta);
 			queryRef.addListenerForSingleValueEvent(listener);
 		}
 	}

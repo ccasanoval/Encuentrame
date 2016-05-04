@@ -1,12 +1,10 @@
 package com.cesoft.encuentrame;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
-import android.support.design.widget.Snackbar;
 
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Login;
@@ -16,14 +14,14 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.location.Geofence;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
+//TODO: No funciona AVISO!!!!!!!!!!!!!!!!!!!!!!
+//TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo?
 //TODO: Si el primer punto de ruta es erroneo y esta lejos, los demas no se grabaran por filtro velocidad!!!
 //Backendless GEOFencing service:
 //https://backendless.com/backend-as-a-service/quick-start-guide-for-backendless-geofencing/
@@ -64,7 +62,7 @@ public class CesService extends IntentService
 		_this = this;
 		Util.initFirebase(this);
 		Util.setSvcContext(this);
-		Login.login(loginListener);
+		//Login.login(loginListener);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
@@ -117,6 +115,7 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 					//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 					boolean bDirty = false;
 					long n = avisos.getChildrenCount();
+System.err.println("CesService:cargarListaGeoAvisos-----********************************************************************------------1------"+n);
 					if(n != _listaGeoAvisos.size())
 					{
 						if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
@@ -136,7 +135,7 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
 								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
 						aGeofences.add(gf);
-
+System.err.println("CesService:cargarListaGeoAvisos-----------------------------------2------");
 						if( ! bDirty)
 						{
 							if(_listaGeoAvisos.size() < i)
@@ -190,11 +189,16 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				System.err.println("CesService:saveGeoTracking:Ruta.getById:"+rutas.getChildrenCount());
 				if(rutas.getChildrenCount() < 1)return;
 
+				try{
+				rutas.getValue(Ruta.class);
+				System.err.println("CesService:saveGeoTracking:Ruta.getById: OOOOOOOOOK");
+				}catch(Exception e){System.err.println("CesService:saveGeoTracking:Ruta.getById:"+rutas);}
+
 				Ruta r = null;
 				long n = rutas.getChildrenCount();
-				for(DataSnapshot r_ : rutas.getChildren())
+				for(DataSnapshot ruta : rutas.getChildren())
 				{
-					r = r_.getValue(Ruta.class);
+					r = ruta.getValue(Ruta.class);//om.firebase.client.FirebaseException: Failed to bounce to type
 					break;
 				}
 				if(r == null)
@@ -248,7 +252,8 @@ System.err.println("CesService:saveGeoTracking:guardar0000:---------------------
 						else
 						{
 							System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + firebase);
-							//r.addPunto(loc.getLatitude(), loc.getLongitude());
+							//r.addPunto(loc.getLatitude(), loc.getLongitude());Ruta.getById(firebase.getKey())
+							//Ruta.addPunto(, loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
 							Ruta.addPunto(firebase.getKey(), loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
 							{
 								@Override

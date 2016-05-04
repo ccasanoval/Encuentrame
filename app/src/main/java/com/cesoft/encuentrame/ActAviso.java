@@ -349,8 +349,8 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 	private void eliminar()
 	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle(_a.getNombre());//getString(R.string.eliminar));
-		dialog.setMessage(getString(R.string.seguro_eliminar));
+		dialog.setTitle(getString(R.string.seguro_eliminar));
+		dialog.setMessage(_a.getNombre());
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override

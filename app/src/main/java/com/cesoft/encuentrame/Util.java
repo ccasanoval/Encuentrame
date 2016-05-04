@@ -67,41 +67,6 @@ System.err.println("----------------------Util.refreshListaRutas ");
 		Login.setSvcContext(c);
 		Firebase.setAndroidContext(c);
 	}
-	/*public static void initBackendless(Context c)
-	{
-System.err.println("---------------Util.initBackendless c = "+c);
-		Backendless.initApp(c, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
-	}*/
-	/*private static SharedPreferences.OnSharedPreferenceChangeListener _pref_listener = new SharedPreferences.OnSharedPreferenceChangeListener()
-	{
-		public void onSharedPreferenceChanged(SharedPreferences prefs, String key)
-		{
-			System.err.println("-----------------------------------------------Util.initPrefs: "+key+" : "+prefs.getBoolean(key, false));
-			if(PREF_SAVE_LOGIN.equals(key))
-			{
-				if( ! prefs.getBoolean(PREF_END_SESSION, false))
-				{
-					AlertDialog.Builder dialog = new AlertDialog.Builder(_app);
-					dialog.setTitle("¿Cerrar sesión?");//getString(R.string.eliminar));
-					dialog.setMessage("¿Cerrar sesión?");
-					dialog.setPositiveButton("Cerrar", new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog, int which)
-						{
-							logout(null, 0);
-						}
-					});
-				}
-				//else if( ! prefs.getBoolean(PREF_SAVE_LOGIN, false))borrarLogin();
-			}
-		}
-	};
-	public static void initPrefs()
-	{
-		SharedPreferences login = PreferenceManager.getDefaultSharedPreferences(_app.getApplicationContext());
-		login.registerOnSharedPreferenceChangeListener(_pref_listener);
-	}*/
 
 	//______________________________________________________________________________________________
 	// LOCATION
@@ -144,7 +109,7 @@ System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getL
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	public static void playNotificacion()
+	/*public static void playNotificacion()
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		if(prefs.getBoolean("notifications_new_message", true))//true o false ha de coincidir con lo que tengas en pref_notificacion.xml
@@ -157,7 +122,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 			if(prefs.getBoolean("notifications_new_message_vibrate", true))
 				vibrate(_app);
 		}
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	private static void playSound(Context c, Uri sound)
@@ -201,8 +166,22 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		else*/
 			showNotificacion(c, sTitulo, a, intent);
 	}
+
 	//______________________________________________________________________________________________
-	//private static int _idNotificacion = 1;
+	private static int _conversor(String s)
+	{
+		// PARA Backendless: Integer.parseInt(a.getId().substring(0,6).replace('-','0'), 16);
+		StringBuilder sb = new StringBuilder(10);
+		s = s.replace("-", "");
+		for(int i=0; i < 9; i++)
+		{
+			//sb.append(Integer.valueOf(s.charAt(i)));
+			//sb.append(Integer.valueOf(s.charAt(i)-30));
+			sb.append(s.charAt(i) % 10);
+		}
+		return Integer.valueOf(sb.toString().substring(0, 9));
+	}
+	//______________________________________________________________________________________________
 	private static void showNotificacion(Context c, String titulo, Aviso a, Intent intent)
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
@@ -210,14 +189,13 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		Boolean bVibrate = prefs.getBoolean("notifications_new_message_vibrate", false);
 		Boolean bLights = prefs.getBoolean("notifications_new_message_lights", false);
 		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
-
-System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"+bVibrate+"     lights:"+bLights);
+//System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"+bVibrate+"     lights:"+bLights);
 
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
 
-		Integer idNotificacion = Integer.parseInt(a.getId().substring(0,6).replace('-','0'), 16);
+		Integer idNotificacion = _conversor(a.getId());//System.err.println("--555555555555555555555555555555555555555555555----"+idNotificacion);
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
