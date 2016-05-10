@@ -13,6 +13,7 @@ public class Objeto implements Parcelable
 {
 	public static final String FIREBASE = "https://blazing-heat-3755.firebaseio.com/";
 	public static final String NOMBRE = "objeto";
+	public static final String GEOFIRE = "https://blazing-heat-3755.firebaseio.com/GEO/";
 
 	public Objeto(){}
 

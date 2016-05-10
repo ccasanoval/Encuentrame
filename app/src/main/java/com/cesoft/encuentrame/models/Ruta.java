@@ -1,28 +1,24 @@
 package com.cesoft.encuentrame.models;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.cesoft.encuentrame.Util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.FirebaseException;
 import com.firebase.client.MutableData;
 import com.firebase.client.Query;
 import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoLocation;
 
+// ONLINE C COMPILER http://cpp.sh
 
+//TODO: Ruta:addPunto:inc count:e:null true DataSnapshot { key = puntosCount, value = 8 }
+//TODO: por que veo  ---------Ruta:getPuntosCount: 53 : DataSnapshot { key = puntosCount, value = 53 }   mil veces???
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,12 +142,12 @@ if(1==1)return;
 			{
 				if(count != null && count.getValue() != null)
 					puntosCount = (Long)count.getValue();
-System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
+//System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
 			{
-System.err.println("---------Ruta:getPuntosCount:e:"+err);
+				System.err.println("Ruta:getPuntosCount:e:"+err);
 			}
 		});
 		return puntosCount;

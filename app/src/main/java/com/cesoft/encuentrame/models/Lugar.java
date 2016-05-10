@@ -4,15 +4,20 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.cesoft.encuentrame.Util;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.firebase.client.snapshot.IndexedNode;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 
+import java.util.ArrayList;
 import java.util.Locale;
 //TODO:
 //Robert Kiyosaki
@@ -21,11 +26,13 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+@JsonIgnoreProperties({"_datos", "_datGeo"})
 public class Lugar extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "lugar";
 
 	private Firebase _datos;
+	private static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
 
 	//______________________________________________________________________________________________
 	private double latitud, longitud;
@@ -54,10 +61,10 @@ public class Lugar extends Objeto implements Parcelable
 		}
 		else if(getId() != null)
 		{
-			Firebase ref = new Firebase(FIREBASE);
-			_datos = ref.child(NOMBRE).child(getId());
+			_datos = newFirebase().child(getId());
 			_datos.setValue(null, listener);
 		}
+		delGeo();
 	}
 	public void guardar(Firebase.CompletionListener listener)//TODO: todos igual, llevar a objeto?
 	{
@@ -67,78 +74,102 @@ public class Lugar extends Objeto implements Parcelable
 		}
 		else
 		{
-			Firebase ref = new Firebase(FIREBASE);
 			if(getId() != null)
 			{
-				_datos = ref.child(NOMBRE).child(getId());
+				_datos = newFirebase().child(getId());
 			}
 			else
 			{
-				_datos = ref.child(NOMBRE).push();
+				_datos = newFirebase().push();
 				setId(_datos.getKey());
 			}
 			_datos.setValue(this, listener);
 		}
+		saveGeo(getLatitud(), getLongitud());
 	}
-	public static void getById(String sId, ValueEventListener listener)
+	/*public static void getById(String sId, ValueEventListener listener)
 	{
-		Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
+		Firebase ref1 = newFirebase().child(sId);
 		ref1.addListenerForSingleValueEvent(listener);
-		/*
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);ChildEventListener
-		Query queryRef = ref.orderByKey().equalTo(sId);//.limitToFirst(1);
-    	queryRef.addChildEventListener(listener);
-		//ref.addListenerForSingleValueEvent(listener);
-			/*new ChildEventListener() {
-		ArrayList<String> relationProps = new ArrayList<>();
-		relationProps.add("lugar");
-		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);*/
-	}
+	}*/
 	public static void getLista(ValueEventListener listener)
 	{
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
+		Firebase ref = newFirebase();
 		//ref.addValueEventListener(listener);//TODO: cual es mejor?
 		ref.addListenerForSingleValueEvent(listener);
 	}
 
 
-	public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
-	{
-System.err.println("-----------------------------------------Lugar:getListaByPos:");
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		GeoFire geoFire = new GeoFire(ref);
-		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio());
-		geoQuery.addGeoQueryEventListener(listener);
-/*    @Override
-    public void onKeyEntered(String key, GeoLocation location) {
-        System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
-    }
-    @Override
-    public void onKeyExited(String key) {
-        System.out.println(String.format("Key %s is no longer in the search area", key));
-    }
-    @Override
-    public void onKeyMoved(String key, GeoLocation location) {
-        System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
-    }
-    @Override
-    public void onGeoQueryReady() {
-        System.out.println("All initial data has been loaded and events have been fired!");
-    }
-    @Override
-    public void onGeoQueryError(FirebaseError error) {
-        System.err.println("There was an error with this query: " + error);
-    }
-});*/
-	}
-
 	public static void getLista(ValueEventListener listener, Filtro filtro)
 	{
 //TODO-----------------------------------------------------------------------------------------------------
-getLista(listener);
-if(1==1)return;
+//getLista(listener);if(1==1)return;
+		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)//filtro.getRadio() > Util.NADA &&
+		{
+			buscarPorGeoFiltro(listener, filtro);
+		}
+		else
+		{
+			buscarPorFiltro(listener, filtro);
+		}
+	}
+	public static void buscarPorFiltro(ValueEventListener listener, Filtro filtro)
+	{
+		Firebase ref = newFirebase();
+		Query queryRef = ref.orderByChild("height").equalTo(25);
+	}
+	//https://github.com/firebase/geofire-java
+	public static void buscarPorGeoFiltro(ValueEventListener listener, Filtro filtro)
+	{
+		if(filtro.getRadio() < 1)filtro.setRadio(100);
+		//final Firebase ref = newFirebase();
+		GeoFire geoFire = newGeoFire();
+		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
+		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
+		{
+			private ArrayList<String> asID = new ArrayList<>();
+			@Override
+			public void onKeyEntered(String key, GeoLocation location)
+			{
+				System.err.println("Lugar:getLista:--------------------------------------------onKeyEntered:"+key+", "+location);
+				asID.add(key);
+			}
+			@Override
+			public void onKeyExited(String key)
+			{
+				System.err.println("Lugar:getLista:--------------------------------------------onKeyExited");
+				asID.remove(key);
+			}
+			@Override
+			public void onKeyMoved(String key, GeoLocation location)
+			{
+				System.err.println("Lugar:getLista:--------------------------------------------onKeyMoved"+key+", "+location);
+			}
+			@Override
+			public void onGeoQueryReady()
+			{
+				System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady");
 
+				//Firebase ref = newFirebase().child(sId);
+				Firebase ref = newFirebase().
+				ref.addListenerForSingleValueEvent(listener);
+				/*
+				IndexedNode in = new IndexedNode(
+				DataSnapshot ds = new DataSnapshot(ref, 1);
+				listener.onDataChange(*/
 
+				//geoQuery.removeAllListeners();
+				geoQuery.removeGeoQueryEventListener(this);
+			}
+			@Override
+			public void onGeoQueryError(FirebaseError error)
+			{
+				System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryError:"+error);
+			}
+		};
+		geoQuery.addGeoQueryEventListener(lisGeo);
+
+/*
 System.err.println("Lugar:getLista:filtro: "+filtro);
 
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
@@ -176,7 +207,7 @@ System.err.println("Lugar:getLista:filtro: "+filtro);
 		}
 System.err.println("Lugar:getLista:SQL: "+sb.toString());
 		//if(sb.length() > 0)
-		//--FILTRO
+		//--FILTRO*/
 
 	}
 
@@ -219,68 +250,42 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 		}
 	};
 
+
+	//----------------------------------------------------------------------------------------------
+	// GEOFIRE
+	private GeoFire _datGeo;
+	private static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+	private void saveGeo(final double lat, final double lon)
+	{
+		if(_datos.getKey() == null)
+		{
+			System.err.println("Lugar:saveGeo:id==null");
+			return;
+		}
+		if(_datGeo == null)_datGeo = newGeoFire();
+		_datGeo.setLocation(_datos.getKey(), new GeoLocation(lat, lon), new GeoFire.CompletionListener()
+		{
+    		@Override
+    		public void onComplete(String key, FirebaseError error)
+			{
+        		if(error != null)
+            		System.err.println("There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+lat+"/"+lon);
+        		else
+            		System.out.println("Location saved on server successfully!");
+			}
+        });
+	}
+	private void delGeo()
+	{
+		if(_datos.getKey() == null)
+		{
+			System.err.println("Lugar:delGeo:id==null");
+			return;
+		}
+		if(_datGeo == null)_datGeo = newGeoFire();
+		_datGeo.removeLocation(_datos.getKey());
+	}
+	// GEOFIRE
+	//----------------------------------------------------------------------------------------------
 }
 
-/*TODO: como lo hace firebase?
-https://github.com/firebase/geofire-java
-https://geofire-java.firebaseapp.com/docs/
-
-GeoFire geoFire = new GeoFire(new Firebase("https://<your-firebase>.firebaseio.com/"));
-geoFire.setLocation("firebase-hq", new GeoLocation(37.7853889, -122.4056973), new GeoFire.CompletionListener() {
-    @Override
-    public void onComplete(String key, FirebaseError error) {
-        if (error != null)
-            System.err.println("There was an error saving the location to GeoFire: " + error);
-         else
-            System.out.println("Location saved on server successfully!");
-    }});
-
-geoFire.removeLocation("firebase-hq");
-
-geoFire.getLocation("firebase-hq", new LocationCallback() {
-    @Override
-    public void onLocationResult(String key, GeoLocation location) {
-        if (location != null)             System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-         else            System.out.println(String.format("There is no location for key %s in GeoFire", key));
-    }
-
-    @Override
-    public void onCancelled(FirebaseError firebaseError) {        System.err.println("There was an error getting the GeoFire location: " + firebaseError);    }
-});
-
-GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 0.6);
-
-geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-    @Override
-    public void onKeyEntered(String key, GeoLocation location) {
-        System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
-    }
-
-    @Override
-    public void onKeyExited(String key) {
-        System.out.println(String.format("Key %s is no longer in the search area", key));
-    }
-
-    @Override
-    public void onKeyMoved(String key, GeoLocation location) {
-        System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
-    }
-
-    @Override
-    public void onGeoQueryReady() {
-        System.out.println("All initial data has been loaded and events have been fired!");
-    }
-
-    @Override
-    public void onGeoQueryError(FirebaseError error) {
-        System.err.println("There was an error with this query: " + error);
-    }
-});
-
-removeGeoQueryEventListener to remove a single event listener or removeAllListeners
-
-GeoQuery search area can be changed with setCenter and setRadius
-
-
-
-*/
