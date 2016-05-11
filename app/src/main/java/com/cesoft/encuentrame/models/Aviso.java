@@ -3,10 +3,16 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 
 import com.cesoft.encuentrame.Util;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 //https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
@@ -175,36 +181,35 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 		//ref.addValueEventListener(listener);//TODO:Cual mejor?
 		ref.addListenerForSingleValueEvent(listener);
 	}
-	/*public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
-	{
-System.err.println("-----------------------------------------Aviso:getListaByPos:");
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		GeoFire geoFire = new GeoFire(ref);
-		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio());
-		geoQuery.addGeoQueryEventListener(listener);
-	}*/
-	public static void getLista(ValueEventListener listener, Filtro filtro)
-	{
-//TODO-----------------------------------------------------------------------------------------------------
-getLista(listener);
-if(1==1)return;
-System.err.println("Aviso:getLista:filtro: "+filtro);
 
-
-		//--FILTRO
-		StringBuilder sb = new StringBuilder();
-		if( ! filtro.getNombre().isEmpty())
+	//public static void getLista(ValueEventListener listener, Filtro filtro)
+	public static void buscarPorFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
+	{
+		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
-			sb.append(" nombre LIKE '%");
-			sb.append(filtro.getNombre());
-			sb.append("%' ");
-		}
-		if(filtro.getRadio() > 0 && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, lugar.latitude, lugar.longitude ) < km(%f) ",
-					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
-		}
+			@Override
+			public void onDataChange(DataSnapshot data)
+			{
+				long n = data.getChildrenCount();
+				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
+				for(DataSnapshot o : data.getChildren())
+				{
+					Aviso a = o.getValue(Aviso.class);
+					if( ! a.getNombre().contains(filtro.getNombre()))continue;
+					if(filtro.getActivo()==Filtro.ACTIVO && !a.isActivo()  ||  filtro.getActivo()==Filtro.INACTIVO && a.isActivo())continue;
+					//TODO:Fecha
+					aAvisos.add(o.getValue(Aviso.class));
+				}
+				listener.onData(aAvisos.toArray(new Aviso[1]));
+			}
+			@Override
+			public void onCancelled(FirebaseError err)
+			{
+				System.err.println("Aviso:buscarPorFiltro:onCancelled:"+err);
+				listener.onError(err.toString());
+			}
+		});
+/*
 		if(filtro.getFechaIni() != null)
 		{
 			if(sb.length() > 0)sb.append(" AND ");
@@ -226,7 +231,83 @@ System.err.println("Aviso:getLista:filtro: "+filtro);
 System.err.println("Aviso:getLista:SQL: "+sb.toString());
 		//if(sb.length() > 0)			query.setWhereClause(sb.toString());
 		//--FILTRO
-		//Backendless.Persistence.of(Aviso.class).find(query, res);
+		//Backendless.Persistence.of(Aviso.class).find(query, res);*/
+	}
+
+
+
+	//----------------------------------------------------------------------------------------------
+	public static void getLista(ObjetoListener<Aviso> listener, Filtro filtro)//(ValueEventListener listener, Filtro filtro)
+	{
+		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)//filtro.getRadio() > Util.NADA &&
+			buscarPorGeoFiltro(listener, filtro);
+		else
+			buscarPorFiltro(listener, filtro);
+	}
+	public static void buscarPorGeoFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
+	{
+System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro);
+		if(filtro.getRadio() < 1)filtro.setRadio(100);
+
+		final ArrayList<Aviso> aA = new ArrayList<>();
+		final boolean bNombre = ! filtro.getNombre().isEmpty();
+
+		final Firebase ref = newFirebase();
+		final GeoQuery geoQuery = newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
+		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
+		{
+			private int nCount = 0;
+			@Override
+			public void onKeyEntered(String key, GeoLocation location)
+			{
+				System.err.println("Aviso:getLista:--------------------------------------------onKeyEntered:"+key+", "+location);
+				nCount++;
+				ValueEventListener vel = new ValueEventListener()
+				{
+					@Override
+					public void onDataChange(DataSnapshot data)
+					{
+						Aviso a = data.getValue(Aviso.class);
+						if(bNombre && ! a.getNombre().contains(filtro.getNombre()))return;
+						aA.add(a);
+						nCount--;
+						if(nCount < 1)listener.onData(aA.toArray(new Aviso[1]));
+					}
+					@Override
+					public void onCancelled(FirebaseError err)
+					{
+						System.err.println("Aviso:getLista:onKeyEntered:onCancelled:"+err);
+						nCount--;
+						if(nCount < 1)listener.onData(aA.toArray(new Aviso[1]));
+					}
+				};
+
+				//newFirebase().child(key).addListenerForSingleValueEvent(vel);
+				ref.child(key).addListenerForSingleValueEvent(vel);//TODO: how to wait to
+			}
+			@Override
+			public void onKeyExited(String key)
+			{
+				System.err.println("Aviso:getLista:--------------------------------------------onKeyExited");
+			}
+			@Override
+			public void onKeyMoved(String key, GeoLocation location)
+			{
+				System.err.println("Aviso:getLista:--------------------------------------------onKeyMoved"+key+", "+location);
+			}
+			@Override
+			public void onGeoQueryReady()
+			{
+System.err.println("Aviso:getLista:--------------------------------------------onGeoQueryReady:A:"+nCount);
+				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
+			}
+			@Override
+			public void onGeoQueryError(FirebaseError error)
+			{
+				System.err.println("Aviso:getLista:--------------------------------------------onGeoQueryError:"+error);
+			}
+		};
+		geoQuery.addGeoQueryEventListener(lisGeo);
 	}
 
 }

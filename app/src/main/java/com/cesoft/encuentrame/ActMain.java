@@ -453,7 +453,7 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 			else
 				Lugar.getLista(_acLugar);
 		}
-		private Lugar.LugarListener _acLugar2 = new Lugar.LugarListener()
+		private Objeto.ObjetoListener<Lugar> _acLugar2 = new Objeto.ObjetoListener<Lugar>()
 		{
 			@Override
 			public void onData(Lugar[] aLugares)
@@ -473,7 +473,7 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				System.err.println("---------LUGARES2:GET:ERROR:" + err);
 			}
 		};
-		private ValueEventListener _acLugar = new ValueEventListener()
+		/*private ValueEventListener _acLugar = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot lugares)
@@ -498,7 +498,7 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 			{
 				System.err.println("---------LUGARES:GET:ERROR:" + err);
 			}
-		};
+		};*/
 
 		//__________________________________________________________________________________________
 		public void refreshRutas()

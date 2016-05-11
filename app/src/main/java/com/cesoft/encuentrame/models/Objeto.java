@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.firebase.client.Firebase;
+import com.firebase.geofire.GeoFire;
 
 import java.util.Date;
 import java.util.Locale;
@@ -71,6 +73,16 @@ public class Objeto implements Parcelable
 	{
 		return String.format(Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha));
+	}
+
+	// FIREBASE
+	//______________________________________________________________________________________________
+	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+	public interface ObjetoListener<T>
+	{
+		void onData(T[] aData);
+		void onError(String err);
 	}
 
 	// PARCELABLE
