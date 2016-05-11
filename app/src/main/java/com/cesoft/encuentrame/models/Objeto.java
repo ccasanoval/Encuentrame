@@ -3,7 +3,33 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
 import java.util.Locale;
+
+
+/* FIREBASE Security & Rules
+{
+    "rules": {
+        ".read": true,
+        ".write": true,
+        "aviso": {
+          ".indexOn": ["activo", "nombre"]
+        },
+        "lugar": {
+          ".indexOn": ["nombre"]
+        },
+        "ruta_punto": {
+          ".indexOn": ["idRuta"]
+        },
+
+        "GEO": {
+          "lugar": {
+              ".indexOn": ["g"]
+            }
+        }
+    }
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
@@ -14,8 +40,6 @@ public class Objeto implements Parcelable
 	public static final String FIREBASE = "https://blazing-heat-3755.firebaseio.com/";
 	public static final String NOMBRE = "objeto";
 	public static final String GEOFIRE = "https://blazing-heat-3755.firebaseio.com/GEO/";
-
-	public Objeto(){}
 
 	//General
 	protected String id = null;
@@ -29,12 +53,19 @@ public class Objeto implements Parcelable
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
 
+	protected Date fecha;
+		public Date getFecha(){return fecha;}
+		public void setFecha(Date v){fecha=v;}
+
 	//______________________________________________________________________________________________
+	public Objeto()
+	{
+		fecha = new Date();
+	}
 	@Override
 	public String toString()
 	{
-		//return "Objeto{id='"+getId()+"', nombre='"+(nombre==null?"":nombre) + "', descripcion='"+(descripcion==null?"":descripcion)+"'}";
-		return String.format(Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s'}", getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion));
+		return String.format(Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%d'}", getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), fecha.getTime());
 	}
 
 	// PARCELABLE
@@ -44,6 +75,7 @@ public class Objeto implements Parcelable
 		setId(in.readString());
 		setNombre(in.readString());
 		setDescripcion(in.readString());
+		setFecha(new Date(in.readLong()));
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -51,6 +83,7 @@ public class Objeto implements Parcelable
 		dest.writeString(getId());
 		dest.writeString(getNombre());
 		dest.writeString(getDescripcion());
+		dest.writeLong(getFecha().getTime());
 	}
 	@Override
 	public int describeContents()

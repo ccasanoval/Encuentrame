@@ -178,14 +178,14 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 		//ref.addValueEventListener(listener);//TODO:Cual mejor?
 		ref.addListenerForSingleValueEvent(listener);
 	}
-	public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
+	/*public static void getListaByPos(GeoQueryEventListener listener, Filtro filtro)
 	{
 System.err.println("-----------------------------------------Aviso:getListaByPos:");
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
 		GeoFire geoFire = new GeoFire(ref);
 		GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio());
 		geoQuery.addGeoQueryEventListener(listener);
-	}
+	}*/
 	public static void getLista(ValueEventListener listener, Filtro filtro)
 	{
 //TODO-----------------------------------------------------------------------------------------------------

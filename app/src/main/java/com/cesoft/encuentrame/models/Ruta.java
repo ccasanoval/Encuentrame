@@ -30,7 +30,7 @@ public class Ruta extends Objeto implements Parcelable
 	public static final String NOMBRE = "ruta";
 	private Firebase _datos;
 
-	//TODO: fecha ini, fecha fin...
+	//TODO: fecha fin...
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
 	/*private int periodo=2*60*1000;
 		public int getPeriodo(){return periodo;}
@@ -42,8 +42,8 @@ public class Ruta extends Objeto implements Parcelable
 	public String toString()
 	{
 		//return super.toString();// + ", RUT:"+(puntos==null?"null":puntos.size());
-		return String.format(Locale.ENGLISH, "Ruta{id='%s', nombre='%s', descripcion='%s', puntosCount='%d'}",
-				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), puntosCount);
+		return String.format(Locale.ENGLISH, "Ruta{id='%s', nombre='%s', descripcion='%s', fecha='%d', puntosCount='%d'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), fecha.getTime(), puntosCount);
 	}
 
 	//// PARCEL
@@ -245,7 +245,6 @@ System.err.println("---------Ruta:getPuntos:e:"+err);
 			this.idRuta = idRuta;
 			this.lat = lat;
 			this.lon = lon;
-			this.fecha = new Date();
 		}
 
 		//// PARCEL

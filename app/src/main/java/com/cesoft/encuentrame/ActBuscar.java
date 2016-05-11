@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+//TODO: cuando radio es Util.NADA => borrar punto
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
@@ -70,7 +71,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
-		fab.setOnClickListener(new View.OnClickListener()
+		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View view)
@@ -85,54 +86,57 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		ArrayAdapter<String> adapter;
 		//_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
 		Spinner _spnActivo = (Spinner)findViewById(R.id.spnActivo);
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		_spnActivo.setAdapter(adapter);
-		_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		if(_spnActivo!=null)
 		{
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			_spnActivo.setAdapter(adapter);
+			_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 			{
-				switch(position)
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 				{
-				case 1:
-					_filtro.setActivo(Filtro.ACTIVO);
-					break;
-				case 2:
-					_filtro.setActivo(Filtro.INACTIVO);
-					break;
-				default:
-					_filtro.setActivo(Util.NADA);
-					break;
+					switch(position)
+					{
+					case 1:		_filtro.setActivo(Filtro.ACTIVO);		break;
+					case 2:		_filtro.setActivo(Filtro.INACTIVO);		break;
+					default:	_filtro.setActivo(Util.NADA);			break;
+					}
 				}
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent)
-			{
-				_filtro.setRadio(Util.NADA);
-			}
-		});
+				@Override
+				public void onNothingSelected(AdapterView<?> parent)
+				{
+					_filtro.setActivo(Util.NADA);
+				}
+			});
+		}
 		//
 		Spinner _spnRadio = (Spinner)findViewById(R.id.spnRadio);
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		_spnRadio.setAdapter(adapter);
-		_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		if(_spnRadio != null)
 		{
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			_spnRadio.setAdapter(adapter);
+			_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 			{
-				_filtro.setRadio(_adRadio[position]);
-				setRadio();
-			}
-			@Override
-			public void onNothingSelected(AdapterView<?> parent)
-			{
-				_filtro.setRadio(Util.NADA);
-			}
-		});
-		_spnRadio.setSelection(3);
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+				{
+					_filtro.setRadio(_adRadio[position]);
+					if(_adRadio[position] == Util.NADA)//if(position==0)
+						delPosLugar();
+					else
+						setRadio();
+				}
+				@Override
+				public void onNothingSelected(AdapterView<?> parent)
+				{
+					//_filtro.setRadio(Util.NADA);
+					delPosLugar();
+				}
+			});
+			_spnRadio.setSelection(3);
+		}
 
 		//------------------------------------------------------------------------------------------
 		/// FECHAS
@@ -210,6 +214,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			_txtNombre.setText(_filtro.getNombre());
 			//-----
 			//_swtActivo.setChecked(_filtro.getActivo() == Filtro.ACTIVO);
+			if(_spnActivo != null)
 			switch(_filtro.getActivo())
 			{
 			case Filtro.ACTIVO:		_spnActivo.setSelection(1);break;
@@ -238,7 +243,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			{
 				if(_adRadio[i] == _filtro.getRadio())
 				{
-					_spnRadio.setSelection(i);
+					if(_spnRadio!=null)_spnRadio.setSelection(i);
 					break;
 				}
 			}
@@ -253,7 +258,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		case Util.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
 			//_spnActivo.setVisibility(View.GONE);
-			findViewById(R.id.layActivo).setVisibility(View.GONE);
+			View v = findViewById(R.id.layActivo);
+			if(v!=null)v.setVisibility(View.GONE);
 			break;
 		case Util.RUTAS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
@@ -290,6 +296,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_filtro.setPunto(pos);
 		setMarker();
 		setRadio();
+	}
+	private void delPosLugar()
+	{
+		if(_marker != null)_marker.remove();
+		if(_circle != null)_circle.remove();
+		_filtro.setPunto(null);
+		_filtro.setRadio(Util.NADA);
 	}
 	private void setMarker()
 	{

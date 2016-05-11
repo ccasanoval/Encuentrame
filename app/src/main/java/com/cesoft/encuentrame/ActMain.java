@@ -448,11 +448,31 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 			{
 System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				checkFechas();
-				Lugar.getLista(_acLugar, _aFiltro[_sectionNumber]);
+				Lugar.getLista(_acLugar2, _aFiltro[_sectionNumber]);
 			}
 			else
 				Lugar.getLista(_acLugar);
 		}
+		private Lugar.LugarListener _acLugar2 = new Lugar.LugarListener()
+		{
+			@Override
+			public void onData(Lugar[] aLugares)
+			{
+				long n = aLugares.length;
+				System.err.println("---------LUGARES2:GET:OK:" + n);
+				if(n < 1)
+				{
+					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+				}
+				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, PlaceholderFragment.this));//.toArray(new Lugar[0])));
+			}
+			@Override
+			public void onError(String err)//FirebaseError err)
+			{
+				System.err.println("---------LUGARES2:GET:ERROR:" + err);
+			}
+		};
 		private ValueEventListener _acLugar = new ValueEventListener()
 		{
 			@Override
