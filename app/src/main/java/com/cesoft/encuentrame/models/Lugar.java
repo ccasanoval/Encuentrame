@@ -13,6 +13,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.firebase.client.core.ThreadBackgroundExecutor;
 import com.firebase.client.snapshot.IndexedNode;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -52,8 +53,8 @@ public class Lugar extends Objeto implements Parcelable
 	@Override
 	public String toString()
 	{
-		return String.format(Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%d'}",
-				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, fecha.getTime());
+		return String.format(Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
 	}
 
 	//// FIREBASE
@@ -104,24 +105,18 @@ public class Lugar extends Objeto implements Parcelable
 		ref.addListenerForSingleValueEvent(listener);
 	}
 
-
+	//----------------------------------------------------------------------------------------------
 	public interface LugarListener
 	{
-		public void onData(Lugar[] aLugares);
-		public void onError(String err);
+		void onData(Lugar[] aLugares);
+		void onError(String err);
 	}
 	public static void getLista(LugarListener listener, Filtro filtro)//(ValueEventListener listener, Filtro filtro)
 	{
-//TODO-----------------------------------------------------------------------------------------------------
-//getLista(listener);if(1==1)return;
 		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)//filtro.getRadio() > Util.NADA &&
-		{
 			buscarPorGeoFiltro(listener, filtro);
-		}
 		else
-		{
 			buscarPorFiltro(listener, filtro);
-		}
 	}
 	public static void buscarPorFiltro(final LugarListener listener, final Filtro filtro)//ValueEventListener listener
 	{
@@ -141,7 +136,7 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 					if( ! l.getNombre().contains(filtro.getNombre()))continue;
 					aLugares.add(o.getValue(Lugar.class));
 				}
-				listener.onData(aLugares.toArray(new Lugar[0]));
+				listener.onData(aLugares.toArray(new Lugar[1]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -150,51 +145,6 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 				listener.onError(err.toString());
 			}
 		});
-
-		/*
-		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created >= ");
-			sb.append(filtro.getFechaIni().getTime());
-		}
-		if(filtro.getFechaFin() != null)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created <= ");
-			sb.append(filtro.getFechaFin().getTime());
-		}
-		*/
-		/* Firebase sucks!!   nombre LIKE '%XXX%' is imposible to do with Firebase...
-		Query queryRef = ref.orderByPriority();
-		if( ! filtro.getNombre().isEmpty())
-		{
-System.err.println("Lugar:buscarPorFiltro:--------------------------1:"+filtro.getNombre());
-			queryRef = queryRef.equalTo("nombre", filtro.getNombre());
-		}
-		ValueEventListener vel = new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot data)
-			{
-				long n = data.getChildrenCount();
-				if(n < 1)return;
-				int i = 0;
-				Lugar[] aLugares = new Lugar[(int)n];
-				for(DataSnapshot o : data.getChildren())
-				{
-					aLugares[i++] = o.getValue(Lugar.class);
-				}
-				listener.onData(aLugares);
-			}
-			@Override
-			public void onCancelled(FirebaseError err)
-			{
-				System.err.println("Lugar:buscarPorFiltro:onCancelled:"+err);
-				listener.onError(err.toString());
-			}
-		};
-		newFirebase().orderByChild("nombre").equalTo(filtro.getNombre()).addListenerForSingleValueEvent(vel);*/
 	}
 	//https://github.com/firebase/geofire-java
 	public static void buscarPorGeoFiltro(final LugarListener listener, final Filtro filtro)
@@ -210,13 +160,15 @@ System.err.println("Lugar:buscarPorGeoFiltro:--------------------------:"+filtro
 		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
 		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
 		{
-			private ArrayList<String> asID = new ArrayList<>();
+			private int nCount = 0;
+			//private ArrayList<String> asID = new ArrayList<>();
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				System.err.println("Lugar:getLista:--------------------------------------------onKeyEntered:"+key+", "+location);
-				asID.add(key);
+				//asID.add(key);
 				//ref.equalTo("id");
+				nCount++;
 
 				ValueEventListener vel = new ValueEventListener()
 				{
@@ -224,26 +176,31 @@ System.err.println("Lugar:buscarPorGeoFiltro:--------------------------:"+filtro
 					public void onDataChange(DataSnapshot data)
 					{
 						Lugar l = data.getValue(Lugar.class);
-System.err.println("Lugar:getLista:onKeyEntered:onDataChange:---------------------------------1:"+l);
+System.err.println("Lugar:getLista:onKeyEntered:onDataChange:---------------------------------0:"+nCount+"   L:"+l);
 						if(bNombre && ! l.getNombre().contains(filtro.getNombre()))return;
+System.err.println("Lugar:getLista:onKeyEntered:onDataChange:---------------------------------1:"+nCount+"   L:"+l);
 						al.add(l);
-System.err.println("Lugar:getLista:onKeyEntered:onDataChange:---------------------------------2:"+l);
+						nCount--;
+						if(nCount < 1)listener.onData(al.toArray(new Lugar[1]));
+System.err.println("Lugar:getLista:onKeyEntered:onDataChange:---------------------------------2:"+nCount+"   L:"+l);
 					}
 					@Override
 					public void onCancelled(FirebaseError err)
 					{
 						System.err.println("Lugar:getLista:onKeyEntered:onCancelled:"+err);
+						nCount--;
+						if(nCount < 1)listener.onData(al.toArray(new Lugar[1]));
 					}
 				};
 
 				//newFirebase().child(key).addListenerForSingleValueEvent(vel);
-				ref.child(key).addListenerForSingleValueEvent(vel);
+				ref.child(key).addListenerForSingleValueEvent(vel);//TODO: how to wait to
 			}
 			@Override
 			public void onKeyExited(String key)
 			{
 				System.err.println("Lugar:getLista:--------------------------------------------onKeyExited");
-				asID.remove(key);
+				//asID.remove(key);
 				//TODO: igual con al
 			}
 			@Override
@@ -254,13 +211,13 @@ System.err.println("Lugar:getLista:onKeyEntered:onDataChange:-------------------
 			@Override
 			public void onGeoQueryReady()
 			{
-				System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady:"+al.size()+" : "+asID.size());
-				//FIREBASE really sucks!!
-
-				listener.onData(al.toArray(new Lugar[0]));
-
-				//geoQuery.removeAllListeners();
-				geoQuery.removeGeoQueryEventListener(this);
+System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady:A:"+nCount);
+				// FIREBASE really sucks!!
+				//try{while(nCount > 0) Thread.sleep(100);}catch(InterruptedException ie){}
+				listener.onData(al.toArray(new Lugar[1]));
+System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady:B:"+al.size());//+" : "+asID.size());
+				//
+				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
 			@Override
 			public void onGeoQueryError(FirebaseError error)
@@ -269,47 +226,6 @@ System.err.println("Lugar:getLista:onKeyEntered:onDataChange:-------------------
 			}
 		};
 		geoQuery.addGeoQueryEventListener(lisGeo);
-
-/*
-System.err.println("Lugar:getLista:filtro: "+filtro);
-
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		Query queryRef;// = ref.orderByChild("height").equalTo(25);
-
-		//LIKE '%ABC%' https://www.firebase.com/blog/2014-01-02-queries-part-two.html
-
-
-
-		//--FILTRO
-		StringBuilder sb = new StringBuilder();//" created = created "
-		if( ! filtro.getNombre().isEmpty())
-		{
-			//ref.orderByChild("nombre").equalTo(filtro.getNombre());
-			ref.equalTo(filtro.getNombre(), "nombre");
-			//sb.append(" nombre LIKE '%");			sb.append(filtro.getNombre());			sb.append("%' ");
-		}
-		if(filtro.getRadio() > Util.NADA && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, lugar.latitude, lugar.longitude ) < km(%f) ",
-					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
-		}
-		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created >= ");
-			sb.append(filtro.getFechaIni().getTime());
-		}
-		if(filtro.getFechaFin() != null)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created <= ");
-			sb.append(filtro.getFechaFin().getTime());
-		}
-System.err.println("Lugar:getLista:SQL: "+sb.toString());
-		//if(sb.length() > 0)
-		//--FILTRO*/
-
 	}
 
 
@@ -321,7 +237,6 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 		//
 		setLatitud(in.readDouble());
 		setLongitud(in.readDouble());
-		//setLatLon(, in.readDouble());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -350,7 +265,6 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 			return new Lugar[size];
 		}
 	};
-
 
 	//----------------------------------------------------------------------------------------------
 	// GEOFIRE
@@ -438,3 +352,49 @@ GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056),
 
 
 */
+
+
+		/*
+		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created >= ");
+			sb.append(filtro.getFechaIni().getTime());
+		}
+		if(filtro.getFechaFin() != null)
+		{
+			if(sb.length() > 0)sb.append(" AND ");
+			sb.append(" created <= ");
+			sb.append(filtro.getFechaFin().getTime());
+		}
+		*/
+		/* Firebase sucks!!   nombre LIKE '%XXX%' is imposible to do with Firebase...
+		Query queryRef = ref.orderByPriority();
+		if( ! filtro.getNombre().isEmpty())
+		{
+System.err.println("Lugar:buscarPorFiltro:--------------------------1:"+filtro.getNombre());
+			queryRef = queryRef.equalTo("nombre", filtro.getNombre());
+		}
+		ValueEventListener vel = new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot data)
+			{
+				long n = data.getChildrenCount();
+				if(n < 1)return;
+				int i = 0;
+				Lugar[] aLugares = new Lugar[(int)n];
+				for(DataSnapshot o : data.getChildren())
+				{
+					aLugares[i++] = o.getValue(Lugar.class);
+				}
+				listener.onData(aLugares);
+			}
+			@Override
+			public void onCancelled(FirebaseError err)
+			{
+				System.err.println("Lugar:buscarPorFiltro:onCancelled:"+err);
+				listener.onError(err.toString());
+			}
+		};
+		newFirebase().orderByChild("nombre").equalTo(filtro.getNombre()).addListenerForSingleValueEvent(vel);*/

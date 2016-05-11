@@ -3,6 +3,8 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -35,11 +37,13 @@ import java.util.Locale;
 // Created by Cesar_Casanova on 17/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //http://stackoverflow.com/questions/32108969/why-do-i-get-failed-to-bounce-to-type-when-i-turn-json-from-firebase-into-java
+//@JsonIgnoreProperties({"id"})//Tendrias que iniciarlo despues de cargar desde firebase....
 public class Objeto implements Parcelable
 {
 	public static final String FIREBASE = "https://blazing-heat-3755.firebaseio.com/";
-	public static final String NOMBRE = "objeto";
 	public static final String GEOFIRE = "https://blazing-heat-3755.firebaseio.com/GEO/";
+	public static final String NOMBRE = "objeto";
+	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 
 	//General
 	protected String id = null;
@@ -65,7 +69,8 @@ public class Objeto implements Parcelable
 	@Override
 	public String toString()
 	{
-		return String.format(Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%d'}", getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), fecha.getTime());
+		return String.format(Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha));
 	}
 
 	// PARCELABLE

@@ -61,7 +61,7 @@ System.err.println("----------------------Util.refreshListaRutas ");
 		public static Application getApplication(){return _app;}
 	private static Context _svcContext;
 		public static void setSvcContext(Context c){_svcContext = c;}
-		//public static Context getSvcContext(){return _svcContext;}
+		public static Context getSvcContext(){return _svcContext;}
 	public static void initFirebase(Context c)
 	{
 		Login.setSvcContext(c);

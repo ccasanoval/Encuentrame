@@ -3,25 +3,16 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 
 import com.cesoft.encuentrame.Util;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQuery;
-import com.firebase.geofire.GeoQueryEventListener;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 //https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//ExcludeProperty(propertyName = "latitud")
 public class Aviso extends Objeto
 {
 	public static final String NOMBRE = "aviso";
@@ -29,12 +20,13 @@ public class Aviso extends Objeto
 	private Firebase _datos;
 
 	//______________________________________________________________________________________________
+	private final static String ACTIVO = "activo";
 	protected boolean activo = true;
 		public boolean isActivo(){return activo;}
 		public void setActivo(boolean v){activo=v;}
 
 	private double latitud, longitud;
-		public double getLatitud(){return latitud;}
+		public double getLatitud(){return latitud;}//TODO: con GeoFire, quiza esto podrias sobra...pero complicaria igual que quitar id de objeto
 		public double getLongitud(){return longitud;}
 		public void setLatitud(double v){latitud=v;}//TODO: validacion
 		public void setLongitud(double v){longitud=v;}
@@ -63,8 +55,8 @@ public class Aviso extends Objeto
 	@Override
 	public String toString()
 	{
-		return String.format(Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', radio='%f', activo='%b'}",
-				getId(), nombre, descripcion, latitud, longitud, radio, activo);
+		return String.format(Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s', latitud='%f', longitud='%f', radio='%f', activo='%b'}",
+				getId(), nombre, descripcion, DATE_FORMAT.format(fecha), latitud, longitud, radio, activo);
 	}
 
 	//______________________________________________________________________________________________
@@ -155,8 +147,12 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 
 	public static void getById(String sId, ValueEventListener listener)
 	{
-		//TODO: Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
-		Firebase.setAndroidContext(Util.getApplication().getBaseContext());
+
+		if(Util.getApplication() != null)
+			Firebase.setAndroidContext(Util.getApplication().getBaseContext());
+		else if(Util.getSvcContext() != null)//Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
+			Firebase.setAndroidContext(Util.getSvcContext());
+		else return;
 		Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
 		ref1.addListenerForSingleValueEvent(listener);
 /*
@@ -168,7 +164,8 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 	public static void getActivos(ValueEventListener listener)
 	{
 		Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-		Query queryRef = ref.orderByChild("activo").equalTo(true);
+		Query queryRef = ref.orderByChild(ACTIVO).equalTo(true);
+			//Query queryRef = ref.equalTo(true, ACTIVO);//NO PIRULA
 		queryRef.addListenerForSingleValueEvent(listener);
     	//queryRef.addChildEventListener(listener);
 	}

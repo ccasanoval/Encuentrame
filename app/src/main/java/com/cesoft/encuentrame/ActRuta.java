@@ -557,16 +557,16 @@ System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 			if(date != null)
 				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
 
-			LatLng pos = new LatLng(pto.getLat(), pto.getLon());
+			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 System.err.println("showRuta: " + pos);
-			if(pto.getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
+			if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
 				mo.rotation(135);
 				_Map.addMarker(mo.position(pos));
 			}
-			else if(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
+			else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -575,9 +575,10 @@ System.err.println("showRuta: " + pos);
 			}
 			else
 			{
-				double disIni = (pto.getLat() - gpIni.getLat())*(pto.getLat() - gpIni.getLat()) + (pto.getLon() - gpIni.getLon())*(pto.getLon() - gpIni.getLon());
-				double disFin = (pto.getLat() - gpFin.getLat())*(pto.getLat() - gpFin.getLat()) + (pto.getLon() - gpFin.getLon())*(pto.getLon() - gpFin.getLon());//TODO: Idem in maps, do something...
-				if(disIni > 0.000000005 || disFin > 0.000000005)
+				//double disIni = (pto.getLat() - gpIni.getLat())*(pto.getLat() - gpIni.getLat()) + (pto.getLon() - gpIni.getLon())*(pto.getLon() - gpIni.getLon());
+				//double disFin = (pto.getLat() - gpFin.getLat())*(pto.getLat() - gpFin.getLat()) + (pto.getLon() - gpFin.getLon())*(pto.getLon() - gpFin.getLon());//TODO: Idem in maps, do something...
+				//if(disIni > 0.000000005 || disFin > 0.000000005)
+				if(pto.distancia2(gpIni) > 0.000000005 || pto.distancia2(gpFin) > 0.000000005)
 				{
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 					_Map.addMarker(mo.position(pos));
@@ -587,6 +588,6 @@ System.err.println("showRuta: " + pos);
 		}
 		po.width(5).color(Color.BLUE);
 		_Map.addPolyline(po);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLat(), gpIni.getLon()), 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), 15));
 	}
 }

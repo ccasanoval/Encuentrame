@@ -229,22 +229,31 @@ System.err.println("---------Ruta:getPuntos:e:"+err);
 			public String getIdRuta(){return idRuta;}
 			public void setIdRuta(String v){idRuta = v;}
 
-		private double lat, lon;
-			public double getLat(){return lat;}
-			public double getLon(){return lon;}
-			public void setLat(double v){lat=v;}
-			public void setLon(double v){lon=v;}
+		private double latitud, longitud;
+			public double getLatitud(){return latitud;}
+			public double getLongitud(){return longitud;}
+			public void setLat(double v){latitud=v;}
+			public void setLon(double v){longitud=v;}
 
 		private Date fecha;
 			public Date getFecha(){return fecha;}
 			public void setFecha(Date v){fecha=v;}
 
-		public RutaPunto(){}
+		//__________________________________________________________________________________________
+		@Override
+		public String toString()
+		{
+			return String.format(Locale.ENGLISH, "RutaPunto{id='%s', fecha='%s', latitud='%f', longitud='%f'}",
+					getId(), DATE_FORMAT.format(fecha), latitud, longitud);
+		}
+		//__________________________________________________________________________________________
+		//public RutaPunto(){}
 		public RutaPunto(String idRuta, double lat, double lon)
 		{
 			this.idRuta = idRuta;
-			this.lat = lat;
-			this.lon = lon;
+			this.latitud = lat;
+			this.longitud = lon;
+			this.fecha = new Date();
 		}
 
 		//// PARCEL
@@ -261,8 +270,8 @@ System.err.println("---------Ruta:getPuntos:e:"+err);
 		{
 			dest.writeString(getId());
 			dest.writeString(getIdRuta());
-			dest.writeDouble(getLat());
-			dest.writeDouble(getLon());
+			dest.writeDouble(getLatitud());
+			dest.writeDouble(getLongitud());
 			dest.writeLong(getFecha().getTime());
 		}
 		@Override
@@ -326,58 +335,20 @@ System.err.println("---------Ruta:getPuntos:e:"+err);
 			Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
 System.err.println("---------"+NOMBRE);
 			//Query queryRef = ref.child("idRuta").equalTo(sIdRuta);
-			Query queryRef = ref.orderByChild("idRuta").equalTo(sIdRuta);
+			Query queryRef = ref.equalTo("idRuta", sIdRuta);
 			queryRef.addListenerForSingleValueEvent(listener);
+		}
+
+		//----------- HELPING FUNC
+		public boolean equalTo(RutaPunto v)
+		{
+			return (getLatitud() == v.getLatitud() && getLongitud() == v.getLongitud());
+		}
+		public double distancia2(RutaPunto v)
+		{
+			double dLat = getLatitud() - v.getLatitud();
+			double dLon = getLongitud() - v.getLongitud();
+			return dLat*dLat + dLon*dLon;
 		}
 	}
 }
-
-
-
-	//public static void sortPuntos(GeoPoint[] gp)
-	/*public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res, Filtro filtro)
-	{
-System.err.println("Ruta:getLista:filtro: "+filtro);
-		BackendlessDataQuery query = new BackendlessDataQuery();
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addSortByOption("created ASC");
-		queryOptions.addRelated("puntos");
-		query.setQueryOptions(queryOptions);
-		//--FILTRO
-		StringBuilder sb = new StringBuilder();//" created = created "
-		if( ! filtro.getNombre().isEmpty())
-		{
-			sb.append(" nombre LIKE '%");
-			sb.append(filtro.getNombre());
-			sb.append("%' ");
-		}
-		if(filtro.getRadio() > 0 && filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(String.format(java.util.Locale.ENGLISH, " distance(%f, %f, puntos.latitude, puntos.longitude ) < km(%f) ",
-					filtro.getPunto().latitude, filtro.getPunto().longitude, filtro.getRadio()/1000.0));
-		}
-		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created >= ");
-			sb.append(filtro.getFechaIni().getTime());
-		}
-		if(filtro.getFechaFin() != null)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created <= ");
-			sb.append(filtro.getFechaFin().getTime());
-		}
-		if(filtro.getActivo() != Util.NADA)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" activo = ");
-			sb.append(filtro.getActivo()==Filtro.ACTIVO?"true":"false");
-		}
-System.err.println("Ruta:getLista:SQL: "+sb.toString());
-		if(sb.length() > 0)
-			query.setWhereClause(sb.toString());
-		//--FILTRO
-		Backendless.Persistence.of(Ruta.class).find(query, res);
-	}*/

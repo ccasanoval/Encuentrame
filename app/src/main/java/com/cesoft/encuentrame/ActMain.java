@@ -480,7 +480,7 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 			{
 				long n = lugares.getChildrenCount();
 				System.err.println("---------LUGARES:GET:OK:" + n);
-				if(n < 1)
+				if(n < 1 && ActMain._coordinatorLayout != null)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
