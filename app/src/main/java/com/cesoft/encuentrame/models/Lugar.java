@@ -214,7 +214,7 @@ System.err.println("Lugar:getLista:onKeyEntered:onDataChange:-------------------
 System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady:A:"+nCount);
 				// FIREBASE really sucks!!
 				//try{while(nCount > 0) Thread.sleep(100);}catch(InterruptedException ie){}
-				listener.onData(al.toArray(new Lugar[1]));
+				//listener.onData(al.toArray(new Lugar[1]));
 System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady:B:"+al.size());//+" : "+asID.size());
 				//
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
