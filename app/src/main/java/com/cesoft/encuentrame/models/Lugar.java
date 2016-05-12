@@ -30,6 +30,9 @@ public class Lugar extends Objeto implements Parcelable
 
 	private Firebase _datos;
 
+//TODO:
+protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	//______________________________________________________________________________________________
 	private double latitud, longitud;
 		public double getLatitud(){return latitud;}
@@ -105,7 +108,7 @@ public class Lugar extends Objeto implements Parcelable
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 					aLugares.add(o.getValue(Lugar.class));
-				listener.onData(aLugares.toArray(new Lugar[1]));
+				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -142,7 +145,7 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 					if( ! l.pasaFiltro(filtro))continue;
 					aLugares.add(l);
 				}
-				listener.onData(aLugares.toArray(new Lugar[1]));
+				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -157,10 +160,8 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 	{
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
-		final ArrayList<Lugar> al = new ArrayList<>();
-		final boolean bNombre = ! filtro.getNombre().isEmpty();
+		final ArrayList<Lugar> aLugares = new ArrayList<>();
 
-		final Firebase ref = newFirebase();
 		GeoFire geoFire = newGeoFire();
 		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
 		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
@@ -170,7 +171,7 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				nCount++;
-				ref.child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)
@@ -178,15 +179,15 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 						nCount--;
 						Lugar l = data.getValue(Lugar.class);
 						if( ! l.pasaFiltro(filtro))return;
-						al.add(l);
-						if(nCount < 1)listener.onData(al.toArray(new Lugar[1]));
+						aLugares.add(l);
+						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
 					@Override
 					public void onCancelled(FirebaseError err)
 					{
 						nCount--;
 						System.err.println("Lugar:getLista:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onData(al.toArray(new Lugar[1]));
+						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
 				});
 			}

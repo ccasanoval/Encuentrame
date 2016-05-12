@@ -8,6 +8,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
@@ -24,7 +25,9 @@ public class Aviso extends Objeto
 	public static final String NOMBRE = "aviso";
 
 	private Firebase _datos;
-
+//TODO:
+protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	//______________________________________________________________________________________________
 	private final static String ACTIVO = "activo";
 	protected boolean activo = true;
@@ -179,7 +182,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 					aAvisos.add(o.getValue(Aviso.class));
-				listener.onData(aAvisos.toArray(new Aviso[1]));
+				listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -221,7 +224,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 					if( ! a.pasaFiltro(filtro))continue;
 					aAvisos.add(o.getValue(Aviso.class));
 				}
-				listener.onData(aAvisos.toArray(new Aviso[1]));
+				listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -237,7 +240,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro);
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
-		final ArrayList<Aviso> aA = new ArrayList<>();
+		final ArrayList<Aviso> aAvisos = new ArrayList<>();
 
 		final GeoQuery geoQuery = newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
 		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
@@ -256,15 +259,15 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 						nCount--;
 						Aviso a = data.getValue(Aviso.class);
 						if( ! a.pasaFiltro(filtro))return;
-						aA.add(a);
-						if(nCount < 1)listener.onData(aA.toArray(new Aviso[1]));
+						aAvisos.add(a);
+						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 					@Override
 					public void onCancelled(FirebaseError err)
 					{
 						nCount--;
 						System.err.println("Aviso:buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onData(aA.toArray(new Aviso[1]));
+						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 				});
 			}

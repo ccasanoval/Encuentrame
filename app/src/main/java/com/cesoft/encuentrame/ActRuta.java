@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
@@ -418,26 +417,9 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		}
 		else// if(_r.getPuntos().size() > 0)
 		{
-			showRuta();//showMarkers();
-			//GeoLocation pos = _r.getPuntos().get(0);
-			//LatLng pos2 = new LatLng(pos.latitude, pos.longitude);
-			//_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));//TODO:Luego en showRuta
+			showRuta();
 		}
 	}
-	/*private void showMarkers()
-	{
-		PolylineOptions po = new PolylineOptions();
-		for(GeoPoint pt : _r.getPuntos())
-		{
-			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
-System.err.println("showMarkers: " + pos);
-			_Map.addMarker(new MarkerOptions().position(pos));
-			po.add(pos);
-			//_Map.addCircle(new CircleOptions().center(pos).radius(2).strokeColor(Color.TRANSPARENT).fillColor(0x55AA0000));
-		}
-		po.width(5).color(Color.RED);
-		Polyline line = _Map.addPolyline(po);
-	}*/
 
 	//______________________________________________________________________________________________
 	private void pideGPS()
@@ -524,7 +506,7 @@ System.err.println("ActRuta:showRuta:onDataChange:-----------:"+ds.getChildrenCo
 				{
 					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
 				}
-				showRutaHelper(_r, aPts);
+				showRutaHelper(aPts);
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -536,7 +518,7 @@ System.err.println("ActRuta:showRuta:onCancelled:-----------:"+err);
 		});
 	}
 
-	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
+	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
 System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
@@ -548,9 +530,8 @@ System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 
 		Ruta.RutaPunto gpIni = aPts[0];
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
-		for(int i=0; i < aPts.length; i++)
+		for(Ruta.RutaPunto pto : aPts)
 		{
-			Ruta.RutaPunto pto = aPts[i];
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(_r.getNombre());
 			Date date = pto.getFecha();
@@ -559,14 +540,14 @@ System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 System.err.println("showRuta: " + pos);
-			if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
+			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
 				mo.rotation(135);
 				_Map.addMarker(mo.position(pos));
 			}
-			else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
+			else if(pto == gpFin)//else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -575,10 +556,7 @@ System.err.println("showRuta: " + pos);
 			}
 			else
 			{
-				//double disIni = (pto.getLat() - gpIni.getLat())*(pto.getLat() - gpIni.getLat()) + (pto.getLon() - gpIni.getLon())*(pto.getLon() - gpIni.getLon());
-				//double disFin = (pto.getLat() - gpFin.getLat())*(pto.getLat() - gpFin.getLat()) + (pto.getLon() - gpFin.getLon())*(pto.getLon() - gpFin.getLon());//TODO: Idem in maps, do something...
-				//if(disIni > 0.000000005 || disFin > 0.000000005)
-				if(pto.distancia2(gpIni) > 0.000000005 || pto.distancia2(gpFin) > 0.000000005)
+				if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)//0.000000005 || pto.distancia2(gpFin) > 0.000000005)
 				{
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 					_Map.addMarker(mo.position(pos));

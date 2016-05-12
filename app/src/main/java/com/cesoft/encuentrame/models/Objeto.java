@@ -85,8 +85,9 @@ public class Objeto implements Parcelable
 
 	// FIREBASE
 	//______________________________________________________________________________________________
-	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-	protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+	//TODO
+	//protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	//protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	public interface ObjetoListener<T>
 	{
 		void onData(T[] aData);

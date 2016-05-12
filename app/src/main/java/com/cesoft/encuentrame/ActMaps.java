@@ -358,10 +358,8 @@ System.err.println("----------showRutaHelper:1:"+aPts.length);
 
 		Ruta.RutaPunto gpIni = aPts[0];
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
-		//for(int i=0; i < aPts.length; i++)
 		for(Ruta.RutaPunto pto : aPts)
 		{
-			//Ruta.RutaPunto pto = aPts[i];
 System.err.println("----------showRutaHelper:2:"+pto);
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
@@ -371,32 +369,31 @@ System.err.println("----------showRutaHelper:2:"+pto);
 
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 System.err.println("showRuta: " + pos);
-			if(pto.equalTo(gpIni))//if(pto.getLatitud() == gpIni.getLatitud() && pto.getLongitud() == gpIni.getLongitud())//It's not possible to establish the z order for the marker...
+			//if(pto.equalTo(gpIni))//if(pto.getLatitud() == gpIni.getLatitud() && pto.getLongitud() == gpIni.getLongitud())//It's not possible to establish the z order for the marker...
+			if(pto == gpIni)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
 				mo.rotation(135);
 				_Map.addMarker(mo.position(pos));
 			}
-			else if(pto.equalTo(gpFin))// getLatitud() == gpFin.getLatitud() && pto.getLongitud() == gpFin.getLongitud())
+			//else if(pto.equalTo(gpFin))// getLatitud() == gpFin.getLatitud() && pto.getLongitud() == gpFin.getLongitud())
+			else if(pto == gpFin)
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				//double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
-				//if(disIni < 0.00000001)pos = new LatLng(pos.latitude + 0.00001, pos.longitude + 0.00001);
 				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else
 			{
-				if(pto.distanciaSimple(gpIni) > 0.00000001 || pto.distanciaSimple(gpFin) > 0.00000001)
+				//if(pto.distanciaSimple(gpIni) > 0.00000001 || pto.distanciaSimple(gpFin) > 0.00000001)
+				if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)
 				{
 					//System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);
 					_Map.addMarker(mo.position(pos));
 				}
-				//Punto igual a ini o fin
-				//else System.err.println("------- NO " + r.getNombre() + " : " + pos + " : " + df.format(date)+":::::::::::::::"+disIni+"-"+disFin+"----"+(pt.getLatitude() - gpIni.getLatitude())+"...."+(pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()));
 			}
 			po.add(pos);
 		}

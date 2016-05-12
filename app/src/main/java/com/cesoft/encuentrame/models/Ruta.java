@@ -15,6 +15,7 @@ import com.firebase.client.MutableData;
 import com.firebase.client.Query;
 import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
@@ -38,6 +39,9 @@ public class Ruta extends Objeto implements Parcelable
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}*/
 
+//TODO:
+protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	//______________________________________________________________________________________________
 	public Ruta(){}
 	@Override
@@ -123,11 +127,12 @@ System.err.println("Ruta:eliminar:r:" + this);
 			@Override
 			public void onDataChange(DataSnapshot data)
 			{
-				long n = data.getChildrenCount();
-				ArrayList<Ruta> aRutas = new ArrayList<>((int)n);
+				int n = (int)data.getChildrenCount();
+System.err.println("Ruta:getLista:a----------"+n);
+				ArrayList<Ruta> aRutas = new ArrayList<>(n);
 				for(DataSnapshot o : data.getChildren())
 					aRutas.add(o.getValue(Ruta.class));
-				listener.onData(aRutas.toArray(new Ruta[1]));
+				listener.onData(aRutas.toArray(new Ruta[n]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -178,7 +183,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 					if( ! r.pasaFiltro(filtro))continue;
 					aRutas.add(r);
 				}
-				listener.onData(aRutas.toArray(new Ruta[1]));
+				listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -194,7 +199,17 @@ System.err.println("Ruta:eliminar:r:" + this);
 System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro);
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
-		final ArrayList<Ruta> aR = new ArrayList<>();//TODO buscar RutaPunto  : como hacer join???????
+		//TODO:
+		//TODO:
+		//TODO:
+		//TODO:
+		//TODO:-------------------------------------------------------------------------------------
+		//TODO:
+		//TODO:
+		//TODO:
+		//TODO:
+
+		final ArrayList<Ruta> aRutas = new ArrayList<>();//TODO buscar RutaPunto  : como hacer join???????
 		final Firebase ref = newFirebase();
 		final GeoQuery geoQuery = newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);//TODO: dejar el radio del filtro en metros antes
 		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
@@ -213,15 +228,15 @@ System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro)
 						nCount--;
 						Ruta r = data.getValue(Ruta.class);
 						if( ! r.pasaFiltro(filtro))return;
-						aR.add(r);
-						if(nCount < 1)listener.onData(aR.toArray(new Ruta[1]));
+						aRutas.add(r);
+						if(nCount < 1)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 					}
 					@Override
 					public void onCancelled(FirebaseError err)
 					{
 						nCount--;
 						System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onData(aR.toArray(new Ruta[1]));
+						if(nCount < 1)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 					}
 				};
 				//newFirebase().child(key).addListenerForSingleValueEvent(vel);
@@ -255,7 +270,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 			{
 				if(count != null && count.getValue() != null)
 					puntosCount = (Long)count.getValue();
-//System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
+System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
 			}
 			@Override
 			public void onCancelled(FirebaseError err)
@@ -346,6 +361,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// RUTA PUNTO
 	////////////////////////////////////////////////////////////////////////////////////////////////////
+	@JsonIgnoreProperties({"_datos"})
 	public static class RutaPunto implements Parcelable
 	{
 		public static final String NOMBRE = "ruta_punto";
@@ -368,6 +384,10 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		private Date fecha;
 			public Date getFecha(){return fecha;}
 			public void setFecha(Date v){fecha=v;}
+
+//TODO:
+protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 
 		//__________________________________________________________________________________________
 		@Override
@@ -417,8 +437,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		//// FIREBASE
 		public static void eliminar(String idRuta)
 		{
-			Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-			Query queryRef = ref.orderByChild("idRuta").equalTo(idRuta);
+			Query queryRef = newFirebase().orderByChild("idRuta").equalTo(idRuta);
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
 			{
 				@Override
@@ -442,122 +461,30 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 			}
 			else
 			{
-				Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
 				if(getId() != null)
 				{
-					_datos = ref.child(getId());
+					_datos = newFirebase().child(getId());
 				}
 				else
 				{
-					_datos = ref.push();
+					_datos = newFirebase().push();
 					setId(_datos.getKey());
 				}
 				_datos.setValue(this, listener);
 			}
 		}
-		/*public static void getById(String sId, ValueEventListener listener)
-		{
-			Firebase ref1 = new Firebase(FIREBASE).child(NOMBRE).child(sId);
-			ref1.addListenerForSingleValueEvent(listener);
-		}*/
 		public static void getLista(String sIdRuta, ValueEventListener listener)
 		{
-			Firebase ref = new Firebase(FIREBASE).child(NOMBRE);
-System.err.println("---------"+NOMBRE);
-			//Query queryRef = ref.child("idRuta").equalTo(sIdRuta);
-			Query queryRef = ref.equalTo("idRuta", sIdRuta);
+System.err.println("RutaPunto:getLista---------"+NOMBRE);
+			Query queryRef = newFirebase().child("idRuta").equalTo(sIdRuta);//TODO: cambiar los orderby por child...
+			//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
 			queryRef.addListenerForSingleValueEvent(listener);
 		}
-		/*public static void getLista(ObjetoListener<Ruta> listener, Filtro filtro)
-		{
-			if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
-				buscarPorFiltro(listener, filtro);
-			else
-				buscarPorGeoFiltro(listener, filtro);
-		}
-		//----
-		public static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro)//TODO Se puede parametrizar? se puede poner la funcion en objeto?
-		{
-			newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot data)
-				{
-					long n = data.getChildrenCount();
-					ArrayList<Ruta> aRutas = new ArrayList<>((int)n);
-					for(DataSnapshot o : data.getChildren())
-					{
-						Ruta r = o.getValue(Ruta.class);
-						if( ! r.pasaFiltro(filtro))continue;
-						aRutas.add(o.getValue(Ruta.class));
-					}
-					listener.onData(aRutas.toArray(new Ruta[1]));
-				}
-				@Override
-				public void onCancelled(FirebaseError err)
-				{
-					System.err.println("Ruta:buscarPorFiltro:onCancelled:"+err);
-					listener.onError("Ruta:buscarPorFiltro:onCancelled:"+err);
-				}
-			});
-		}
-		//----
-		public static void buscarPorGeoFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro)
-		{
-	System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro);
-			if(filtro.getRadio() < 1)filtro.setRadio(100);
-
-			final ArrayList<Ruta> aR = new ArrayList<>();
-			final GeoQuery geoQuery = newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
-			GeoQueryEventListener lisGeo = new GeoQueryEventListener()
-			{
-				private int nCount = 0;
-				@Override
-				public void onKeyEntered(String key, GeoLocation location)
-				{
-					System.err.println("Aviso:buscarPorGeoFiltro:onKeyEntered:"+key+", "+location);
-					nCount++;
-					newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
-					{
-						@Override
-						public void onDataChange(DataSnapshot data)
-						{
-							nCount--;
-							Ruta r = data.getValue(Ruta.class);
-							if( ! r.pasaFiltro(filtro))return;
-							aR.add(r);
-							if(nCount < 1)listener.onData(aR.toArray(new Ruta[1]));
-						}
-						@Override
-						public void onCancelled(FirebaseError err)
-						{
-							nCount--;
-							System.err.println("Aviso:buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
-							if(nCount < 1)listener.onData(aR.toArray(new Ruta[1]));
-						}
-					});
-				}
-				@Override
-				public void onGeoQueryReady()
-				{
-	System.err.println("Ruta:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
-					geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
-				}
-				@Override public void onKeyExited(String key){}
-				@Override public void onKeyMoved(String key, GeoLocation location){}
-				@Override
-				public void onGeoQueryError(FirebaseError err)
-				{
-					System.err.println("Ruta:buscarPorGeoFiltro:onGeoQueryError:"+err);
-				}
-			};
-			geoQuery.addGeoQueryEventListener(lisGeo);
-		}*/
 
 
 
 		//----------- HELPING FUNC
-		public boolean equalTo(RutaPunto v)
+		/*public boolean equalTo(RutaPunto v)
 		{
 			return (getLatitud() == v.getLatitud() && getLongitud() == v.getLongitud());
 		}
@@ -566,6 +493,10 @@ System.err.println("---------"+NOMBRE);
 			double dLat = getLatitud() - v.getLatitud();
 			double dLon = getLongitud() - v.getLongitud();
 			return dLat*dLat + dLon*dLon;
+		}*/
+		public double distanciaReal(RutaPunto v)
+		{
+			return distanciaReal(getLatitud(), getLongitud(), v.getLatitud(), v.getLongitud());
 		}
 		/*
 		 * Calculate distance between two points in latitude and longitude taking into account height difference.

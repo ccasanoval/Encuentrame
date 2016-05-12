@@ -521,9 +521,12 @@ System.err.println("ActMain:refreshRutas()");
 				System.err.println("---------RUTAS2:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
-						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					//TODO: por que se llama a ActMain:refreshRutas() tantas veces?
+					//TODO:
+					//if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
+					//	Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 				}
+				else
 				_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 			}
 			@Override
