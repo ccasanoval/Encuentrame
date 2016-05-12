@@ -29,7 +29,6 @@ public class Lugar extends Objeto implements Parcelable
 	public static final String NOMBRE = "lugar";
 
 	private Firebase _datos;
-	//private static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
 
 	//______________________________________________________________________________________________
 	private double latitud, longitud;
@@ -91,25 +90,39 @@ public class Lugar extends Objeto implements Parcelable
 		Firebase ref1 = newFirebase().child(sId);
 		ref1.addListenerForSingleValueEvent(listener);
 	}*/
-	public static void getLista(ObjetoListener<Lugar> listener)//ValueEventListener listener)
+
+	//______________________________________________________________________________________________
+	public static void getLista(final ObjetoListener<Lugar> listener)
 	{
 		Firebase ref = newFirebase();
 		//ref.addValueEventListener(listener);//TODO: cual es mejor?
-		ref.addListenerForSingleValueEvent(listener);
+		ref.addListenerForSingleValueEvent(new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot data)
+			{
+				long n = data.getChildrenCount();
+				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
+				for(DataSnapshot o : data.getChildren())
+					aLugares.add(o.getValue(Lugar.class));
+				listener.onData(aLugares.toArray(new Lugar[1]));
+			}
+			@Override
+			public void onCancelled(FirebaseError err)
+			{
+				System.err.println("Lugar:getLista:onCancelled:"+err);
+				listener.onError("Lugar:getLista:onCancelled:"+err);
+			}
+		});
 	}
 
 	//----------------------------------------------------------------------------------------------
-	/*public interface LugarListener
+	public static void getLista(ObjetoListener<Lugar> listener, Filtro filtro)
 	{
-		void onData(Lugar[] aLugares);
-		void onError(String err);
-	}*/
-	public static void getLista(ObjetoListener<Lugar> listener, Filtro filtro)//(ValueEventListener listener, Filtro filtro)
-	{
-		if(filtro.getPunto().latitude != 0 && filtro.getPunto().longitude != 0)//filtro.getRadio() > Util.NADA &&
-			buscarPorGeoFiltro(listener, filtro);
-		else
+		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro);
+		else
+			buscarPorGeoFiltro(listener, filtro);
 	}
 	public static void buscarPorFiltro(final ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
@@ -126,9 +139,8 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 				for(DataSnapshot o : data.getChildren())
 				{
 					Lugar l = o.getValue(Lugar.class);
-					if( ! l.getNombre().contains(filtro.getNombre()))continue;
-					//TODO:Fecha
-					aLugares.add(o.getValue(Lugar.class));
+					if( ! l.pasaFiltro(filtro))continue;
+					aLugares.add(l);
 				}
 				listener.onData(aLugares.toArray(new Lugar[1]));
 			}
@@ -136,7 +148,7 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 			public void onCancelled(FirebaseError err)
 			{
 				System.err.println("Lugar:buscarPorFiltro:onCancelled:"+err);
-				listener.onError(err.toString());
+				listener.onError("Lugar:buscarPorFiltro:onCancelled:"+err);
 			}
 		});
 	}
@@ -154,34 +166,29 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
 		{
 			private int nCount = 0;
-			//private ArrayList<String> asID = new ArrayList<>();
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				nCount++;
-
-				ValueEventListener vel = new ValueEventListener()
+				ref.child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)
 					{
-						Lugar l = data.getValue(Lugar.class);
-						if(bNombre && ! l.getNombre().contains(filtro.getNombre()))return;
-						al.add(l);
 						nCount--;
+						Lugar l = data.getValue(Lugar.class);
+						if( ! l.pasaFiltro(filtro))return;
+						al.add(l);
 						if(nCount < 1)listener.onData(al.toArray(new Lugar[1]));
 					}
 					@Override
 					public void onCancelled(FirebaseError err)
 					{
-						System.err.println("Lugar:getLista:onKeyEntered:onCancelled:"+err);
 						nCount--;
+						System.err.println("Lugar:getLista:onKeyEntered:onCancelled:"+err);
 						if(nCount < 1)listener.onData(al.toArray(new Lugar[1]));
 					}
-				};
-
-				//newFirebase().child(key).addListenerForSingleValueEvent(vel);
-				ref.child(key).addListenerForSingleValueEvent(vel);//TODO: how to wait to
+				});
 			}
 			@Override
 			public void onKeyExited(String key)

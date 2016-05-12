@@ -448,12 +448,12 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 			{
 System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				checkFechas();
-				Lugar.getLista(_acLugar2, _aFiltro[_sectionNumber]);
+				Lugar.getLista(_acLugar, _aFiltro[_sectionNumber]);
 			}
 			else
 				Lugar.getLista(_acLugar);
 		}
-		private Objeto.ObjetoListener<Lugar> _acLugar2 = new Objeto.ObjetoListener<Lugar>()
+		private Objeto.ObjetoListener<Lugar> _acLugar = new Objeto.ObjetoListener<Lugar>()
 		{
 			@Override
 			public void onData(Lugar[] aLugares)
@@ -512,6 +512,26 @@ System.err.println("ActMain:refreshRutas()");
 			else
 				Ruta.getLista(_acRuta);
 		}
+		private Objeto.ObjetoListener<Ruta> _acRuta = new Objeto.ObjetoListener<Ruta>()
+		{
+			@Override
+			public void onData(Ruta[] aRutas)
+			{
+				long n = aRutas.length;
+				System.err.println("---------RUTAS2:GET:OK:" + n);
+				if(n < 1)
+				{
+					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+				}
+				_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this));//.toArray(new Lugar[0])));
+			}
+			@Override
+			public void onError(String err)
+			{
+				System.err.println("---------RUTAS2:GET:ERROR:" + err);
+			}
+		};/*
 		private ValueEventListener _acRuta = new ValueEventListener()
 		{
 			@Override
@@ -547,7 +567,7 @@ System.err.println("ActMain:refreshRutas()");
 			{
 				System.err.println("---------RUTAS:GET:ERROR:" + err);
 			}
-		};
+		};*/
 
 		//__________________________________________________________________________________________
 		public void refreshAvisos()
@@ -560,7 +580,27 @@ System.err.println("ActMain:refreshRutas()");
 			else
 				Aviso.getLista(_acAviso);
 		}
-		private ValueEventListener _acAviso = new ValueEventListener()
+		private Objeto.ObjetoListener<Aviso> _acAviso = new Objeto.ObjetoListener<Aviso>()
+		{
+			@Override
+			public void onData(Aviso[] aAvisos)
+			{
+				long n = aAvisos.length;
+				System.err.println("---------AVISOS2:GET:OK:" + n);
+				if(n < 1)
+				{
+					if(_this._viewPager.getCurrentItem() == Util.AVISOS && _apf[Util.AVISOS].isAdded())
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+				}
+				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, PlaceholderFragment.this));
+			}
+			@Override
+			public void onError(String err)
+			{
+				System.err.println("---------AVISOS2:GET:ERROR:" + err);
+			}
+		};
+		/*private ValueEventListener _acAviso = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot avisos)
@@ -585,7 +625,7 @@ System.err.println("ActMain:refreshRutas()");
 			{
 				System.err.println("---------AVISOS:GET:ERROR:" + err);
 			}
-		};
+		};*/
 
 		//__________________________________________________________________________________________
 		//TODO: a otro lugar

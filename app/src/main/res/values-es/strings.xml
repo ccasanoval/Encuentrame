@@ -107,4 +107,5 @@
 	<string name="ok_eliminar_aviso">Se eliminó el lugar</string>
 	<string name="ok_eliminar_lugar">Se eliminó el aviso</string>
 	<string name="ok_eliminar_ruta">Se eliminó la ruta</string>
+	<string name="pto_ruta_ko">Error al obtener los puntos de la ruta</string>
 </resources>

@@ -9,14 +9,13 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoLocation;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +32,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.text.DateFormat;
 import java.util.Date;
 
+import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Ruta;
@@ -330,21 +330,18 @@ System.err.println("----------showRuta:"+r);
 			@Override
 			public void onDataChange(DataSnapshot ds)
 			{
-System.err.println("----------showRuta:"+ds);
 				int i = 0;
 				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
 				for(DataSnapshot o : ds.getChildren())
 				{
 					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
-System.err.println("----------showRuta:2:"+aPts[i-1]);
 				}
 				showRutaHelper(r, aPts);
 			}
 			@Override
 			public void onCancelled(FirebaseError firebaseError)
 			{
-				//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
-				Snackbar.make(_coordinatorLayout, "Error al obtener los puntos de la ruta", Snackbar.LENGTH_LONG).show();//TODO:
+				Snackbar.make(_coordinatorLayout, getString(R.string.pto_ruta_ko), Snackbar.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -361,9 +358,10 @@ System.err.println("----------showRutaHelper:1:"+aPts.length);
 
 		Ruta.RutaPunto gpIni = aPts[0];
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
-		for(int i=0; i < aPts.length; i++)
+		//for(int i=0; i < aPts.length; i++)
+		for(Ruta.RutaPunto pto : aPts)
 		{
-			Ruta.RutaPunto pto = aPts[i];
+			//Ruta.RutaPunto pto = aPts[i];
 System.err.println("----------showRutaHelper:2:"+pto);
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
@@ -391,7 +389,7 @@ System.err.println("showRuta: " + pos);
 			}
 			else
 			{
-				if(pto.distancia2(gpIni) > 0.00000001 || pto.distancia2(gpFin) > 0.00000001)
+				if(pto.distanciaSimple(gpIni) > 0.00000001 || pto.distanciaSimple(gpFin) > 0.00000001)
 				{
 					//System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);
@@ -412,59 +410,50 @@ System.err.println("showRuta: " + pos);
 
 	private void showLugares()
 	{
-		Lugar.getLista(new ValueEventListener()
+		Lugar.getLista(new Objeto.ObjetoListener<Lugar>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot lugares)
+			public void onData(Lugar[] aData)
 			{
-				long n = lugares.getChildrenCount();
-				System.err.println("---------LUGARES:GET:OK:" + n);
-				if(n < 1)return;
-				for(DataSnapshot lugar : lugares.getChildren())
-					showLugar(lugar.getValue(Lugar.class));
+				System.err.println("---------LUGARES:GET:OK:"+aData.length);
+				for(Lugar o : aData)showLugar(o);
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onError(String err)
 			{
-				System.err.println("---------LUGARES:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				System.err.println("---------LUGARES:GET:ERROR:" + err);
 			}
 		});
 	}
 	private void showAvisos()
 	{
-		Aviso.getLista(new ValueEventListener()
+		Aviso.getLista(new Objeto.ObjetoListener<Aviso>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot avisos)
+			public void onData(Aviso[] aData)
 			{
-				long n = avisos.getChildrenCount();
-				System.err.println("---------AVISOS:GET:OK:" + n);
-				if(n < 1)return;
-				for(DataSnapshot aviso : avisos.getChildren())
-					showAviso(aviso.getValue(Aviso.class));
+				System.err.println("---------AVISOS:GET:OK:"+aData.length);
+				for(Aviso o : aData)showAviso(o);
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onError(String err)
 			{
-				System.err.println("---------AVISOS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				System.err.println("---------AVISOS:GET:ERROR:" + err);
 			}
 		});
 	}
 	private void showRutas()
 	{
-		Ruta.getLista(new ValueEventListener()
+		Ruta.getLista(new Objeto.ObjetoListener<Ruta>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot rutas)
+			public void onData(Ruta[] aData)
 			{
-				long n = rutas.getChildrenCount();
-				System.err.println("---------RUTAS:GET:OK:" + n);
-				if(n < 1)return;
-				for(DataSnapshot ruta : rutas.getChildren())
-					showRuta(ruta.getValue(Ruta.class));
+				System.err.println("---------RUTAS:GET:OK:" + aData.length);
+				for(Ruta o : aData)showRuta(o);
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onError(String err)
 			{
 				System.err.println("---------RUTAS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 			}

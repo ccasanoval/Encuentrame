@@ -195,18 +195,16 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				}catch(Exception e){System.err.println("CesService:saveGeoTracking:Ruta.getById:"+rutas);}
 
 				Ruta r = null;
-				long n = rutas.getChildrenCount();
 				for(DataSnapshot ruta : rutas.getChildren())
 				{
 					r = ruta.getValue(Ruta.class);//om.firebase.client.FirebaseException: Failed to bounce to type
-					break;
+					if(r != null)break;
 				}
 				if(r == null)
 				{
 					System.err.println("CesService:saveGeoTracking:Ruta.getById:NULL---------------");
 					return;
 				}
-				//Ruta r = rutas.getValue(Ruta.class);//TODO: com.firebase.client.FirebaseException: Failed to bounce to type
 
 				final Location loc = Util.getLocation();
 				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());

@@ -75,6 +75,14 @@ public class Objeto implements Parcelable
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha));
 	}
 
+	public boolean pasaFiltro(Filtro filtro)
+	{
+		if(!filtro.getNombre().isEmpty() && !getNombre().contains(filtro.getNombre()))return false;
+		if(filtro.getFechaIni() != null && getFecha().getTime() < filtro.getFechaIni().getTime())return false;
+		if(filtro.getFechaFin() != null && getFecha().getTime() > filtro.getFechaFin().getTime())return false;
+		return true;
+	}
+
 	// FIREBASE
 	//______________________________________________________________________________________________
 	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}

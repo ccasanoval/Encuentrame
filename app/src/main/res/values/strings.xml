@@ -110,4 +110,5 @@
 	<string name="ok_guardar_aviso">The Alert was saved</string>
 	<string name="ok_guardar_lugar">The Point was saved</string>
 	<string name="ok_guardar_ruta">The Route was saved</string>
+	<string name="pto_ruta_ko">An error ocurred while obtaining the route points</string>
 </resources>
