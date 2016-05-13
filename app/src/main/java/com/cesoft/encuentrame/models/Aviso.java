@@ -198,7 +198,9 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 	public boolean pasaFiltro(Filtro filtro)
 	{
 		if( ! super.pasaFiltro(filtro))return false;
+System.err.println("----------"+filtro.getActivo()+" : "+isActivo());
 		if(filtro.getActivo()==Filtro.ACTIVO && !isActivo()  ||  filtro.getActivo()==Filtro.INACTIVO && isActivo())return false;
+System.err.println("----------pasaFiltro FINAL");
 		return true;
 	}
 	public static void getLista(ObjetoListener<Aviso> listener, Filtro filtro)
@@ -258,8 +260,7 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 					{
 						nCount--;
 						Aviso a = data.getValue(Aviso.class);
-						if( ! a.pasaFiltro(filtro))return;
-						aAvisos.add(a);
+						if(a.pasaFiltro(filtro))aAvisos.add(a);
 						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 					@Override

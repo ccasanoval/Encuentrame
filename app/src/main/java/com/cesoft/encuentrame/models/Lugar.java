@@ -142,6 +142,7 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 				for(DataSnapshot o : data.getChildren())
 				{
 					Lugar l = o.getValue(Lugar.class);
+System.err.println("--------------------Lugar:"+l);
 					if( ! l.pasaFiltro(filtro))continue;
 					aLugares.add(l);
 				}
@@ -178,8 +179,7 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 					{
 						nCount--;
 						Lugar l = data.getValue(Lugar.class);
-						if( ! l.pasaFiltro(filtro))return;
-						aLugares.add(l);
+						if(l.pasaFiltro(filtro))aLugares.add(l);
 						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
 					@Override
@@ -192,26 +192,14 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 				});
 			}
 			@Override
-			public void onKeyExited(String key)
-			{
-				System.err.println("Lugar:getLista:--------------------------------------------onKeyExited");
-			}
-			@Override
-			public void onKeyMoved(String key, GeoLocation location)
-			{
-				System.err.println("Lugar:getLista:--------------------------------------------onKeyMoved"+key+", "+location);
-			}
-			@Override
 			public void onGeoQueryReady()
 			{
-System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryReady:A:"+nCount);
+				System.err.println("Lugar:getLista:onGeoQueryReady:A:"+nCount);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
-			@Override
-			public void onGeoQueryError(FirebaseError error)
-			{
-				System.err.println("Lugar:getLista:--------------------------------------------onGeoQueryError:"+error);
-			}
+			@Override public void onKeyExited(String key){System.err.println("Lugar:getLista:onKeyExited");}
+			@Override public void onKeyMoved(String key, GeoLocation location){System.err.println("Lugar:getLista:onKeyMoved"+key+", "+location);}
+			@Override public void onGeoQueryError(FirebaseError error){System.err.println("Lugar:getLista:onGeoQueryError:"+error);}
 		};
 		geoQuery.addGeoQueryEventListener(lisGeo);
 	}

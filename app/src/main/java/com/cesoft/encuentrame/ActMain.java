@@ -264,7 +264,6 @@ System.err.println("----------------------------ActMain:onCreateView:_sectionNum
 			if(_aFiltro[_sectionNumber] == null)
 				_aFiltro[_sectionNumber] = new Filtro(_sectionNumber);
 
-
 			FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
 			fab.setOnClickListener(new View.OnClickListener()
 			{
@@ -294,7 +293,7 @@ System.err.println("----------------------------ActMain:onCreateView:_sectionNum
 				break;
 			case Util.RUTAS://---------------------------------------------------------------------------
 				textView.setText(getString(R.string.rutas));
-				refreshRutas();
+				refreshRutas(2);
 				break;
 			case Util.AVISOS://--------------------------------------------------------------------------
 				textView.setText(getString(R.string.avisos));
@@ -311,7 +310,7 @@ System.err.println("----------------------------ActMain:onCreateView:_sectionNum
 					@Override
 					public void onReceive(Context context, Intent intent)
 					{
-						refreshRutas();
+						refreshRutas(3);
 					}
 				};
 			}
@@ -409,7 +408,7 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 			switch(requestCode)
 			{
 			case Util.LUGARES:	refreshLugares(); break;
-			case Util.RUTAS:	refreshRutas(); break;
+			case Util.RUTAS:	refreshRutas(1); break;
 			case Util.AVISOS:	refreshAvisos(); break;
 			}
 		}
@@ -430,7 +429,7 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 			if(_sectionNumber == Util.RUTAS)
 			{
 				LocalBroadcastManager.getInstance(_apf[Util.RUTAS].getContext()).registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
-				refreshRutas();
+				//TODO: refreshRutas();
 			}
 		}
 		@Override
@@ -462,8 +461,11 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				System.err.println("---------LUGARES2:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
+					try{//http://www.androidhive.info/2015/09/android-material-design-snackbar-example/
+					if(_this._viewPager.getCurrentItem() == Util.LUGARES)// && _apf[Util.LUGARES].isAdded()
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					}
+					catch(Exception e){System.err.println("ActMain:_acLugar:"+e);}
 				}
 				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 			}
@@ -473,37 +475,11 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				System.err.println("---------LUGARES2:GET:ERROR:" + err);
 			}
 		};
-		/*private ValueEventListener _acLugar = new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot lugares)
-			{
-				long n = lugares.getChildrenCount();
-				System.err.println("---------LUGARES:GET:OK:" + n);
-				if(n < 1 && ActMain._coordinatorLayout != null)
-				{
-					if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
-						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
-				}
-				int i = 0;
-				Lugar[] aLugares = new Lugar[(int)n];
-				for(DataSnapshot o : lugares.getChildren())
-				{
-					aLugares[i++] = o.getValue(Lugar.class);
-				}
-				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, PlaceholderFragment.this));//.toArray(new Lugar[0])));
-			}
-			@Override
-			public void onCancelled(FirebaseError err)
-			{
-				System.err.println("---------LUGARES:GET:ERROR:" + err);
-			}
-		};*/
 
 		//__________________________________________________________________________________________
-		public void refreshRutas()
+		public void refreshRutas(int i)
 		{
-System.err.println("ActMain:refreshRutas()");
+System.err.println("ActMain:refreshRutas()"+i);
 			if(_aFiltro[_sectionNumber].isOn())
 			{
 				checkFechas();
@@ -522,9 +498,10 @@ System.err.println("ActMain:refreshRutas()");
 				if(n < 1)
 				{
 					//TODO: por que se llama a ActMain:refreshRutas() tantas veces?
-					//TODO:
-					//if(_this._viewPager.getCurrentItem() == Util.LUGARES && _apf[Util.LUGARES].isAdded())
-					//	Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					try{
+					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
+						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					}catch(Exception e){System.err.println("ActMain:_acRuta:"+e);}
 				}
 				else
 				_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this));//.toArray(new Lugar[0])));
@@ -534,43 +511,7 @@ System.err.println("ActMain:refreshRutas()");
 			{
 				System.err.println("---------RUTAS2:GET:ERROR:" + err);
 			}
-		};/*
-		private ValueEventListener _acRuta = new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot rutas)
-			{
-				long n = rutas.getChildrenCount();
-				System.err.println("---------RUTAS:GET:OK:" + n);//TODO: Usar text to speach y opcion de config para habilitarlo...
-				if(n < 1)
-				{
-					if(_this._viewPager.getCurrentItem() == Util.RUTAS && _apf[Util.RUTAS].isAdded())
-						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
-				}
-				int i = 0;
-				Ruta[] aRutas = new Ruta[(int)n];
-				for(DataSnapshot o : rutas.getChildren())
-				{
-					try
-					{
-						aRutas[i] = o.getValue(Ruta.class);
-						i++;
-					}
-					catch(Exception e)
-					{
-						System.err.println("---------RUTAS:ValueEventListener:e:"+e+" : "+o);
-					}
-				}
-				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
-				_listView.setAdapter(r);
-				r.notifyDataSetChanged();
-			}
-			@Override
-			public void onCancelled(FirebaseError err)
-			{
-				System.err.println("---------RUTAS:GET:ERROR:" + err);
-			}
-		};*/
+		};
 
 		//__________________________________________________________________________________________
 		public void refreshAvisos()
@@ -592,8 +533,10 @@ System.err.println("ActMain:refreshRutas()");
 				System.err.println("---------AVISOS2:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.AVISOS && _apf[Util.AVISOS].isAdded())
+					try{
+					if(_this._viewPager.getCurrentItem() == Util.AVISOS)
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					}catch(Exception e){System.err.println("ActMain:_acAviso:"+e);}
 				}
 				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, PlaceholderFragment.this));
 			}

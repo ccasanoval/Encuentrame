@@ -80,6 +80,7 @@ public class Objeto implements Parcelable
 		if(!filtro.getNombre().isEmpty() && !getNombre().contains(filtro.getNombre()))return false;
 		if(filtro.getFechaIni() != null && getFecha().getTime() < filtro.getFechaIni().getTime())return false;
 		if(filtro.getFechaFin() != null && getFecha().getTime() > filtro.getFechaFin().getTime())return false;
+System.err.println("pasaFiltro----------OK");
 		return true;
 	}
 

@@ -37,7 +37,7 @@ import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Ruta;
 
-
+//TODO: cuando dos lugares o avisos en mismo sitio: girar con angulo aleatorio...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {

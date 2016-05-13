@@ -148,7 +148,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
 				{
 					Calendar newDate = Calendar.getInstance();
-					newDate.set(year, monthOfYear, dayOfMonth);
+					newDate.set(year, monthOfYear, dayOfMonth, 0, 0);
 					_filtro.setFechaIni(newDate.getTime());
 					_txtFechaIni.setText(dateFormatter.format(newDate.getTime()));
 				}
@@ -161,7 +161,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
 				{
 					Calendar newDate = Calendar.getInstance();
-					newDate.set(year, monthOfYear, dayOfMonth);
+					newDate.set(year, monthOfYear, dayOfMonth, 23, 59);
 					_filtro.setFechaFin(newDate.getTime());
 					_txtFechaFin.setText(dateFormatter.format(newDate.getTime()));
 				}

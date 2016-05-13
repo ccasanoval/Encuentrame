@@ -227,8 +227,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro)
 					{
 						nCount--;
 						Ruta r = data.getValue(Ruta.class);
-						if( ! r.pasaFiltro(filtro))return;
-						aRutas.add(r);
+						if( ! r.pasaFiltro(filtro))aRutas.add(r);
 						if(nCount < 1)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 					}
 					@Override
@@ -303,23 +302,6 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 				listener.onCancelled(err);
 			}
 		});
-		/*
-		RutaPunto.getLista(getId(), new ObjetoListener<RutaPunto>()
-		{
-			@Override
-			public void onData(RutaPunto[] aData)
-			{
-				puntosCount = aData.length;
-				listener.onData(aData);
-			}
-			@Override
-			public void onError(String err)
-			{
-				puntosCount = 0;
-				listener.onError(err.toString());
-			}
-		});
-		* */
 	}
 	//______________________________________________________________________________________________
 	public static void addPunto(final String idRuta, double lat, double lon, final Firebase.CompletionListener listener)
