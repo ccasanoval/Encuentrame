@@ -544,14 +544,14 @@ System.err.println("showRuta: " + pos);
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
-				mo.rotation(135);
+				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else if(pto == gpFin)//else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				mo.rotation(45);
+				mo.rotation(-45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else

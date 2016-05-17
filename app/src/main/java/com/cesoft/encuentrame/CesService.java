@@ -13,6 +13,8 @@ import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.MutableData;
+import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.location.Geofence;
 
@@ -30,6 +32,8 @@ public class CesService extends IntentService
 {
 	private static final int GEOFEN_DWELL_TIME = 2*60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
+	private static final int MIN_DISTANCIA = 5;
+	private static final int MAX_VELOCIDAD = 300;
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
 	private static CesGeofenceStore _GeofenceStoreAvisos;
@@ -180,7 +184,6 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 		final String sId = Util.getTrackingRoute();//TODO: guardar ruta en nube para que no se olvide al reiniciar?
 		if(sId.isEmpty())return;
 
-		//Backendless.Persistence.of(Ruta.class).findById(sId, new AsyncCallback<Ruta>()
 		Ruta.getById(sId, new ValueEventListener()
 		{
 			@Override
@@ -216,27 +219,27 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				}
 				else if(_locLastSaved != null)
 				{
-					if(loc.distanceTo(_locLastSaved) < 2)//Puntos muy cercanos
+					if(loc.distanceTo(_locLastSaved) < MIN_DISTANCIA)//Puntos muy cercanos (metros)
 					{
-						System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude());
+						System.err.println("CesService:saveGeoTracking:Punto repetido o cercano: " + sId + " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude());
 						return;
 					}
 
 					//Si el nuevo punto no tiene sentido, no se guarda...
 					double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
 //System.err.println("CesService:saveGeoTracking:Punto FALSO???: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
-					if(vel > 300)//kilometros hora a metros segundo : 300km/h = 83m/s
+					if(vel > MAX_VELOCIDAD)//kilometros hora a metros segundo : 300km/h = 83m/s
 					{
-						System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
+						System.err.println("CesService:saveGeoTracking:Punto FALSO:--------------------------- " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
 						return;
 					}
 				}
-String s = "null";
-if(_locLastSaved != null)s = _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude();
-System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s + " ///// " + loc.getLatitude() + "," + loc.getLongitude());
-System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
+//String s = "null";
+//if(_locLastSaved != null)s = _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude();
+//System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s + " ///// " + loc.getLatitude() + "," + loc.getLongitude());
+//System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
 
-				//TODO: añadir geofence por si quisiera funcionar...?
+//TODO: añadir geofence por si quisiera funcionar...?
 System.err.println("CesService:saveGeoTracking:guardar0000:----------------------:" + r);
 				r.guardar(new Firebase.CompletionListener()
 				{
@@ -245,26 +248,28 @@ System.err.println("CesService:saveGeoTracking:guardar0000:---------------------
 					{
 						if(err != null)
 						{
-							System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + err);
+							System.err.println("CesService:saveGeoTracking:guardar:err:----------------------:" + err);
 						}
 						else
 						{
 							System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + firebase);
 							//r.addPunto(loc.getLatitude(), loc.getLongitude());Ruta.getById(firebase.getKey())
 							//Ruta.addPunto(, loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
-							Ruta.addPunto(firebase.getKey(), loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
-							{
-								@Override
-								public void onComplete(FirebaseError err, Firebase firebase)
-								{
-									if(err != null)
-										System.err.println("CesService:saveGeoTracking:guardar:pto:err:----------------------:" + err);
-									else
-										System.err.println("CesService:saveGeoTracking:guardar:pto:----------------------:" + firebase);
-								}
-							});
+							Ruta.addPunto(firebase.getKey(), loc.getLatitude(), loc.getLongitude(), new Transaction.Handler()
+									{
+										@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
+										@Override
+										public void onComplete(FirebaseError err, boolean b, DataSnapshot ds)
+										{
+											if(err != null)
+												System.err.println("CesService:saveGeoTracking:guardar:pto:err:----------------------:" + err);
+											else
+												System.err.println("CesService:saveGeoTracking:guardar:pto:----------------------:" + ds);
+
+											Util.refreshListaRutas();//Refrescar lista rutas en main..
+										}
+									});
 						}
-						Util.refreshListaRutas();//Refrescar lista rutas en main..
 
 						_locLastSaved = loc;
 						_tmLastSaved = System.currentTimeMillis();

@@ -24,10 +24,10 @@ public class Aviso extends Objeto
 {
 	public static final String NOMBRE = "aviso";
 
-	private Firebase _datos;
-//TODO:
-protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+	protected Firebase _datos;
+	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+
 	//______________________________________________________________________________________________
 	private final static String ACTIVO = "activo";
 	protected boolean activo = true;
@@ -130,6 +130,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 			_datos = newFirebase().child(getId());
 			_datos.setValue(null, listener);
 		}
+		delGeo();
 	}
 	public void guardar(Firebase.CompletionListener listener)
 	{
@@ -150,6 +151,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 			}
 			_datos.setValue(this, listener);
 		}
+		saveGeo();
 	}
 
 	//______________________________________________________________________________________________
@@ -289,4 +291,41 @@ System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
 		geoQuery.addGeoQueryEventListener(lisGeo);
 	}
 
+
+
+	//----------------------------------------------------------------------------------------------
+	// GEOFIRE
+	private GeoFire _datGeo;
+	private void saveGeo()
+	{
+		if(_datos.getKey() == null)
+		{
+			System.err.println("Aviso:saveGeo:id==null");
+			return;
+		}
+		if(_datGeo == null)_datGeo = newGeoFire();
+		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), new GeoFire.CompletionListener()
+		{
+    		@Override
+    		public void onComplete(String key, FirebaseError error)
+			{
+        		if(error != null)
+            		System.err.println("Aviso:saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+        		else
+            		System.out.println("Aviso:saveGeo:Location saved on server successfully!");
+			}
+        });
+	}
+	private void delGeo()
+	{
+		if(_datos.getKey() == null)
+		{
+			System.err.println("Aviso:delGeo:id==null");
+			return;
+		}
+		if(_datGeo == null)_datGeo = newGeoFire();
+		_datGeo.removeLocation(_datos.getKey());
+	}
+	// GEOFIRE
+	//----------------------------------------------------------------------------------------------
 }

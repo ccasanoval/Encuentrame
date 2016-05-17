@@ -1,7 +1,5 @@
 package com.cesoft.encuentrame;
 
-import java.util.Date;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,9 +31,6 @@ import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 
 //Version Firebase
 /*
@@ -446,7 +441,6 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 			if(_aFiltro[_sectionNumber].isOn())
 			{
 System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
-				checkFechas();
 				Lugar.getLista(_acLugar, _aFiltro[_sectionNumber]);
 			}
 			else
@@ -482,7 +476,6 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 System.err.println("ActMain:refreshRutas()"+i);
 			if(_aFiltro[_sectionNumber].isOn())
 			{
-				checkFechas();
 				Ruta.getLista(_acRuta, _aFiltro[_sectionNumber]);
 			}
 			else
@@ -501,9 +494,8 @@ System.err.println("ActMain:refreshRutas()"+i);
 					try{
 					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
-					}catch(Exception e){System.err.println("ActMain:_acRuta:"+e);}
+					}catch(Exception e){System.err.println("ActMain:_acRuta:e:"+e);}
 				}
-				else
 				_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this));//.toArray(new Lugar[0])));
 			}
 			@Override
@@ -518,7 +510,6 @@ System.err.println("ActMain:refreshRutas()"+i);
 		{
 			if(_aFiltro[_sectionNumber].isOn())
 			{
-				checkFechas();
 				Aviso.getLista(_acAviso, _aFiltro[_sectionNumber]);
 			}
 			else
@@ -546,44 +537,7 @@ System.err.println("ActMain:refreshRutas()"+i);
 				System.err.println("---------AVISOS2:GET:ERROR:" + err);
 			}
 		};
-		/*private ValueEventListener _acAviso = new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot avisos)
-			{
-				long n = avisos.getChildrenCount();
-				System.err.println("---------LUGARES:GET:OK:" + n);
-				if(n < 1)
-				{
-					if(_this._viewPager.getCurrentItem() == Util.AVISOS && _apf[Util.AVISOS].isAdded())
-						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
-				}
-				int i = 0;
-				Aviso[] aAviso = new Aviso[(int)n];
-				for(DataSnapshot o : avisos.getChildren())
-				{
-					aAviso[i++] = o.getValue(Aviso.class);
-				}
-				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAviso, PlaceholderFragment.this));
-			}
-			@Override
-			public void onCancelled(FirebaseError err)
-			{
-				System.err.println("---------AVISOS:GET:ERROR:" + err);
-			}
-		};*/
 
-		//__________________________________________________________________________________________
-		//TODO: a otro lugar
-		private void checkFechas()
-		{
-			Date ini = _aFiltro[_sectionNumber].getFechaIni();
-			Date fin = _aFiltro[_sectionNumber].getFechaFin();
-			if(ini!=null && fin!=null && ini.getTime() > fin.getTime())
-			{
-				_aFiltro[_sectionNumber].setFechaIni(fin);
-				_aFiltro[_sectionNumber].setFechaFin(ini);
-			}
-		}
+
 	}
 }

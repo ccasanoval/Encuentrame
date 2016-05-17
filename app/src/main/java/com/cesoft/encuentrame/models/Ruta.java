@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.FirebaseException;
 import com.firebase.client.MutableData;
 import com.firebase.client.Query;
 import com.firebase.client.Transaction;
@@ -21,17 +22,22 @@ import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 // ONLINE C COMPILER http://cpp.sh
 
+//TODO: Compartir datos de GeoFire para no duplicar posicion en FIREBASE...
 //TODO: por que veo  ---------Ruta:getPuntosCount: 53 : DataSnapshot { key = puntosCount, value = 53 }   mil veces???
+//TODO: Config : max number of points per rute => cuando alcanza el limite corta...
+//TODO: config : Radious of geofence (si se utilizase ruta por geofence)....
+//TODO: Mejorar busqueda, porque no busca por la linea que une dos puntos, solo busca los puntos...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Config : max number of points per rute => cuando alcanza el limite corta...
-//TODO: config : Radious of geofence (si se utilizase ruta por geofence)....
 @JsonIgnoreProperties({"_datos"})
 public class Ruta extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "ruta";
-	private Firebase _datos;
+	public static final String IDRUTA = "idRuta";
+	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	//protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+	protected Firebase _datos;
 
 	//TODO: fecha fin...
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
@@ -39,9 +45,6 @@ public class Ruta extends Objeto implements Parcelable
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}*/
 
-//TODO:
-protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	//______________________________________________________________________________________________
 	public Ruta(){}
 	@Override
@@ -79,16 +82,18 @@ protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).c
 	public void eliminar(Firebase.CompletionListener listener)
 	{
 System.err.println("Ruta:eliminar:r:" + this);
+		RutaPunto.eliminar(getId());
 		if(_datos != null)
 		{
 			_datos.setValue(null, listener);
 		}
 		else if(getId() != null)
 		{
-			_datos = newFirebase().child(NOMBRE).child(getId());
+			_datos = newFirebase().child(getId());//.orderByKey()
 			_datos.setValue(null, listener);
 		}
-		RutaPunto.eliminar(getId());
+		_datos.removeValue();
+		puntosCount = 0;
 	}
 	public void guardar(Firebase.CompletionListener listener)
 	{
@@ -211,7 +216,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro)
 
 		final ArrayList<Ruta> aRutas = new ArrayList<>();//TODO buscar RutaPunto  : como hacer join???????
 		final Firebase ref = newFirebase();
-		final GeoQuery geoQuery = newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);//TODO: dejar el radio del filtro en metros antes
+		final GeoQuery geoQuery = RutaPunto.newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
 		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
 		{
 			private int nCount = 0;
@@ -260,7 +265,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 
 	//______________________________________________________________________________________________
 	private long puntosCount = 0;
-	public long getPuntosCount()//TODO: Se llama demasiado??
+	public long getPuntosCount()//TODO: Se llama demasiado??  RutaArrayAdapter:getView: se llama 3 veces?
 	{
 		Ruta.getPuntosCount(getId(), new ValueEventListener()
 		{
@@ -281,7 +286,7 @@ System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
 	}
 	public static void getPuntosCount(String idRuta, ValueEventListener listener)
 	{
-		Firebase ref = new Firebase(FIREBASE).child(NOMBRE).child(idRuta).child("puntosCount");
+		Firebase ref = newFirebase().child(idRuta).child("puntosCount");
 		ref.addListenerForSingleValueEvent(listener);//ref.addValueEventListener(listener);
 	}
 	public void getPuntos(final ValueEventListener listener)
@@ -304,17 +309,17 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		});
 	}
 	//______________________________________________________________________________________________
-	public static void addPunto(final String idRuta, double lat, double lon, final Firebase.CompletionListener listener)
+	public static void addPunto(final String idRuta, double lat, double lon, final Transaction.Handler listener)//final Firebase.CompletionListener listener)
 	{
 		RutaPunto pto = new RutaPunto(idRuta, lat, lon);
 		pto.guardar(new Firebase.CompletionListener()
 		{
 			@Override
-			public void onComplete(FirebaseError err, Firebase firebase)
+			public void onComplete(FirebaseError err, final Firebase firebase)
 			{
 				if(err == null)
 				{
-					Firebase ref = new Firebase(FIREBASE).child(NOMBRE).child(idRuta).child("puntosCount");
+					Firebase ref = newFirebase().child(idRuta).child("puntosCount");
 					ref.runTransaction(new Transaction.Handler()
 					{
 						@Override
@@ -327,13 +332,13 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 							return Transaction.success(currentData);//we can also abort by calling Transaction.abort()
 						}
 						@Override
-						public void onComplete(FirebaseError err, boolean b, DataSnapshot dataSnapshot)
+						public void onComplete(FirebaseError err, boolean b, DataSnapshot ds)
 						{
-							System.err.println("Ruta:addPunto:inc count:e:"+err+" "+b+" "+dataSnapshot);
+							System.err.println("Ruta:addPunto:inc count:"+err+" "+b+" "+ds);
+							listener.onComplete(err, b, ds);//firebase);
 						}
 					});
 				}
-				listener.onComplete(err, firebase);
 			}
 		});
 	}
@@ -347,6 +352,8 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 	public static class RutaPunto implements Parcelable
 	{
 		public static final String NOMBRE = "ruta_punto";
+		protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+		protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 		private Firebase _datos;
 
 		protected String id = null;
@@ -367,19 +374,16 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 			public Date getFecha(){return fecha;}
 			public void setFecha(Date v){fecha=v;}
 
-//TODO:
-protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
-
 		//__________________________________________________________________________________________
 		@Override
 		public String toString()
 		{
-			return String.format(Locale.ENGLISH, "RutaPunto{id='%s', fecha='%s', latitud='%f', longitud='%f'}",
-					getId(), DATE_FORMAT.format(fecha), latitud, longitud);
+			//DataSnapshot { key = -KHyIT4QjGjBeP7E9KdD, value = {longitud=-3.662471, latitud=40.4870812, id=-KHyIT4QjGjBeP7E9KdD, idRuta=-KHyIM5YX5NuJydP-YIQ, fecha=1463481654587} }
+			return String.format(Locale.ENGLISH, "RutaPunto{id='%s', fecha='%s', latitud='%f', longitud='%f', idRuta='%s'}",
+					getId(), DATE_FORMAT.format(fecha), latitud, longitud, idRuta);
 		}
 		//__________________________________________________________________________________________
-		//public RutaPunto(){}
+		public RutaPunto(){}//Required for Firebase
 		public RutaPunto(String idRuta, double lat, double lon)
 		{
 			this.idRuta = idRuta;
@@ -416,24 +420,26 @@ protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).c
 			public RutaPunto[] newArray(int size){return new RutaPunto[size];}
 		};
 
-		//// FIREBASE
+		//----------------------------------------------------------------------------------------------
+		// FIREBASE
 		public static void eliminar(String idRuta)
 		{
-			Query queryRef = newFirebase().orderByChild("idRuta").equalTo(idRuta);
+			delGeo(idRuta);
+			/*Query queryRef = newFirebase().orderByChild(IDRUTA).equalTo(idRuta);
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
 			{
 				@Override
 				public void onDataChange(DataSnapshot puntos)
 				{
 					puntos.getRef().setValue(null);
-					System.err.println("-----------Ruta:RutaPunto:eliminar:");
+					System.err.println("--------------------------------Ruta:RutaPunto:eliminar:");
 				}
 				@Override
 				public void onCancelled(FirebaseError err)
 				{
 					System.err.println("-----------Ruta:RutaPunto:eliminar:e:"+err);
 				}
-			});
+			});*/
 		}
 		public void guardar(Firebase.CompletionListener listener)
 		{
@@ -454,17 +460,92 @@ protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).c
 				}
 				_datos.setValue(this, listener);
 			}
+			saveGeo();
 		}
-		public static void getLista(String sIdRuta, ValueEventListener listener)
+		public static void getLista(String sIdRuta, final ValueEventListener listener)
 		{
 System.err.println("RutaPunto:getLista---------"+NOMBRE);
-			Query queryRef = newFirebase().child("idRuta").equalTo(sIdRuta);//TODO: cambiar los orderby por child...
+			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//TODO: cambiar los orderByChild por child...?
 			//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
-			queryRef.addListenerForSingleValueEvent(listener);
+			//queryRef.addListenerForSingleValueEvent(listener);
+			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
+			{
+				@Override
+				public void onDataChange(DataSnapshot ds)
+				{
+System.err.println("RutaPunto:getLista:onDataChange---------");
+					for(DataSnapshot o : ds.getChildren())
+					{
+						System.err.println("RutaPunto:getLista:onDataChange:o------------------------"+o);
+						try{
+						System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+o.getValue(Ruta.RutaPunto.class));
+						}catch(FirebaseException e)
+						{
+							System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+e+" : "+e.getCause()+" : "+e.getStackTrace());
+
+						}
+					}
+					listener.onDataChange(ds);
+				}
+				@Override
+				public void onCancelled(FirebaseError err)
+				{
+					listener.onCancelled(err);
+				}
+			});
 		}
+		// FIREBASE
+		//----------------------------------------------------------------------------------------------
+
+		//----------------------------------------------------------------------------------------------
+		// GEOFIRE
+		private void saveGeo()
+		{
+			if(_datos.getKey() == null)
+			{
+				System.err.println("RutaPunto:saveGeo:id==null");
+				return;
+			}
+			//_datGeo.setLocation(idRuta + _datos.getKey(), new GeoLocation(lat, lon), new GeoFire.CompletionListener()
+			newGeoFire().setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), new GeoFire.CompletionListener()
+			{
+				@Override
+				public void onComplete(String key, FirebaseError error)
+				{
+					if(error != null)
+						System.err.println("RutaPunto:saveGeo:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
+					else
+						System.out.println("RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
+				}
+			});
+		}
+		private static void delGeo(final String idRuta)
+		{
+			final GeoFire datGeo = newGeoFire();
+			RutaPunto.getLista(idRuta, new ValueEventListener()
+			{
+				@Override
+				public void onDataChange(DataSnapshot ds)
+				{
+					for(DataSnapshot o : ds.getChildren())
+					{
+						RutaPunto rp = o.getValue(RutaPunto.class);
+						datGeo.removeLocation(rp.getId());
+					}
+					ds.getRef().setValue(null);
+				}
+				@Override
+				public void onCancelled(FirebaseError err)
+				{
+					System.out.println("RutaPunto:delGeo:e:"+err+" : "+idRuta);
+				}
+			});
+		}
+		// GEOFIRE
+		//----------------------------------------------------------------------------------------------
 
 
-
+		//----------------------------------------------------------------------------------------------
 		//----------- HELPING FUNC
 		/*public boolean equalTo(RutaPunto v)
 		{

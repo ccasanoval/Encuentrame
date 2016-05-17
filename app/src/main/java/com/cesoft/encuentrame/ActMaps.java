@@ -65,7 +65,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		try{_r = getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
 		try{_a = getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
 		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
-System.err.println("**********************_iTipo="+_iTipo);
+System.err.println("********************** (0=Lug, 1=Rut, 2=Avi)_iTipo="+_iTipo);
 		//------------------------------------------------------------------------------------------
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -212,8 +212,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 		{
 			_a.setLatitud(lat);
 			_a.setLongitud(lon);
-			//_a.setLatitud(lat);
-			//_a.setLongitud(lon);
 			setMarker(_a.getNombre(), _a.getDescripcion());
 			setMarkerRadius();
 		}
@@ -374,7 +372,7 @@ System.err.println("showRuta: " + pos);
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.snippet(INI + df.format(date));
-				mo.rotation(135);
+				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			//else if(pto.equalTo(gpFin))// getLatitud() == gpFin.getLatitud() && pto.getLongitud() == gpFin.getLongitud())
@@ -382,7 +380,7 @@ System.err.println("showRuta: " + pos);
 			{
 				mo.snippet(FIN + df.format(date));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				mo.rotation(45);
+				mo.rotation(-45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else

@@ -3,10 +3,6 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.firebase.client.Firebase;
-import com.firebase.geofire.GeoFire;
-
 import java.util.Date;
 import java.util.Locale;
 
@@ -34,6 +30,9 @@ import java.util.Locale;
     }
 }
 */
+//TODO:
+//TODO: Usuarios distintos no ven datos privados... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
@@ -46,6 +45,9 @@ public class Objeto implements Parcelable
 	public static final String GEOFIRE = "https://blazing-heat-3755.firebaseio.com/GEO/";
 	public static final String NOMBRE = "objeto";
 	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+
+	//protected Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	//protected GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 
 	//General
 	protected String id = null;

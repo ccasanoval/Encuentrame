@@ -401,6 +401,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_filtro.setNombre(_txtNombre.getText().toString());
 		if(_filtro.isValid())
 		{
+			checkFechas();
 			_filtro.turnOn();
 System.err.println("ActBuscar:buscar:filtro:---------------------------------------------- " + _filtro);
 			Util.return2Main(this, _filtro);
@@ -408,6 +409,17 @@ System.err.println("ActBuscar:buscar:filtro:------------------------------------
 		else
 		{
 			eliminar();
+		}
+	}
+	//__________________________________________________________________________________________
+	private void checkFechas()
+	{
+		Date ini = _filtro.getFechaIni();
+		Date fin = _filtro.getFechaFin();
+		if(ini!=null && fin!=null && ini.getTime() > fin.getTime())
+		{
+			_filtro.setFechaIni(fin);
+			_filtro.setFechaFin(ini);
 		}
 	}
 }

@@ -27,12 +27,10 @@ import java.util.Locale;
 public class Lugar extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "lugar";
+	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
+	protected Firebase _datos;
 
-	private Firebase _datos;
-
-//TODO:
-protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	//______________________________________________________________________________________________
 	private double latitud, longitud;
 		public double getLatitud(){return latitud;}
@@ -86,7 +84,7 @@ protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).c
 			}
 			_datos.setValue(this, listener);
 		}
-		saveGeo(getLatitud(), getLongitud());
+		saveGeo();
 	}
 	/*public static void getById(String sId, ValueEventListener listener)
 	{
@@ -245,7 +243,7 @@ System.err.println("--------------------Lugar:"+l);
 	//----------------------------------------------------------------------------------------------
 	// GEOFIRE
 	private GeoFire _datGeo;
-	private void saveGeo(final double lat, final double lon)
+	private void saveGeo()//final double lat, final double lon)
 	{
 		if(_datos.getKey() == null)
 		{
@@ -253,13 +251,13 @@ System.err.println("--------------------Lugar:"+l);
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.setLocation(_datos.getKey(), new GeoLocation(lat, lon), new GeoFire.CompletionListener()
+		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), new GeoFire.CompletionListener()
 		{
     		@Override
     		public void onComplete(String key, FirebaseError error)
 			{
         		if(error != null)
-            		System.err.println("There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+lat+"/"+lon);
+            		System.err.println("There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
         		else
             		System.out.println("Location saved on server successfully!");
 			}
@@ -278,98 +276,3 @@ System.err.println("--------------------Lugar:"+l);
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------
 }
-
-/*
-
-------------------------- GEO FIRE
-
-GRADLE
-dependencies {
-    compile 'com.firebase:geofire:1.1.0+'
-}
-
-OBJECT
-GeoFire geoFire = new GeoFire(new Firebase("https://<your-firebase>.firebaseio.com/"));
-
-NEW
-geoFire.setLocation("firebase-hq", new GeoLocation(37.7853889, -122.4056973), new GeoFire.CompletionListener() {
-    @Override
-    public void onComplete(String key, FirebaseError error) {
-        if (error != null) {
-            System.err.println("There was an error saving the location to GeoFire: " + error);
-        } else {
-            System.out.println("Location saved on server successfully!");
-        }
-    }
-});
-
-DEL
-geoFire.removeLocation("firebase-hq");
-
-GET
-geoFire.getLocation("firebase-hq", new LocationCallback() {
-    @Override
-    public void onLocationResult(String key, GeoLocation location) {
-        if (location != null) {
-            System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-        } else {
-            System.out.println(String.format("There is no location for key %s in GeoFire", key));
-        }
-    }
-    @Override
-    public void onCancelled(FirebaseError firebaseError) {
-        System.err.println("There was an error getting the GeoFire location: " + firebaseError);
-    }
-});
-
-QUERY
-GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 0.6);
-
-
-*/
-
-
-		/*
-		if(filtro.getFechaIni() != null)//DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created >= ");
-			sb.append(filtro.getFechaIni().getTime());
-		}
-		if(filtro.getFechaFin() != null)
-		{
-			if(sb.length() > 0)sb.append(" AND ");
-			sb.append(" created <= ");
-			sb.append(filtro.getFechaFin().getTime());
-		}
-		*/
-		/* Firebase sucks!!   nombre LIKE '%XXX%' is imposible to do with Firebase...
-		Query queryRef = ref.orderByPriority();
-		if( ! filtro.getNombre().isEmpty())
-		{
-System.err.println("Lugar:buscarPorFiltro:--------------------------1:"+filtro.getNombre());
-			queryRef = queryRef.equalTo("nombre", filtro.getNombre());
-		}
-		ValueEventListener vel = new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot data)
-			{
-				long n = data.getChildrenCount();
-				if(n < 1)return;
-				int i = 0;
-				Lugar[] aLugares = new Lugar[(int)n];
-				for(DataSnapshot o : data.getChildren())
-				{
-					aLugares[i++] = o.getValue(Lugar.class);
-				}
-				listener.onData(aLugares);
-			}
-			@Override
-			public void onCancelled(FirebaseError err)
-			{
-				System.err.println("Lugar:buscarPorFiltro:onCancelled:"+err);
-				listener.onError(err.toString());
-			}
-		};
-		newFirebase().orderByChild("nombre").equalTo(filtro.getNombre()).addListenerForSingleValueEvent(vel);*/
