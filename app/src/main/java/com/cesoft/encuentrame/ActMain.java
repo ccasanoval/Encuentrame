@@ -113,13 +113,11 @@ public class ActMain extends AppCompatActivity
 		Util.setApplication(getApplication());
 		//Util.initPrefs();
 
-		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
-		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 		// Set up the ViewPager with the sections adapter.
 		_viewPager = (ViewPager)findViewById(R.id.container);
 		if(_viewPager != null)
-		_viewPager.setAdapter(sectionsPagerAdapter);
+		_viewPager.setAdapter(new SectionsPagerAdapter(getSupportFragmentManager()));
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		if(tabLayout != null)
 		{
@@ -134,7 +132,7 @@ public class ActMain extends AppCompatActivity
 			Integer nPagina = getIntent().getIntExtra(PAGINA, -1);
 			if(nPagina >= Util.LUGARES && nPagina <= Util.AVISOS)
 				_viewPager.setCurrentItem(nPagina);
-System.err.println("PAGINA++++++++++++++++"+nPagina);
+System.err.println("ActMain:PAGINA++++++++++++++++"+nPagina);
 
 			String sMensaje = getIntent().getStringExtra(MENSAJE);
 			if(sMensaje != null && !sMensaje.isEmpty())
@@ -159,8 +157,8 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		switch(id)
 		{
 		case R.id.action_config:
-				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), Util.CONFIG);
-				return true;
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), Util.CONFIG);
+			return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
 			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());//_sectionNumber
@@ -186,6 +184,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		@Override
 		public Fragment getItem(int position)
 		{
+System.err.println("---------ActMain:SectionsPagerAdapter:getItem:"+position);
 			return PlaceholderFragment.newInstance(position);
 		}
 		@Override
@@ -206,11 +205,8 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		}
 	}
 
-/*	Si está este, no se llama al de PlaceholderFragment
-	@Override public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		System.err.println("ActMain:onActivityResult:--------+++++++MAIN++++++++--" + requestCode+":"+resultCode);
-	}*/
+	/*Si está este, no se llama al de PlaceholderFragment
+	@Override public void onActivityResult(int requestCode, int resultCode, Intent data){}*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// LUGARES / RUTAS / AVISOS
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,13 +486,12 @@ System.err.println("ActMain:refreshRutas()"+i);
 				System.err.println("---------RUTAS2:GET:OK:" + n);
 				if(n < 1)
 				{
-					//TODO: por que se llama a ActMain:refreshRutas() tantas veces?
 					try{
 					if(_this._viewPager.getCurrentItem() == Util.RUTAS)
 						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
 					}catch(Exception e){System.err.println("ActMain:_acRuta:e:"+e);}
 				}
-				_listView.setAdapter(new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this));//.toArray(new Lugar[0])));
+				_listView.setAdapter(new RutaArrayAdapter(_apf[Util.RUTAS].getContext(), aRutas, _apf[Util.RUTAS]));	//_rootView   raa.notifyDataSetChanged();
 			}
 			@Override
 			public void onError(String err)
@@ -537,7 +532,5 @@ System.err.println("ActMain:refreshRutas()"+i);
 				System.err.println("---------AVISOS2:GET:ERROR:" + err);
 			}
 		};
-
-
 	}
 }

@@ -110,7 +110,6 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 		{
 			//TODO: si so n los mismos no hay necesidad de recrearlos: comprobar...
 			//_listaGeoAvisos.clear();
-
 			Aviso.getActivos(new ValueEventListener()
 			{
 				@Override
@@ -183,7 +182,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 	{
 		final String sId = Util.getTrackingRoute(CesService._this.getBaseContext());//TODO: guardar ruta en nube para que no se olvide al reiniciar?
 		if(sId.isEmpty())return;
-
+System.err.println("CesService:saveGeoTracking:idRuta:"+sId);
 		Ruta.getById(sId, new ValueEventListener()
 		{
 			@Override

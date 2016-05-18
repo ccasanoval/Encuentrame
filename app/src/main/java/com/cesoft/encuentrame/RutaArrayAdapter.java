@@ -19,8 +19,10 @@ import java.util.Locale;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
-	private final Ruta[] _rutas;
+	private Ruta[] _rutas;//final
+		public void setRutas(Ruta[] v){_rutas = v;}
 	private IListaItemClick _inter;
+		public void setInter(IListaItemClick v){_inter = v;}
 
 	public RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
 	{
@@ -36,7 +38,9 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-System.err.println("RutaArrayAdapter:getView:-----------------------"+position+" : "+_rutas[position]);//TODO:Se llama dos veces o mas
+
+System.err.println("RutaArrayAdapter:getView:-----------------------"+position+" : "+(position<_rutas.length?_rutas[position]:"---"));//TODO:Se llama dos veces o mas
+
 		txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));//Util.getApplication().getResources().getConfiguration().locale<>Locale.ENGLISH
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
