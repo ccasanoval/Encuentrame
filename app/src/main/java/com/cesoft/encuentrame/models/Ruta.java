@@ -22,7 +22,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-// ONLINE C COMPILER http://cpp.sh
 
 //TODO: Compartir datos de GeoFire para no duplicar posicion en FIREBASE...
 //TODO: Config : max number of points per rute => cuando alcanza el limite corta...
@@ -610,7 +609,7 @@ System.err.println("-----------------Ruta:saveGeo:onGeoQueryReady: i="+i+" "+(i>
 			Double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
 					+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
 			Double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-System.err.println("-------------------distanciaReal:"+(R * c * 1000));
+//System.err.println("-------------------distanciaReal:"+(R * c * 1000));
 			return R * c * 1000; // convert to meters
 			// -- sin altura --
 			//double distancia = R * c * 1000; // convert to meters

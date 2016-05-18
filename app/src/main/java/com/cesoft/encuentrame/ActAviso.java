@@ -447,7 +447,9 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 			LatLng pos = new LatLng(_a.getLatitud(), _a.getLongitud());
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
-					.title(_a.getNombre()).snippet(_a.getDescripcion());
+					.title(_a.getNombre())
+					//.snippet(_a.getDescripcion());
+					.snippet(_a.getDescripcion() + " (" + Aviso.DATE_FORMAT2.format(_a.getFecha()) +")");//+ "\n" + //TODO:igual en lugares
 			_marker = _Map.addMarker(mo);
 			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));

@@ -1,7 +1,9 @@
 package com.cesoft.encuentrame;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -30,26 +32,26 @@ import com.cesoft.encuentrame.models.Login;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
-
-
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 //Version Firebase
 /*
 {
     "rules": {
         ".read": true,
         ".write": true,
-        "aviso": {
-          ".indexOn": ["activo", "nombre"]
-        },
-        "lugar": {
-          ".indexOn": ["nombre"]
-        },
-        "ruta_punto": {
-          ".indexOn": ["idRuta"]
+        "aviso": {".indexOn": ["activo", "nombre"]},
+        "lugar": {".indexOn": ["nombre"]},
+        "ruta_punto": {".indexOn": ["idRuta"]},
+
+        "GEO":
+        {
+          "lugar":{".indexOn": ["g"]},
+          "ruta_punto":{".indexOn": ["g"]}
         }
     }
 }
-//TODO: listeners con actualizaciones continuas ????
+*/
 /*
 GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
 Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
@@ -61,6 +63,13 @@ https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=D
 Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
+
+// ONLINE C COMPILER http://cpp.sh
+
+//TODO: Al cerrar sesion no cierra ventana.... debe volver a login..
+
+//TODO: listeners con actualizaciones continuas ????
+//TODO: Usuarios distintos no ven datos privados... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 //TODO:Login con google OAuth....
 //TODO:Login: borrar cuenta.. Esta seguro? confirmar por email?
@@ -373,7 +382,24 @@ System.err.println("ActMain:onItemEdit:"+obj);
 
 			if(requestCode == Util.CONFIG)
 			{
-				Login.logout();
+				AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+				//dialog.setTitle(getString(R.string.pref_header_logout));
+				dialog.setMessage(getString(R.string.seguro_salir));
+				dialog.setPositiveButton(getString(R.string.pref_header_logout), new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						Login.logout();
+
+						Intent intent = new Intent(ActMain._this.getBaseContext(), ActLogin.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+
+						ActMain._this.finish();
+					}
+				});
+				dialog.create().show();
 				return;
 			}
 

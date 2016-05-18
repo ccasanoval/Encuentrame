@@ -9,9 +9,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
 
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016
@@ -20,9 +22,7 @@ import java.util.Locale;
 public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
 	private Ruta[] _rutas;//final
-		public void setRutas(Ruta[] v){_rutas = v;}
 	private IListaItemClick _inter;
-		public void setInter(IListaItemClick v){_inter = v;}
 
 	public RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
 	{
@@ -60,6 +60,9 @@ System.err.println("RutaArrayAdapter:getView:-----------------------"+position+"
 					_inter.onItemMap(Util.RUTAS, _rutas[position]);
 				}
 			});
+
+		TextView txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
+		txtFecha.setText(Ruta.DATE_FORMAT2.format(_rutas[position].getFecha()));
 
 		// Si la ruta se está grabando, resaltar
 		//String sIdRuta = Util.getTrackingRoute();

@@ -19,8 +19,6 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
-import com.cesoft.encuentrame.models.Filtro;
-
 import java.util.List;
 
 /**
@@ -30,8 +28,7 @@ import java.util.List;
  * Android Design: Settings</a> for design guidelines and the <a href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-//TODO: No funciona flechita de volver...
-//TODO: Organizate poner la barra de arriba como aqui...
+//TODO: En Organizate: poner la barra de arriba como aqui...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActConfig extends ActConfigBase
 {
@@ -48,9 +45,6 @@ public class ActConfig extends ActConfigBase
 		super.onHeaderClick(header, position);
 		if(header.id == R.id.pref_logout)
 		{
-System.err.println("ActConfig:onHeaderClick:-------------------------------------------");
-			//Util.logout();		//int pid = android.os.Process.myPid();   	//android.os.Process.killProcess(pid);
-			//Util.return2Main(ActConfig.this, true, getString(R.string.ok_guardar));
 			setResult(Activity.RESULT_OK, new Intent());
 			finish();
 		}
@@ -202,7 +196,6 @@ System.err.println("-----------Actconfig:onOptionsItemSelected:GENERAL:"+(item.g
 	}
 
 	//-------------------------------- NOTIFICATION --------------------------------
-	// This fragment shows notification preferences only. It is used when the activity is showing a two-pane settings UI.
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static class NotificationPreferenceFragment extends PreferenceFragment
 	{
@@ -230,7 +223,6 @@ System.err.println("-----------Actconfig:onOptionsItemSelected:GENERAL:"+(item.g
 	}
 
 	//-------------------------------- OPCIONES --------------------------------
-	// This fragment shows data and sync preferences only. It is used when the activity is showing a two-pane settings UI.
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static class OpcionesPreferenceFragment extends PreferenceFragment
 	{
@@ -242,7 +234,7 @@ System.err.println("-----------Actconfig:onOptionsItemSelected:GENERAL:"+(item.g
 			setHasOptionsMenu(true);
 			// Bind the summaries of EditText/List/Dialog/Ringtone preferences to their values.
 			// When their values change, their summaries are updated to reflect the new value, per the Android Design guidelines.
-			//bindPreferenceSummaryToValue(findPreference("sync_frequency"));//TODO:?
+			//bindPreferenceSummaryToValue(findPreference("sync_frequency"));
 		}
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)

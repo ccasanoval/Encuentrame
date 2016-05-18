@@ -5,11 +5,11 @@
 
 	<string name="app_name">Find me!</string>
 
-	<string name="app_lice" translatable="false">2016 Cesar Casanova (Creative Commons NC-SA)</string>
+	<string name="app_lice" translatable="false">2016 Cesar Casanova \n(Creative Commons NC-SA)</string>
 	<string name="app_vers" translatable="false">2016 - V 1.0</string>
 	<string name="app_lice_tit">Licence</string>
 	<string name="app_vers_tit">Version:</string>
-	<string name="app_desc">\nApp for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can share your geo-data easily.\n\n</string>
+	<string name="app_desc">App for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can share your geo-data easily.\n</string>
 
 	<string name="activo">Active</string>
 	<string name="actualizar_posicion">Refresh location</string>
@@ -89,6 +89,7 @@
 
 	<string name="pref_header_logout">Logout</string>
 	<string name="pref_header_logout_sum">End current user session</string>
+	<string name="seguro_salir">Are you sure you want to Logout?</string>
 
 	<string name="pref_header_opciones">Options</string>
 	<string name="pref_header_opciones_sum">Settings…</string>

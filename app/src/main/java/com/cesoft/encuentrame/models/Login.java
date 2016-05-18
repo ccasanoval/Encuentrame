@@ -71,14 +71,14 @@ public class Login
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
 			if( ! prefs.getBoolean(PREF_SAVE_LOGIN, true))
 			{
-System.err.println("Util.login2:PREF_SAVE_LOGIN = false");
+System.err.println("Login.login2:PREF_SAVE_LOGIN = false");
 				delLogin();
 				return false;
 			}
 		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
 		String usr = getUsuario();
 		String pwd = getClave();
-System.err.println("Util.login2: "+usr+":"+pwd);
+System.err.println("Login.login2: "+usr+":"+pwd);
 		if(usr == null || pwd == null || usr.isEmpty() || pwd.isEmpty())return false;
 		login(usr, pwd, listerner);
 		return true;
@@ -87,7 +87,7 @@ System.err.println("Util.login2: "+usr+":"+pwd);
 	//-------
 	public static void login(String usr, String pwd, final Firebase.AuthResultHandler listerner)
 	{
-System.err.println("Util.login1: logando...");
+System.err.println("Login.login1: logando...");
 		Firebase ref = new Firebase(Objeto.FIREBASE);
 		ref.authWithPassword(usr, pwd, new Firebase.AuthResultHandler()
 		{
@@ -144,6 +144,7 @@ System.err.println("--------------------login:saveLogin("+usr+", "+pwd+")");
 		Firebase ref = new Firebase(Objeto.FIREBASE);
 		ref.unauth();
 		_idUser = null;
+		saveLogin("", "");
 	}
 	//-------
 	public static void addUser(String email, String pwd, final Firebase.ValueResultHandler<Map<String, Object>> listener)

@@ -2,12 +2,14 @@
 
 	<EditTextPreference
 		android:title="@string/app_name"
-		android:key=""
+		android:icon="@mipmap/ic_launcher"></EditTextPreference>
+
+	<EditTextPreference
+		android:title=""
 		android:summary="@string/app_desc"></EditTextPreference>
 
 	<EditTextPreference
 		android:title="@string/app_lice_tit"
-		android:key=""
 		android:summary="@string/app_lice"></EditTextPreference>
 
 	<EditTextPreference

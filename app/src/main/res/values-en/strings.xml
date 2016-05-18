@@ -4,7 +4,7 @@
 
 	<string name="app_lice_tit">Licence</string>
 	<string name="app_vers_tit">Version:</string>
-	<string name="app_desc">\nApp for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can share your geo-data easily.\n\n</string>
+	<string name="app_desc">App for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can share your geo-data easily.\n</string>
 
 	<string name="activo">Active</string>
 	<string name="actualizar_posicion">Refresh location</string>
@@ -100,4 +100,5 @@
 	<string name="ok_eliminar_lugar">The Point was deleted</string>
 	<string name="ok_eliminar_ruta">The Route was deleted</string>
 	<string name="pto_ruta_ko">An error ocurred while obtaining the route points</string>
+	<string name="seguro_salir">Are you sure you want to Logout?</string>
 </resources>

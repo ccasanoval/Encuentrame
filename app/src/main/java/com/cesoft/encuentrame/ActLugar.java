@@ -390,7 +390,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
 					.title(_l.getNombre())//getString(R.string.aviso)
-					.snippet(_l.getDescripcion());
+					.snippet(_l.getDescripcion() + "\n" + Lugar.DATE_FORMAT2.format(_l.getFecha()));
 			_marker = _Map.addMarker(mo);
 			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));

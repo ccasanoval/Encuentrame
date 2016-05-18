@@ -31,7 +31,9 @@ import java.util.Locale;
 }
 */
 //TODO:
+//TODO:
 //TODO: Usuarios distintos no ven datos privados... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO:
 //TODO:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +47,7 @@ public class Objeto implements Parcelable
 	public static final String GEOFIRE = "https://blazing-heat-3755.firebaseio.com/GEO/";
 	public static final String NOMBRE = "objeto";
 	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-
+	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 	//protected Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
 	//protected GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 

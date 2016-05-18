@@ -54,6 +54,9 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 				}
 			});
 
+		TextView txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
+		txtFecha.setText(Lugar.DATE_FORMAT2.format(_lugares[position].getFecha()));
+
 		return convertView;
 	}
 
