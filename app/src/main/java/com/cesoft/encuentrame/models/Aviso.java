@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame.models;
 
+import android.content.Context;
 import android.os.Parcel;
 
 import com.cesoft.encuentrame.Util;
@@ -155,14 +156,15 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 	}
 
 	//______________________________________________________________________________________________
-	public static void getById(String sId, ValueEventListener listener)
+	public static void getById(String sId, Context c, ValueEventListener listener)
 	{
 
 		if(Util.getApplication() != null)
 			Firebase.setAndroidContext(Util.getApplication().getBaseContext());
-		else if(Util.getSvcContext() != null)//Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
-			Firebase.setAndroidContext(Util.getSvcContext());
-		else return;
+		//else if(Util.getSvcContext() != null)//Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
+		//	Firebase.setAndroidContext(Util.getSvcContext());
+		//else return;
+		Firebase.setAndroidContext(c);
 		newFirebase().child(sId).addListenerForSingleValueEvent(listener);
 	}
 	public static void getActivos(ValueEventListener listener)

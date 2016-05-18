@@ -65,7 +65,7 @@ public class CesService extends IntentService
 		super.onCreate();
 		_this = this;
 		Util.initFirebase(this);
-		Util.setSvcContext(this);
+		//Util.setSvcContext(this);
 		//Login.login(loginListener);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
@@ -181,7 +181,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 	private static String _sId = "";
 	public static void saveGeoTracking()
 	{
-		final String sId = Util.getTrackingRoute();//TODO: guardar ruta en nube para que no se olvide al reiniciar?
+		final String sId = Util.getTrackingRoute(CesService._this.getBaseContext());//TODO: guardar ruta en nube para que no se olvide al reiniciar?
 		if(sId.isEmpty())return;
 
 		Ruta.getById(sId, new ValueEventListener()
@@ -209,13 +209,18 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 					return;
 				}
 
-				final Location loc = Util.getLocation();
-				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
-				if( ! _sId.equals(sId))
+				final Location loc = Util.getLocation(CesService._this.getBaseContext());
+				if(loc == null)
 				{
+					System.err.println("CesService:saveGeoTracking:findById:Util.getLocation() == NULL -------------------");
+					return;
+				}
+				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
+				if( ! _sId.equals(sId))//TODO: si se reinicia la toma por nueva y el ultimo punto podria repetirse
+				{
+					System.err.println("CesService:saveGeoTracking:Nueva ruta: " + _sId + " != " + sId);
 					_sId = sId;
 					_locLastSaved = null;
-					System.err.println("CesService:saveGeoTracking:Nueva ruta: " + _sId + " != " + sId);
 				}
 				else if(_locLastSaved != null)
 				{

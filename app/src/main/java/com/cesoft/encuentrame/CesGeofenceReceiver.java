@@ -63,18 +63,18 @@ System.err.println("CesGeofenceReceiver:onReceive:------------------------------
 	}
 
 	//______________________________________________________________________________________________
-	protected void showAviso(final Context context, String sId, final String sTitle)
+	protected void showAviso(final Context c, String sId, final String sTitle)
 	{
-		Aviso.getById(sId, new ValueEventListener()
+		Aviso.getById(sId, c, new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot aviso)
 			{
 				Aviso a = aviso.getValue(Aviso.class);
-				Intent i = new Intent(context, ActAviso.class);
+				Intent i = new Intent(c, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, a);
 				i.putExtra("notificacion", true);
-				Util.showAviso(context, sTitle, a, i);
+				Util.showAviso(c, sTitle, a, i);
 			}
 			@Override
 			public void onCancelled(FirebaseError err)

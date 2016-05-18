@@ -173,7 +173,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			View layPeriodo = findViewById(R.id.layPeriodo);
 			if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 			//si está activo muestra btnStop
-			String sId = Util.getTrackingRoute();
+			String sId = Util.getTrackingRoute(ActRuta.this.getBaseContext());
 			View layStartStop = findViewById(R.id.layStartStop);
 			if( ! sId.equals(_r.getId()))
 			{
@@ -473,7 +473,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			{
 				if(err == null)
 				{
-					Util.setTrackingRoute(ruta.getKey());
+					Util.setTrackingRoute(ruta.getKey(), getBaseContext());
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -488,7 +488,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	private void stopTrackingRecord()
 	{
 System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
-		Util.setTrackingRoute("");
+		Util.setTrackingRoute("", getBaseContext());
 		Util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
 	}
 

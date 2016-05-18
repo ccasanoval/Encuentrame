@@ -32,11 +32,11 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
-		String sIdRuta = Util.getTrackingRoute();
+		String sIdRuta = Util.getTrackingRoute(getContext());
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-System.err.println("RutaArrayAdapter:getView:-----------------------"+position+" : "+_rutas[position]);
+System.err.println("RutaArrayAdapter:getView:-----------------------"+position+" : "+_rutas[position]);//TODO:Se llama dos veces o mas
 		txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));//Util.getApplication().getResources().getConfiguration().locale<>Locale.ENGLISH
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);

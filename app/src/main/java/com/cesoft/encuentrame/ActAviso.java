@@ -95,7 +95,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void onClick(View v)
 			{
-				Location loc = Util.getLocation();
+				Location loc = Util.getLocation(ActAviso.this.getBaseContext());
 				if(loc != null)setPosLugar(loc);
 			}
 		});
@@ -149,7 +149,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		{
 			_bNuevo = true;
 			_a = new Aviso();
-			Location loc = Util.getLocation();
+			Location loc = Util.getLocation(getBaseContext());
 			if(loc != null)setPosLugar(loc);
 		}
 		//------------------------------------------------------------------------------------------

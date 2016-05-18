@@ -3,6 +3,7 @@ package com.cesoft.encuentrame;
 import java.util.List;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 
 import com.firebase.client.DataSnapshot;
@@ -42,7 +43,7 @@ public class CesServiceAvisoGeo extends IntentService
 System.err.println("CesServiceAvisoGeo:onHandleIntent:-------------------------------------GEOFENCE_TRANSITION_ENTER");
 				for(Geofence geof : geofences)
 				{
-					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso));
+					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso), getBaseContext());
 					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
 				}
 				break;
@@ -70,17 +71,17 @@ System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------
 	}
 
 	//______________________________________________________________________________________________
-	protected void showAviso(String sId, final String sTitle)
+	protected void showAviso(String sId, final String sTitle, final Context c)
 	{
-		Aviso.getById(sId, new ValueEventListener()
+		Aviso.getById(sId, c, new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot aviso)
 			{
 				Aviso a = aviso.getValue(Aviso.class);
-				Intent i = new Intent(CesServiceAvisoGeo.this, ActAviso.class);
+				Intent i = new Intent(c, ActAviso.class);//CesServiceAvisoGeo.this
 				i.putExtra(Aviso.NOMBRE, a);
-				Util.showAviso(CesServiceAvisoGeo.this, sTitle, a, i);
+				Util.showAviso(c, sTitle, a, i);//CesServiceAvisoGeo.this
 			}
 			@Override
 			public void onCancelled(FirebaseError err)

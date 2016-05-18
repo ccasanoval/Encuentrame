@@ -471,12 +471,12 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 		};
 
 		//__________________________________________________________________________________________
-		public void refreshRutas(int i)
+		public void refreshRutas(int i)//TODO: cuando paro la ruta no la actualiza...?
 		{
 System.err.println("ActMain:refreshRutas()"+i);
 			if(_aFiltro[_sectionNumber].isOn())
 			{
-				Ruta.getLista(_acRuta, _aFiltro[_sectionNumber]);
+				Ruta.getLista(_acRuta, _aFiltro[_sectionNumber], Util.getTrackingRoute(this.getContext()));
 			}
 			else
 				Ruta.getLista(_acRuta);

@@ -3,10 +3,14 @@ package com.cesoft.encuentrame.models;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.cesoft.encuentrame.Util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -150,30 +154,24 @@ System.err.println("Ruta:getLista:a----------"+n);
 
 	//----------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------
-	/*@Override
-	public boolean pasaFiltro(Filtro filtro)//TODO:
+	//@Override
+	public boolean pasaFiltro(Filtro filtro, String idRuta, String idRutaAct)//Util.getTrackingRoute(c)
 	{
-	final String sId = Util.getTrackingRoute();//Ruta activa
-		if(sId.isEmpty())return;
-		Ruta.getById(sId, new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot rutas)
-			{
-
 		if( ! super.pasaFiltro(filtro))return false;
-		if(filtro.getActivo()==Filtro.ACTIVO && !isActivo()  ||  filtro.getActivo()==Filtro.INACTIVO && isActivo())return false;
+System.err.println("pasaFiltro : idRuta ====="+idRuta);
+		boolean bActivo = idRuta!=null && idRuta.equals(idRutaAct);//Ruta activa
+		if(filtro.getActivo()==Filtro.ACTIVO && !bActivo  ||  filtro.getActivo()==Filtro.INACTIVO && bActivo)return false;
 		return true;
-	}*/
-	public static void getLista(ObjetoListener<Ruta> listener, Filtro filtro)
+	}
+	public static void getLista(ObjetoListener<Ruta> listener, Filtro filtro, String idRutaAct)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
-			buscarPorFiltro(listener, filtro);
+			buscarPorFiltro(listener, filtro, idRutaAct);
 		else
-			buscarPorGeoFiltro(listener, filtro);
+			buscarPorGeoFiltro(listener, filtro, idRutaAct);
 	}
 	//----
-	public static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro)
+	public static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
 		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
@@ -185,7 +183,7 @@ System.err.println("Ruta:getLista:a----------"+n);
 				for(DataSnapshot o : data.getChildren())
 				{
 					Ruta r = o.getValue(Ruta.class);
-					if( ! r.pasaFiltro(filtro))continue;
+					if( ! r.pasaFiltro(filtro, r.getId(), idRutaAct))continue;
 					aRutas.add(r);
 				}
 				listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
@@ -199,57 +197,89 @@ System.err.println("Ruta:getLista:a----------"+n);
 		});
 	}
 	//----
-	public static void buscarPorGeoFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro)
-	{//TODO: guardar puntos de ruta en GeoFire y buscar por esoso puntos y luego por la ruta asociada. Hacer algo para no almacenar puntos redundantes, distancia > 10 metros (no solo con punto anterior?)
+	public static void buscarPorGeoFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
+	{//TODO: Hacer algo para no almacenar puntos redundantes, distancia > 10 metros (no solo con punto anterior!?)
+		//TODO: flag Activo...
 System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro);
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
-		//TODO:
-		//TODO:
-		//TODO:
-		//TODO:
-		//TODO:-------------------------------------------------------------------------------------
-		//TODO:
-		//TODO:
-		//TODO:
-		//TODO:
-
-		final ArrayList<Ruta> aRutas = new ArrayList<>();//TODO buscar RutaPunto  : como hacer join???????
-		final Firebase ref = newFirebase();
-		final GeoQuery geoQuery = RutaPunto.newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
-		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
+		final ObjetoListener<String> lis = new ObjetoListener<String>()
 		{
+			@Override
+			public void onData(final String[] aData)
+			{
+				//final Set<Ruta> sRutas = new TreeSet<>();
+				final ArrayList<Ruta> aRutas = new ArrayList<>();
+
+System.err.println("-----------------------------------------------data_r="+aData.length);
+				if(aData.length < 1)listener.onData(new Ruta[0]);
+				else
+				for(String idRuta : aData)
+				{
+					Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
+					{
+						@Override
+						public void onDataChange(DataSnapshot data)
+						{
+System.err.println("-----------------------------------------------data_r="+data);
+							Ruta r = data.getValue(Ruta.class);
+System.err.println("-----------------------------------------------r="+r);
+							if(r.pasaFiltro(filtro, r.getId(), idRutaAct))aRutas.add(r);
+System.err.println("-----------------------------------------------size="+aRutas.size()+" = "+aData.length);
+							if(aRutas.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+						}
+						@Override
+						public void onCancelled(FirebaseError err)
+						{
+							System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:"+err);
+							if(aRutas.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+						}
+					});
+				}
+			}
+			@Override
+			public void onError(String err)
+			{
+				listener.onError(err);	//System.err.println("Ruta:buscarPorGeoFiltro:onError:e:"+err);
+			}
+		};
+
+		//------
+		final GeoQuery geoQuery = RutaPunto.newGeoFire().queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
+		geoQuery.addGeoQueryEventListener(new GeoQueryEventListener()
+		{
+			private Set<String> asRutas = new TreeSet<>();
 			private int nCount = 0;
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)
 			{
-				System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:"+key+", "+location);
+				System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered: idPunto:"+key+", "+location);
 				nCount++;
-				ValueEventListener vel = new ValueEventListener()
+				RutaPunto.newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)
 					{
 						nCount--;
-						Ruta r = data.getValue(Ruta.class);
-						if( ! r.pasaFiltro(filtro))aRutas.add(r);
-						if(nCount < 1)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+						RutaPunto rp = data.getValue(RutaPunto.class);
+						asRutas.add(rp.getIdRuta());
+System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered: --------------nCount="+nCount+" : ruta="+rp.getIdRuta());
+						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
 					}
 					@Override
 					public void onCancelled(FirebaseError err)
 					{
 						nCount--;
-						System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+						System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:e:"+err);
+						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
 					}
-				};
-				//newFirebase().child(key).addListenerForSingleValueEvent(vel);
-				ref.child(key).addListenerForSingleValueEvent(vel);
+				});
 			}
 			@Override
 			public void onGeoQueryReady()
 			{
 System.err.println("Ruta:buscarPorGeoFiltro:--------------------------------------------onGeoQueryReady:A:"+nCount);
+				if(nCount == 0)lis.onData(new String[0]);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
 			@Override public void onKeyExited(String key){}
@@ -258,8 +288,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 			{
 				System.err.println("Ruta:buscarPorGeoFiltro:onGeoQueryError:"+error);
 			}
-		};
-		geoQuery.addGeoQueryEventListener(lisGeo);
+		});
 	}
 
 
@@ -425,21 +454,6 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		public static void eliminar(String idRuta)
 		{
 			delGeo(idRuta);
-			/*Query queryRef = newFirebase().orderByChild(IDRUTA).equalTo(idRuta);
-			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot puntos)
-				{
-					puntos.getRef().setValue(null);
-					System.err.println("--------------------------------Ruta:RutaPunto:eliminar:");
-				}
-				@Override
-				public void onCancelled(FirebaseError err)
-				{
-					System.err.println("-----------Ruta:RutaPunto:eliminar:e:"+err);
-				}
-			});*/
 		}
 		public void guardar(Firebase.CompletionListener listener)
 		{
@@ -575,6 +589,7 @@ System.err.println("RutaPunto:getLista:onDataChange---------");
 			Double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
 					+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
 			Double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+System.err.println("-------------------distanciaReal:"+(R * c * 1000));
 			return R * c * 1000; // convert to meters
 			// -- sin altura --
 			//double distancia = R * c * 1000; // convert to meters

@@ -59,9 +59,9 @@ System.err.println("----------------------Util.refreshListaRutas ");
 	private static Application _app;
 		public static void setApplication(Application app){_app = app;}
 		public static Application getApplication(){return _app;}
-	private static Context _svcContext;
-		public static void setSvcContext(Context c){_svcContext = c;}
-		public static Context getSvcContext(){return _svcContext;}
+	//private static Context _svcContext;
+//		public static void setSvcContext(Context c){_svcContext = c;}
+//		public static Context getSvcContext(){return _svcContext;}
 	public static void initFirebase(Context c)
 	{
 		Login.setSvcContext(c);
@@ -77,31 +77,39 @@ System.err.println("----------------------Util.refreshListaRutas ");
 		_locLast=loc;
 System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 	}
-	public static Location getLocation()
+	public static Location getLocation(Context c)
 	{
 		Location location1=null, location2=null;
 		try
 		{
-			LocationManager locationManager = (LocationManager)_svcContext.getSystemService(Context.LOCATION_SERVICE);
-			if(locationManager == null)return _locLast;
-			boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-			boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-			if(isNetworkEnabled)
-				location1 = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if(isGPSEnabled)
-				location2 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if(location1==null && location2==null)return _locLast;
-			if(_locLast == null)_locLast = location1!=null?location1:location2;
-			if(location1 != null && location1.getTime() > _locLast.getTime())
-				_locLast = location1;
-			else if(location2 != null && location2.getTime() > _locLast.getTime())
-				_locLast = location2;
+			//LocationManager locationManager = (LocationManager)_svcContext.getSystemService(Context.LOCATION_SERVICE);
+			LocationManager locationManager = (LocationManager)c.getSystemService(Context.LOCATION_SERVICE);
+			if(locationManager != null)
+			{
+				boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+				boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+				if(isNetworkEnabled)
+					location1 = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+				if(isGPSEnabled)
+					location2 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				if(location1==null && location2==null)return _locLast;
+				if(_locLast == null)_locLast = location1!=null?location1:location2;
+				if(location1 != null && location1.getTime() > _locLast.getTime())
+					_locLast = location1;
+				else if(location2 != null && location2.getTime() > _locLast.getTime())
+					_locLast = location2;
+			}
+			else
+			{
+				System.err.println("Util.getLocation:e: locationManager === NULL");
+			}
 		}
 		catch(SecurityException se)
 		{
+			System.err.println("Util.getLocation:e:"+se);
 			se.printStackTrace();
 		}
-System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
+try{System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());}catch(Exception e){System.err.println("Util.getLocation:ee:"+e);}
 		return _locLast;
     }
 
@@ -298,16 +306,16 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	private static final String PREF_TRACKING = "tracking_prefs";
 	private static final String ID_TRACKING = "id_tracking_route";
-	public static void setTrackingRoute(String sIdRoute)
+	public static void setTrackingRoute(String sIdRoute, Context c)
 	{
-		SharedPreferences sp = _svcContext.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);//_svcContext
 		SharedPreferences.Editor editor = sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
 		editor.apply();//editor.commit(); Aply does it in background
 	}
-	public static String getTrackingRoute()
+	public static String getTrackingRoute(Context c)
 	{
-		SharedPreferences sp = _svcContext.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);//_svcContext
  		return sp.getString(ID_TRACKING, "");
 	}
 
