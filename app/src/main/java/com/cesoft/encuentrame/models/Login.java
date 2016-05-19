@@ -56,6 +56,13 @@ public class Login
 		e.putString(PREF_PWD, "");
 		e.apply();
 	}
+	public static void delPasswordOnly()
+	{
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		SharedPreferences.Editor e = prefs.edit();
+		e.putString(PREF_PWD, "");
+		e.apply();
+	}
 
 	//-------
 	private static ArrayList<Firebase.AuthResultHandler> _observers = new ArrayList<>();
@@ -123,7 +130,7 @@ System.err.println("--------------------login:");
 			if(prefs.getBoolean(PREF_SAVE_LOGIN, true))
 			{
 System.err.println("--------------------login:saveLogin("+usr+", "+pwd+")");
-				if(usr != null && !usr.isEmpty())
+				if(!usr.isEmpty())
 				saveLogin(usr, pwd);
 			}
 			else
@@ -144,7 +151,7 @@ System.err.println("--------------------login:saveLogin("+usr+", "+pwd+")");
 		Firebase ref = new Firebase(Objeto.FIREBASE);
 		ref.unauth();
 		_idUser = null;
-		saveLogin("", "");
+		delPasswordOnly();//delLogin();
 	}
 	//-------
 	public static void addUser(String email, String pwd, final Firebase.ValueResultHandler<Map<String, Object>> listener)
