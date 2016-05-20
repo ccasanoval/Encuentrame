@@ -28,12 +28,9 @@ import android.widget.TextView;
 
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
-import com.cesoft.encuentrame.models.Login;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Ruta;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 //Version Firebase
 /*
 {
@@ -60,11 +57,11 @@ Uploading is not possible. App measurement disabled
 
 https://developers.google.com/identity/sign-in/android/start?hl=en
 https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=Default%20Demo%20App&cntpkg=com.google.samples.quickstart.signin&cnturl=https:%2F%2Fdevelopers.google.com%2Fidentity%2Fsign-in%2Fandroid%2Fstart%3Fconfigured%3Dtrue&cntlbl=Continue%20with%20Try%20Sign-In
-Registered SHA-1s:
-74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
 // ONLINE C COMPILER http://cpp.sh
+
+//TODO: pendiente de que actualicen a GeoFire 1.2 : http://stackoverflow.com/questions/37331145/geofire-and-firebaseui-with-upgraded-firebase
 
 //TODO: Al cerrar sesion no cierra ventana.... debe volver a login..
 

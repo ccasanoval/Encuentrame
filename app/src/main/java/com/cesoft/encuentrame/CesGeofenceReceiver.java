@@ -3,13 +3,12 @@ package com.cesoft.encuentrame;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
-import com.cesoft.encuentrame.models.Aviso;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+
+import com.cesoft.encuentrame.models.Aviso;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -20,7 +19,6 @@ import java.util.List;
 //TODO: En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable : eliminar CesServiceAvisoGeo
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
-//TODO: Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
@@ -65,19 +63,19 @@ System.err.println("CesGeofenceReceiver:onReceive:------------------------------
 	//______________________________________________________________________________________________
 	protected void showAviso(final Context c, String sId, final String sTitle)
 	{
-		Aviso.getById(sId, c, new ValueEventListener()
+		Aviso.getById(sId, new ValueEventListener()
 		{
 			@Override
-			public void onDataChange(DataSnapshot aviso)
+			public void onDataChange(com.google.firebase.database.DataSnapshot data)
 			{
-				Aviso a = aviso.getValue(Aviso.class);
+				Aviso a = data.getValue(Aviso.class);
 				Intent i = new Intent(c, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, a);
 				i.putExtra("notificacion", true);
 				Util.showAviso(c, sTitle, a, i);
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("CesGeofenceReceiver:showAviso:e:" + err);
 			}

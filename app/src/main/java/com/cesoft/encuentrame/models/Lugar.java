@@ -3,15 +3,18 @@ package com.cesoft.encuentrame.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,13 +26,14 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 10/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@JsonIgnoreProperties({"_datos", "_datGeo"})
 public class Lugar extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "lugar";
-	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference();}
 	protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
-	protected Firebase _datos;
+
+	@Exclude
+	protected DatabaseReference _datos;
 
 	//______________________________________________________________________________________________
 	private double latitud, longitud;
@@ -52,7 +56,7 @@ public class Lugar extends Objeto implements Parcelable
 
 	//// FIREBASE
 	//______________________________________________________________________________________________
-	public void eliminar(Firebase.CompletionListener listener)
+	public void eliminar(DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -65,7 +69,7 @@ public class Lugar extends Objeto implements Parcelable
 		}
 		delGeo();
 	}
-	public void guardar(Firebase.CompletionListener listener)//TODO: todos igual, llevar a objeto?
+	public void guardar(DatabaseReference.CompletionListener listener)//TODO: todos igual, llevar a objeto?
 	{
 		if(_datos != null)
 		{
@@ -95,9 +99,8 @@ public class Lugar extends Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public static void getLista(final ObjetoListener<Lugar> listener)
 	{
-		Firebase ref = newFirebase();
-		//ref.addValueEventListener(listener);//TODO: cual es mejor?
-		ref.addListenerForSingleValueEvent(new ValueEventListener()
+		//newFirebase().addValueEventListener(listener);//TODO: cual es mejor?
+		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -109,7 +112,7 @@ public class Lugar extends Objeto implements Parcelable
 				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("Lugar:getLista:onCancelled:"+err);
 				listener.onError("Lugar:getLista:onCancelled:"+err);
@@ -128,9 +131,7 @@ public class Lugar extends Objeto implements Parcelable
 	public static void buscarPorFiltro(final ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
 System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
-		Firebase ref = newFirebase();
-
-		ref.addListenerForSingleValueEvent(new ValueEventListener()
+		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -147,7 +148,7 @@ System.err.println("--------------------Lugar:"+l);
 				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("Lugar:buscarPorFiltro:onCancelled:"+err);
 				listener.onError("Lugar:buscarPorFiltro:onCancelled:"+err);
@@ -181,7 +182,7 @@ System.err.println("--------------------Lugar:"+l);
 						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
 					@Override
-					public void onCancelled(FirebaseError err)
+					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
 						System.err.println("Lugar:getLista:onKeyEntered:onCancelled:"+err);
@@ -242,6 +243,7 @@ System.err.println("--------------------Lugar:"+l);
 
 	//----------------------------------------------------------------------------------------------
 	// GEOFIRE
+	@Exclude
 	private GeoFire _datGeo;
 	private void saveGeo()//final double lat, final double lon)
 	{

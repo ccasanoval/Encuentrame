@@ -11,11 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,6 +31,10 @@ import com.cesoft.encuentrame.models.Objeto;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Lugar;
 import com.cesoft.encuentrame.models.Ruta;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 //TODO: cuando dos lugares o avisos en mismo sitio: girar con angulo aleatorio...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,10 +107,10 @@ System.err.println("********************** (0=Lug, 1=Rut, 2=Avi)_iTipo="+_iTipo)
 			{
 				if(_l != null)
 				{
-					_l.guardar(new Firebase.CompletionListener()
+					_l.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
-						public void onComplete(FirebaseError err, Firebase firebase)
+						public void onComplete(DatabaseError err, DatabaseReference databaseReference)
 						{
 							if(err != null)
 							{
@@ -130,10 +129,10 @@ System.err.println("********************** (0=Lug, 1=Rut, 2=Avi)_iTipo="+_iTipo)
 				}
 				if(_a != null)
 				{
-					_a.guardar(new Firebase.CompletionListener()
+					_a.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
-						public void onComplete(FirebaseError err, Firebase firebase)
+						public void onComplete(DatabaseError err, DatabaseReference databaseReference)
 						{
 							if(err != null)
 							{
@@ -331,14 +330,13 @@ System.err.println("----------showRuta:"+r);
 				int i = 0;
 				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
 				for(DataSnapshot o : ds.getChildren())
-				{
-					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
-				}
+					aPts[i++] = o.getValue(Ruta.RutaPunto.class);
 				showRutaHelper(r, aPts);
 			}
 			@Override
-			public void onCancelled(FirebaseError firebaseError)
+			public void onCancelled(DatabaseError err)
 			{
+				System.err.println("ActMaps:showRuta:e:"+err);
 				Snackbar.make(_coordinatorLayout, getString(R.string.pto_ruta_ko), Snackbar.LENGTH_LONG).show();
 			}
 		});

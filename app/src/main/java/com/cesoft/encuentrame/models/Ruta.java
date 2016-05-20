@@ -9,19 +9,19 @@ import java.util.TreeSet;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.FirebaseException;
-import com.firebase.client.MutableData;
-import com.firebase.client.Query;
-import com.firebase.client.Transaction;
-import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
 //TODO: Compartir datos de GeoFire para no duplicar posicion en FIREBASE...
 //TODO: Config : max number of points per rute => cuando alcanza el limite corta...
@@ -30,13 +30,15 @@ import com.firebase.geofire.GeoQueryEventListener;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@JsonIgnoreProperties({"_datos"})
 public class Ruta extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "ruta";
 	public static final String IDRUTA = "idRuta";
-	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-	protected Firebase _datos;
+	//protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference();}
+
+	@Exclude
+	protected DatabaseReference _datos;
 
 	//TODO: fecha fin...
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
@@ -78,7 +80,7 @@ public class Ruta extends Objeto implements Parcelable
 
 	//// FIREBASE
 	//
-	public void eliminar(Firebase.CompletionListener listener)
+	public void eliminar(DatabaseReference.CompletionListener listener)
 	{
 System.err.println("Ruta:eliminar:r:" + this);
 		RutaPunto.eliminar(getId());
@@ -94,7 +96,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 		_datos.removeValue();
 		puntosCount = 0;
 	}
-	public void guardar(Firebase.CompletionListener listener)
+	public void guardar(DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -134,7 +136,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 				listener.onData(aRutas.toArray(new Ruta[n]));
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("Ruta:getLista:onCancelled:"+err);
 				listener.onError("Ruta:getLista:onCancelled:"+err);
@@ -177,8 +179,9 @@ System.err.println("Ruta:eliminar:r:" + this);
 				}
 				listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 			}
+
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("Ruta:buscarPorFiltro:onCancelled:"+err);
 				listener.onError(err.toString());
@@ -214,7 +217,7 @@ System.err.println("-----------------------------------------------data_r="+aDat
 							if(aRutas.size()+aIgnorados.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 						}
 						@Override
-						public void onCancelled(FirebaseError err)
+						public void onCancelled(DatabaseError err)
 						{
 							System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:"+err);
 							if(aRutas.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
@@ -252,7 +255,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered: --------------nCount="
 						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
 					}
 					@Override
-					public void onCancelled(FirebaseError err)
+					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
 						System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:e:"+err);
@@ -269,9 +272,9 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 			}
 			@Override public void onKeyExited(String key){}
 			@Override public void onKeyMoved(String key, GeoLocation location){}
-			@Override public void onGeoQueryError(FirebaseError error)
+			@Override public void onGeoQueryError(com.firebase.client.FirebaseError err)
 			{
-				System.err.println("Ruta:buscarPorGeoFiltro:onGeoQueryError:"+error);
+				System.err.println("Ruta:buscarPorGeoFiltro:onGeoQueryError:"+err);
 			}
 		});
 	}
@@ -317,7 +320,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 				listener.onDataChange(ds);
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				puntosCount = 0;
 				listener.onCancelled(err);
@@ -325,33 +328,33 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		});
 	}
 	//______________________________________________________________________________________________
-	public static void addPunto(final String idRuta, double lat, double lon, final Transaction.Handler listener)//final Firebase.CompletionListener listener)
+	public static void addPunto(final String idRuta, double lat, double lon, final Transaction.Handler listener)
 	{
 		RutaPunto pto = new RutaPunto(idRuta, lat, lon);
-		pto.guardar(new Firebase.CompletionListener()
+		pto.guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
-			public void onComplete(FirebaseError err, final Firebase firebase)
+			public void onComplete(DatabaseError err, DatabaseReference databaseReference)
 			{
 				if(err == null)
 				{
-					Firebase ref = newFirebase().child(idRuta).child("puntosCount");
+					DatabaseReference ref = newFirebase().child(idRuta).child("puntosCount");
 					ref.runTransaction(new Transaction.Handler()
 					{
 						@Override
-						public Transaction.Result doTransaction(MutableData currentData)
+						public Transaction.Result doTransaction(MutableData mutableData)
 						{
-							if(currentData.getValue() == null)
-								currentData.setValue(1);
+							if(mutableData.getValue() == null)
+								mutableData.setValue(1);
         					else
-            					currentData.setValue((Long)currentData.getValue() + 1);
-							return Transaction.success(currentData);//we can also abort by calling Transaction.abort()
+            					mutableData.setValue((Long)mutableData.getValue() + 1);
+							return Transaction.success(mutableData);//we can also abort by calling Transaction.abort()
 						}
 						@Override
-						public void onComplete(FirebaseError err, boolean b, DataSnapshot ds)
+						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
-							System.err.println("Ruta:addPunto:inc count:"+err+" "+b+" "+ds);
-							listener.onComplete(err, b, ds);//firebase);
+							System.err.println("Ruta:addPunto:inc count:"+err+" "+b+" "+data);
+							listener.onComplete(err, b, data);
 						}
 					});
 				}
@@ -364,13 +367,14 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// RUTA PUNTO
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	@JsonIgnoreProperties({"_datos"})
 	public static class RutaPunto implements Parcelable
 	{
 		public static final String NOMBRE = "ruta_punto";
-		protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+		protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference();}
 		protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
-		private Firebase _datos;
+
+		@Exclude
+		private DatabaseReference _datos;
 
 		protected String id = null;
 			public String getId(){return id;}
@@ -442,7 +446,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		{
 			delGeo(idRuta);
 		}
-		public void guardar(Firebase.CompletionListener listener)
+		public void guardar(DatabaseReference.CompletionListener listener)
 		{
 			if(_datos != null)
 			{
@@ -478,18 +482,17 @@ System.err.println("RutaPunto:getLista:onDataChange---------");
 					for(DataSnapshot o : ds.getChildren())
 					{
 						System.err.println("RutaPunto:getLista:onDataChange:o------------------------"+o);
-						try{
+						//try{
 						System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+o.getValue(Ruta.RutaPunto.class));
-						}catch(FirebaseException e)
-						{
-							System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+e+" : "+e.getCause());
-
-						}
+						//}catch(FirebaseException e)
+						//{
+						//	System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+e+" : "+e.getCause());
+						//}
 					}
 					listener.onDataChange(ds);
 				}
 				@Override
-				public void onCancelled(FirebaseError err)
+				public void onCancelled(DatabaseError err)
 				{
 					listener.onCancelled(err);
 				}
@@ -520,7 +523,10 @@ System.err.println("------RutaPunto:saveGeo:--------SE GUARDA");
 					saveGeo2();
 				}
 				@Override
-				public void onCancelled(FirebaseError err){}
+				public void onCancelled(DatabaseError err)
+				{
+					System.err.println("RutaPunto:saveGeo:onCancelled:e:"+err);
+				}
 			});
 
 			/*final GeoQuery geoQuery = RutaPunto.newGeoFire().queryAtLocation(new GeoLocation(getLatitud(), getLongitud()), DISTANCIA_MIN);//Puntos a menos de x? => no lo incluyo
@@ -569,7 +575,7 @@ System.err.println("-----------------Ruta:saveGeo:onGeoQueryReady: i="+i+" "+(i>
 					ds.getRef().setValue(null);
 				}
 				@Override
-				public void onCancelled(FirebaseError err)
+				public void onCancelled(DatabaseError err)
 				{
 					System.out.println("RutaPunto:delGeo:e:"+err+" : "+idRuta);
 				}

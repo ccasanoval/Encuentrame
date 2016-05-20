@@ -20,11 +20,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cesoft.encuentrame.models.Login;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-
+import com.google.firebase.database.FirebaseDatabase;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
@@ -37,7 +36,7 @@ public class ActLogin extends AppCompatActivity
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
 
-	Firebase.AuthResultHandler resLogin = new Firebase.AuthResultHandler()
+	/*Firebase.AuthResultHandler resLogin = new Firebase.AuthResultHandler()
 	{
 		@Override
 		public void onAuthenticated(AuthData usr)
@@ -50,7 +49,7 @@ public class ActLogin extends AppCompatActivity
 		{
 			System.err.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + err.getMessage());
 		}
-	};
+	};*/
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -80,6 +79,9 @@ public class ActLogin extends AppCompatActivity
 		}
 		*/
 		_win = this;
+
+		//--- INICIAR
+		Util.init(this);
 
 		//Establece observer para que me comunique cuando entra
 		Login.addOnLoginListener(new Firebase.AuthResultHandler()

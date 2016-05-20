@@ -23,8 +23,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -36,7 +34,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -50,6 +47,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame.models.Aviso;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
@@ -241,7 +241,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 	//______________________________________________________________________________________________
 	//______________________________________________________________________________________________
-	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format("%.5f/%.5f", lat, lon));}
+	private void setPosLabel(double lat, double lon){_lblPosicion.setText(Util.formatLatLon(lat, lon));}
 	private void setValores()
 	{
 		_txtNombre.setText(_a.getNombre());
@@ -322,15 +322,15 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		_a.setActivo(_swtActivo.isChecked());
 		//_a.reactivarPorHoy();
 		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
-		_a.guardar(new Firebase.CompletionListener()
+		_a.guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
-			public void onComplete(FirebaseError err, Firebase aviso)
+			public void onComplete(DatabaseError err, DatabaseReference data)
 			{
 				if(err == null)
 				{
 					CesService.cargarListaGeoAvisos();
-					System.err.println("ActAviso:guardar:handleResponse:" + aviso);
+					System.err.println("ActAviso:guardar:handleResponse:" + data);
 					//return2Main(true, getString(R.string.ok_guardar));
 					openMain(true, getString(R.string.ok_guardar_aviso));
 				}
@@ -356,14 +356,14 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_a.eliminar(new Firebase.CompletionListener()
+				_a.eliminar(new DatabaseReference.CompletionListener()
 				{
 					@Override
-					public void onComplete(FirebaseError err, Firebase firebase)
+					public void onComplete(DatabaseError err, DatabaseReference data)
 					{
-						if(err != null)
+						if(err == null)
 						{
-							System.err.println("ActAviso:eliminar:handleResponse:" + firebase);
+							System.err.println("ActAviso:eliminar:handleResponse:" + data);
 							//return2Main(true, getString(R.string.ok_eliminar));
 							openMain(true, getString(R.string.ok_eliminar_aviso));
 						}
@@ -436,7 +436,7 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 	{
 		_a.setLatitud(lat);
 		_a.setLongitud(lon);
-		_lblPosicion.setText(String.format("%.5f/%.5f", _a.getLatitud(), _a.getLongitud()));
+		_lblPosicion.setText(Util.formatLatLon(_a.getLatitud(), _a.getLongitud()));
 		setMarker();
 	}
 	private void setMarker()
@@ -480,7 +480,7 @@ System.err.println("ActAviso:guardar:-------------------------------------------
 			public void onResult(@NonNull LocationSettingsResult result)
 			{
 				final Status status = result.getStatus();
-				final LocationSettingsStates le = result.getLocationSettingsStates();
+				//final LocationSettingsStates le = result.getLocationSettingsStates();
 				switch(status.getStatusCode())
 				{
 				case LocationSettingsStatusCodes.SUCCESS:

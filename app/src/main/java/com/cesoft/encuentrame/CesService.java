@@ -6,19 +6,16 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
 
-import com.cesoft.encuentrame.models.Aviso;
-import com.cesoft.encuentrame.models.Login;
-import com.cesoft.encuentrame.models.Ruta;
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.MutableData;
-import com.firebase.client.Transaction;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.location.Geofence;
 
-
+import com.cesoft.encuentrame.models.Aviso;
+import com.cesoft.encuentrame.models.Ruta;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +37,7 @@ public class CesService extends IntentService
 	private static CesService _this;
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
-	Firebase.AuthResultHandler loginListener = new Firebase.AuthResultHandler()
+	/*FirebaseAuth.AuthResultHandler loginListener = new Firebase.AuthResultHandler()
 	{
 		@Override
 		public void onAuthenticated(AuthData usr)
@@ -52,7 +49,7 @@ public class CesService extends IntentService
 		{
 			System.err.println("CesService:onCreate:onAuthenticated:e:"+err);
 		}
-	};
+	};*/
 
 	//______________________________________________________________________________________________
 	public CesService()
@@ -64,9 +61,7 @@ public class CesService extends IntentService
 	{
 		super.onCreate();
 		_this = this;
-		Util.initFirebase(this);
-		//Util.setSvcContext(this);
-		//Login.login(loginListener);
+		Util.init(this);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
@@ -84,7 +79,7 @@ System.err.println("CesService:loop---------------------------------------------
 				if( ! Login.isLogged())
 				{
 					System.err.println("CesService:loop---sin usuario");
-					Login.login(loginListener);
+					Login.login();
 					Thread.sleep(DELAY_LOAD / 3);
 					continue;
 				}
@@ -157,7 +152,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 					}
 				}
 				@Override
-				public void onCancelled(FirebaseError err)
+				public void onCancelled(DatabaseError err)
 				{
 					System.err.println("CesService:cargarListaGeoAvisos:f:"+err);
 				}
@@ -245,49 +240,46 @@ System.err.println("CesService:saveGeoTracking:idRuta:"+sId);
 
 //TODO: añadir geofence por si quisiera funcionar...?
 System.err.println("CesService:saveGeoTracking:guardar0000:----------------------:" + r);
-				r.guardar(new Firebase.CompletionListener()
+				r.guardar(new DatabaseReference.CompletionListener()
 				{
 					@Override
-					public void onComplete(FirebaseError err, Firebase firebase)
+					public void onComplete(DatabaseError err, DatabaseReference data)
 					{
-						if(err != null)
+						if(err == null)
 						{
-							System.err.println("CesService:saveGeoTracking:guardar:err:----------------------:" + err);
+							System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + data);
+							//r.addPunto(loc.getLatitude(), loc.getLongitude());Ruta.getById(firebase.getKey())
+							//Ruta.addPunto(, loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
+							Ruta.addPunto(data.getKey(), loc.getLatitude(), loc.getLongitude(), new Transaction.Handler()
+								{
+									@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
+									@Override
+									public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
+									{
+										if(err != null)
+											System.err.println("CesService:saveGeoTracking:guardar:pto:err:----------------------:" + err);
+										else
+											System.err.println("CesService:saveGeoTracking:guardar:pto:----------------------:" + data);
+
+										Util.refreshListaRutas();//Refrescar lista rutas en main..
+									}
+								});
 						}
 						else
 						{
-							System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + firebase);
-							//r.addPunto(loc.getLatitude(), loc.getLongitude());Ruta.getById(firebase.getKey())
-							//Ruta.addPunto(, loc.getLatitude(), loc.getLongitude(), new Firebase.CompletionListener()
-							Ruta.addPunto(firebase.getKey(), loc.getLatitude(), loc.getLongitude(), new Transaction.Handler()
-									{
-										@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
-										@Override
-										public void onComplete(FirebaseError err, boolean b, DataSnapshot ds)
-										{
-											if(err != null)
-												System.err.println("CesService:saveGeoTracking:guardar:pto:err:----------------------:" + err);
-											else
-												System.err.println("CesService:saveGeoTracking:guardar:pto:----------------------:" + ds);
-
-											Util.refreshListaRutas();//Refrescar lista rutas en main..
-										}
-									});
+							System.err.println("CesService:saveGeoTracking:guardar:err:----------------------:" + err);
 						}
-
 						_locLastSaved = loc;
 						_tmLastSaved = System.currentTimeMillis();
 					}
 				});
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:" + err);
 			}
 		});
-
 	}
-
 }
 

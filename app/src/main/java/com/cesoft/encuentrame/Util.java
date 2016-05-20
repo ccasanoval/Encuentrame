@@ -23,8 +23,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
-import com.cesoft.encuentrame.models.Login;
-import com.firebase.client.Firebase;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 
@@ -59,13 +58,11 @@ System.err.println("----------------------Util.refreshListaRutas ");
 	private static Application _app;
 		public static void setApplication(Application app){_app = app;}
 		public static Application getApplication(){return _app;}
-	//private static Context _svcContext;
-//		public static void setSvcContext(Context c){_svcContext = c;}
-//		public static Context getSvcContext(){return _svcContext;}
-	public static void initFirebase(Context c)
+
+	public static void init(Context c)
 	{
+		FirebaseDatabase.getInstance().setPersistenceEnabled(true);/// Iniciar firebase disk persistence
 		Login.setSvcContext(c);
-		Firebase.setAndroidContext(c);
 	}
 
 	//______________________________________________________________________________________________
@@ -350,4 +347,9 @@ System.err.println("-----util:return2Main:filtro:"+filtro);
 		act.finish();
 	}
 
+	//______________________________________________________________________________________________
+	public static String formatLatLon(double lat, double lon)
+	{
+		return String.format("%.5f/%.5f", lat, lon);
+	}
 }

@@ -1,23 +1,23 @@
 package com.cesoft.encuentrame.models;
 
-import android.content.Context;
 import android.os.Parcel;
 
-import com.cesoft.encuentrame.Util;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
-//https://develop.backendless.com/#Encuentrame/v1/main/data/Aviso
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,8 +25,8 @@ public class Aviso extends Objeto
 {
 	public static final String NOMBRE = "aviso";
 
-	protected Firebase _datos;
-	protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
+	protected DatabaseReference _datos;
+	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference();}
 	protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 
 	//______________________________________________________________________________________________
@@ -120,7 +120,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 
 	//// FIREBASE
 	//
-	public void eliminar(Firebase.CompletionListener listener)
+	public void eliminar(DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -133,7 +133,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 		}
 		delGeo();
 	}
-	public void guardar(Firebase.CompletionListener listener)
+	public void guardar(DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -156,15 +156,8 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 	}
 
 	//______________________________________________________________________________________________
-	public static void getById(String sId, Context c, ValueEventListener listener)
+	public static void getById(String sId, ValueEventListener listener)
 	{
-
-		if(Util.getApplication() != null)
-			Firebase.setAndroidContext(Util.getApplication().getBaseContext());
-		//else if(Util.getSvcContext() != null)//Cuando cierras app pero das a notificacion: exception: You need to set the Android context using Firebase.setAndroidContext() before using Firebase.
-		//	Firebase.setAndroidContext(Util.getSvcContext());
-		//else return;
-		Firebase.setAndroidContext(c);
 		newFirebase().child(sId).addListenerForSingleValueEvent(listener);
 	}
 	public static void getActivos(ValueEventListener listener)
@@ -189,7 +182,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 				listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("Aviso:getLista:onCancelled:"+err);
 				listener.onError("Aviso:getLista:onCancelled:"+err);
@@ -233,7 +226,7 @@ System.err.println("----------pasaFiltro FINAL");
 				listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 				System.err.println("Aviso:buscarPorFiltro:onCancelled:"+err);
 				listener.onError(err.toString());
@@ -268,7 +261,7 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 					@Override
-					public void onCancelled(FirebaseError err)
+					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
 						System.err.println("Aviso:buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
@@ -282,6 +275,7 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
+
 			@Override public void onKeyExited(String key){}
 			@Override public void onKeyMoved(String key, GeoLocation location){}
 			@Override

@@ -17,8 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,6 +38,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame.models.Lugar;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.Locale;
 
@@ -204,7 +204,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
-	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
+	private void setPosLabel(double lat, double lon){_lblPosicion.setText(Util.formatLatLon(lat, lon));}
 	private void setValores()
 	{
 		_txtNombre.setText(_l.getNombre());
@@ -266,10 +266,10 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		}
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
-		_l.guardar(new Firebase.CompletionListener()
+		_l.guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
-			public void onComplete(FirebaseError err, Firebase firebase)
+			public void onComplete(DatabaseError err, DatabaseReference data)
 			{
 				if(err == null)
 				{
@@ -296,10 +296,10 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_l.eliminar(new Firebase.CompletionListener()
+				_l.eliminar(new DatabaseReference.CompletionListener()
 				{
 					@Override
-					public void onComplete(FirebaseError err, Firebase firebase)
+					public void onComplete(DatabaseError err, DatabaseReference data)
 					{
 						if(err == null)
 						{
@@ -378,7 +378,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		_l.setLatitud(lat);
 		_l.setLongitud(lon);
-		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", _l.getLatitud(), _l.getLongitud()));
+		_lblPosicion.setText(Util.formatLatLon(_l.getLatitud(), _l.getLongitud()));
 		setMarker();
 	}
 	private void setMarker()

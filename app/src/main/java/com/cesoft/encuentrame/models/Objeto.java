@@ -43,7 +43,7 @@ import java.util.Locale;
 //@JsonIgnoreProperties({"id"})//Tendrias que iniciarlo despues de cargar desde firebase....
 public class Objeto implements Parcelable
 {
-	public static final String FIREBASE = "https://blazing-heat-3755.firebaseio.com/";
+	//public static final String FIREBASE = "https://blazing-heat-3755.firebaseio.com/";
 	public static final String GEOFIRE = "https://blazing-heat-3755.firebaseio.com/GEO/";
 	public static final String NOMBRE = "objeto";
 	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);

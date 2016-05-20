@@ -20,12 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
-
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -48,8 +42,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.cesoft.encuentrame.models.Ruta;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
+import com.cesoft.encuentrame.models.Ruta;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
@@ -87,7 +85,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		//_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
 //TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
-findViewById(R.id.layPeriodo).setVisibility(View.GONE);
+		View layPeriodo = findViewById(R.id.layPeriodo);
+		if(layPeriodo!=null)layPeriodo.setVisibility(View.GONE);
 /*		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnTrackingDelay.setAdapter(adapter);
@@ -170,7 +169,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		{
 			setTitle(getString(R.string.editar_ruta));
 			if(btnStart!=null)btnStart.setVisibility(View.GONE);
-			View layPeriodo = findViewById(R.id.layPeriodo);
+			//View layPeriodo = findViewById(R.id.layPeriodo);
 			if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 			//si está activo muestra btnStop
 			String sId = Util.getTrackingRoute(ActRuta.this.getBaseContext());
@@ -266,8 +265,8 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			}
 		}*/
 		//
-		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
-		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+		//TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
+		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 //TODO:
 //		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
 //		if(date != null && lblFecha!= null)lblFecha.setText(dateFormat.format(date));
@@ -320,14 +319,14 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	//______________________________________________________________________________________________
 	private void guardar()
 	{
-		guardar(new Firebase.CompletionListener()
+		guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
-			public void onComplete(FirebaseError err, Firebase firebase)
+			public void onComplete(DatabaseError err, DatabaseReference data)
 			{
 				if(err == null)
 				{
-					System.err.println("ActRuta:guardar:"+firebase);
+					System.err.println("ActRuta:guardar:"+data);
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -338,7 +337,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			}
 		});
 	}
-	private void guardar(Firebase.CompletionListener res)
+	private void guardar(DatabaseReference.CompletionListener res)
 	{
 		if(_txtNombre.getText().toString().isEmpty())
 		{
@@ -362,14 +361,14 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				_r.eliminar(new Firebase.CompletionListener()
+				_r.eliminar(new DatabaseReference.CompletionListener()
 				{
 					@Override
-					public void onComplete(FirebaseError err, Firebase firebase)
+					public void onComplete(DatabaseError err, DatabaseReference data)
 					{
 						if(err == null)
 						{
-							System.err.println("ActRuta:eliminar:handleResponse:"+firebase);
+							System.err.println("ActRuta:eliminar:handleResponse:"+data);
 							Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
 						}
 						else
@@ -466,14 +465,14 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
-		guardar(new Firebase.CompletionListener()
+		guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
-			public void onComplete(FirebaseError err, Firebase ruta)
+			public void onComplete(DatabaseError err, DatabaseReference data)
 			{
 				if(err == null)
 				{
-					Util.setTrackingRoute(ruta.getKey(), getBaseContext());
+					Util.setTrackingRoute(data.getKey(), getBaseContext());
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -509,7 +508,7 @@ System.err.println("ActRuta:showRuta:onDataChange:-----------:"+ds.getChildrenCo
 				showRutaHelper(aPts);
 			}
 			@Override
-			public void onCancelled(FirebaseError err)
+			public void onCancelled(DatabaseError err)
 			{
 System.err.println("ActRuta:showRuta:onCancelled:-----------:"+err);
 				//Snackbar.make(_coordinatorLayout, getString(R.string.error_load_rute_pts), Snackbar.LENGTH_LONG).show();
