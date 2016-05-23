@@ -21,7 +21,7 @@ import weborb.service.ExcludeProperties;//import weborb.service.ExcludeProperty;
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //ExcludeProperty(propertyName = "latitud")
-@ExcludeProperties(propertyNames = { "latitud, longitud" })
+@ExcludeProperties(propertyNames = { "latitud, longitud", "fechaActivo" })
 public class Aviso extends Objeto
 {
 	public transient static final String NOMBRE = "aviso";
@@ -43,9 +43,10 @@ public class Aviso extends Objeto
 		}
 		public void reactivarPorHoy(AsyncCallback<Aviso> ac)
 		{
-			Calendar cal = Calendar.getInstance();
+			/*Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.DATE, -2);
-			fechaActivo = cal.getTime();
+			fechaActivo = cal.getTime();*/
+			fechaActivo = new Date(0);
 			Backendless.Persistence.save(this, ac);
 		}
 
@@ -75,7 +76,9 @@ public class Aviso extends Objeto
 	//______________________________________________________________________________________________
 	public String toString()
 	{
-		return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio()+" "+lugar.getObjectId());
+		//return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio()+" "+lugar.getObjectId());
+		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s == %d', radio='%d' }",
+				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(created), created.getTime(), getRadio());
 	}
 	//______________________________________________________________________________________________
 	@Override public boolean equals(Object o)

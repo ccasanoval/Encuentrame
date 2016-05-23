@@ -59,6 +59,9 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 				}
 			});
 
+		TextView txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
+		txtFecha.setText(Ruta.DATE_FORMAT2.format(_rutas[position].getCreated()));
+
 		// Si la ruta se está grabando, resaltar
 		//String sIdRuta = Util.getTrackingRoute();
 		if(sIdRuta.equals(_rutas[position].getObjectId()))

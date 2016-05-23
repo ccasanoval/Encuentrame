@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -172,7 +173,6 @@ System.err.println("ActConfig:onHeaderClick:------------------------------------
 	}
 
 	//-------------------------------- GENERAL --------------------------------
-	// This fragment shows general preferences only. It is used when the activity is showing a two-pane settings UI.
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static class GeneralPreferenceFragment extends PreferenceFragment
 	{
@@ -182,10 +182,12 @@ System.err.println("ActConfig:onHeaderClick:------------------------------------
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.pref_general);
 			setHasOptionsMenu(true);
-			// Bind the summaries of EditText/List/Dialog/Ringtone preferences to their values.
-			// When their values change, their summaries are updated to reflect the new value, per the Android Design guidelines.
-			//bindPreferenceSummaryToValue(findPreference("example_text"));
-			//bindPreferenceSummaryToValue(findPreference("example_list"));
+
+			try{
+				PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+				Preference customPref = findPreference("version");//Look at pref_general.xml
+				customPref.setSummary(String.format(getString(R.string.app_vers), pInfo.versionName));
+			}catch(Exception e){System.err.println("ActConfig:GeneralPreferenceFragment:onCreate:e:"+e);}
 		}
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)

@@ -15,6 +15,9 @@ public class Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "objeto";//TRANSIENT so not to include in backendless
 
+	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
+	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
+
 	public Objeto(){}
 
 	//Backendless
@@ -27,7 +30,7 @@ public class Objeto implements Parcelable
 	public void setCreated(Date created){this.created = created;}
 	public Date getUpdated(){return updated;}
 	public void setUpdated(Date updated){this.updated = updated;}
-		public Date getFecha(){return updated!=null?updated:created;}
+		//public Date getFecha(){return updated!=null?updated:created;}
 
 	protected String nombre;
 	protected String descripcion;
@@ -39,7 +42,8 @@ public class Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public String toString()
 	{
-		return "ID:"+getObjectId()+", NOM:"+(nombre==null?"":nombre) + ", DESC:"+(descripcion==null?"":descripcion);
+		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",
+				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(created));
 	}
 
 	//______________________________________________________________________________________________
@@ -72,6 +76,7 @@ public class Objeto implements Parcelable
 		setObjectId(in.readString());
 		nombre = in.readString();
 		descripcion = in.readString();
+		created = new Date(in.readLong());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -79,6 +84,7 @@ public class Objeto implements Parcelable
 		dest.writeString(getObjectId());
 		dest.writeString(nombre);
 		dest.writeString(descripcion);
+		dest.writeLong(created.getTime());
 	}
 	@Override
 	public int describeContents()

@@ -38,8 +38,6 @@ import java.util.Date;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
-	//private static final int DELAY_LOCATION = 60000;
-
 	private Filtro _filtro;
 	private EditText _txtNombre;
 
@@ -70,6 +68,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
+		if(fab != null)
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -87,52 +86,58 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		Spinner _spnActivo = (Spinner)findViewById(R.id.spnActivo);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		_spnActivo.setAdapter(adapter);
-		_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		if(_spnActivo != null)
 		{
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			_spnActivo.setAdapter(adapter);
+			_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 			{
-				switch(position)
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 				{
-				case 1:
-					_filtro.setActivo(Filtro.ACTIVO);
-					break;
-				case 2:
-					_filtro.setActivo(Filtro.INACTIVO);
-					break;
-				default:
-					_filtro.setActivo(Util.NADA);
-					break;
+					switch(position)
+					{
+					case 1:
+						_filtro.setActivo(Filtro.ACTIVO);
+						break;
+					case 2:
+						_filtro.setActivo(Filtro.INACTIVO);
+						break;
+					default:
+						_filtro.setActivo(Util.NADA);
+						break;
+					}
 				}
-			}
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parent)
-			{
-				_filtro.setRadio(Util.NADA);
-			}
-		});
+				@Override
+				public void onNothingSelected(AdapterView<?> parent)
+				{
+					_filtro.setRadio(Util.NADA);
+				}
+			});
+		}
 		//
 		Spinner _spnRadio = (Spinner)findViewById(R.id.spnRadio);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		_spnRadio.setAdapter(adapter);
-		_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		if(_spnRadio != null)
 		{
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			_spnRadio.setAdapter(adapter);
+			_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 			{
-				_filtro.setRadio(_adRadio[position]);
-				setRadio();
-			}
-			@Override
-			public void onNothingSelected(AdapterView<?> parent)
-			{
-				_filtro.setRadio(Util.NADA);
-			}
-		});
-		_spnRadio.setSelection(3);
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+				{
+					_filtro.setRadio(_adRadio[position]);
+					setRadio();
+				}
+				@Override
+				public void onNothingSelected(AdapterView<?> parent)
+				{
+					_filtro.setRadio(Util.NADA);
+				}
+			});
+			_spnRadio.setSelection(3);
+		}
 
 		//------------------------------------------------------------------------------------------
 		/// FECHAS
@@ -144,7 +149,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
 				{
 					Calendar newDate = Calendar.getInstance();
-					newDate.set(year, monthOfYear, dayOfMonth);
+					newDate.set(year, monthOfYear, dayOfMonth, 0, 0);
 					_filtro.setFechaIni(newDate.getTime());
 					_txtFechaIni.setText(dateFormatter.format(newDate.getTime()));
 				}
@@ -157,7 +162,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
 				{
 					Calendar newDate = Calendar.getInstance();
-					newDate.set(year, monthOfYear, dayOfMonth);
+					newDate.set(year, monthOfYear, dayOfMonth, 23, 59);
 					_filtro.setFechaFin(newDate.getTime());
 					_txtFechaFin.setText(dateFormatter.format(newDate.getTime()));
 				}
@@ -167,6 +172,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		_txtFechaIni = (EditText)findViewById(R.id.txtFechaIni);
 		_txtFechaFin = (EditText)findViewById(R.id.txtFechaFin);
 		ImageButton ib = (ImageButton)findViewById(R.id.btnFechaIni);
+		if(ib != null)
 		ib.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -180,6 +186,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			}
 		});
 		ib = (ImageButton)findViewById(R.id.btnFechaFin);
+		if(ib != null)
 		ib.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -208,6 +215,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			_txtNombre.setText(_filtro.getNombre());
 			//-----
 			//_swtActivo.setChecked(_filtro.getActivo() == Filtro.ACTIVO);
+			if(_spnActivo != null)
 			switch(_filtro.getActivo())
 			{
 			case Filtro.ACTIVO:		_spnActivo.setSelection(1);break;
@@ -236,6 +244,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			{
 				if(_adRadio[i] == _filtro.getRadio())
 				{
+					if(_spnRadio != null)
 					_spnRadio.setSelection(i);
 					break;
 				}
@@ -251,7 +260,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		case Util.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
 			//_spnActivo.setVisibility(View.GONE);
-			findViewById(R.id.layActivo).setVisibility(View.GONE);
+			View v = findViewById(R.id.layActivo);
+			if(v != null)v.setVisibility(View.GONE);
 			break;
 		case Util.RUTAS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
@@ -321,42 +331,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		Util.setLocation(location);
 	}
 
-	//______________________________________________________________________________________________
-	/*private void pideGPS()
-	{
-		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
-		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-				.addLocationRequest(_LocationRequest)
-				//.addLocationRequest()
-				;
-		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(_GoogleApiClient, builder.build());
-		result.setResultCallback(new ResultCallback<LocationSettingsResult>()
-		{
-			@Override
-			public void onResult(@NonNull LocationSettingsResult result)
-			{
-				final Status status = result.getStatus();
-				final LocationSettingsStates le = result.getLocationSettingsStates();
-				switch(status.getStatusCode())
-				{
-				case LocationSettingsStatusCodes.SUCCESS:
-					System.err.println("LocationSettingsStatusCodes.SUCCESS");
-					// All location settings are satisfied. The client can initialize location requests here.
-					break;
-				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					System.err.println("LocationSettingsStatusCodes.RESOLUTION_REQUIRED");
-					// Location settings are not satisfied. But could be fixed by showing the user a dialog.
-					break;
-				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
-					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
-					break;
-				}
-			}
-		});
-	}*/
 
-		//____________________________________________________________________________________________________________________________________________________
+	//____________________________________________________________________________________________________________________________________________________
 	/// MENU
 	//______________________________________________________________________________________________
 	@Override

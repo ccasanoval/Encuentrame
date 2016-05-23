@@ -2,17 +2,18 @@
 
 	<EditTextPreference
 		android:title="@string/app_name"
-		android:key=""
-		android:summary="@string/app_desc"></EditTextPreference>
+		android:icon="@mipmap/ic_launcher"/>
+
+	<EditTextPreference
+		android:summary="@string/app_desc"/>
 
 	<EditTextPreference
 		android:title="@string/app_lice_tit"
-		android:key=""
-		android:summary="@string/app_lice"></EditTextPreference>
+		android:summary="@string/app_lice"/>
 
 	<EditTextPreference
 		android:title="@string/app_vers_tit"
-		android:key=""
-		android:summary="@string/app_vers"></EditTextPreference>
+		android:key="version"
+		android:summary="@string/app_vers"/>
 
 </PreferenceScreen>

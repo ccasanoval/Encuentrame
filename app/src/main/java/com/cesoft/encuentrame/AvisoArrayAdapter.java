@@ -55,6 +55,9 @@ public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 				}
 			});
 
+		TextView txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
+		txtFecha.setText(Aviso.DATE_FORMAT2.format(_avisos[position].getCreated()));
+
 		return convertView;
 	}
 }

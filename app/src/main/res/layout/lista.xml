@@ -10,10 +10,10 @@
 	<TextView
 		android:id="@+id/txtNombre"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
+		android:layout_height="wrap_content"
 		android:layout_marginLeft="5dp"
 		android:layout_marginStart="5dp"
-		android:text="AAAAAAAAAAAAAAA"
+		android:text=""
 		android:textSize="24sp"
 		android:textStyle="bold"
 		android:fontFamily="sans-serif"
@@ -22,6 +22,22 @@
 		android:gravity="center_vertical"
 		android:focusable="false"
         android:lines="1"
+        android:maxLines="1"
+		/>
+	<TextView
+		android:id="@+id/txtFecha"
+		android:layout_below="@+id/txtNombre"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="5dp"
+		android:layout_marginStart="5dp"
+		android:text=""
+		android:textSize="14sp"
+		android:fontFamily="sans-serif"
+		android:textColor="@android:color/darker_gray"
+		android:gravity="center_vertical"
+		android:focusable="false"
+		android:lines="1"
         android:maxLines="1"
 		/>
 

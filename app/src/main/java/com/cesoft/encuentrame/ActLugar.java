@@ -110,12 +110,13 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		//------------------------------------------------------------------------------------------
 		try
 		{
-			_l = this.getIntent().getParcelableExtra(Lugar.NOMBRE);
-System.err.println("*************"+_l);
+			_l = getIntent().getParcelableExtra(Lugar.NOMBRE);
+//System.err.println("*************OBJ:"+_l);
 			setValores();
 		}
 		catch(Exception e)
 		{
+//System.err.println("*************ERR:"+e);
 			_bNuevo = true;
 			_l = new Lugar();
 		}

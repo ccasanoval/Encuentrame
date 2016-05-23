@@ -35,7 +35,9 @@ public class Lugar extends Objeto implements Parcelable
 
 	public String toString()
 	{
-		return super.toString() + ", POS:"+(lugar==null?"":lugar.getLatitude()+"/"+lugar.getLongitude());
+		//return super.toString() + ", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+" "+lugar.getObjectId());
+		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', fecha='%s' / %d }",
+				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(created), created.getTime());
 	}
 
 	//// Backendless
@@ -110,7 +112,7 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
-//System.err.println("Lugar:read Parcel:++++++++++++++++B: "+this);
+System.err.println("Lugar:read Parcel:++++++++++++++++B: "+this);
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -120,6 +122,7 @@ System.err.println("Lugar:getLista:SQL: "+sb.toString());
 		dest.writeString(lugar.getObjectId());
 		dest.writeDouble(lugar.getLatitude());
 		dest.writeDouble(lugar.getLongitude());
+System.err.println("Lugar:write Parcel:++++++++++++++++A: "+this);
 	}
 
 	@Override

@@ -36,6 +36,11 @@ import com.cesoft.encuentrame.models.Ruta;
 import java.util.Date;
 import java.util.Iterator;
 
+// PLAY STORE DEVELOPER CONSOLE : https://play.google.com/apps/publish/?hl=es&dev_acc=11164117065791896000
+// MAP API CREDENTIAL: https://console.developers.google.com/apis/credentials?project=shining-medium-121911
+// GOOGLE API SIGN : https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=Default%20Demo%20App&cntpkg=com.google.samples.quickstart.signin&cnturl=https:%2F%2Fdevelopers.google.com%2Fidentity%2Fsign-in%2Fandroid%2Fstart%3Fconfigured%3Dtrue&cntlbl=Continue%20with%20Try%20Sign-In
+// LAUNCH SIGNED APK : https://www.jetbrains.com/idea/help/generating-a-signed-release-apk-through-an-artifact.html
+
 /*
 GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
 Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
@@ -49,6 +54,7 @@ Registered SHA-1s:
 */
 
 
+//TODO: main window=> Number or routes, places and geofences...
 //TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
 //https://www.firebase.com/docs/android/guide/
 //http://developer.android.com/intl/es/training/basics/fragments/index.html
@@ -56,18 +62,13 @@ Registered SHA-1s:
 //TODO: Egg?
 //TODO: Google auth?
 //TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
-//TODO: mostrar fecha de creacion y modificacion en vistas...
 //TODO: widget para ruta start/stop... widget para guardar punto...
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
-//TODO: main window=> Number or routes, places and geofences...
+
 //TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
 
-//TODO: Version cambiando Backendless por Firebase as MBAAS (Hacer branck)
-//https://github.com/Kunena/Kunena-Forum/wiki/Create-a-new-branch-with-git-and-manage-branches
 
-//TODO: Release
-//http://developer.android.com/intl/es/tools/publishing/app-signing.html
 //TODO: dialogo que pida activar gps! si no esta activo
 //http://stackoverflow.com/questions/29801368/how-to-show-enable-location-dialog-like-google-maps
 //TODO: Preparar para tablet

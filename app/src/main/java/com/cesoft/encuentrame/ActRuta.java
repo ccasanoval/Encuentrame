@@ -90,7 +90,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
 //TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
-findViewById(R.id.layPeriodo).setVisibility(View.GONE);
+		View layPeriodo = findViewById(R.id.layPeriodo);
+		if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnTrackingDelay.setAdapter(adapter);
@@ -175,7 +176,6 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		{
 			setTitle(getString(R.string.editar_ruta));
 			if(btnStart!=null)btnStart.setVisibility(View.GONE);
-			View layPeriodo = findViewById(R.id.layPeriodo);
 			if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 			//si está activo muestra btnStop
 			String sId = Util.getTrackingRoute();
@@ -273,7 +273,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		//
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
+		Date date = _r.getCreated();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
 		if(date != null && lblFecha!= null)lblFecha.setText(dateFormat.format(date));
 	}
 
