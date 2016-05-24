@@ -119,7 +119,8 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void handleFault(BackendlessFault backendlessFault)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							System.err.println("ActMaps:guardar:handleFault:f:" + backendlessFault);
+							Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 						}
 					});
 				}

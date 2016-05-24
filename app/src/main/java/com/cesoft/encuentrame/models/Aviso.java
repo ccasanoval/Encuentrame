@@ -86,7 +86,7 @@ public class Aviso extends Objeto
 		if(this == o)return true;
 		if(!(o instanceof Aviso))return false;
 		Aviso a = (Aviso)o;
-System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
+//System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 		return getObjectId().equals(a.getObjectId())
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud() && getRadio() == a.getRadio()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
@@ -96,17 +96,14 @@ System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 	//
 	protected Aviso(Parcel in)
 	{
-		//setObjectId(in.readString());nombre = in.readString();descripcion = in.readString();
 		super(in);
 		//
 		setActivo(in.readByte() > 0);
-		//lugar = new GeoPoint(0,0);
 		lugar.setObjectId(in.readString());
 		lugar.setLatitude(in.readDouble());
 		lugar.setLongitude(in.readDouble());
-System.err.println("----------------Aviso:from parcel 1:" + this);
 		setRadio(in.readInt());
-System.err.println("----------------Aviso:from parcel 2:" + this);
+//System.err.println("----------------Aviso:from parcel 2:" + this);
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)

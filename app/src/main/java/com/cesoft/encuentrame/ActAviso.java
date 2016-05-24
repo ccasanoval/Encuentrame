@@ -328,10 +328,8 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			@Override
 			public void handleResponse(Aviso a)
 			{
-				CesService.cargarListaGeoAvisos();
-				System.err.println("ActAviso:guardar:handleResponse:" + a);
-				//return2Main(true, getString(R.string.ok_guardar));
-				openMain(true, getString(R.string.ok_guardar_aviso));
+				CesService.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
+				openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
 			}
 			@SuppressLint("StringFormatInvalid")
 			@Override
@@ -341,7 +339,6 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 			}
 		});
-System.err.println("ActAviso:guardar:-------------------------------------------fin");
 	}
 
 	//______________________________________________________________________________________________
