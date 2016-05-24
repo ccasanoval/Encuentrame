@@ -109,6 +109,23 @@
 			android:label="@string/title_activity_act_buscar"
 			android:theme="@style/AppTheme.NoActionBar">
 		</activity>
-	</application>
 
+		<!-- WIDGETs -->
+		<receiver android:name=".WidgetLugar" android:label="@string/widget_lugar">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+				<action android:name="com.cesoft.encuentrame.WidgetLugar.ACTION_WIDGET_SHOWAPP"/>
+			</intent-filter>
+			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_lugar" />
+		</receiver>
+
+		<receiver android:name=".WidgetRuta" android:label="@string/widget_ruta">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+				<action android:name="com.cesoft.encuentrame.WidgetRuta.ACTION_WIDGET_SHOWAPP"/>
+			</intent-filter>
+			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_ruta" />
+		</receiver>
+
+	</application>
 </manifest>

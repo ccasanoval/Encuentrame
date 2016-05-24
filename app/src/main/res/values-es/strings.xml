@@ -107,4 +107,7 @@
 	<string name="ok_eliminar_aviso">Se eliminó el lugar</string>
 	<string name="ok_eliminar_lugar">Se eliminó el aviso</string>
 	<string name="ok_eliminar_ruta">Se eliminó la ruta</string>
+
+	<string name="widget_lugar">Lugares</string>
+	<string name="widget_ruta">Rutas</string>
 </resources>
