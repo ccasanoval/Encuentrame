@@ -60,6 +60,7 @@
 	<string name="recover_lbl">Recover your password</string>
 	<string name="login_error">Wrong user or password</string>
 	<string name="login_timeout">Login timeout</string>
+	<string name="login_fisrt">Log in first</string>
 	<string name="recover_ok">An email to recover your \n password was sent to you</string>
 	<string name="register">Register</string>
 	<string name="register_bad_pass">Notice that both passwords must be equal!</string>

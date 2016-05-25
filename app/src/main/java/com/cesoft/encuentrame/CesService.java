@@ -20,6 +20,9 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//TODO: comprobar temas de login en en nuevo de Firebase...?
+//TODO: CesService:Login:f: -------------------------------------------------- Entity with the specified ID cannot be found: Id - A801DF39-639B-910E-FF23-C9996E781E00
+
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
 //TODO: Si el primer punto de ruta es erroneo y esta lejos, los demas no se grabaran por filtro velocidad!!!
 //Backendless GEOFencing service:
@@ -53,7 +56,7 @@ public class CesService extends IntentService
 	//______________________________________________________________________________________________
 	public CesService()
 	{
-		super("EncuentrameAvisoSvc");
+		super("EncuentrameSvc");
 	}
 	@Override
 	public void onCreate()
@@ -129,6 +132,7 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 					while(it.hasNext())
 					{
 						Aviso a = it.next();
+						if(a.getRadio() < 1)continue;
 						aAvisos.add(a);
 						Geofence gf = new Geofence.Builder().setRequestId(a.getObjectId())
 								.setCircularRegion(a.getLatitud(), a.getLongitud(), a.getRadio())

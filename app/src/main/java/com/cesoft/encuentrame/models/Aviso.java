@@ -53,12 +53,9 @@ public class Aviso extends Objeto
 	private GeoPoint lugar = new GeoPoint(0,0);
 		public GeoPoint getLugar(){return lugar;}
 		public void setLugar(GeoPoint v){lugar=v;}
-		//public void setLugar(GeoPoint v, int radio){lugar=v; setRadio(radio);}
 		public double getLatitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLatitude();}
 		public double getLongitud(){if(lugar==null || lugar.getLatitude() == null)return 0.0;return lugar.getLongitude();}
 		public void setLatLon(double lat, double lon){lugar.setLatitude(lat);lugar.setLongitude(lon);}
-		//public void setLatitud(Double lat){lugar.setLatitude(lat);}
-		//public void setLongitud(Double lon){lugar.setLongitude(lon);}
 
 		public int getRadio()//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
 		{
@@ -69,7 +66,6 @@ public class Aviso extends Objeto
 				return Integer.parseInt((String)o);
 			else if(Integer.class == o.getClass()) return (Integer)o;
 			else return 0;
-			//return (Integer)lugar.getMetadata(RADIO);
 		}
 		public void setRadio(int v){lugar.addMetadata(RADIO, v);}
 
@@ -77,8 +73,8 @@ public class Aviso extends Objeto
 	public String toString()
 	{
 		//return super.toString() +", ACT:"+activo+", POS:"+(lugar==null?"null":lugar.getLatitude()+"/"+lugar.getLongitude()+":"+getRadio()+" "+lugar.getObjectId());
-		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s == %d', radio='%d' }",
-				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(created), created.getTime(), getRadio());
+		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', created='%s == %d', radio='%d' }",
+				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), created!=null?DATE_FORMAT.format(created):"", created!=null?created.getTime():0, getRadio());
 	}
 	//______________________________________________________________________________________________
 	@Override public boolean equals(Object o)
@@ -145,7 +141,7 @@ System.err.println("----------------Aviso:writeToParcel:"+lugar);
 	public static void getById(String sId, AsyncCallback<Aviso> res)
 	{
 		ArrayList<String> relationProps = new ArrayList<>();
-		relationProps.add("lugar");
+		relationProps.add(LUGAR);
 		Backendless.Persistence.of(Aviso.class).findById(sId, relationProps, res);
 	}
 	public static void getActivos(AsyncCallback<BackendlessCollection<Aviso>> res)
@@ -171,7 +167,7 @@ System.err.println("Aviso:getLista:filtro: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addSortByOption("created ASC");
-		queryOptions.addRelated("lugar");
+		queryOptions.addRelated(LUGAR);
 		query.setQueryOptions(queryOptions);
 		//--FILTRO
 		StringBuilder sb = new StringBuilder();

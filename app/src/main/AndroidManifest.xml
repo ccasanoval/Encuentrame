@@ -52,7 +52,6 @@
 			android:theme="@style/AppTheme.NoActionBar">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
-
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
@@ -84,6 +83,13 @@
 			android:name=".ActMaps"
 			android:label="@string/title_activity_act_maps">
 		</activity>
+		<activity
+			android:name=".ActBuscar"
+			android:label="@string/title_activity_act_buscar"
+			android:theme="@style/AppTheme.NoActionBar" />
+		<activity
+			android:name=".ActWidgetNuevoPunto"
+			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />
 		<!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -104,28 +110,31 @@
 			android:name="com.google.android.gms.version"
 			android:value="@integer/google_play_services_version"/>
 
-		<activity
-			android:name=".ActBuscar"
-			android:label="@string/title_activity_act_buscar"
-			android:theme="@style/AppTheme.NoActionBar">
-		</activity>
-
 		<!-- WIDGETs -->
-		<receiver android:name=".WidgetLugar" android:label="@string/widget_lugar">
+		<receiver
+			android:name=".WidgetLugar"
+			android:label="@string/widget_lugar">
 			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
 				<action android:name="com.cesoft.encuentrame.WidgetLugar.ACTION_WIDGET_SHOWAPP"/>
 			</intent-filter>
-			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_lugar" />
+			<meta-data
+				android:name="android.appwidget.provider"
+				android:resource="@xml/widget_lugar"/>
 		</receiver>
-
-		<receiver android:name=".WidgetRuta" android:label="@string/widget_ruta">
+		<receiver
+			android:name=".WidgetRuta"
+			android:label="@string/widget_ruta">
 			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
 				<action android:name="com.cesoft.encuentrame.WidgetRuta.ACTION_WIDGET_SHOWAPP"/>
 			</intent-filter>
-			<meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_ruta" />
+
+			<meta-data
+				android:name="android.appwidget.provider"
+				android:resource="@xml/widget_ruta"/>
 		</receiver>
 
 	</application>
+
 </manifest>

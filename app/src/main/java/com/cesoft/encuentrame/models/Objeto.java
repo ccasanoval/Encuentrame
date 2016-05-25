@@ -10,7 +10,7 @@ import weborb.service.ExcludeProperty;
 // Created by Cesar_Casanova on 17/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //import weborb.service.ExcludeProperty;
-@ExcludeProperty(propertyName = "fecha")
+//@ ExcludeProperty(propertyName = "fecha")
 public class Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "objeto";//TRANSIENT so not to include in backendless
@@ -18,7 +18,7 @@ public class Objeto implements Parcelable
 	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
 	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 
-	public Objeto(){}
+	public Objeto(){}//created = new Date();
 
 	//Backendless
 	protected String objectId;
@@ -30,10 +30,9 @@ public class Objeto implements Parcelable
 	public void setCreated(Date created){this.created = created;}
 	public Date getUpdated(){return updated;}
 	public void setUpdated(Date updated){this.updated = updated;}
-		//public Date getFecha(){return updated!=null?updated:created;}
 
-	protected String nombre;
-	protected String descripcion;
+	protected String nombre="";
+	protected String descripcion="";
 	public String getNombre(){return nombre;}
 	public void setNombre(String v){nombre=v;}
 	public String getDescripcion(){return descripcion;}
@@ -42,7 +41,7 @@ public class Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public String toString()
 	{
-		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",
+		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', created='%s'}",
 				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(created));
 	}
 

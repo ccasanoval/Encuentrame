@@ -91,6 +91,7 @@
 	<string name="pref_header_notifications_sum">Alerts settings…</string>
 	<string name="pref_header_opciones_sum">Settings…</string>
 	<string name="login_error">Wrong user or password</string>
+	<string name="login_fisrt">Log in first</string>
 	<string name="register_ko">There was a fault while \n registering the user \n Try again, please.</string>
 	<string name="login_timeout">Login timeout</string>
 	<string name="ok_guardar_aviso">The Alert was saved</string>

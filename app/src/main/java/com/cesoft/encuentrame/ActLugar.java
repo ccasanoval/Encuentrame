@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -276,7 +275,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
 			}
-			@SuppressLint("StringFormatInvalid")
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{

@@ -2,11 +2,14 @@ package com.cesoft.encuentrame;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -18,17 +21,21 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
+import com.cesoft.encuentrame.models.Lugar;
 
 import java.util.HashMap;
 
@@ -494,4 +501,105 @@ System.err.println("Util.isLogged: D");
 			}
 		});
 	}
+
+
+
+	//// ASK FOR GPS ACTIVATION
+	public static void ask4GPSactivation(final Context c)
+	{
+		// Get Location Manager and check for GPS & Network location services
+		LocationManager lm = (LocationManager)c.getSystemService(Context.LOCATION_SERVICE);
+		if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+		{
+  			// Build the alert dialog
+  			AlertDialog.Builder builder = new AlertDialog.Builder(c);
+			builder.setTitle("Location Services Not Active");//TODO: @string
+			builder.setMessage("Please enable Location Services and GPS");
+			builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+			{
+				public void onClick(DialogInterface dialogInterface, int i)
+				{
+					// Show location settings when the user acknowledges the alert dialog
+					Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+					c.startActivity(intent);
+				}
+			});
+			Dialog alertDialog = builder.create();
+			alertDialog.setCanceledOnTouchOutside(false);
+			alertDialog.show();
+		}
+	}
+
+	public static void ask4Input(final Context c, final String tit, final String msg, final String btnOk, final String btnCancel, DialogInterface.OnClickListener listener)
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(c);
+		alert.setTitle(tit);
+		alert.setMessage(msg);
+		// Set an EditText view to get user input
+		final EditText input = new EditText(c);
+		alert.setView(input);
+		//
+		alert.setPositiveButton(btnOk, listener);
+		alert.setNegativeButton(btnCancel, listener);//alert.setNegativeButton(btnCancel, listenerCancel);
+		alert.show();
+		/*new DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int whichButton)
+			{
+				String value = input.getText();
+			}
+		});*/
+	}
+
+
+
+
+	public static void addNuevo(String sNombre, double lat, double lon, final AsyncCallback<Lugar> listener)
+	{
+System.err.println("------------------------------------------------Lugar:addNuevo:"+sNombre+" : "+lat+"/"+lon);
+
+
+		/*Aviso a = new Aviso();
+		a.setLugar(new GeoPoint(lat, lon));
+		a.setNombre(sNombre);
+		a.setDescripcion("Widget");
+		//a.guardar(listener);
+		Backendless.Persistence.save(a, new AsyncCallback<Aviso>(){
+			@Override
+			public void handleResponse(Aviso aviso)
+			{
+				System.err.println("--------------++++++++++++++----------------------------------Lugar:addNuevo:aviso:"+aviso);
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("--------------++++++++++++++----------------------------------Lugar:addNuevo:aviso:backendlessFault:"+backendlessFault);
+			}
+		});*/
+
+
+		Lugar l = new Lugar();
+		l.setLugar(new GeoPoint(lat, lon));	//l.setLatLon(lat, lon);
+		l.setNombre(sNombre);
+		l.setDescripcion("Widget");//System.err.println("------------------------------------------------Lugar:addNuevo:l:"+l);
+		//l.guardar(listener);
+		Backendless.Persistence.save(l, new AsyncCallback<Lugar>(){
+			@Override
+			public void handleResponse(Lugar lugar)
+			{
+				System.err.println("--------------111111111111111111111----------------------------------Lugar:addNuevo:lugar: "+lugar);
+				listener.handleResponse(lugar);
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("--------------00000000000000000000--------------------------Lugar:addNuevo:lugar:backendlessFault: "+backendlessFault);
+				listener.handleFault(backendlessFault);
+			}
+		});
+
+
+	}
+
+
 }

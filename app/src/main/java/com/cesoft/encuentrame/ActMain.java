@@ -53,6 +53,8 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
+//TODO: no molestar mas por hoy
+//TODO: O utilizar TOAST o cerrar teclado cuando pulse guardar por si hay error y msg en snack que seria tapado por teclado
 
 //TODO: main window=> Number or routes, places and geofences...
 //TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
@@ -447,7 +449,7 @@ System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}
 				}
 				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 				Lugar[] listaAL = new Lugar[n];
@@ -485,7 +487,7 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.RUTAS)//if(_sectionNumber == Util.RUTAS)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
 					//return;
 				}
 				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
@@ -525,7 +527,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
-					Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();
+					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:AVISOS:handleResponse:e:"+e);}
 				}
 				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
 				Aviso[] listaAL = new Aviso[n];

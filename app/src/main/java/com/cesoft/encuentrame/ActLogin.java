@@ -79,10 +79,9 @@ public class ActLogin extends AppCompatActivity
 		}
 		*/
 		_win = this;
-		startService(new Intent(this, CesService.class));
-System.err.println("ActLogin--------1:"+Util.isLogged()+" 2:"+Util.getUsuario());
-		if( ! Util.isLogged()){Util.initBackendless(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
-System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
+		startService(new Intent(this, CesService.class));//TODO: encender o apagar SERVICIO segun pref de usuario, para que no active demasiado CPU? Ajustar loop delay
+//		if( ! Util.isLogged()){Util.initBackendless(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
+//System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
 		if(Util.isLogged())goMain();
 	}
 

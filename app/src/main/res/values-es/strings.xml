@@ -102,6 +102,7 @@
 	<string name="pref_header_notifications_sum">Configuración de avisos…</string>
 	<string name="pref_header_opciones_sum">Configuraciones…</string>
 	<string name="login_error">Usuario o contraseña incorrectas</string>
+	<string name="login_fisrt">Entre en su cuenta primero</string>
 	<string name="register_ko">Ocurrió un error al \n registrar el usuario \n Inténtelo de nuevo, por favor.</string>
 	<string name="login_timeout">Tiempo de espera excedido</string>
 	<string name="ok_eliminar_aviso">Se eliminó el lugar</string>
