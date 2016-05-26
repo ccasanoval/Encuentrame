@@ -48,7 +48,7 @@ public class Lugar extends Objeto
 		if(this == o)return true;
 		if(!(o instanceof Lugar))return false;
 		Lugar a = (Lugar)o;
-		return ( (getObjectId() == null && a.getObjectId() == null) || (a.getObjectId() != null && getObjectId().equals(a.getObjectId())) )
+		return ( (getObjectId() == null && a.getObjectId() == null) || (a.getObjectId() != null && getObjectId() != null && getObjectId().equals(a.getObjectId())) )
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
 	}

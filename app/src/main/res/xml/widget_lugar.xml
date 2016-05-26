@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:initialLayout="@layout/widget_lugar"
+	android:resizeMode="horizontal|vertical"
+	android:minResizeWidth="40dp"
+	android:minResizeHeight="40dp"
+	android:minHeight="30dp"
+	android:minWidth="30dp"
+	android:previewImage="@mipmap/nuevo_lugar"
+	android:updatePeriodMillis="0" >
+	<!-- updatePeriodMillis: doesn't work -->
+	<!-- android:configure="com.cesoftware.Organizate.CesWidgetConfig" -->
+	<!-- DONT DRAIN THE BATTERY: If device is asleep when it's time for update (updatePeriodMillis), then the device will wake up. Set an alarm with an Intent that your AppWidgetProvider receives,
+	 using the AlarmManager. Set it to ELAPSED_REALTIME or RTC, which will only deliver the alarm when the device is awake.	Then set updatePeriodMillis to 0  -->
+
+</appwidget-provider>

@@ -47,13 +47,9 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private String[] _asRadio = {"-",		 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
 	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 
-	//private GoogleApiClient _GoogleApiClient;
-	//private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
 	private Circle _circle;
-
-	//private CoordinatorLayout _coordinatorLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -96,18 +92,11 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				{
 					switch(position)
 					{
-					case 1:
-						_filtro.setActivo(Filtro.ACTIVO);
-						break;
-					case 2:
-						_filtro.setActivo(Filtro.INACTIVO);
-						break;
-					default:
-						_filtro.setActivo(Util.NADA);
-						break;
+					case 1:		_filtro.setActivo(Filtro.ACTIVO);	break;
+					case 2:		_filtro.setActivo(Filtro.INACTIVO);	break;
+					default:	_filtro.setActivo(Util.NADA);		break;
 					}
 				}
-
 				@Override
 				public void onNothingSelected(AdapterView<?> parent)
 				{

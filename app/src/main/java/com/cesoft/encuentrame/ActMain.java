@@ -210,7 +210,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
-		private int _sectionNumber = Util.NADA;
+		private int _sectionNumber = Util.LUGARES;//Util.NADA;
 		public PlaceholderFragment(){}
 
 		// Returns a new instance of this fragment for the given section number.
@@ -372,7 +372,7 @@ System.err.println("ActMain:onItemEdit:"+obj);
 				return;
 			}
 
-System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ requestCode);
+System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ requestCode+":"+_sectionNumber);
 			if(data != null)
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
