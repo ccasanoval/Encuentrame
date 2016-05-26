@@ -44,10 +44,11 @@ public class Lugar extends Objeto
 	//______________________________________________________________________________________________
 	@Override public boolean equals(Object o)
 	{
+		if(o == null)return false;
 		if(this == o)return true;
 		if(!(o instanceof Lugar))return false;
 		Lugar a = (Lugar)o;
-		return getObjectId().equals(a.getObjectId())
+		return ( (getObjectId() == null && a.getObjectId() == null) || (a.getObjectId() != null && getObjectId().equals(a.getObjectId())) )
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
 	}
