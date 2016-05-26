@@ -16,7 +16,7 @@ import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame.models.Lugar;
 
 
-public class ActWidgetNuevoPunto extends Activity//AppCompatActivity porque se muestra como dialogo
+public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private ProgressDialog _progressDialog;
 
@@ -24,7 +24,7 @@ public class ActWidgetNuevoPunto extends Activity//AppCompatActivity porque se m
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_widget_nuevo_punto);
+		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 	}
 	@Override
@@ -44,24 +44,29 @@ public class ActWidgetNuevoPunto extends Activity//AppCompatActivity porque se m
 		Util.initBackendless(this);
 		if( ! Util.isLogged())
 		{
-			Toast.makeText(ActWidgetNuevoPunto.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+			Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
 			finish();
 		}
 		//
-		final EditText txtNuevoLugar = (EditText)findViewById(R.id.txtNuevoLugar);
+		final EditText txtNombre = (EditText)findViewById(R.id.txtNombre);
 		ImageButton btnSave = (ImageButton)findViewById(R.id.btnSave);
 		btnSave.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
+				if(txtNombre.getText().length() < 1)
+				{
+					Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.sin_nombre), Toast.LENGTH_SHORT).show();
+					return;
+				}
 				_progressDialog.show();//runOnUiThread(new Runnable()
 
 				Location pos = Util.getLocation();
 				final int[] flag = new int[]{0};
 				final Lugar l = new Lugar();
 				l.setLugar(new GeoPoint(pos.getLatitude(), pos.getLongitude()));//l.setLatLon(lat, lon);
-				l.setNombre(txtNuevoLugar.getText().toString());
+				l.setNombre(txtNombre.getText().toString());
 				l.setDescripcion("Widget");
 				l.guardar(new AsyncCallback<Lugar>()
 				{
@@ -70,9 +75,9 @@ public class ActWidgetNuevoPunto extends Activity//AppCompatActivity porque se m
 					{
 						//System.err.println("--------------A----------------------------------Lugar:addNuevo:lugar: "+lugar);
 						_progressDialog.dismiss();
-						Toast.makeText(ActWidgetNuevoPunto.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_SHORT).show();
+						Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_SHORT).show();
 						//TODO: send mesage to ActMain para que refresque lista? Tampoco importa, el widget tiene sentido si no tienes app avierta...
-						ActWidgetNuevoPunto.this.finish();
+						ActWidgetNuevoLugar.this.finish();
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
@@ -87,9 +92,9 @@ public class ActWidgetNuevoPunto extends Activity//AppCompatActivity porque se m
 							l.guardar(this);
 							return;
 						}
-						System.err.println("ActWidgetNuevoPunto:addNuevo:backendlessFault: "+backendlessFault);
+						System.err.println("ActWidgetNuevoLugar:addNuevo:backendlessFault: "+backendlessFault);
 						_progressDialog.hide();//if(_progressDialog.isShowing())
-						Toast.makeText(ActWidgetNuevoPunto.this, String.format(getString(R.string.error_guardar), backendlessFault), Toast.LENGTH_LONG).show();
+						Toast.makeText(ActWidgetNuevoLugar.this, String.format(getString(R.string.error_guardar), backendlessFault), Toast.LENGTH_LONG).show();
 					}
 				});
     		}

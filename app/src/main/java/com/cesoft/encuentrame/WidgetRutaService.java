@@ -1,10 +1,12 @@
 package com.cesoft.encuentrame;
 
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.app.Service;
 import android.content.Intent;
-
+import android.widget.RemoteViews;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -13,7 +15,7 @@ public class WidgetRutaService extends Service
 {
 	private static Handler _h = null;
 	private static Runnable _r = null;
-	private static final int _DELAY = 5*60*1000;
+	private static final int _DELAY = 10*1000;//5*60*1000;
 	private static Long _id = -1L;
 
 	//______________________________________________________________________________________________
@@ -29,7 +31,7 @@ public class WidgetRutaService extends Service
 				@Override
 				public void run()
 				{
-					System.err.println("-----RUN WIDGET-----");
+					System.err.println("-----WidgetRutaService-----");
 					cambiarTextoWidget(intent);
 					_h.postDelayed(_r, _DELAY);
 				}
@@ -48,11 +50,13 @@ public class WidgetRutaService extends Service
 	}
 
 	//______________________________________________________________________________________________
+	int _s=1;
 	private void cambiarTextoWidget(Intent intent)
 	{
 		try
 		{
-			String s="xxx";
+			_s++;
+			String s="xxx"+_s;
 			/*
 			ArrayList<Objeto> lista;// = new ArrayList<>();
 			//Iterator<Objeto> it =(Iterator<Objeto>)Objeto.findAll(Objeto.class);while(it.hasNext())lista.add(it.next());
@@ -79,6 +83,7 @@ public class WidgetRutaService extends Service
 				_id = o.getId();
 				s = o.getNombre();
 			}
+			*/
 
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
 			int[] allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
@@ -87,16 +92,16 @@ public class WidgetRutaService extends Service
 			for(int widgetId : allWidgetIds)
 			{
 				RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.widget_ruta);
-				remoteViews.setTextViewText(R.id.txtTarea, s);
+				remoteViews.setTextViewText(R.id.txtRuta, s);
 
 				Intent clickIntent = new Intent(this.getApplicationContext(), WidgetRuta.class);
 				clickIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
 				clickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
 
 				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-				remoteViews.setOnClickPendingIntent(R.id.txtTarea, pendingIntent);
+				remoteViews.setOnClickPendingIntent(R.id.txtRuta, pendingIntent);
 				appWidgetManager.updateAppWidget(widgetId, remoteViews);
-			}*/
+			}
 			stopSelf();
 		}
 		catch(Exception e)

@@ -3,12 +3,16 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/layout"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
+	android:layout_height="75dp"
 	android:orientation="vertical"
-	android:background="@drawable/widget">
+	android:background="@drawable/widget"
+	>
+	<!--
+	 android:background="@null"
+	 -->
 
 	<ImageButton
-		android:id="@+id/lblNomApp"
+		android:id="@+id/btnApp"
 		android:src="@mipmap/ic_launcher"
 		android:contentDescription="@string/app_name"
 		android:gravity="start|top"
@@ -19,7 +23,7 @@
 		android:layout_height="28dp"/>
 
 	<ImageButton
-		android:id="@+id/btnAddLugar"
+		android:id="@+id/btnAdd"
 		android:src="@mipmap/nuevo_lugar"
 		android:contentDescription="@string/app_name"
 		android:gravity="end|bottom"

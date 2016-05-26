@@ -3,7 +3,7 @@
 
 	<stroke android:width="2dp" android:color="#FFFFFFFF" />
 
-	<gradient android:angle="135" android:startColor="#DD2EDD2E" android:endColor="#DD000000" />
+	<!-- gradient android:angle="135" android:startColor="#DD2EDD2E" android:endColor="#DD000000" / -->
 	<!-- CES:NOTE: angle debe ser multiplo de 45 -->
 
 	<corners

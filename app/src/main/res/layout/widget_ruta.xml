@@ -1,29 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/layout"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
+	android:layout_height="70dp"
 	android:orientation="vertical"
-	android:background="@drawable/widget">
+	android:background="@drawable/widget"
+	>
+	<!--
+	 android:background="@null"
+	 -->
 
-	<TextView
-		android:id="@+id/lblNomApp"
-		style="@android:style/TextAppearance.Small"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_margin="2dip"
-		android:text="@string/app_name" >
-	</TextView>
+	<ImageButton
+		android:id="@+id/btnApp"
+		android:layout_gravity="start"
+		android:src="@mipmap/ic_launcher"
+		android:contentDescription="@string/app_name"
+		android:background="@null"
+		android:scaleType="fitXY"
+		android:layout_width="28dp"
+		android:layout_height="28dp"/>
 
-	<TextView
-		android:id="@+id/txtTarea"
-		style="@android:style/TextAppearance.Medium"
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_gravity="center"
-		android:gravity="center_horizontal|center_vertical"
-		android:layout_margin="2dip"
-		android:text="zzz" >
-	</TextView>
+		android:orientation="horizontal"
+		android:layout_toRightOf="@+id/btnApp"
+		android:layout_toEndOf="@+id/btnApp"
+		android:layout_alignParentBottom="true">
 
-</LinearLayout> 
+		<ImageButton
+			android:id="@+id/btnAdd2"
+			android:src="@mipmap/nueva_ruta"
+			android:contentDescription="@string/nueva_ruta"
+			android:gravity="end|bottom"
+			android:layout_gravity="bottom"
+			android:background="@null"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+
+		<TextView
+			android:id="@+id/txtRuta"
+			android:layout_weight="1"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"/>
+
+		<ImageButton
+			android:id="@+id/btnStop"
+			android:src="@android:drawable/ic_media_pause"
+			android:contentDescription="@string/stop"
+			android:gravity="end|bottom"
+			android:layout_gravity="bottom"
+			android:background="@null"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="1dp"/>
+
+	</LinearLayout>
+</RelativeLayout>

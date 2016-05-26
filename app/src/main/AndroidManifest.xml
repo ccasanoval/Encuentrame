@@ -88,7 +88,7 @@
 			android:label="@string/title_activity_act_buscar"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
-			android:name=".ActWidgetNuevoPunto"
+			android:name=".ActWidgetNuevoLugar"
 			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />
 		<!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -129,7 +129,6 @@
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
 				<action android:name="com.cesoft.encuentrame.WidgetRuta.ACTION_WIDGET_SHOWAPP"/>
 			</intent-filter>
-
 			<meta-data
 				android:name="android.appwidget.provider"
 				android:resource="@xml/widget_ruta"/>

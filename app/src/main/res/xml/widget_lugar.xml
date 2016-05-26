@@ -5,10 +5,11 @@
 	android:resizeMode="horizontal|vertical"
 	android:minResizeWidth="40dp"
 	android:minResizeHeight="40dp"
-	android:minHeight="30dp"
-	android:minWidth="30dp"
+	android:minHeight="40dp"
+	android:minWidth="40dp"
 	android:previewImage="@mipmap/nuevo_lugar"
 	android:updatePeriodMillis="0" >
+	<!-- minWidth or minHeight => 70×n−30 being n the number or columns or rows respectively  -->
 	<!-- updatePeriodMillis: doesn't work -->
 	<!-- android:configure="com.cesoftware.Organizate.CesWidgetConfig" -->
 	<!-- DONT DRAIN THE BATTERY: If device is asleep when it's time for update (updatePeriodMillis), then the device will wake up. Set an alarm with an Intent that your AppWidgetProvider receives,

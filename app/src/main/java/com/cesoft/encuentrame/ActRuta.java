@@ -496,51 +496,6 @@ System.err.println("showMarkers: " + pos);
 			{
 				Util.setTrackingRoute(r.getObjectId());
 				Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
-
-				/*
-				/// Si hay una ruta activa, se cierra ¿Avisar?
-				//TODO: Guardar varias rutas al mismo tiempo ???
-				String sId = Util.getTrackingRoute();
-				//if( ! sId.isEmpty())//No hace falta borrar punto anterior ...
-
-				/// Activar tracking, guardar ruta activa
-				Util.setTrackingRoute(r.getObjectId());
-				/// Obtener posicion y guardar primer punto
-				Location loc = Util.getLocation();
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
-				r.guardar(new AsyncCallback<Ruta>()
-				{
-					@Override
-					public void handleResponse(Ruta ruta)
-					{
-						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:"+ruta);
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("ActRuta:startTrackingRecord:Guardar ruta:handleFault:"+backendlessFault);
-					}
-				});
-				//TODO: try geofence for tracking again????
-				/// Crear geofence con pos actual
-				RutaPto rp = new RutaPto();
-				rp.setIdRuta(r.getObjectId());
-				rp.setLatLon(loc.getLatitude(), loc.getLongitude());
-				rp.saveTrackingPto(new AsyncCallback<RutaPto>()
-				{
-					@Override public void handleResponse(RutaPto rutaPto)
-					{
-System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
-						//CesService.cargarGeoTracking();
-						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
-					}
-					@Override public void handleFault(BackendlessFault backendlessFault)
-					{
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
-						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
-					}
-				});
-				*/
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -614,3 +569,25 @@ System.err.println("showRuta: " + pos);
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
 	}
 }
+
+/*
+//TODO: try geofence for tracking again????
+				/// Crear geofence con pos actual
+				RutaPto rp = new RutaPto();
+				rp.setIdRuta(r.getObjectId());
+				rp.setLatLon(loc.getLatitude(), loc.getLongitude());
+				rp.saveTrackingPto(new AsyncCallback<RutaPto>()
+				{
+					@Override public void handleResponse(RutaPto rutaPto)
+					{
+System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
+						//CesService.cargarGeoTracking();
+						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
+					}
+					@Override public void handleFault(BackendlessFault backendlessFault)
+					{
+						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
+					}
+				});
+ */
