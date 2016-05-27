@@ -18,21 +18,16 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 	private ProgressDialog _progressDialog;
 	private EditText _txtNombre;
 
-	public ActWidgetNuevaRuta(){System.err.println("ActWidgetNuevaRuta---------------------- -1");}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-System.err.println("----------------------0");
 		setContentView(R.layout.act_widget_nuevo);
-System.err.println("----------------------1");
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-System.err.println("----------------------2");
-		//_txtNombre = (EditText)findViewById(R.id.txtNombre);
-System.err.println("----------------------3");
+		_txtNombre = (EditText)findViewById(R.id.txtNombre);
+System.err.println("----------------------_txtNombre="+_txtNombre);
 	}
-/*	@Override
+	@Override
 	public void onPause()
 	{
 		super.onPause();
@@ -114,5 +109,5 @@ System.err.println("----------------------6");
 				});
     		}
 		});
-	}*/
+	}
 }

@@ -30,7 +30,7 @@
 		android:layout_alignParentBottom="true">
 
 		<ImageButton
-			android:id="@+id/btnAdd2"
+			android:id="@+id/btnAdd"
 			android:src="@mipmap/nueva_ruta"
 			android:contentDescription="@string/nueva_ruta"
 			android:gravity="end|bottom"
