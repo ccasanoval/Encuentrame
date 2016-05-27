@@ -30,8 +30,8 @@ public class WidgetRuta extends AppWidgetProvider
 		{
 			Util.setTrackingRoute("");
 
-			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
-			remoteViews.setTextViewText(R.id.txtNombre, "Bla bla");
+			//RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
+			//remoteViews.setTextViewText(R.id.txtNombre, "Bla bla");
 			//appWidgetManager.updateAppWidget(widgetId, remoteViews);
 		}
 		else
@@ -42,26 +42,35 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
-		Intent active;
+		Intent intent;
 		PendingIntent actionPendingIntent;
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 
 		// ADD RUTA
-		active = new Intent(context, getClass());//WidgetRuta.class
-		active.setAction(ACTION_WIDGET_RUTA_ADD);
-		actionPendingIntent = PendingIntent.getBroadcast(context, 0, active, 0);
+		intent = new Intent(context, getClass());//WidgetRuta.class
+		intent.setAction(ACTION_WIDGET_RUTA_ADD);
+		actionPendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.btnAdd, actionPendingIntent);
 
 		// STOP RUTA
-		active = new Intent(context, WidgetRuta.class);
-		active.setAction(ACTION_WIDGET_RUTA_STOP);
-		actionPendingIntent = PendingIntent.getBroadcast(context, 0, active, 0);
+		intent = new Intent(context, WidgetRuta.class);
+		intent.setAction(ACTION_WIDGET_RUTA_STOP);
+		actionPendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.btnStop, actionPendingIntent);
 
 		// OPEN APP
-		active = new Intent(context.getApplicationContext(), ActLogin.class);
-		actionPendingIntent = PendingIntent.getActivity(context, 0, active, 0);
+		//intent = new Intent(context.getApplicationContext(), ActLogin.class);
+		intent = new Intent(context.getApplicationContext(), ActMain.class);
+		intent.putExtra("someKey", true);
+		actionPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.btnApp, actionPendingIntent);
+
+		// REFRESH WIDGET SVC
+		ComponentName thisWidget = new ComponentName(context, WidgetRuta.class);
+		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+		intent = new Intent(context.getApplicationContext(), WidgetRutaService.class);
+		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+		context.startService(intent);
 
 		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
 

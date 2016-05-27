@@ -147,7 +147,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 		//Backendless.Persistence.of(Lugar.class).save(this, ac);
 		Backendless.Persistence.save(this, ac);
 	}
-	public static void getById(String sId, AsyncCallback<BackendlessCollection<Ruta>> res)
+	/*public static void getById(String sId, AsyncCallback<BackendlessCollection<Ruta>> res)
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
@@ -155,7 +155,32 @@ System.err.println("Ruta:eliminar:r:" + this);
 		query.setWhereClause("objectId = '" + sId + "'");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
+	}*/
+	public static void getById(final String sId, final AsyncCallback<Ruta> res)
+	{
+		BackendlessDataQuery query = new BackendlessDataQuery();
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
+		query.setWhereClause("objectId = '" + sId + "'");
+		query.setQueryOptions(queryOptions);
+		Backendless.Persistence.of(Ruta.class).find(query, new AsyncCallback<BackendlessCollection<Ruta>>()
+		{
+			@Override
+			public void handleResponse(BackendlessCollection<Ruta> rutaBackendlessCollection)
+			{
+				if(rutaBackendlessCollection.getCurrentPage().size() < 1)
+					res.handleResponse(null);
+				else
+					res.handleResponse(rutaBackendlessCollection.getCurrentPage().get(0));
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				res.handleFault(backendlessFault);
+			}
+		});
 	}
+
 	public static void getLista(AsyncCallback<BackendlessCollection<Ruta>> res)
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();

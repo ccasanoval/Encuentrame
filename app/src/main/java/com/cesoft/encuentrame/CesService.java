@@ -185,16 +185,15 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 		final String sId = Util.getTrackingRoute();//TODO: guardar ruta en nube para que no se olvide al reiniciar?
 		if(sId.isEmpty())return;
 
-		//Backendless.Persistence.of(Ruta.class).findById(sId, new AsyncCallback<Ruta>()
-		Ruta.getById(sId, new AsyncCallback<BackendlessCollection<Ruta>>()
+		Ruta.getById(sId, new AsyncCallback<Ruta>()
 		{
 			@Override
-			public void handleResponse(BackendlessCollection<Ruta> ar)
+			public void handleResponse(Ruta r)
 			{
-				System.err.println("CesService:saveGeoTracking:Ruta.getById");
-				if(ar.getCurrentPage().size() < 1)
-					return;
-				Ruta r = ar.getCurrentPage().get(0);
+				System.err.println("CesService:saveGeoTracking:Ruta.getById:"+r);
+				//if(ar.getCurrentPage().size() < 1)return;
+				//Ruta r = ar.getCurrentPage().get(0);
+				if(r == null)return;
 				final Location loc = Util.getLocation();
 				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
 				if( ! _sId.equals(sId))

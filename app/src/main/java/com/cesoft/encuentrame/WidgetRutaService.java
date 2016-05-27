@@ -8,6 +8,13 @@ import android.app.Service;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
+import com.backendless.BackendlessCollection;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.cesoft.encuentrame.models.Ruta;
+
+import java.util.Locale;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,15 +22,15 @@ public class WidgetRutaService extends Service
 {
 	private static Handler _h = null;
 	private static Runnable _r = null;
-	private static final int _DELAY = 10*1000;//5*60*1000;
-	private static Long _id = -1L;
+	private static final int _DELAY = 30*1000;//5*60*1000;
+	//private static Long _id = -1L;
 
 	//______________________________________________________________________________________________
 	@Override
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
-		if(_h == null)
+		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
 		{
 			_h = new Handler();
 			_r = new Runnable()
@@ -50,58 +57,41 @@ public class WidgetRutaService extends Service
 	}
 
 	//______________________________________________________________________________________________
-	int _s=1;
-	private void cambiarTextoWidget(Intent intent)
+	private void cambiarTextoWidget(final Intent intent)
 	{
-		try
+		try//TODO: activar desactivar botones de widget
 		{
-			_s++;
-			String s="xxx"+_s;
-			/*
-			ArrayList<Objeto> lista;// = new ArrayList<>();
-			//Iterator<Objeto> it =(Iterator<Objeto>)Objeto.findAll(Objeto.class);while(it.hasNext())lista.add(it.next());
-			lista = (ArrayList<Objeto>)Objeto.findWithQuery(Objeto.class, "select * from Objeto where _padre is not null and _i_prioridad > 3 order by _i_prioridad desc");
-			if(lista == null || lista.size() < 1)
-				lista = (ArrayList<Objeto>)Objeto.findWithQuery(Objeto.class, "select * from Objeto where _padre is not null order by _i_prioridad desc");
-			if(lista == null || lista.size() < 1)
-				lista = (ArrayList<Objeto>)Objeto.findWithQuery(Objeto.class, "select * from Objeto order by _i_prioridad desc");
-
-			if(lista != null && lista.size() > 0)
+			String idRuta = Util.getTrackingRoute();
+			Ruta.getById(idRuta, new AsyncCallback<Ruta>()
 			{
-				Objeto o = lista.get(0);
-				if(lista.size() > 1)
+				@Override
+				public void handleResponse(Ruta ruta)
 				{
-					for(int i=0; i < lista.size()-1; i++)
+					if(ruta == null)return;
+					String s = String.format(Locale.ENGLISH, "%s (%d)", ruta.getNombre(), ruta.getPuntos().size());
+					AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(WidgetRutaService.this.getApplicationContext());
+					int[] allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+					for(int widgetId : allWidgetIds)
 					{
-						if(lista.get(i).getId().equals(_id))
-						{
-							o = lista.get(i+1);
-							break;
-						}
+						RemoteViews remoteViews = new RemoteViews(WidgetRutaService.this.getApplicationContext().getPackageName(), R.layout.widget_ruta);
+						remoteViews.setTextViewText(R.id.txtRuta, s);
+
+						Intent clickIntent = new Intent(WidgetRutaService.this.getApplicationContext(), WidgetRuta.class);
+						clickIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+						clickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+
+						PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+						remoteViews.setOnClickPendingIntent(R.id.txtRuta, pendingIntent);
+						appWidgetManager.updateAppWidget(widgetId, remoteViews);
 					}
 				}
-				_id = o.getId();
-				s = o.getNombre();
-			}
-			*/
+				@Override
+				public void handleFault(BackendlessFault f)
+				{
+					System.err.println("WidgetRutaService:cambiarTextoWidget:handleFault:f:"+f);
+				}
+			});
 
-			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this.getApplicationContext());
-			int[] allWidgetIds = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-	//    ComponentName thisWidget = new ComponentName(getApplicationContext(), CesWidgetProvider.class);
-	//    int[] allWidgetIds2 = appWidgetManager.getAppWidgetIds(thisWidget);
-			for(int widgetId : allWidgetIds)
-			{
-				RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.widget_ruta);
-				remoteViews.setTextViewText(R.id.txtRuta, s);
-
-				Intent clickIntent = new Intent(this.getApplicationContext(), WidgetRuta.class);
-				clickIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-				clickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
-
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-				remoteViews.setOnClickPendingIntent(R.id.txtRuta, pendingIntent);
-				appWidgetManager.updateAppWidget(widgetId, remoteViews);
-			}
 			stopSelf();
 		}
 		catch(Exception e)
