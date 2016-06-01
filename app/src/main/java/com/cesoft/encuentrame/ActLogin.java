@@ -31,7 +31,7 @@ public class ActLogin extends AppCompatActivity
 {
 	private static final int OK=0, KO=1, TO=2;
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
-	private static ActLogin _win;
+	private static ActLogin _this;
 
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
@@ -78,7 +78,7 @@ public class ActLogin extends AppCompatActivity
 			public static final String VER = "v1";
 		}
 		*/
-		_win = this;
+		_this = this;
 		startService(new Intent(this, CesService.class));//TODO: encender o apagar SERVICIO segun pref de usuario, para que no active demasiado CPU? Ajustar loop delay
 //		if( ! Util.isLogged()){Util.initBackendless(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
 //System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
@@ -174,7 +174,7 @@ System.err.println("+++++++++++++++++++++++++++++++++++++++++++++ finEsperaLogin
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			if(Util.isLogged())_win.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
+			if(Util.isLogged())_this.goMain();//TODO:Comprobar si ejecuta lo de abajo, si lo hace mejor añadir return...
 System.err.println("-------------------------------------LOGIN:onCreateView.........................................................................");
 
 			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
@@ -189,7 +189,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 			switch(sectionNumber)
 			{
 			case ENTER://---------------------------------------------------------------------------
-				txtLogin.setText(Util.getUsuario());
+				txtLogin.setText(Util.getUsuario(ActLogin._this));
 				txtEmail.setVisibility(View.GONE);
 				txtPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));
@@ -198,7 +198,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), new LoginBECallback<BackendlessUser>(_win));
+						Util.login(txtLogin.getText().toString(), txtPassword.getText().toString(), _this, new LoginBECallback<BackendlessUser>(_this));
 						/*rootView.post(new Runnable()
 						{
 							public void run()
@@ -226,7 +226,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 						user.setPassword(txtPassword.getText().toString());
 						user.setEmail(txtEmail.getText().toString());
 						user.setProperty("name", txtLogin.getText().toString());
-						Backendless.UserService.register(user, new RegisterBECallback<BackendlessUser>(_win));/*
+						Backendless.UserService.register(user, new RegisterBECallback<BackendlessUser>(_this));/*
 						{
 							@Override
 							public void handleResponse(BackendlessUser backendlessUser)
@@ -270,7 +270,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 								System.err.println("RECOVER-----------------OK:" + response);
 								//Snackbar.make(rootView, getString(R.string.recover_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.recover_lbl), null).show();
 								Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-								TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+								TabLayout.Tab t = _this._tabLayout.getTabAt(ENTER);
 								if(t!=null)t.select();
 							}
 							public void handleFault(BackendlessFault fault)
@@ -307,7 +307,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 			System.err.println("REGISTER-----------------" + usr);
 			//Snackbar.make(rootView, getString(R.string.register_ok), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
 			Toast.makeText(context, R.string.register_ok, Toast.LENGTH_LONG).show();
-			TabLayout.Tab t = _win._tabLayout.getTabAt(ENTER);
+			TabLayout.Tab t = _this._tabLayout.getTabAt(ENTER);
 			if(t!=null)t.select();
 			progressDialog.cancel();
 		}

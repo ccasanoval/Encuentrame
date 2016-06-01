@@ -28,7 +28,7 @@ public class WidgetRuta extends AppWidgetProvider
 		}
 		else if(ACTION_WIDGET_RUTA_STOP.equals(intent.getAction()))
 		{
-			Util.setTrackingRoute("");
+			Util.setTrackingRoute(context, "");
 
 			//RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 			//remoteViews.setTextViewText(R.id.txtNombre, "Bla bla");

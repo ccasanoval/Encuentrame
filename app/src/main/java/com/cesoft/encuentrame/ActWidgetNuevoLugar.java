@@ -40,7 +40,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
 		_progressDialog.hide();
 		//
-		Util.setSvcContext(this);
+		//Util.setSvcContext(this);
 		Util.initBackendless(this);
 		if( ! Util.isLogged())
 		{
@@ -62,7 +62,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 				}
 				_progressDialog.show();//runOnUiThread(new Runnable()
 
-				Location pos = Util.getLocation();
+				Location pos = Util.getLocation(ActWidgetNuevoLugar.this);
 				final int[] flag = new int[]{0};
 				final Lugar l = new Lugar();
 				l.setLugar(new GeoPoint(pos.getLatitude(), pos.getLongitude()));//l.setLatLon(lat, lon);

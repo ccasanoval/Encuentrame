@@ -46,6 +46,7 @@ import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
+//Todo: cambiar a toast o kitar keyboard antes de enseñar o no se vera.....igual en resto de forms
 public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 	//GoogleMap.OnCameraChangeListener,
 {
@@ -101,7 +102,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(View v)
 			{
-				Location loc = Util.getLocation();
+				Location loc = Util.getLocation(ActLugar.this);
 				if(loc != null)setPosLugar(loc);
 			}
 		});
@@ -347,7 +348,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
-			Location loc = Util.getLocation();
+			Location loc = Util.getLocation(ActLugar.this);
 			if(loc != null)_l.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
 		setPosLugar(_l.getLatitud(), _l.getLongitud());

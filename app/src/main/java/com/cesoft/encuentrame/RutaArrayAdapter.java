@@ -32,7 +32,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
-		String sIdRuta = Util.getTrackingRoute();
+		String sIdRuta = Util.getTrackingRoute(getContext());
 //System.err.println("----------------RutaArrayAdapter :0: "+position+" ::::  "+(sIdRuta.equals(_rutas[position].getObjectId()))+" :::: "+sIdRuta+"==="+_rutas[position].getObjectId()+"\n"+convertView);
 		if(convertView == null)
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);

@@ -20,7 +20,6 @@ import java.util.Iterator;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: comprobar temas de login en en nuevo de Firebase...?
 //TODO: CesService:Login:f: -------------------------------------------------- Entity with the specified ID cannot be found: Id - A801DF39-639B-910E-FF23-C9996E781E00
 
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
@@ -64,8 +63,8 @@ public class CesService extends IntentService
 		super.onCreate();
 		_this = this;
 		Util.initBackendless(this);
-		Util.setSvcContext(this);
-		Util.login(resLogin);
+		//Util.setSvcContext(this);
+		Util.login(this, resLogin);
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
@@ -83,7 +82,7 @@ System.err.println("CesService:loop---------------------------------------------
 				if( ! Util.isLogged())
 				{
 					System.err.println("CesService:loop---sin usuario");
-					Util.login(resLogin);
+					Util.login(CesService.this, resLogin);
 					//try{Backendless.UserService.login("quake1978", "colt1911");}catch(Exception e){System.err.println("e:" + e);}
 					Thread.sleep(DELAY_LOAD / 3);
 					continue;
@@ -182,7 +181,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 	private static String _sId = "";
 	public static void saveGeoTracking()
 	{
-		final String sId = Util.getTrackingRoute();//TODO: guardar ruta en nube para que no se olvide al reiniciar?
+		final String sId = Util.getTrackingRoute(CesService._this);//TODO: guardar ruta en nube para que no se olvide al reiniciar?
 		if(sId.isEmpty())return;
 
 		Ruta.getById(sId, new AsyncCallback<Ruta>()
@@ -194,7 +193,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				//if(ar.getCurrentPage().size() < 1)return;
 				//Ruta r = ar.getCurrentPage().get(0);
 				if(r == null)return;
-				final Location loc = Util.getLocation();
+				final Location loc = Util.getLocation(CesService._this);
 				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
 				if( ! _sId.equals(sId))
 				{

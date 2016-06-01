@@ -73,11 +73,12 @@ System.err.println("----------------------Util.refreshListaRutas ");
 	private static Application _app;
 		public static void setApplication(Application app){_app = app;}
 		public static Application getApplication(){return _app;}
-	private static Context _svcContext;
-		public static void setSvcContext(Context c){_svcContext = c;}
+	//private static Context _svcContext;
+	//	public static void setSvcContext(Context c){_svcContext = c;}
 	public static void initBackendless(Context c)
 	{
 System.err.println("---------------Util.initBackendless c = "+c);
+		//try{System.err.print(Backendless.get);}catch(Exception e){}
 		Backendless.initApp(c, BackendSettings.APP, BackendSettings.KEY, BackendSettings.VER);
 	}
 	/*private static SharedPreferences.OnSharedPreferenceChangeListener _pref_listener = new SharedPreferences.OnSharedPreferenceChangeListener()
@@ -120,12 +121,13 @@ System.err.println("---------------Util.initBackendless c = "+c);
 		_locLast=loc;
 System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 	}
-	public static Location getLocation()
+	public static Location getLocation(Context c)
 	{
 		Location location1=null, location2=null;
 		try
 		{
-			LocationManager locationManager = (LocationManager)_svcContext.getSystemService(Context.LOCATION_SERVICE);
+			if(c == null)return null;
+			LocationManager locationManager = (LocationManager)c.getSystemService(Context.LOCATION_SERVICE);
 			if(locationManager == null)return _locLast;
 			boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -152,9 +154,9 @@ System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getL
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	public static void playNotificacion()
+	public static void playNotificacion(Context c)
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message", true))//true o false ha de coincidir con lo que tengas en pref_notificacion.xml
 		{
 System.err.println("-----------------------------Ding Dong!!!!!!!!!");
@@ -328,16 +330,16 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 	//______________________________________________________________________________________________
 	private static final String PREF_TRACKING = "tracking_prefs";
 	private static final String ID_TRACKING = "id_tracking_route";
-	public static void setTrackingRoute(String sIdRoute)
+	public static void setTrackingRoute(Context c, String sIdRoute)
 	{
-		SharedPreferences sp = _svcContext.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
 		editor.apply();//editor.commit(); Aply does it in background
 	}
-	public static String getTrackingRoute()
+	public static String getTrackingRoute(Context c)
 	{
-		SharedPreferences sp = _svcContext.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
  		return sp.getString(ID_TRACKING, "");
 	}
 
@@ -375,22 +377,22 @@ System.err.println("-----util:return2Main:filtro:"+filtro);
 
 	//______________________________________________________________________________________________
 	// LOGIN
-	public static String getUsuario()
+	public static String getUsuario(Context c)
 	{
-		if(_svcContext == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		return prefs.getString(PREF_LOGIN, "");
 	}
-	public static String getClave()
+	public static String getClave(Context c)
 	{
-		if(_svcContext == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		return prefs.getString(PREF_PWD, "");
 		//}catch(Exception e){System.err.println("Util:getClave:e:"+e);}
 		//return "";
 	}
 	//-------
-	public static void login(AsyncCallback<BackendlessUser> res)
+	public static void login(Context c, AsyncCallback<BackendlessUser> res)
 	{
 		BackendlessUser bu = Backendless.UserService.CurrentUser();
 		if(bu != null)
@@ -412,22 +414,22 @@ System.err.println("Util.login2: ::::::::::::::::::::::::::::::::"+userId+"+++")
 
 		try
 		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+prefs.getBoolean(PREF_SAVE_LOGIN, false));
 			if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
 		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
-		String usr = getUsuario();
-		String pwd = getClave();
+		String usr = getUsuario(c);
+		String pwd = getClave(c);
 //System.err.println("Util.login2: "+usr);
-		login(usr, pwd, res);
+		login(usr, pwd, c, res);
 //System.err.println("Util.login2: no hay usr y pwd en settings..."+usr+" / "+pwd);
 	}
 	//-------
-	public static void login(String usr, String pwd, AsyncCallback<BackendlessUser> res)
+	public static void login(String usr, String pwd, Context c, AsyncCallback<BackendlessUser> res)
 	{
-		if(_svcContext != null)
+		if(c != null)
 		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 			Backendless.UserService.login(usr, pwd, res, prefs.getBoolean(PREF_SAVE_LOGIN, true));//NO NEED FOR saveLogin() ON prefs
 System.err.println("Util.login1: logando...");
 		}
@@ -480,6 +482,7 @@ System.err.println("Util.isLogged: D");
 
 	public static void logout(final Activity act)
 	{
+		try{
 		Backendless.UserService.logout(new AsyncCallback<Void>()
 		{
 			@Override
@@ -500,6 +503,7 @@ System.err.println("Util.isLogged: D");
 				//System.exit(0);
 			}
 		});
+		}catch(Exception e){System.err.println("Util:logout:e:"+e);}
 	}
 
 

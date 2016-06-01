@@ -42,7 +42,7 @@ public class Objeto implements Parcelable
 	public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', created='%s'}",
-				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(created));
+				getObjectId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), (created==null?"":DATE_FORMAT.format(created)));
 	}
 
 	//______________________________________________________________________________________________

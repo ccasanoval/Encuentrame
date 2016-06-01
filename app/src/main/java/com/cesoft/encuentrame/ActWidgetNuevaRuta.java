@@ -42,7 +42,7 @@ System.err.println("----------------------5");
 		_progressDialog.hide();
 System.err.println("----------------------6");
 		//
-		Util.setSvcContext(this);
+		//Util.setSvcContext(this);
 		Util.initBackendless(this);
 		if( ! Util.isLogged())
 		{
@@ -83,7 +83,7 @@ System.err.println("----------------------6");
 					@Override
 					public void handleResponse(Ruta ruta)
 					{
-						Util.setTrackingRoute(ruta.getObjectId());
+						Util.setTrackingRoute(ActWidgetNuevaRuta.this, ruta.getObjectId());
 						//System.err.println("--------------A----------------------------------Ruta:addNuevo:ruta: "+ruta);
 						_progressDialog.dismiss();
 						Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();

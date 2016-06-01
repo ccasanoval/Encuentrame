@@ -61,7 +61,7 @@ public class WidgetRutaService extends Service
 	{
 		try//TODO: activar desactivar botones de widget
 		{
-			String idRuta = Util.getTrackingRoute();
+			String idRuta = Util.getTrackingRoute(this);
 			Ruta.getById(idRuta, new AsyncCallback<Ruta>()
 			{
 				@Override

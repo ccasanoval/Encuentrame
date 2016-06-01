@@ -268,7 +268,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		_Map = googleMap;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActBuscar:onMapReady:setMyLocationEnabled:e:"+se);}
-		Location loc = Util.getLocation();
+		Location loc = Util.getLocation(this);
+		if(loc == null)return;
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{

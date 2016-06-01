@@ -53,12 +53,12 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
+//TODO: si falla una vez el puto backendless intentar de nuevo automaticamente una vez mas?
 //TODO: no molestar mas por hoy
 //TODO: O utilizar TOAST o cerrar teclado cuando pulse guardar por si hay error y msg en snack que seria tapado por teclado
 
 //TODO: main window=> Number or routes, places and geofences...
 //TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
-//https://www.firebase.com/docs/android/guide/
 //http://developer.android.com/intl/es/training/basics/fragments/index.html
 
 //TODO: Egg?
@@ -358,7 +358,7 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		{
 			Intent i = new Intent(ActMain._this, ActBuscar.class);
 			i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
-			startActivityForResult(i, Util.BUSCAR);
+			startActivityForResult(i, Util.BUSCAR);//Fragment PlaceholderFragment{41a89958} not attached to Activity
 		}
 		// Recoge el resultado de startActivityForResult
 		@Override
@@ -449,7 +449,7 @@ System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
-					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}
+					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
 				}
 				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 				Lugar[] listaAL = new Lugar[n];
