@@ -53,6 +53,14 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
+//TODO:Arreglar RUTAS:GET:ERROR:BackendlessFault{ code: 'IllegalArgumentException', message: 'Attempt to invoke interface method 'java.lang.String android.content.SharedPreferences.getString(java.lang.String, java.lang.String)' on a null object reference' }
+// al arrancar desde widget.. cuestion de context?ç
+
+//https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
+//TODO: Cambiar ListView por recyclerview
+//TODO: las listas no hacen scroll???? Si, pero tienen una linea menos, seeguramente por menu....mirar organizate
+
+//TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras's
 //TODO: si falla una vez el puto backendless intentar de nuevo automaticamente una vez mas?
 //TODO: no molestar mas por hoy
 //TODO: O utilizar TOAST o cerrar teclado cuando pulse guardar por si hay error y msg en snack que seria tapado por teclado

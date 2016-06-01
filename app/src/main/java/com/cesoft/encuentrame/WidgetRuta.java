@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -19,7 +20,10 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onReceive(Context context, Intent intent)//http://stackoverflow.com/questions/2471875/processing-more-than-one-button-click-at-android-widget
 	{
-		System.err.println("----------------onReceive:"+intent.getAction());
+		Intent iSvc = new Intent(context, WidgetRutaService.class);
+		context.startService(iSvc);
+
+System.err.println("\n----------------WidgetRuta:onReceive:"+intent.getAction());
 		if(ACTION_WIDGET_RUTA_ADD.equals(intent.getAction()))
 		{
 			Intent i = new Intent(context, ActWidgetNuevaRuta.class);
@@ -30,9 +34,13 @@ public class WidgetRuta extends AppWidgetProvider
 		{
 			Util.setTrackingRoute(context, "");
 
-			//RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
-			//remoteViews.setTextViewText(R.id.txtNombre, "Bla bla");
-			//appWidgetManager.updateAppWidget(widgetId, remoteViews);
+			//TODO: Show TOAS: se paro la ruta...
+
+			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
+			remoteViews.setTextViewText(R.id.txtRuta, "");
+			remoteViews.setViewVisibility(R.id.btnStop, View.INVISIBLE);
+			ComponentName componentName = new ComponentName(context, WidgetRuta.class);
+			AppWidgetManager.getInstance(context).updateAppWidget(componentName, remoteViews);
 		}
 		else
 			super.onReceive(context, intent);
@@ -59,9 +67,7 @@ public class WidgetRuta extends AppWidgetProvider
 		remoteViews.setOnClickPendingIntent(R.id.btnStop, actionPendingIntent);
 
 		// OPEN APP
-		//intent = new Intent(context.getApplicationContext(), ActLogin.class);
-		intent = new Intent(context.getApplicationContext(), ActMain.class);
-		intent.putExtra("someKey", true);
+		intent = new Intent(context.getApplicationContext(), ActLogin.class);//intent.putExtra("someKey", true);
 		actionPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.btnApp, actionPendingIntent);
 

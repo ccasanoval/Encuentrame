@@ -2,11 +2,15 @@ package com.cesoft.encuentrame;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.backendless.async.callback.AsyncCallback;
@@ -84,10 +88,21 @@ System.err.println("----------------------6");
 					public void handleResponse(Ruta ruta)
 					{
 						Util.setTrackingRoute(ActWidgetNuevaRuta.this, ruta.getObjectId());
+
+						/*RemoteViews remoteViews = new RemoteViews(ActWidgetNuevaRuta.this.getPackageName(), R.layout.widget_ruta);
+			remoteViews.setTextViewText(R.id.txtRuta, ruta.getNombre());
+			remoteViews.setViewVisibility(R.id.btnStop, View.VISIBLE);
+						remoteViews.setViewVisibility(R.id.btnStop, View.INVISIBLE);
+						ComponentName componentName = new ComponentName(ActWidgetNuevaRuta.this, WidgetRuta.class);
+			AppWidgetManager.getInstance(ActWidgetNuevaRuta.this).updateAppWidget(componentName, remoteViews);//DONT WORK HERE*/
+
 						//System.err.println("--------------A----------------------------------Ruta:addNuevo:ruta: "+ruta);
 						_progressDialog.dismiss();
 						Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 						ActWidgetNuevaRuta.this.finish();
+
+						Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
+						ActWidgetNuevaRuta.this.startService(i);
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
@@ -105,6 +120,9 @@ System.err.println("----------------------6");
 						System.err.println("ActWidgetNuevaRuta:addNuevo:backendlessFault: "+backendlessFault);
 						_progressDialog.hide();//if(_progressDialog.isShowing())
 						Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), backendlessFault), Toast.LENGTH_LONG).show();
+
+						Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
+						ActWidgetNuevaRuta.this.startService(i);
 					}
 				});
     		}
