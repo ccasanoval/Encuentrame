@@ -108,7 +108,9 @@ public class Ruta extends Objeto implements Parcelable
 			dest.writeString(p.getObjectId());
 			dest.writeDouble(p.getLatitude());
 			dest.writeDouble(p.getLongitude());
-			try{dest.writeLong(Long.parseLong((String)p.getMetadata(FECHA)));}catch(Exception e){dest.writeLong(0);System.err.println("-----"+p.getMetadata(FECHA)+":e:"+e);}
+			try{
+				dest.writeLong(Long.parseLong((String)p.getMetadata(FECHA)));
+			}catch(Exception e){dest.writeLong(0);System.err.println("Ruta:writeToParcel:e:"+e+" / "+p.getMetadata(FECHA));}
 		}
 	}
 	@Override

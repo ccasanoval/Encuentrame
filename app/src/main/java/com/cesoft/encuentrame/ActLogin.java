@@ -79,9 +79,11 @@ public class ActLogin extends AppCompatActivity
 		}
 		*/
 		_this = this;
+		// Geotracking Svc
 		startService(new Intent(this, CesService.class));//TODO: encender o apagar SERVICIO segun pref de usuario, para que no active demasiado CPU? Ajustar loop delay
-//		if( ! Util.isLogged()){Util.initBackendless(this);Util.login(resLogin);}//TODO: algo mas inteligente para no repetir init o login?
-//System.err.println("ActLogin--------3:"+Util.isLogged()+" 4:"+Util.getUsuario());
+		// Rute Widget Svc
+		startService(new Intent(this, WidgetRutaService.class));
+		//
 		if(Util.isLogged())goMain();
 	}
 

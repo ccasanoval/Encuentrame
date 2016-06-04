@@ -17,7 +17,11 @@ System.err.println("------------------CesOnSysBoot : onReceive : action="+intent
 		if(intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED) && Util.isAutoArranque(context))
 		{
 			Util.setApplication((Application)context.getApplicationContext());
+			// Geotracking Svc
 			Intent serviceIntent = new Intent(context, CesService.class);
+			context.startService(serviceIntent);
+			// Rute Widget Svc
+			serviceIntent = new Intent(context, WidgetRutaService.class);
 			context.startService(serviceIntent);
 		}
 	}

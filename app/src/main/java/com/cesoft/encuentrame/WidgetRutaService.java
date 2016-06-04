@@ -26,9 +26,8 @@ public class WidgetRutaService extends Service
 {
 	private static Handler _h = null;
 	private static Runnable _r = null;
-	private static final int _DELAY_SHORT = 30*1000;
-	private static final int _DELAY_LONG = 2*60*1000;//5*60*1000;
-	//private static Long _id = -1L;
+	private static final int _DELAY_SHORT = 60*1000;
+	private static final int _DELAY_LONG = 5*60*1000;
 
 	//______________________________________________________________________________________________
 	@Override
