@@ -3,6 +3,7 @@ package com.cesoft.encuentrame;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.app.Service;
@@ -28,6 +29,12 @@ public class WidgetRutaService extends Service
 	private static Runnable _r = null;
 	private static final int _DELAY_SHORT = 60*1000;
 	private static final int _DELAY_LONG = 5*60*1000;
+
+	public static void startServ(android.content.Context c)//android.app.Activity act)//
+	{
+		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
+		c.startService(serviceIntent);
+	}
 
 	//______________________________________________________________________________________________
 	@Override

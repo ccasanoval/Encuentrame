@@ -84,12 +84,19 @@ System.err.println("----------------Lugar:writeToParcel:"+lugar);
 		@Override
 		public Lugar[] newArray(int size){return new Lugar[size];}
 	};
+//TODO: ActLugar:guardar:handleFault:f:BackendlessFault{ code: 'Server.Processing', message: 'java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect string value: '\xAC\xED\x00\x05sr...' for column 'DATE_FORMAT.04DA65AD-E927-6454-FF30-E837EB9B6100' at row 1' }
 
 
 	//// BACKENDLESS
 	//
 	public void eliminar(AsyncCallback<Long> ac)
 	{
+		lugar.clearMetadata();
+		Backendless.Geo.removePoint(lugar, new AsyncCallback<Void>()
+			{
+				@Override public void handleResponse(Void response){System.err.println("Lugar:eliminar:geoPoint:ok:"+response);}
+				@Override public void handleFault(BackendlessFault fault){System.err.println("Lugar:eliminar:geoPoint:e:"+fault);}
+			});
 		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
 		Backendless.Persistence.of(Lugar.class).remove(this, ac);
 	}

@@ -5,6 +5,7 @@ import android.os.Parcel;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.QueryOptions;
@@ -129,6 +130,11 @@ System.err.println("----------------Aviso:writeToParcel:"+lugar);
 	//
 	public void eliminar(AsyncCallback<Long> ac)
 	{
+		Backendless.Geo.removePoint(lugar, new AsyncCallback<Void>()
+		{
+			@Override public void handleResponse(Void response){System.err.println("Aviso:eliminar:geoPoint:ok:"+response);}
+			@Override public void handleFault(BackendlessFault fault){System.err.println("Aviso:eliminar:geoPoint:e:"+fault);}
+		});
 		//removePoint( GeoPoint geoPoint, AsyncCallback<Void> responder )
 		Backendless.Persistence.of(Aviso.class).remove(this, ac);
 	}

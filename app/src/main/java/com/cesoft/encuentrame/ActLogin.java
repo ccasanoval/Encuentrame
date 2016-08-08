@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.Fragment;
@@ -37,7 +36,7 @@ public class ActLogin extends AppCompatActivity
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
 
-	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
+	/*AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
 	{
 		@Override
 		public void handleResponse(BackendlessUser backendlessUser)
@@ -49,7 +48,7 @@ public class ActLogin extends AppCompatActivity
 		{
 			System.err.println("ActLogin:222CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
 		}
-	};
+	};*/
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -82,7 +81,8 @@ public class ActLogin extends AppCompatActivity
 		// Geotracking Svc
 		startService(new Intent(this, CesService.class));//TODO: encender o apagar SERVICIO segun pref de usuario, para que no active demasiado CPU? Ajustar loop delay
 		// Rute Widget Svc
-		startService(new Intent(this, WidgetRutaService.class));
+		WidgetRutaService.startServ(this);
+//		startService(new Intent(this, WidgetRutaService.class));
 		//
 		if(Util.isLogged())goMain();
 	}
@@ -172,7 +172,6 @@ System.err.println("+++++++++++++++++++++++++++++++++++++++++++++ finEsperaLogin
 			return fragment;
 		}
 
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -221,7 +220,8 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					{
 						if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
 						{
-							Snackbar.make(rootView, getString(R.string.register_bad_pass), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+							//Snackbar.make(rootView, getString(R.string.register_bad_pass), Snackbar.LENGTH_LONG).setAction(getString(R.string.register_lbl), null).show();
+							Toast.makeText(ActLogin._this, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
 							return;
 						}
 						BackendlessUser user = new BackendlessUser();

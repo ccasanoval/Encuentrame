@@ -9,9 +9,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,11 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -63,15 +59,15 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private Ruta _r;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
-	private Spinner _spnTrackingDelay;
-	private static final String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
-	private static final int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
+	//private Spinner _spnTrackingDelay;
+	//private static final String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
+	//private static final int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
 
 	private GoogleMap _Map;
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
 
-	private CoordinatorLayout _coordinatorLayout;
+	//private CoordinatorLayout _coordinatorLayout;//TODO: eliminar de layout
 
 
 	//______________________________________________________________________________________________
@@ -81,16 +77,16 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_ruta);
 
-		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
-		_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
+		//_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
 //TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
-		View layPeriodo = findViewById(R.id.layPeriodo);
+		/*View layPeriodo = findViewById(R.id.layPeriodo);
 		if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -107,7 +103,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			{
 				_r.setPeriodo(2 * 60 * 1000);//TODO:radio por defecto en settings
 			}
-		});
+		});*/
 		//-----------
 		ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
 		if(btnStart != null)
@@ -176,7 +172,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		{
 			setTitle(getString(R.string.editar_ruta));
 			if(btnStart!=null)btnStart.setVisibility(View.GONE);
-			if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
+			//if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 			//si está activo muestra btnStop
 			String sId = Util.getTrackingRoute(ActRuta.this);
 			View layStartStop = findViewById(R.id.layStartStop);
@@ -222,7 +218,8 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			catch(SecurityException e)
 			{
 				System.err.println("ActRuta:startTracking:e:"+e);
-				Snackbar.make(_coordinatorLayout, "ActRuta:startTracking:e:"+e, Snackbar.LENGTH_LONG).show();
+				Toast.makeText(this, "ActRuta:startTracking:e:"+e, Toast.LENGTH_LONG).show();
+				//Snackbar.make(_coordinatorLayout, "ActRuta:startTracking:e:"+e, Snackbar.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -262,14 +259,14 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	{
 		_txtNombre.setText(_r.getNombre());
 		_txtDescripcion.setText(_r.getDescripcion());
-		for(int i=0; i < _aiDelay.length; i++)
+		/*for(int i=0; i < _aiDelay.length; i++)
 		{
 			if(_r.getPeriodo() == _aiDelay[i])
 			{
 				_spnTrackingDelay.setSelection(i);
 				break;
 			}
-		}
+		}*/
 		//
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
@@ -282,6 +279,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	public void onStart()
 	{
 		super.onStart();
+System.err.println("**************************************************");
 		if(checkPlayServices())buildGoogleApiClient();
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
 	}
@@ -339,15 +337,18 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 				{
 					System.err.println("ActRuta:guardar:handleFault:f:" + backendlessFault);
 					//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
-					Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+					//Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+					Toast.makeText(ActRuta.this, getString(R.string.error_guardar), Toast.LENGTH_LONG).show();
 				}
 			});
 	}
 	private void guardar(AsyncCallback<Ruta> res)
 	{
+System.err.println("***************** GUARDAR ");
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
+			Toast.makeText(ActRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
+			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
 		}
@@ -381,8 +382,9 @@ System.err.println("ActRuta:eliminar:handleResponse:"+l);
 					{
 						System.err.println("ActRuta:eliminar:handleFault:f:" + backendlessFault);
 						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault), Snackbar.LENGTH_LONG).show();
+						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault), Snackbar.LENGTH_LONG).show();
 						//}});
+						Toast.makeText(ActRuta.this, getString(R.string.error_eliminar), Toast.LENGTH_LONG).show();
 					}
 				});
 			}
@@ -489,20 +491,23 @@ System.err.println("showMarkers: " + pos);
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
+System.err.println("startTrackingRecord**************************************************");
 		guardar(new AsyncCallback<Ruta>()
 		{
 			@Override
 			public void handleResponse(Ruta r)
 			{
+System.err.println("startTrackingRecord:handleResponse**************************************************");
 				Util.setTrackingRoute(ActRuta.this, r.getObjectId());
 				Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 			}
 			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			public void handleFault(BackendlessFault err)
 			{
-				System.err.println("ActRuta:startTrackingRecord:handleFault:" + backendlessFault);
+				System.err.println("ActRuta:startTrackingRecord:handleFault:" + err);
 				//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
-				Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				//Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+				Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
 			}
 		});
 	}

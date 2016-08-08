@@ -2,15 +2,12 @@ package com.cesoft.encuentrame;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.backendless.async.callback.AsyncCallback;
@@ -101,8 +98,9 @@ System.err.println("----------------------6");
 						Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 						ActWidgetNuevaRuta.this.finish();
 
-						Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
-						ActWidgetNuevaRuta.this.startService(i);
+						WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
+						//Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
+						//ActWidgetNuevaRuta.this.startService(i);
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)

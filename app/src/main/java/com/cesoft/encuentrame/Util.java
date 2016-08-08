@@ -1,43 +1,29 @@
 package com.cesoft.encuentrame;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
-import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame.models.Aviso;
 import com.cesoft.encuentrame.models.Filtro;
-import com.cesoft.encuentrame.models.Lugar;
-
-import java.util.HashMap;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/03/2016.
@@ -154,7 +140,7 @@ System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getL
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	public static void playNotificacion(Context c)
+	/*public static void playNotificacion(Context c)
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message", true))//true o false ha de coincidir con lo que tengas en pref_notificacion.xml
@@ -176,7 +162,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 			sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		Ringtone r = RingtoneManager.getRingtone(c, sound);
 		if(r != null)r.play();
-	}
+	}*/
 	//______________________________________________________________________________________________
 	private static void vibrate(Context c)
 	{
@@ -280,7 +266,7 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 	//______________________________________________________________________________________________
 	/// TEXT TO SPEECH
 	//______________________________________________________________________________________________
-	private static TextToSpeech tts = null;
+	/*private static TextToSpeech tts = null;
 	public static void hablar(final Context c, String texto)
 	{
 		if(tts == null)
@@ -316,7 +302,7 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 		//System.err.println("------ttsGreater21");
     	String utteranceId=c.hashCode() + "";
     	tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	/// CONFIG
@@ -460,25 +446,6 @@ System.err.println("Util.isLogged: D");
 		return false;
 	}
 
-	/*public static void saveLogin(String usr, String pwd)
-	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
-		SharedPreferences.Editor e = prefs.edit();
-		e.putString(PREF_LOGIN, usr);
-		e.putString(PREF_PWD, pwd);
-		e.apply();
-	}
-	public static void borrarLogin()
-	{
-		// Lo contrario a Backendless.UserService.login(usr, pwd, res,   true  );
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
-		if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
-		SharedPreferences.Editor e = prefs.edit();
-		e.putString(PREF_LOGIN, "");
-		e.putString(PREF_PWD, "");
-		e.apply();
-	}*/
 
 	public static void logout(final Activity act)
 	{
@@ -505,105 +472,5 @@ System.err.println("Util.isLogged: D");
 		});
 		}catch(Exception e){System.err.println("Util:logout:e:"+e);}
 	}
-
-
-
-	//// ASK FOR GPS ACTIVATION
-	public static void ask4GPSactivation(final Context c)
-	{
-		// Get Location Manager and check for GPS & Network location services
-		LocationManager lm = (LocationManager)c.getSystemService(Context.LOCATION_SERVICE);
-		if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-		{
-  			// Build the alert dialog
-  			AlertDialog.Builder builder = new AlertDialog.Builder(c);
-			builder.setTitle("Location Services Not Active");//TODO: @string
-			builder.setMessage("Please enable Location Services and GPS");
-			builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-			{
-				public void onClick(DialogInterface dialogInterface, int i)
-				{
-					// Show location settings when the user acknowledges the alert dialog
-					Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-					c.startActivity(intent);
-				}
-			});
-			Dialog alertDialog = builder.create();
-			alertDialog.setCanceledOnTouchOutside(false);
-			alertDialog.show();
-		}
-	}
-
-	public static void ask4Input(final Context c, final String tit, final String msg, final String btnOk, final String btnCancel, DialogInterface.OnClickListener listener)
-	{
-		AlertDialog.Builder alert = new AlertDialog.Builder(c);
-		alert.setTitle(tit);
-		alert.setMessage(msg);
-		// Set an EditText view to get user input
-		final EditText input = new EditText(c);
-		alert.setView(input);
-		//
-		alert.setPositiveButton(btnOk, listener);
-		alert.setNegativeButton(btnCancel, listener);//alert.setNegativeButton(btnCancel, listenerCancel);
-		alert.show();
-		/*new DialogInterface.OnClickListener()
-		{
-			public void onClick(DialogInterface dialog, int whichButton)
-			{
-				String value = input.getText();
-			}
-		});*/
-	}
-
-
-
-
-	public static void addNuevo(String sNombre, double lat, double lon, final AsyncCallback<Lugar> listener)
-	{
-System.err.println("------------------------------------------------Lugar:addNuevo:"+sNombre+" : "+lat+"/"+lon);
-
-
-		/*Aviso a = new Aviso();
-		a.setLugar(new GeoPoint(lat, lon));
-		a.setNombre(sNombre);
-		a.setDescripcion("Widget");
-		//a.guardar(listener);
-		Backendless.Persistence.save(a, new AsyncCallback<Aviso>(){
-			@Override
-			public void handleResponse(Aviso aviso)
-			{
-				System.err.println("--------------++++++++++++++----------------------------------Lugar:addNuevo:aviso:"+aviso);
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("--------------++++++++++++++----------------------------------Lugar:addNuevo:aviso:backendlessFault:"+backendlessFault);
-			}
-		});*/
-
-
-		Lugar l = new Lugar();
-		l.setLugar(new GeoPoint(lat, lon));	//l.setLatLon(lat, lon);
-		l.setNombre(sNombre);
-		l.setDescripcion("Widget");//System.err.println("------------------------------------------------Lugar:addNuevo:l:"+l);
-		//l.guardar(listener);
-		Backendless.Persistence.save(l, new AsyncCallback<Lugar>(){
-			@Override
-			public void handleResponse(Lugar lugar)
-			{
-				System.err.println("--------------111111111111111111111----------------------------------Lugar:addNuevo:lugar: "+lugar);
-				listener.handleResponse(lugar);
-			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
-			{
-				System.err.println("--------------00000000000000000000--------------------------Lugar:addNuevo:lugar:backendlessFault: "+backendlessFault);
-				listener.handleFault(backendlessFault);
-			}
-		});
-
-
-	}
-
 
 }

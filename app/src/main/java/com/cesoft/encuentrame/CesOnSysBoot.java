@@ -21,8 +21,9 @@ System.err.println("------------------CesOnSysBoot : onReceive : action="+intent
 			Intent serviceIntent = new Intent(context, CesService.class);
 			context.startService(serviceIntent);
 			// Rute Widget Svc
-			serviceIntent = new Intent(context, WidgetRutaService.class);
-			context.startService(serviceIntent);
+			WidgetRutaService.startServ(context);
+				//serviceIntent = new Intent(context, WidgetRutaService.class);
+				//context.startService(serviceIntent);
 		}
 	}
 }

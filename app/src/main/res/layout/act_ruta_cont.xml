@@ -64,7 +64,7 @@
 		android:textAppearance="?android:attr/textAppearanceSmall"
 		/>
 
-	<LinearLayout
+	<!--LinearLayout
 		android:id="@+id/layPeriodo"
 		android:layout_below="@+id/txtDescripcion_"
 		android:orientation="horizontal"
@@ -83,11 +83,11 @@
 			android:layout_height="wrap_content"
 			android:textAppearance="?android:attr/textAppearanceLarge"
 			android:prompt="@string/periodo" />
-	</LinearLayout>
+	</LinearLayout-->
 
 	<LinearLayout
 		android:id="@+id/layStartStop"
-		android:layout_below="@+id/layPeriodo"
+		android:layout_below="@+id/lblFecha"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"

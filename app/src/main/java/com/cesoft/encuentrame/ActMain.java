@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
@@ -53,6 +52,11 @@ Registered SHA-1s:
 74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
 */
 
+//ActRuta:startTrackingRecord:handleFault:BackendlessFault{ code: 'Server.Processing', message: 'java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect string value: '\xAC\xED\x00\x05sr...' for column 'DATE_FORMAT.CD30A1B6-E235-CD8C-FFD2-65ABA6ADFF00' at row 1' }
+// ActLugar:guardar:handleFault:f:BackendlessFault{         code: 'Server.Processing', message: 'java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect string value: '\xAC\xED\x00\x05sr...' for column 'DATE_FORMAT.54687BF6-31C9-02E5-FF07-0908E50A4600' at row 1' }
+
+//CesService:saveGeoTracking:findById:f:----------------------:BackendlessFault{ code: '1023', message: 'Unable to retrieve data. Query contains invalid object related properties.' }
+
 //TODO:Arreglar RUTAS:GET:ERROR:BackendlessFault{ code: 'IllegalArgumentException', message: 'Attempt to invoke interface method 'java.lang.String android.content.SharedPreferences.getString(java.lang.String, java.lang.String)' on a null object reference' }
 // al arrancar desde widget.. cuestion de context?ç
 
@@ -63,8 +67,6 @@ Registered SHA-1s:
 //TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras's
 //TODO: si falla una vez el puto backendless intentar de nuevo automaticamente una vez mas?
 //TODO: no molestar mas por hoy
-//TODO: O utilizar TOAST o cerrar teclado cuando pulse guardar por si hay error y msg en snack que seria tapado por teclado
-
 //TODO: main window=> Number or routes, places and geofences...
 //TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
 //http://developer.android.com/intl/es/training/basics/fragments/index.html
@@ -92,7 +94,7 @@ public class ActMain extends AppCompatActivity
 {
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 	private static ActMain _this;
-	private static CoordinatorLayout _coordinatorLayout;
+	//private static CoordinatorLayout _coordinatorLayout;
 
 	private ViewPager _viewPager;
 
@@ -102,7 +104,7 @@ public class ActMain extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
 
-		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);
+		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);//TODO: Eliminar de layout
 		_this = this;
 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
@@ -136,7 +138,8 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 
 			String sMensaje = getIntent().getStringExtra(MENSAJE);
 			if(sMensaje != null && !sMensaje.isEmpty())
-				Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();
+				Toast.makeText(ActMain.this, sMensaje, Toast.LENGTH_LONG).show();
+				//Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();
 			//if( ! getIntent().getBooleanExtra(DIRTY, true))return;
 		}
 		catch(Exception e){System.err.println("ActMain:onCreate:e:"+e);}
@@ -364,9 +367,12 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		}
 		public void buscar()
 		{
-			Intent i = new Intent(ActMain._this, ActBuscar.class);
+			try
+			{
+			Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
 			i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
 			startActivityForResult(i, Util.BUSCAR);//Fragment PlaceholderFragment{41a89958} not attached to Activity
+			}catch(Exception e){System.err.println("ActMain:buscar:e:"+e);}
 		}
 		// Recoge el resultado de startActivityForResult
 		@Override
@@ -385,7 +391,8 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
 				if(sMensaje != null && !sMensaje.isEmpty())
-					Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();//getString(R.string.ok_guardar)
+					Toast.makeText(ActMain._this, sMensaje, Toast.LENGTH_LONG).show();
+					//Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();//getString(R.string.ok_guardar)
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 
 				Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
@@ -393,7 +400,8 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 				{
 					_aFiltro[_sectionNumber] = filtro;
 					if( ! filtro.isOn())
-						Snackbar.make(ActMain._coordinatorLayout, getString(R.string.sin_filtro), Snackbar.LENGTH_LONG).show();
+						Toast.makeText(ActMain._this, getString(R.string.sin_filtro), Toast.LENGTH_SHORT).show();
+						//Snackbar.make(ActMain._coordinatorLayout, getString(R.string.sin_filtro), Snackbar.LENGTH_LONG).show();
 				}
 				//else		_aFiltro[_sectionNumber] = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
 			}
@@ -457,7 +465,7 @@ System.err.println("---------LUGARES:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.LUGARES)
-					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
+					try{Toast.makeText(ActMain._this, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
 				}
 				Iterator<Lugar> iterator = lugares.getCurrentPage().iterator();
 				Lugar[] listaAL = new Lugar[n];
@@ -495,7 +503,8 @@ System.err.println("---------RUTAS:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.RUTAS)//if(_sectionNumber == Util.RUTAS)
-					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
+					try{Toast.makeText(ActMain._this, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
+					//try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
 					//return;
 				}
 				Iterator<Ruta> iterator = rutas.getCurrentPage().iterator();
@@ -535,7 +544,7 @@ System.err.println("---------AVISOS:GET:OK:" + n);
 				if(n < 1)
 				{
 					if(_this._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
-					try{Snackbar.make(ActMain._coordinatorLayout, getString(R.string.lista_vacia), Snackbar.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:AVISOS:handleResponse:e:"+e);}
+					try{Toast.makeText(ActMain._this, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:AVISOS:handleResponse:e:"+e);}
 				}
 				Iterator<Aviso> iterator = avisos.getCurrentPage().iterator();
 				Aviso[] listaAL = new Aviso[n];

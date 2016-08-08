@@ -28,6 +28,7 @@ public class Ruta extends Objeto implements Parcelable
 {
 	public transient static final String NOMBRE = "ruta";//TRANSIENT so not to be included in backendless
 	public transient static final String FECHA = "fecha";//TRANSIENT so not to be included in backendless
+	public transient static final String PUNTOS = "puntos";//TRANSIENT so not to be included in backendless
 
 	public Ruta(){}
 
@@ -35,6 +36,7 @@ public class Ruta extends Objeto implements Parcelable
 		public boolean isActivo(){return activo;}
 		public void setActivo(boolean b){activo = b;}*/
 
+	//Tuve que ir a Backendless->Rutas->Esquema y permisos->Añadir columna: 'puntos' : GeoPoint Relationship : To Many
 	private List<GeoPoint> puntos = new ArrayList<>();
 		public List<GeoPoint> getPuntos()
 		{
@@ -70,9 +72,9 @@ public class Ruta extends Objeto implements Parcelable
 		}
 
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
-	private int periodo=2*60*1000;
+	/*private int periodo=1*60*1000;
 		public int getPeriodo(){return periodo;}
-		public void setPeriodo(int v){periodo=v;}
+		public void setPeriodo(int v){periodo=v;}*/
 
 	public String toString()
 	{
@@ -133,7 +135,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 			Backendless.Geo.removePoint(gp, new AsyncCallback<Void>()
 			{
 				@Override public void handleResponse(Void response){}
-				@Override public void handleFault(BackendlessFault fault){}
+				@Override public void handleFault(BackendlessFault fault){System.err.println("Ruta:eliminar:geoPoint:e:"+fault);}
 			});
 		}
 		puntos.clear();
@@ -153,7 +155,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
+		queryOptions.addRelated(PUNTOS);//los puntos no los devuelve por orden!!!!!
 		query.setWhereClause("objectId = '" + sId + "'");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
@@ -162,7 +164,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
+		queryOptions.addRelated(PUNTOS);//los puntos no los devuelve por orden!!!!!
 		query.setWhereClause("objectId = '" + sId + "'");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, new AsyncCallback<BackendlessCollection<Ruta>>()
@@ -187,7 +189,7 @@ System.err.println("Ruta:eliminar:r:" + this);
 	{
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.addRelated("puntos");//los puntos no los devuelve por orden!!!!!
+		queryOptions.addRelated(PUNTOS);//los puntos no los devuelve por orden!!!!!
 		queryOptions.addSortByOption("created ASC");
 		query.setQueryOptions(queryOptions);
 		Backendless.Persistence.of(Ruta.class).find(query, res);
@@ -199,7 +201,7 @@ System.err.println("Ruta:getLista:filtro: "+filtro);
 		BackendlessDataQuery query = new BackendlessDataQuery();
 		QueryOptions queryOptions = new QueryOptions();
 		queryOptions.addSortByOption("created ASC");
-		queryOptions.addRelated("puntos");
+		queryOptions.addRelated(PUNTOS);
 		query.setQueryOptions(queryOptions);
 		//--FILTRO
 		StringBuilder sb = new StringBuilder();//" created = created "

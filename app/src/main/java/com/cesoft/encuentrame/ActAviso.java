@@ -8,9 +8,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -23,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
@@ -37,7 +36,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,6 +49,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame.models.Aviso;
+
+import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
@@ -75,7 +75,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private Marker _marker;
 	private Circle _circle;
 
-	private CoordinatorLayout _coordinatorLayout;
+	//private CoordinatorLayout _coordinatorLayout;TODO: eliminar de layout
 
 	//______________________________________________________________________________________________
 	@Override
@@ -84,7 +84,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_aviso);
 
-		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
@@ -242,7 +242,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 	//______________________________________________________________________________________________
 	//______________________________________________________________________________________________
-	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format("%.5f/%.5f", lat, lon));}
+	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
 	private void setValores()
 	{
 		_txtNombre.setText(_a.getNombre());
@@ -309,12 +309,14 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	{
 		if(_a.getLatitud()==0 && _a.getLongitud()==0)
 		{
-			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
+			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
+			Toast.makeText(ActAviso.this, getString(R.string.sin_lugar), Toast.LENGTH_LONG).show();
 			return;
 		}
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
+			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
+			Toast.makeText(ActAviso.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
 		}
@@ -336,7 +338,8 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			public void handleFault(BackendlessFault backendlessFault)
 			{
 				System.err.println("ActAviso:guardar:handleFault:f:" + backendlessFault);
-				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				Toast.makeText(ActAviso.this, getString(R.string.error_guardar), Toast.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -365,7 +368,8 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 					public void handleFault(BackendlessFault backendlessFault)
 					{
 						System.err.println("ActAviso:eliminar:handleFault:f:"+backendlessFault);
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						Toast.makeText(ActAviso.this, getString(R.string.error_eliminar), Toast.LENGTH_LONG).show();
 					}
 				});
 			}
@@ -429,7 +433,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	private void setPosLugar(double lat, double lon)
 	{
 		_a.setLatLon(lat, lon);
-		_lblPosicion.setText(String.format("%.5f/%.5f", _a.getLatitud(), _a.getLongitud()));
+		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", _a.getLatitud(), _a.getLongitud()));
 		setMarker();
 	}
 	private void setMarker()
@@ -471,7 +475,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			public void onResult(@NonNull LocationSettingsResult result)
 			{
 				final Status status = result.getStatus();
-				final LocationSettingsStates le = result.getLocationSettingsStates();
+				//final LocationSettingsStates le = result.getLocationSettingsStates();
 				switch(status.getStatusCode())
 				{
 				case LocationSettingsStatusCodes.SUCCESS:

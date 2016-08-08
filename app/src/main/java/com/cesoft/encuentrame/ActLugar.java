@@ -7,7 +7,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -258,12 +258,15 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
-			Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
+			//O escondes el teclado o el snackbar no se ve.....
+			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
+			Toast.makeText(this, getString(R.string.sin_lugar), Toast.LENGTH_LONG).show();
 			return;
 		}
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-			Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
+			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
+			Toast.makeText(this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			return;
 		}
@@ -280,7 +283,8 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			public void handleFault(BackendlessFault backendlessFault)
 			{
 				System.err.println("ActLugar:guardar:handleFault:f:" + backendlessFault);
-				Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+				Toast.makeText(ActLugar.this, getString(R.string.error_guardar), Toast.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -307,7 +311,8 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 					public void handleFault(BackendlessFault backendlessFault)
 					{
 						System.err.println("ActLugar:eliminar:handleFault:f:"+backendlessFault);
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
+						Toast.makeText(ActLugar.this, getString(R.string.error_eliminar), Toast.LENGTH_LONG).show();
 					}
 				});
 			}

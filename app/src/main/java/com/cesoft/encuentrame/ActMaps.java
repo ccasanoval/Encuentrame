@@ -7,10 +7,9 @@ import android.graphics.Color;
 import android.view.View;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
-import android.os.Build;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.backendless.BackendlessCollection;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -110,7 +109,8 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void handleResponse(Lugar l)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_lugar), Snackbar.LENGTH_LONG).show();
+							Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_LONG).show();
+							//Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_lugar), Snackbar.LENGTH_LONG).show();
 							Intent data = new Intent();
 							data.putExtra(Lugar.NOMBRE, _l);
 							setResult(Activity.RESULT_OK, data);
@@ -120,7 +120,8 @@ System.err.println("**********************_iTipo="+_iTipo);
 						public void handleFault(BackendlessFault backendlessFault)
 						{
 							System.err.println("ActMaps:guardar:handleFault:f:" + backendlessFault);
-							Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
+							Toast.makeText(ActMaps.this, getString(R.string.error_guardar), Toast.LENGTH_LONG).show();
+							//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
 						}
 					});
 				}
@@ -131,7 +132,8 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void handleResponse(Aviso a)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_aviso), Snackbar.LENGTH_LONG).show();
+							Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_aviso), Toast.LENGTH_LONG).show();
+							//Snackbar.make(_coordinatorLayout, getString(R.string.ok_guardar_aviso), Snackbar.LENGTH_LONG).show();
 							Intent data = new Intent();
 							data.putExtra(Aviso.NOMBRE, _a);
 							setResult(Activity.RESULT_OK, data);
@@ -140,7 +142,8 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void handleFault(BackendlessFault backendlessFault)
 						{
-							Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							//Snackbar.make(_coordinatorLayout, getString(R.string.error_guardar), Snackbar.LENGTH_LONG).show();
+							Toast.makeText(ActMaps.this, getString(R.string.error_guardar), Toast.LENGTH_LONG).show();
 						}
 					});
 				}
