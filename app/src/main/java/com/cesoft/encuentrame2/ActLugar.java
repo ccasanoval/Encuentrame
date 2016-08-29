@@ -256,13 +256,18 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
+	private boolean _bGuardar = true;
 	private void guardar()
 	{
+		//TODO: disable this until done
+		if(!_bGuardar)return;
+		_bGuardar = false;
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
 			//O escondes el teclado o el snackbar no se ve.....
 			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(this, getString(R.string.sin_lugar), Toast.LENGTH_LONG).show();
+			_bGuardar = true;
 			return;
 		}
 		if(_txtNombre.getText().toString().isEmpty())
@@ -270,6 +275,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
+			_bGuardar = true;
 			return;
 		}
 		_l.setNombre(_txtNombre.getText().toString());
@@ -280,6 +286,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			public void handleResponse(Lugar l)
 			{
 				Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
+				_bGuardar = true;
 			}
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
@@ -292,12 +299,14 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 					@Override
 					public void handleResponse(Lugar l)
 					{
+						_bGuardar = true;
 						Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
 					}
 					@SuppressLint("StringFormatInvalid")
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
+						_bGuardar = true;
 						System.err.println("ActLugar:guardar:handleFault2:f:" + backendlessFault);
 						Toast.makeText(ActLugar.this, String.format(getString(R.string.error_guardar), backendlessFault), Toast.LENGTH_LONG).show();
 					}
@@ -309,8 +318,11 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
+	private boolean _bEliminar = true;
 	private void eliminar()
 	{
+		if(!_bEliminar)return;
+		_bEliminar=false;
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_l.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
@@ -325,13 +337,14 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 					public void handleResponse(Long lugar)
 					{
 						Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
+						_bEliminar=true;
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
 						System.err.println("ActLugar:eliminar:handleFault:f:"+backendlessFault);
-						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
-						Toast.makeText(ActLugar.this, getString(R.string.error_eliminar), Toast.LENGTH_LONG).show();
+						Toast.makeText(ActLugar.this, String.format(getString(R.string.error_eliminar), backendlessFault), Toast.LENGTH_LONG).show();
+						_bEliminar=true;
 					}
 				});
 			}

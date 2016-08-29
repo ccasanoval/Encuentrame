@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -24,6 +25,7 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.cesoft.encuentrame2.models.Aviso;
 import com.cesoft.encuentrame2.models.Filtro;
+import com.google.android.gms.location.LocationServices;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/03/2016.

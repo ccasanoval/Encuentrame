@@ -22,7 +22,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cesoft.encuentrame2.models.Lugar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -107,27 +106,35 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			}
 		});*/
 		//-----------
-		ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
+		final ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
 		if(btnStart != null)
-		btnStart.setOnClickListener(new View.OnClickListener()
 		{
-			@Override
-			public void onClick(View v)
+			btnStart.setEnabled(true);
+			btnStart.setOnClickListener(new View.OnClickListener()
 			{
-				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
-				startTrackingRecord();
-			}
-		});
-		ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
+				@Override
+				public void onClick(View v)
+				{
+					//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
+					btnStart.setEnabled(false);
+					startTrackingRecord();
+				}
+			});
+		}
+		final ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
 		if(btnStop != null)
-		btnStop.setOnClickListener(new View.OnClickListener()
 		{
-			@Override
-			public void onClick(View v)
+			btnStop.setEnabled(true);
+			btnStop.setOnClickListener(new View.OnClickListener()
 			{
-				stopTrackingRecord();
-			}
-		});
+				@Override
+				public void onClick(View v)
+				{
+					btnStop.setEnabled(false);
+					stopTrackingRecord();
+				}
+			});
+		}
 		//-----------
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -191,6 +198,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		_GoogleApiClient.connect();
 		_LocationRequest = new LocationRequest();
 		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setFastestInterval(DELAY_LOCATION);
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
@@ -281,7 +289,6 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	public void onStart()
 	{
 		super.onStart();
-System.err.println("**************************************************");
 		if(checkPlayServices())buildGoogleApiClient();
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
 	}
@@ -322,7 +329,7 @@ System.err.println("**************************************************");
 	}
 
 	//______________________________________________________________________________________________
-	private void guardar()
+	private synchronized void guardar()
 	{
 		guardar(
 			new AsyncCallback<Ruta>()
@@ -346,7 +353,6 @@ System.err.println("**************************************************");
 	}
 	private void guardar(AsyncCallback<Ruta> res)
 	{
-System.err.println("***************** GUARDAR ");
 		if(_txtNombre.getText().toString().isEmpty())
 		{
 			Toast.makeText(ActRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
@@ -360,7 +366,7 @@ System.err.println("***************** GUARDAR ");
 	}
 
 	//______________________________________________________________________________________________
-	private void eliminar()
+	private synchronized void eliminar()
 	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_r.getNombre());//getString(R.string.eliminar));
@@ -375,18 +381,14 @@ System.err.println("***************** GUARDAR ");
 					@Override
 					public void handleResponse(Long l)
 					{
-System.err.println("ActRuta:eliminar:handleResponse:"+l);
 						Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
-						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){Snackbar.make(_coordinatorLayout, , Snackbar.LENGTH_LONG).show();}});
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
 						System.err.println("ActRuta:eliminar:handleFault:f:" + backendlessFault);
-						//ActRuta.this.runOnUiThread(new Runnable(){public void run(){
-						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault), Snackbar.LENGTH_LONG).show();
-						//}});
-						Toast.makeText(ActRuta.this, getString(R.string.error_eliminar), Toast.LENGTH_LONG).show();
+						//TODO: repetir una vez...?
+						Toast.makeText(ActRuta.this, String.format(getString(R.string.error_eliminar), backendlessFault), Toast.LENGTH_LONG).show();
 					}
 				});
 			}
@@ -433,20 +435,6 @@ System.err.println("ActRuta:eliminar:handleResponse:"+l);
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));
 		}
 	}
-	/*private void showMarkers()
-	{
-		PolylineOptions po = new PolylineOptions();
-		for(GeoPoint pt : _r.getPuntos())
-		{
-			LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
-System.err.println("showMarkers: " + pos);
-			_Map.addMarker(new MarkerOptions().position(pos));
-			po.add(pos);
-			//_Map.addCircle(new CircleOptions().center(pos).radius(2).strokeColor(Color.TRANSPARENT).fillColor(0x55AA0000));
-		}
-		po.width(5).color(Color.RED);
-		Polyline line = _Map.addPolyline(po);
-	}*/
 
 	//______________________________________________________________________________________________
 	private void pideGPS()

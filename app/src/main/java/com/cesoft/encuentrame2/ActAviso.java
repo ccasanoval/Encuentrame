@@ -305,12 +305,16 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 
 	//______________________________________________________________________________________________
+	private boolean _bGuardar = true;
 	private void guardar()
 	{
+		if(!_bGuardar)return;
+		_bGuardar = false;
 		if(_a.getLatitud()==0 && _a.getLongitud()==0)
 		{
 			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(ActAviso.this, getString(R.string.sin_lugar), Toast.LENGTH_LONG).show();
+			_bGuardar = true;
 			return;
 		}
 		if(_txtNombre.getText().toString().isEmpty())
@@ -318,6 +322,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(ActAviso.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
+			_bGuardar = true;
 			return;
 		}
 		_a.setNombre(_txtNombre.getText().toString());
@@ -332,6 +337,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 			{
 				CesService.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
 				openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
+				_bGuardar = true;
 			}
 			@SuppressLint("StringFormatInvalid")
 			@Override
@@ -348,6 +354,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 					{
 						CesService.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
 						openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
+						_bGuardar = true;
 					}
 					@SuppressLint("StringFormatInvalid")
 					@Override
@@ -355,6 +362,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 					{
 						System.err.println("ActAviso:guardar:handleFault2:f:" + backendlessFault);
 						Toast.makeText(ActAviso.this, String.format(getString(R.string.error_guardar), backendlessFault), Toast.LENGTH_LONG).show();
+						_bGuardar = true;
 					}
 				});
 				//*****************************************************************************
@@ -364,8 +372,11 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 	}
 
 	//______________________________________________________________________________________________
+	private boolean _bEliminar = true;
 	private void eliminar()
 	{
+		if(!_bEliminar)return;
+		_bEliminar=false;
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_a.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
@@ -382,13 +393,14 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 						System.err.println("ActAviso:eliminar:handleResponse:" + l);
 						//return2Main(true, getString(R.string.ok_eliminar));
 						openMain(true, getString(R.string.ok_eliminar_aviso));
+						_bEliminar=true;
 					}
 					@Override
 					public void handleFault(BackendlessFault backendlessFault)
 					{
 						System.err.println("ActAviso:eliminar:handleFault:f:"+backendlessFault);
-						//Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_eliminar), backendlessFault.getCode()), Snackbar.LENGTH_LONG).show();
-						Toast.makeText(ActAviso.this, getString(R.string.error_eliminar), Toast.LENGTH_LONG).show();
+						Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), backendlessFault), Toast.LENGTH_LONG).show();
+						_bEliminar=true;
 					}
 				});
 			}

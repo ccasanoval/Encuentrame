@@ -35,6 +35,7 @@ public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 
 //System.err.println("----------------------"+position+" : "+_lugares[position]);
 		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
+		if(_avisos[position] != null)
 		txtNombre.setText(_avisos[position].getNombre());
 		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
 		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);

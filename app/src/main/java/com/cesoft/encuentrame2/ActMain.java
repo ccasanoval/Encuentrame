@@ -369,9 +369,15 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		{
 			try
 			{
-			Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
-			i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
-			startActivityForResult(i, Util.BUSCAR);//Fragment PlaceholderFragment{41a89958} not attached to Activity
+				System.err.println("ActMain:buscar:__________"+_sectionNumber);
+				System.err.println("ActMain:buscar:__________"+_apf[_sectionNumber]);
+				Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
+			System.err.println("ActMain:buscar:__________zzzzzzzzzzzzz");
+			System.err.println("ActMain:buscar:__________"+_aFiltro[_sectionNumber]);
+				i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
+			System.err.println("ActMain:buscar:____________yyyyyyyyyyyy");
+
+				startActivityForResult(i, Util.BUSCAR);//Fragment PlaceholderFragment{41a89958} not attached to Activity
 			}catch(Exception e){System.err.println("ActMain:buscar:e:"+e);}
 		}
 		// Recoge el resultado de startActivityForResult

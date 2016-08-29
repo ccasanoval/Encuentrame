@@ -3,6 +3,10 @@ package com.cesoft.encuentrame2;
 import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationListener;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
@@ -11,7 +15,18 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame2.models.Aviso;
 import com.cesoft.encuentrame2.models.Ruta;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,7 +42,7 @@ import java.util.Iterator;
 //Backendless GEOFencing service:
 //https://backendless.com/backend-as-a-service/quick-start-guide-for-backendless-geofencing/
 
-public class CesService extends IntentService
+public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
 	private static final int GEOFEN_DWELL_TIME = 2*60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
@@ -65,6 +80,8 @@ public class CesService extends IntentService
 		Util.initBackendless(this);
 		//Util.setSvcContext(this);
 		Util.login(this, resLogin);
+
+		iniGeoTracking();
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
@@ -182,76 +199,89 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 	public static void saveGeoTracking()
 	{
 		final String sId = Util.getTrackingRoute(CesService._this);//TODO: guardar ruta en nube para que no se olvide al reiniciar?
-		if(sId.isEmpty())return;
+		if(sId.isEmpty())
+		{
+			CesService._this.stopTracking();
+			return;
+		}
+		CesService._this.startTracking();
 
 		Ruta.getById(sId, new AsyncCallback<Ruta>()
 		{
 			@Override
 			public void handleResponse(Ruta r)
 			{
-				System.err.println("CesService:saveGeoTracking:Ruta.getById:"+r);
-				//if(ar.getCurrentPage().size() < 1)return;
-				//Ruta r = ar.getCurrentPage().get(0);
-				if(r == null)return;
-				final Location loc = Util.getLocation(CesService._this);
-				System.err.println("CesService:saveGeoTracking:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "," + loc.getLongitude());
-				if( ! _sId.equals(sId))
-				{
-					_sId = sId;
-					_locLastSaved = null;
-					System.err.println("CesService:saveGeoTracking:Nueva ruta: " + _sId + " != " + sId);
-				}
-				else if(_locLastSaved != null)
-				{
-					if(loc.distanceTo(_locLastSaved) < 2)//Puntos muy cercanos
-					{
-						System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude());
-						return;
-					}
-
-					//Si el nuevo punto no tiene sentido, no se guarda...
-					double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
-//System.err.println("CesService:saveGeoTracking:Punto FALSO???: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
-					if(vel > 300)//kilometros hora a metros segundo : 300km/h = 83m/s
-					{
-						System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
-						return;
-					}
-				}
-String s = "null";
-if(_locLastSaved != null)s = _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude();
-System.err.println("CesService:saveGeoTracking:Punto dif: " + sId + " ::: " + s + " ///// " + loc.getLatitude() + "," + loc.getLongitude());
-System.err.println("CesService:saveGeoTracking:findById:----------------------:" + r + " :::: " + s);
-
-				//TODO: añadir geofence por si quisiera funcionar...?
-				r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
-System.err.println("CesService:saveGeoTracking:guardar0000:----------------------:" + r);
-				r.guardar(new AsyncCallback<Ruta>()
-				{
-					@Override
-					public void handleResponse(Ruta r)
-					{
-						System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + r);
-						Util.refreshListaRutas();//Refrescar lista rutas en main..
-
-						_locLastSaved = loc;
-						_tmLastSaved = System.currentTimeMillis();
-					}
-					@Override
-					public void handleFault(BackendlessFault backendlessFault)
-					{
-						System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + backendlessFault);
-					}
-				});
+				//CesService.handleResponse(r, sId);
+				CesService.handleResponse(r, sId);
 			}
-
 			@Override
 			public void handleFault(BackendlessFault backendlessFault)
 			{
 				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:" + backendlessFault);
 			}
 		});
+	}
 
+	public static void handleResponse(Ruta r, String sId)
+	{
+		System.err.println("CesService:handleResponse:"+r);
+		if(r == null)return;
+		final Location loc = Util.getLocation(CesService._this);
+		guardarPunto(loc, r, sId);
+	}
+
+	private static void guardarPunto(final Location loc, final Ruta r, final String sId)
+	{
+		if(loc == null)
+		{
+			System.err.println("CesService:guardarPunto:findById:Util.getLocation()-----------------:NULL");
+			return;
+		}
+		System.err.println("CesService:guardarPunto:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "/" + loc.getLongitude()+":"+(new java.util.Date(loc.getTime())));
+		if( ! _sId.equals(sId))
+		{
+			_sId = sId;
+			_locLastSaved = null;
+			System.err.println("CesService:guardarPunto:Nueva ruta: " + _sId + " != " + sId);
+		}
+		else if(_locLastSaved != null)
+		{
+			if(loc.distanceTo(_locLastSaved) < 2)//Puntos muy cercanos
+			{
+				System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude());
+				return;
+			}
+
+			//Si el nuevo punto no tiene sentido, no se guarda...
+			double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
+			if(vel > 200)//kilometros hora a metros segundo : 300km/h = 83m/s
+			{
+				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
+				return;
+			}
+		}
+		//TODO: añadir geofence por si quisiera funcionar...?
+		r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
+		r.guardar(new AsyncCallback<Ruta>()
+		{
+			@Override
+			public void handleResponse(Ruta r)
+			{
+				System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + r);
+				System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + r.getCreated()+":::");
+
+				Util.refreshListaRutas();//Refrescar lista rutas en main..
+
+				_locLastSaved = loc;
+				_tmLastSaved = System.currentTimeMillis();
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("CesService:saveGeoTracking:guardar:f:----------------------date:" + r.getCreated());
+				System.err.println("CesService:saveGeoTracking:guardar:f:----------------------:" + backendlessFault);
+			}
+		});
 	}
 
 	//TODO: por que no funciona tracking con geofence?????
@@ -354,6 +384,128 @@ if(g.getLatitude() == null)return;
 			//_lista.clear();
 		}
 	}*/
+
+
+
+
+
+	//https://developer.android.com/training/location/change-location-settings.html
+	private LocationRequest _LocationRequest;
+	private GoogleApiClient _GoogleApiClient;
+	public void iniGeoTracking()
+	{
+		if(checkPlayServices())buildGoogleApiClient();
+		if(_GoogleApiClient != null)_GoogleApiClient.connect();
+
+	    _LocationRequest = new LocationRequest();
+	    _LocationRequest.setInterval(2*60*1000);
+	    _LocationRequest.setFastestInterval(60*1000);
+	    _LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		pideGPS();
+	}
+	//______________________________________________________________________________________________
+	protected synchronized void buildGoogleApiClient()
+	{
+		_GoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
+	}
+	private boolean checkPlayServices()
+	{
+    	GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+    	int result = googleAPI.isGooglePlayServicesAvailable(this);
+    	if(result != ConnectionResult.SUCCESS)
+		{
+			System.err.println("CesService:checkPlayServices:e:" + result);
+	        return false;
+	    }
+	    return true;
+	}
+
+
+	private void startTracking()
+	{
+		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
+		{
+			try
+			{
+				if(_LocationRequest == null)
+				{
+					iniGeoTracking();
+					throw new SecurityException("_LocationRequest = NULL");
+				}
+				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
+			}
+			catch(SecurityException e)
+			{
+				System.err.println("CesService:startTracking:e:"+e);
+			}
+		}
+	}
+	private void stopTracking()
+	{
+		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
+			LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
+	}
+
+
+	@Override
+	public void onConnected(@Nullable Bundle bundle)
+	{
+		System.err.println("CesService:onConnected");
+	}
+	@Override
+	public void onConnectionSuspended(int i)
+	{
+		System.err.println("CesService:onConnectionSuspended:"+i);
+		if(_GoogleApiClient != null)
+			_GoogleApiClient.connect();
+	}
+	@Override
+	public void onLocationChanged(Location location)
+	{
+		System.err.println("CesService:onLocationChanged:"+location.getLatitude()+"/"+location.getLongitude()+":"+(new java.util.Date(location.getTime())));
+		Util.setLocation(location);
+	}
+	@Override
+	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+	{
+		System.err.println("CesService:onConnectionFailed:e:" + connectionResult.getErrorCode());
+	}
+
+	private void pideGPS()
+	{
+		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
+		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+				.addLocationRequest(_LocationRequest)
+				.setAlwaysShow(true)//so it ask for GPS activation like google maps
+				;
+		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(_GoogleApiClient, builder.build());
+		result.setResultCallback(new ResultCallback<LocationSettingsResult>()
+		{
+			@Override
+			public void onResult(@NonNull LocationSettingsResult result)
+			{
+				final Status status = result.getStatus();
+				switch(status.getStatusCode())
+				{
+				case LocationSettingsStatusCodes.SUCCESS:
+					System.err.println("LocationSettingsStatusCodes.SUCCESS");
+					// All location settings are satisfied. The client can initialize location requests here.
+					break;
+				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+					try
+					{
+						status.startResolutionForResult(null, 1000);
+					}
+					catch(android.content.IntentSender.SendIntentException e){}
+					break;
+				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
+					break;
+				}
+			}
+		});
+	}
 
 }
 
