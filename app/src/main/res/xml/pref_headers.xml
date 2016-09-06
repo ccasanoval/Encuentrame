@@ -8,19 +8,19 @@
 		android:title="@string/pref_header_logout"/>
 
 	<header
-		android:fragment="com.cesoft.encuentrame2.ActConfig$OpcionesPreferenceFragment"
+		android:fragment="com.cesoft.encuentrame3.ActConfig$OpcionesPreferenceFragment"
 		android:icon="@drawable/ic_sync_black_24dp"
 		android:summary="@string/pref_header_opciones_sum"
 		android:title="@string/pref_header_opciones"/>
 
 	<header
-		android:fragment="com.cesoft.encuentrame2.ActConfig$NotificationPreferenceFragment"
+		android:fragment="com.cesoft.encuentrame3.ActConfig$NotificationPreferenceFragment"
 		android:icon="@drawable/ic_notifications_black_24dp"
 		android:summary="@string/pref_header_notifications_sum"
 		android:title="@string/pref_header_notifications"/>
 
 	<header
-		android:fragment="com.cesoft.encuentrame2.ActConfig$GeneralPreferenceFragment"
+		android:fragment="com.cesoft.encuentrame3.ActConfig$GeneralPreferenceFragment"
 		android:icon="@drawable/ic_info_black_24dp"
 		android:title="@string/pref_header_about"/>
 

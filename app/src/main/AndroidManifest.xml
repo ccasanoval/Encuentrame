@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.cesoft.encuentrame2"
+<manifest package="com.cesoft.encuentrame3"
 		  xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<uses-permission android:name="android.permission.INTERNET"/>
@@ -24,7 +24,7 @@
 			android:name=".CesGeofenceReceiver"
 			android:exported="false">
 			<intent-filter>
-				<action android:name="com.cesoft.encuentrame.ACCION_RECIBE_GEOFENCE"/>
+				<action android:name="com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE"/>
 			</intent-filter>
 		</receiver>
 		<!--
@@ -124,7 +124,7 @@
 			android:label="@string/widget_lugar">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-				<action android:name="com.cesoft.encuentrame.WidgetLugar.ACTION_WIDGET_SHOWAPP"/>
+				<action android:name="com.cesoft.encuentrame3.WidgetLugar.ACTION_WIDGET_SHOWAPP"/>
 			</intent-filter>
 			<meta-data
 				android:name="android.appwidget.provider"
@@ -137,9 +137,9 @@
 			android:label="@string/widget_ruta">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-				<action android:name="com.cesoft.encuentrame.WidgetRuta.ACTION_WIDGET_SHOWAPP"/>
-				<action android:name="com.cesoft.encuentrame.WidgetRuta.ACTION_WIDGET_RUTA_ADD"/>
-            	<action android:name="com.cesoft.encuentrame.WidgetRuta.ACTION_WIDGET_RUTA_STOP"/>
+				<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_SHOWAPP"/>
+				<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_RUTA_ADD"/>
+            	<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_RUTA_STOP"/>
 			</intent-filter>
 			<meta-data
 				android:name="android.appwidget.provider"
