@@ -32,9 +32,9 @@ public class Util
 	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
 	public static final String TIPO = "tipo";
-	private static final String PREF_LOGIN = "login";
-	private static final String PREF_PWD = "password";
-	private static final String PREF_SAVE_LOGIN = "save_login";
+//	private static final String PREF_LOGIN = "login";
+//	private static final String PREF_PWD = "password";
+//	private static final String PREF_SAVE_LOGIN = "save_login";
 
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
@@ -168,7 +168,7 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
 
-		Integer idNotificacion = Integer.parseInt(a.getId().substring(0,6).replace('-','0'), 16);
+		Integer idNotificacion = _conversor(a.getId());
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
@@ -205,6 +205,16 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
                 SharedPreferencesID.PREFERENCE_ID_PUSH_SOUND_URI,
                 "android.resource://ru.mail.mailapp/raw/new_message_bells")));
 		*/
+	}
+	//______________________________________________________________________________________________
+	private static int _conversor(String s)
+	{
+		// PARA Backendless: Integer.parseInt(a.getId().substring(0,6).replace('-','0'), 16);
+		StringBuilder sb = new StringBuilder(10);
+		s = s.replace("-", "");
+		for(int i=0; i < 9; i++)
+			sb.append(s.charAt(i) % 10);
+		return Integer.valueOf(sb.toString().substring(0, 9));
 	}
 	//______________________________________________________________________________________________
 	/*private static void showNotificacionDlg(Context c, Aviso a, Intent intent)

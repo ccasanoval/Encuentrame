@@ -109,6 +109,7 @@ public class ActMain extends AppCompatActivity
 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		toolbar.setSubtitle(Login.getCurrentUserName());
 
 		Util.setApplication(getApplication());
 		//Util.initPrefs();
@@ -385,6 +386,12 @@ System.err.println("ActMain:buscar:__________"+_aFiltro[_sectionNumber]);
 			if(requestCode == Util.CONFIG)
 			{
 				Login.logout();
+
+				Intent intent = new Intent(ActMain._this.getBaseContext(), ActLogin.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				ActMain._this.finish();
+
 				return;
 			}
 

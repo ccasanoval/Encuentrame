@@ -1,6 +1,8 @@
 package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
+
+import com.cesoft.encuentrame3.Login;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -23,7 +25,8 @@ import java.util.Date;
 public class Aviso extends Objeto
 {
 	public static final String NOMBRE = "aviso";
-	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(NOMBRE);}
+	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	protected DatabaseReference _datos;
 
@@ -77,7 +80,7 @@ public class Aviso extends Objeto
 		}*/
 
 	//______________________________________________________________________________________________
-	public Aviso(){}
+	public Aviso(){fecha = new Date();}
 	@Override
 	public String toString()
 	{

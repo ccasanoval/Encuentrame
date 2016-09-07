@@ -55,16 +55,8 @@ public class ActLogin extends AppCompatActivity
 		Login.setSvcContext(this);
 		Login.init(new Login.AuthListener()
 		{
-			@Override
-			public void onExito(FirebaseUser usr)
-			{
-				Toast.makeText(ActLogin.this, "OK:"+usr.getDisplayName()+":"+usr.getEmail(), Toast.LENGTH_LONG).show();
-			}
-			@Override
-			public void onFallo()
-			{
-				Toast.makeText(ActLogin.this, "KK:", Toast.LENGTH_LONG).show();
-			}
+			@Override	public void onExito(FirebaseUser usr){}
+			@Override	public void onFallo(){}
 		});
 
 		//Crea servicio si no está ya creado, dentro del servicio se llama a login
@@ -191,10 +183,11 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 									@Override
 									public void onExito(FirebaseUser usr)
 									{
-										if(usr != null)
-											Toast.makeText(ActLogin._this, "LOG OK:"+usr.getDisplayName()+":"+usr.getEmail(), Toast.LENGTH_LONG).show();
+										if(usr != null)//TODO: string
+											Toast.makeText(ActLogin._this, "Bienvenido: "+usr.getEmail(), Toast.LENGTH_LONG).show();
 										else
-											Toast.makeText(ActLogin._this, "LOG OK:?", Toast.LENGTH_LONG).show();
+											Toast.makeText(ActLogin._this, "LOG KK2", Toast.LENGTH_LONG).show();
+										ActLogin._this.goMain();
 									}
 									@Override
 									public void onFallo()
@@ -224,6 +217,7 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 									@Override
 									public void onExito(FirebaseUser usr)
 									{
+										if(usr != null)
 										Toast.makeText(ActLogin._this, "REG OK:"+usr.getDisplayName()+":"+usr.getEmail(), Toast.LENGTH_LONG).show();
 									}
 									@Override

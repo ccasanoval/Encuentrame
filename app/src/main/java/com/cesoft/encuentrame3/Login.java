@@ -3,15 +3,21 @@ package com.cesoft.encuentrame3;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.List;
 
 
 //TODO: Autenticar con twitter, google, etc
@@ -26,8 +32,20 @@ public class Login
 	private static Context _svcContext;
 		public static void setSvcContext(Context c){_svcContext = c;}
 
+	private static String _sCurrentUserID="";
+		private static void setCurrentUserID(String v){_sCurrentUserID=v;}
+		public static String getCurrentUserID(){return _sCurrentUserID;}
+	private static String _sCurrentUserName="";
+		private static void setCurrentUserName(String v){_sCurrentUserName=v;}
+		public static String getCurrentUserName(){return _sCurrentUserName;}
+
 	private static Login _this;
 	public Login(){_this=this;}
+
+	static
+	{
+		FirebaseDatabase.getInstance().setPersistenceEnabled(true);/// Iniciar firebase disk persistence
+	}
 
 	//-----
 	public interface AuthListener
@@ -40,26 +58,27 @@ public class Login
 	private static FirebaseAuth.AuthStateListener _AuthListener;
 	public static void init(final AuthListener listener)
 	{
-		FirebaseDatabase.getInstance().setPersistenceEnabled(true);/// Iniciar firebase disk persistence
 		_Auth = FirebaseAuth.getInstance();
 		_AuthListener = new FirebaseAuth.AuthStateListener()
 		{
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
             {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user != null)
-                {
-                    System.err.println("Login: onAuthStateChanged: signed_in: " + user.getUid());
-	                listener.onExito(user);
-                }
-                else
-                {
-                    System.err.println("onAuthStateChanged: signed_out: "+firebaseAuth);
-	                listener.onFallo();//firebaseAuth);
-                }
-            }
-        };
+				FirebaseUser user = firebaseAuth.getCurrentUser();
+				if(user != null)
+				{
+					System.err.println("Login: onAuthStateChanged: signed_in: " + user.getDisplayName() + " /"+user.getEmail());
+					Login.setCurrentUserID(user.getUid());
+					Login.setCurrentUserName(user.getEmail());//user.getDisplayName());
+					listener.onExito(user);
+				}
+				else
+				{
+					System.err.println("onAuthStateChanged: signed_out: "+firebaseAuth);
+					listener.onFallo();//firebaseAuth);
+				}
+			}
+		};
 		_Auth.addAuthStateListener(_AuthListener);
 		//OnStop: if(mAuthListener != null)mAuth.removeAuthStateListener(mAuthListener);
 		//Todo en la espera : showProgressDialog
@@ -98,7 +117,100 @@ public class Login
 						// If sign in fails, display a message to the user. If sign in succeeds the auth state listener
 	                    // will be notified and logic to handle the signed in user can be handled in the listener.
 						if(task.isSuccessful())
-							listener.onExito(null);
+						{
+							if(_Auth != null)listener.onExito(_Auth.getCurrentUser());
+							else listener.onExito(
+									new FirebaseUser()
+									{
+										@NonNull
+										@Override
+										public String getUid()
+										{
+											return null;
+										}
+
+										@NonNull
+										@Override
+										public String getProviderId()
+										{
+											return null;
+										}
+
+										@Override
+										public boolean isAnonymous()
+										{
+											return false;
+										}
+
+										@Nullable
+										@Override
+										public List<String> getProviders()
+										{
+											return null;
+										}
+
+										@NonNull
+										@Override
+										public List<? extends UserInfo> getProviderData()
+										{
+											return null;
+										}
+
+										@NonNull
+										@Override
+										public FirebaseUser zzan(@NonNull List<? extends UserInfo> list)
+										{
+											return null;
+										}
+
+										@Override
+										public FirebaseUser zzcn(boolean b)
+										{
+											return null;
+										}
+
+										@NonNull
+										@Override
+										public FirebaseApp zzcks()
+										{
+											return null;
+										}
+
+										@Nullable
+										@Override
+										public String getDisplayName()
+										{
+											return null;
+										}
+
+										@Nullable
+										@Override
+										public Uri getPhotoUrl()
+										{
+											return null;
+										}
+
+										@Nullable
+										@Override
+										public String getEmail()
+										{
+											return null;
+										}
+
+										@NonNull
+										@Override
+										public String zzckt()
+										{
+											return null;
+										}
+
+										@Override
+										public void zzrb(@NonNull String s)
+										{
+
+										}
+									});
+						}
 						else
 							listener.onFallo();
                     }
@@ -109,8 +221,6 @@ public class Login
 			System.err.println("Login:login2:e:"+e);
 		}
 	}
-
-
 
 
 	public static String getUsuario()

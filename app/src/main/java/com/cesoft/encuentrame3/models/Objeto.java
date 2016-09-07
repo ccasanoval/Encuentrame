@@ -8,8 +8,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Date;
 
-//https://encuentrame-671b9.firebaseio.com/
 /* FIREBASE Security & Rules
+https://www.firebase.com/docs/security/guide/user-security.html
 {
     "rules": {
         ".read": true,
@@ -18,6 +18,8 @@ import java.util.Date;
           ".indexOn": ["activo", "nombre"]
         },
         "lugar": {
+          //".read": "auth != null && data.child('uid').val() === auth.uid"
+          //".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid) && newData.hasChild('uid')",
           ".indexOn": ["nombre"]
         },
         "ruta_punto": {
@@ -42,8 +44,6 @@ public class Objeto implements Parcelable
 	public static final String GEO = "GEO";
 	public static final String NOMBRE = "objeto";
 
-	protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(GEO));}
-
 	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
 	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 
@@ -51,6 +51,9 @@ public class Objeto implements Parcelable
 	protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
+	/*protected String uid = null;
+		public String getUid(){return uid;}
+		public void setUid(String v){uid = v;}*/
 
 	protected String nombre;
 	protected String descripcion;

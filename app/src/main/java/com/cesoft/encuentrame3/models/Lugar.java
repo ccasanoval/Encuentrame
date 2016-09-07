@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.cesoft.encuentrame3.Login;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
@@ -28,7 +29,8 @@ import java.util.Date;
 public class Lugar extends Objeto
 {
 	public static final String NOMBRE = "lugar";
-	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(NOMBRE);}
+	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	protected DatabaseReference _datos;
 
@@ -39,6 +41,9 @@ public class Lugar extends Objeto
 	protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
+	/*protected String uid = null;
+		public String getUid(){return uid;}
+		public void setUid(String v){uid = v;}*/
 	protected String nombre;
 	protected String descripcion;
 		public String getNombre(){return nombre;}

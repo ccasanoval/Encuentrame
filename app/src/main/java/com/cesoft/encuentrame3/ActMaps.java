@@ -229,7 +229,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 		}
 		else if(_a != null)
 		{
-			_l.setLatitud(lat);_l.setLongitud(lon);
+			_a.setLatitud(lat);_a.setLongitud(lon);
 			setMarker(_a.getNombre(), _a.getDescripcion());
 			setMarkerRadius();
 		}

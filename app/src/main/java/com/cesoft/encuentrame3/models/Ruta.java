@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.cesoft.encuentrame3.Login;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -35,7 +36,8 @@ public class Ruta extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "ruta";
 	public static final String IDRUTA = "idRuta";
-	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(NOMBRE);}
+	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	protected DatabaseReference _datos;
 
@@ -64,7 +66,7 @@ public class Ruta extends Objeto implements Parcelable
 		public void setPeriodo(int v){periodo=v;}*/
 
 	//______________________________________________________________________________________________
-	public Ruta(){}
+	public Ruta(){fecha = new Date();}
 	@Override
 	public String toString()
 	{
@@ -384,12 +386,12 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// RUTA PUNTO
 	////////////////////////////////////////////////////////////////////////////////////////////////////
+	@IgnoreExtraProperties
 	public static class RutaPunto implements Parcelable
 	{
-		public static final String NOMBRE = "ruta_punto";
-		protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference();}
-		protected static GeoFire newGeoFire(){return new GeoFire(newFirebase());}
-
+		public static final String NOMBRE = "ruta_punto";//TODO:? or parent?
+		protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+		protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 		@Exclude
 		private DatabaseReference _datos;
 
@@ -415,7 +417,6 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		@Override
 		public String toString()
 		{
-			//DataSnapshot { key = -KHyIT4QjGjBeP7E9KdD, value = {longitud=-3.662471, latitud=40.4870812, id=-KHyIT4QjGjBeP7E9KdD, idRuta=-KHyIM5YX5NuJydP-YIQ, fecha=1463481654587} }
 			return String.format(Locale.ENGLISH, "RutaPunto{id='%s', fecha='%s', latitud='%f', longitud='%f', idRuta='%s'}",
 					getId(), DATE_FORMAT.format(fecha), latitud, longitud, idRuta);
 		}
@@ -499,12 +500,7 @@ System.err.println("RutaPunto:getLista:onDataChange---------");
 					for(DataSnapshot o : ds.getChildren())
 					{
 						System.err.println("RutaPunto:getLista:onDataChange:o------------------------"+o);
-						//try{
 						System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+o.getValue(Ruta.RutaPunto.class));
-						//}catch(FirebaseException e)
-						//{
-						//	System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+e+" : "+e.getCause());
-						//}
 					}
 					listener.onDataChange(ds);
 				}
@@ -522,7 +518,7 @@ System.err.println("RutaPunto:getLista:onDataChange---------");
 		// GEOFIRE
 		private void saveGeo()
 		{
-			final double DISTANCIA_MIN = 15/1000.0;//Km
+			final double DISTANCIA_MIN = 10/1000.0;//Km
 			if(_datos.getKey() == null){System.err.println("RutaPunto:saveGeo:id==null ----------------------------------------------------------------");return;}
 
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(getIdRuta());
