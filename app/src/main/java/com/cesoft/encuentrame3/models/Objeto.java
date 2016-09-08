@@ -2,10 +2,6 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.firebase.geofire.GeoFire;
-import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.Date;
 
 /* FIREBASE Security & Rules

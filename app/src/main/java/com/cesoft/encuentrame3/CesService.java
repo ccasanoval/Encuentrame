@@ -50,7 +50,7 @@ import java.util.Iterator;
 
 public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
-	private static final int GEOFEN_DWELL_TIME = 2*60*1000;//TODO:customize in settings...
+	private static final int GEOFEN_DWELL_TIME = 1*60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
@@ -447,8 +447,8 @@ if(g.getLatitude() == null)return;
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
 
 	    _LocationRequest = new LocationRequest();
-	    _LocationRequest.setInterval(2*60*1000);
-	    _LocationRequest.setFastestInterval(60*1000);
+	    _LocationRequest.setInterval(60*1000);//TODO: ajustar por usuario...
+	    _LocationRequest.setFastestInterval(50*1000);
 	    _LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		pideGPS();
 	}
@@ -538,18 +538,12 @@ if(g.getLatitude() == null)return;
 				{
 				case LocationSettingsStatusCodes.SUCCESS:
 					System.err.println("LocationSettingsStatusCodes.SUCCESS");
-					// All location settings are satisfied. The client can initialize location requests here.
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try
-					{
-						status.startResolutionForResult(null, 1000);
-					}
-					catch(android.content.IntentSender.SendIntentException e){}
+					try{status.startResolutionForResult(null, 1000);}catch(android.content.IntentSender.SendIntentException e){}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
 					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
-					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
 					break;
 				}
 			}

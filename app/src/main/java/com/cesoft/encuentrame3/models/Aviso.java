@@ -104,7 +104,6 @@ System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 	//
 	protected Aviso(Parcel in)
 	{
-		//setObjectId(in.readString());nombre = in.readString();descripcion = in.readString();
 		super(in);
 		//
 		setActivo(in.readByte() > 0);

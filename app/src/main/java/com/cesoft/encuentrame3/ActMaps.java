@@ -178,24 +178,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 		}
 		else if(_r != null)		/// RUTA
 		{
-			//if(_r.getPuntos().size() > 0)	setPosLugar(_r.getPuntos().get(0).getLatitude(), _r.getPuntos().get(0).getLongitude());
-			_r.getPuntos(new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot ds)
-				{
-					DataSnapshot o = ds.getChildren().iterator().next();
-					if(o == null)return;
-					Ruta.RutaPunto p = o.getValue(Ruta.RutaPunto.class);
-					setPosLugar(p.getLatitud(), p.getLongitud());
-				}
-				@Override
-				public void onCancelled(DatabaseError err)
-				{
-					System.err.println("ActMaps:onMapReady:e:"+err);
-				}
-			});
-
 			showRuta(_r);
 		}
 		else
@@ -224,12 +206,10 @@ System.err.println("**********************_iTipo="+_iTipo);
 		_loc.setLongitude(lon);
 		if(_l != null)
 		{
-			_l.setLatitud(lat);_l.setLongitud(lon);
 			setMarker(_l.getNombre(), _l.getDescripcion());
 		}
 		else if(_a != null)
 		{
-			_a.setLatitud(lat);_a.setLongitud(lon);
 			setMarker(_a.getNombre(), _a.getDescripcion());
 			setMarkerRadius();
 		}

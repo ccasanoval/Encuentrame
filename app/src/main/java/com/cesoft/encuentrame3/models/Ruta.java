@@ -78,12 +78,14 @@ public class Ruta extends Objeto implements Parcelable
 	protected Ruta(Parcel in)
 	{
 		super(in);
+		setId(in.readString());
 		puntosCount = in.readLong();
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
+		dest.writeString(getId());
 		dest.writeLong(puntosCount);
 	}
 	@Override
@@ -302,31 +304,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 	//______________________________________________________________________________________________
 	private long puntosCount = 0;
 	public long getPuntosCount(){return puntosCount;}
-	/*public long getPuntosCount2()
-	{
-		Ruta.getPuntosCount2(getId(), new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot count)
-			{
-				if(count != null && count.getValue() != null)
-					puntosCount = (Long)count.getValue();
-System.err.println("---------Ruta:getPuntosCount: "+puntosCount+" : "+count);
-			}
-			@Override
-			public void onCancelled(FirebaseError err)
-			{
-				System.err.println("Ruta:getPuntosCount:e:"+err);
-			}
-		});
-		return puntosCount;
-	}
-	public static void getPuntosCount2(String idRuta, ValueEventListener listener)
-	{
-		Firebase ref = newFirebase().child(idRuta).child("puntosCount");
-		ref.addListenerForSingleValueEvent(listener);//ref.addValueEventListener(listener);
-System.err.println("---------Ruta:getPuntosCount:2:"+idRuta);
-	}*/
+	//______________________________________________________________________________________________
 	public void getPuntos(final ValueEventListener listener)
 	{
 System.err.println("---------Ruta:getPuntos:0:"+getId());
@@ -460,9 +438,28 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 
 		//----------------------------------------------------------------------------------------------
 		// FIREBASE
-		public static void eliminar(String idRuta)
+		public static void eliminar(final String idRuta)
 		{
-			delGeo(idRuta);
+			//delGeo(idRuta);
+
+			RutaPunto.getLista(idRuta, new ValueEventListener()
+			{
+				@Override
+				public void onDataChange(DataSnapshot ds)
+				{
+					for(DataSnapshot o : ds.getChildren())
+					{
+						RutaPunto rp = o.getValue(RutaPunto.class);
+						newFirebase().child(rp.getId()).setValue(null, null);
+						delGeo(rp.getId());
+					}
+				}
+				@Override
+				public void onCancelled(DatabaseError err)
+				{
+					System.out.println("RutaPunto:delGeo:e:"+err+" : "+idRuta);
+				}
+			});
 		}
 		public void guardar(DatabaseReference.CompletionListener listener)
 		{
@@ -541,22 +538,6 @@ System.err.println("------RutaPunto:saveGeo:--------SE GUARDA");
 					System.err.println("RutaPunto:saveGeo:onCancelled:e:"+err);
 				}
 			});
-
-			/*final GeoQuery geoQuery = RutaPunto.newGeoFire().queryAtLocation(new GeoLocation(getLatitud(), getLongitud()), DISTANCIA_MIN);//Puntos a menos de x? => no lo incluyo
-			geoQuery.addGeoQueryEventListener(new GeoQueryEventListener()
-			{
-				private int i = 0;
-				@Override public void onKeyEntered(String key, GeoLocation location){i++;}
-				@Override public void onGeoQueryReady()
-				{
-System.err.println("-----------------Ruta:saveGeo:onGeoQueryReady: i="+i+" "+(i>0?" No se guarda ":" Se guarda "));
-					if(i == 0)saveGeo2();
-					geoQuery.removeGeoQueryEventListener(this);
-				}
-				@Override public void onKeyExited(String key){}
-				@Override public void onKeyMoved(String key, GeoLocation location){}
-				@Override public void onGeoQueryError(FirebaseError err){}
-			});*/
 		}
 		private void saveGeo2()
 		{
@@ -572,10 +553,11 @@ System.err.println("-----------------Ruta:saveGeo:onGeoQueryReady: i="+i+" "+(i>
 				}
 			});
 		}
-		private static void delGeo(final String idRuta)
+		private static void delGeo(final String idRutaPunto)//TODO: Aqui estas borrando tambien -> mueve a RutaPunto delete
 		{
 			final GeoFire datGeo = newGeoFire();
-			RutaPunto.getLista(idRuta, new ValueEventListener()
+			datGeo.removeLocation(idRutaPunto);
+			/*RutaPunto.getLista(idRuta, new ValueEventListener()
 			{
 				@Override
 				public void onDataChange(DataSnapshot ds)
@@ -584,15 +566,17 @@ System.err.println("-----------------Ruta:saveGeo:onGeoQueryReady: i="+i+" "+(i>
 					{
 						RutaPunto rp = o.getValue(RutaPunto.class);
 						datGeo.removeLocation(rp.getId());
+						newFirebase().child(rp.getId()).setValue(null, null);
+System.err.println("----------------Ruta:delGeo:deleting:"+rp.getId());
 					}
-					ds.getRef().setValue(null);
+System.err.println("----------------Ruta:delGeo:"+ds.getRef());
 				}
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
 					System.out.println("RutaPunto:delGeo:e:"+err+" : "+idRuta);
 				}
-			});
+			});*/
 		}
 		// GEOFIRE
 		//----------------------------------------------------------------------------------------------

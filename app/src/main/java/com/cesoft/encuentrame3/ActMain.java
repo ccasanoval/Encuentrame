@@ -161,8 +161,10 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		switch(id)
 		{
 		case R.id.action_config:
-				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), Util.CONFIG);
-				return true;
+			try{
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), Util.CONFIG);
+			}catch(Exception e){System.err.println("ActMain: onOptionsItemSelected: action_config: "+e);}
+			return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
 			i.putExtra(Util.TIPO, _viewPager.getCurrentItem());//_sectionNumber
@@ -371,6 +373,8 @@ System.err.println("ActMain:onItemEdit:"+obj);
 			try
 			{
 System.err.println("ActMain:buscar:__________"+_sectionNumber);
+System.err.println("ActMain:buscar:__________"+_apf[_sectionNumber]);
+
 				Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
 System.err.println("ActMain:buscar:__________"+_aFiltro[_sectionNumber]);
 				i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
