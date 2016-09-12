@@ -84,7 +84,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 		super.onCreate();
 		_this = this;
 		//Util.setSvcContext(this);
-		Login.login(null, new Login.AuthListener()
+		Login.login(new Login.AuthListener()
 		{
 			@Override
 			public void onExito(FirebaseUser usr)
@@ -92,9 +92,9 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 				System.err.println("CesService:onCreate:login:exito:-------------------------------------------------- ");
 			}
 			@Override
-			public void onFallo()
+			public void onFallo(Exception e)
 			{
-				System.err.println("CesService:onCreate:login:fallo:-------------------------------------------------- ");
+				System.err.println("CesService:onCreate:login:fallo:-------------------------------------------------- "+e);
 				CesService.this.stopSelf();
 			}
 		});
@@ -117,17 +117,17 @@ System.err.println("CesService:loop---------------------------------------------
 				if( ! Login.isLogged())
 				{
 					System.err.println("CesService:loop---sin usuario");
-					Login.login(null, new Login.AuthListener()
+					Login.login(new Login.AuthListener()
 					{
 						@Override
 						public void onExito(FirebaseUser usr)
 						{
-							System.err.println("CesService:loop---------Login OK");
+							System.err.println("CesService:loop---------Login OK:"+usr);
 						}
 						@Override
-						public void onFallo()
+						public void onFallo(Exception e)
 						{
-							System.err.println("CesService:loop---------Login kk");
+							System.err.println("CesService:loop---------Login kk:"+e);
 						}
 					});
 					Thread.sleep(DELAY_LOAD / 3);

@@ -3,22 +3,17 @@ package com.cesoft.encuentrame3;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.List;
-
 
 //TODO: Autenticar con twitter, google, etc
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,8 +34,6 @@ public class Login
 		private static void setCurrentUserName(String v){_sCurrentUserName=v;}
 		public static String getCurrentUserName(){return _sCurrentUserName;}
 
-	private static Login _this;
-	public Login(){_this=this;}
 
 	static
 	{
@@ -51,7 +44,7 @@ public class Login
 	public interface AuthListener
 	{
 		void onExito(FirebaseUser usr);
-		void onFallo();
+		void onFallo(Exception e);
 	}
 	//-----
 	private static FirebaseAuth _Auth;
@@ -67,15 +60,16 @@ public class Login
 				FirebaseUser user = firebaseAuth.getCurrentUser();
 				if(user != null)
 				{
-					System.err.println("Login: onAuthStateChanged: signed_in: " + user.getDisplayName() + " /"+user.getEmail());
+					System.err.println("Login:init:onAuthStateChanged:0: " + user.getDisplayName() + " /"+user.getEmail());
 					Login.setCurrentUserID(user.getUid());
 					Login.setCurrentUserName(user.getEmail());//user.getDisplayName());
 					listener.onExito(user);
 				}
 				else
 				{
-					System.err.println("onAuthStateChanged: signed_out: "+firebaseAuth);
-					listener.onFallo();//firebaseAuth);
+					System.err.println("Login:init:onAuthStateChanged:1: "+firebaseAuth);
+					System.err.println("Login:init:onAuthStateChanged:1: "+firebaseAuth.getCurrentUser());
+					listener.onFallo(new Exception("onAuthStateChanged:user=null / "+firebaseAuth));
 				}
 			}
 		};
@@ -84,142 +78,69 @@ public class Login
 		//Todo en la espera : showProgressDialog
 	}
 
-	public static void addUser(String email, String password, final Activity win, final AuthListener listener)
+	public static void addUser(String email, String password, final AuthListener listener)
 	{
+		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
+System.err.println("Login: addUser:" + email + "/"+password);
+
 		_Auth.createUserWithEmailAndPassword(email, password)
-				.addOnCompleteListener(win, new OnCompleteListener<AuthResult>()
+			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
+			{
+				@Override
+				public void onSuccess(AuthResult authResult)
 				{
-					@Override
-					public void onComplete(@NonNull Task<AuthResult> task)
-					{
-						System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
-						// If sign in fails, display a message to the user. If sign in succeeds the auth state listener
-						// will be notified and logic to handle the  signed in user can be handled in the listener.
-						if(task.isSuccessful())
-							listener.onExito(null);
-						else
-							listener.onFallo();
-                    }
-                });
+					System.err.println("Login:addUser:success: "+authResult.getUser());
+					listener.onExito(authResult.getUser());
+				}
+			})
+			.addOnFailureListener(new OnFailureListener()
+			{
+				@Override
+				public void onFailure(@NonNull Exception e)
+				{
+					System.err.println("Login:addUser:failure: "+e);
+					listener.onFallo(e);
+				}
+			})
+			.addOnCompleteListener(new OnCompleteListener<AuthResult>()
+			{
+				@Override
+				public void onComplete(@NonNull Task<AuthResult> task)
+				{
+					System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
+                }
+            });
 	}
 
-	private static void login2(String email, String password, final Activity win, final AuthListener listener)
+	private static void login2(String email, String password, final AuthListener listener)
 	{
-		try
-		{
 		_Auth.signInWithEmailAndPassword(email, password)
-				.addOnCompleteListener(win, new OnCompleteListener<AuthResult>()
+			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
+			{
+				@Override
+				public void onSuccess(AuthResult authResult)
 				{
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task)
-                    {
-						System.err.println("Login: signInWithEmail:onComplete:" + task.isSuccessful());
-						// If sign in fails, display a message to the user. If sign in succeeds the auth state listener
-	                    // will be notified and logic to handle the signed in user can be handled in the listener.
-						if(task.isSuccessful())
-						{
-							if(_Auth != null)listener.onExito(_Auth.getCurrentUser());
-							else listener.onExito(
-									new FirebaseUser()
-									{
-										@NonNull
-										@Override
-										public String getUid()
-										{
-											return null;
-										}
-
-										@NonNull
-										@Override
-										public String getProviderId()
-										{
-											return null;
-										}
-
-										@Override
-										public boolean isAnonymous()
-										{
-											return false;
-										}
-
-										@Nullable
-										@Override
-										public List<String> getProviders()
-										{
-											return null;
-										}
-
-										@NonNull
-										@Override
-										public List<? extends UserInfo> getProviderData()
-										{
-											return null;
-										}
-
-										@NonNull
-										@Override
-										public FirebaseUser zzan(@NonNull List<? extends UserInfo> list)
-										{
-											return null;
-										}
-
-										@Override
-										public FirebaseUser zzcn(boolean b)
-										{
-											return null;
-										}
-
-										@NonNull
-										@Override
-										public FirebaseApp zzcks()
-										{
-											return null;
-										}
-
-										@Nullable
-										@Override
-										public String getDisplayName()
-										{
-											return null;
-										}
-
-										@Nullable
-										@Override
-										public Uri getPhotoUrl()
-										{
-											return null;
-										}
-
-										@Nullable
-										@Override
-										public String getEmail()
-										{
-											return null;
-										}
-
-										@NonNull
-										@Override
-										public String zzckt()
-										{
-											return null;
-										}
-
-										@Override
-										public void zzrb(@NonNull String s)
-										{
-
-										}
-									});
-						}
-						else
-							listener.onFallo();
-                    }
-				});
-		}
-		catch(Exception e)
-		{
-			System.err.println("Login:login2:e:"+e);
-		}
+					System.err.println("Login:login2:ok:"+authResult.getUser()+"/"+_Auth.getCurrentUser());
+					listener.onExito(authResult.getUser());
+				}
+			})
+			.addOnFailureListener(new OnFailureListener()
+			{
+				@Override
+				public void onFailure(@NonNull Exception e)
+				{
+					System.err.println("Login:login2:e:"+e);
+					listener.onFallo(e);
+				}
+			})
+			.addOnCompleteListener(new OnCompleteListener<AuthResult>()
+			{
+				@Override
+				public void onComplete(@NonNull Task<AuthResult> task)
+				{
+					System.err.println("Login:login2:task:"+task);
+				}
+			});
 	}
 
 
@@ -262,7 +183,7 @@ public class Login
 	}
 
 	//-------
-	public static boolean login(Activity win, AuthListener listener)
+	public static boolean login(AuthListener listener)
 	{
 		try
 		{
@@ -277,12 +198,12 @@ public class Login
 		String password = getClave();
 System.err.println("Login.login: "+email+":"+password);
 		if(email == null || password == null || email.isEmpty() || password.isEmpty())return false;
-		login2(email, password, win, listener);
+		login2(email, password, listener);
 		return true;
 	}
-	public static void login(String email, String password, final Activity win, final AuthListener listener)
+	public static void login(String email, String password, final AuthListener listener)
 	{
-		login2(email, password, win, listener);
+		login2(email, password, listener);
 		if(_svcContext != null)
 		{
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
@@ -311,11 +232,34 @@ System.err.println("Login.login: "+email+":"+password);
 	}
 
 	//-------
-	public static void restoreUser(String email)//AuthListener listener
+	public static void restoreUser(final String email, final AuthListener listener)//AuthListener listener
 	{
-		//TODO: !!!!!!!!!!!!! Añadir paso dos: espacio para codigo y nueva contraseña...
-		//https://firebase.google.com/docs/reference/node/firebase.auth.Auth#sendPasswordResetEmail
-		_Auth.sendPasswordResetEmail(email);
-		//confirmPasswordReset(code, newPassword)
+		_Auth.sendPasswordResetEmail(email)
+			.addOnCompleteListener(new OnCompleteListener<Void>()
+			{
+				@Override
+				public void onComplete(@NonNull Task<Void> task)
+				{
+					System.err.println("Login:restoreUser:complete: "+task);
+				}
+			})
+			.addOnSuccessListener(new OnSuccessListener<Void>()
+			{
+				@Override
+				public void onSuccess(Void aVoid)
+				{
+					System.err.println("Login:restoreUser:success: ");
+					listener.onExito(_Auth.getCurrentUser());
+				}
+			})
+			.addOnFailureListener(new OnFailureListener()
+			{
+				@Override
+				public void onFailure(@NonNull Exception e)
+				{
+					System.err.println("Login:restoreUser:failure: "+e);
+					listener.onFallo(e);
+				}
+			});
 	}
 }
