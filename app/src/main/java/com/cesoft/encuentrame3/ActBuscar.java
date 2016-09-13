@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
@@ -131,7 +133,12 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		//------------------------------------------------------------------------------------------
 		/// FECHAS
 		Calendar newCalendar = Calendar.getInstance();
-		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", getResources().getConfiguration().locale);
+		Locale locale;
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+			locale = getResources().getConfiguration().getLocales().get(0);
+		else
+			locale = getResources().getConfiguration().locale;
+		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", locale);
 		_datePickerDialogIni = new DatePickerDialog(this,
 			new DatePickerDialog.OnDateSetListener()
 			{
@@ -295,7 +302,6 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		{
 			if(_marker != null)_marker.remove();
 			if(_filtro.getPunto() == null || (_filtro.getPunto().latitude == 0 && _filtro.getPunto().longitude == 0))return;
-			//LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
 			MarkerOptions mo = new MarkerOptions()
 					.position(_filtro.getPunto())
 					.title(getString(R.string.buscar));
@@ -345,7 +351,6 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		_filtro.turnOff();
 		Util.return2Main(this, _filtro);
-		//Util.return2Main(this, true, getString(R.string.sin_filtro));
 	}
 	private void buscar()
 	{
@@ -353,7 +358,6 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		if(_filtro.isValid())
 		{
 			_filtro.turnOn();
-System.err.println("ActBuscar:buscar:filtro:---------------------------------------------- " + _filtro);
 			Util.return2Main(this, _filtro);
 		}
 		else

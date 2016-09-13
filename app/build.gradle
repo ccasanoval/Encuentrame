@@ -19,7 +19,7 @@ android {
         }
     }
 
-    //---------------------------------------------------------
+    /*//---------------------------------------------------------
     if (project.hasProperty('keyAlias')) {
         signingConfigs.release.keyAlias = keyAlias
     }
@@ -44,7 +44,7 @@ android {
     }
     if (project.hasProperty('storeFile')) {
         signingConfigs.debug.storeFile = storeFile
-    }
+    }*/
 
     return true
 }

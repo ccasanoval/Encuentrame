@@ -23,9 +23,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.backendless.BackendlessCollection;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Lugar;
@@ -33,7 +30,6 @@ import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
 
 import java.util.Date;
-import java.util.Iterator;
 
 // PLAY STORE DEVELOPER CONSOLE : https://play.google.com/apps/publish/?hl=es&dev_acc=11164117065791896000
 // MAP API CREDENTIAL: https://console.developers.google.com/apis/credentials?project=shining-medium-121911
@@ -56,9 +52,6 @@ Registered SHA-1s:
 // ActLugar:guardar:handleFault:f:BackendlessFault{         code: 'Server.Processing', message: 'java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect string value: '\xAC\xED\x00\x05sr...' for column 'DATE_FORMAT.54687BF6-31C9-02E5-FF07-0908E50A4600' at row 1' }
 
 //CesService:saveGeoTracking:findById:f:----------------------:BackendlessFault{ code: '1023', message: 'Unable to retrieve data. Query contains invalid object related properties.' }
-
-//TODO:Arreglar RUTAS:GET:ERROR:BackendlessFault{ code: 'IllegalArgumentException', message: 'Attempt to invoke interface method 'java.lang.String android.content.SharedPreferences.getString(java.lang.String, java.lang.String)' on a null object reference' }
-// al arrancar desde widget.. cuestion de context?ç
 
 //https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
 //TODO: Cambiar ListView por recyclerview
@@ -234,6 +227,7 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
+			fragment.setRetainInstance(true);
 			_apf[sectionNumber] = fragment;
 			fragment._sectionNumber = sectionNumber;
 			return fragment;
@@ -373,10 +367,10 @@ System.err.println("ActMain:onItemEdit:"+obj);
 			try
 			{
 System.err.println("ActMain:buscar:__________"+_sectionNumber);
-System.err.println("ActMain:buscar:__________"+_apf[_sectionNumber]);
-
-				Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
-System.err.println("ActMain:buscar:__________"+_aFiltro[_sectionNumber]);
+System.err.println("ActMain:buscar:__________"+_apf[_sectionNumber].isAdded());
+				//_apf[_sectionNumber].setTargetFragment(
+				//Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
+				Intent i = new Intent(_this.getApplicationContext(), ActBuscar.class);
 				i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
 				startActivityForResult(i, Util.BUSCAR);//Fragment PlaceholderFragment{41a89958} not attached to Activity
 			}catch(Exception e){System.err.println("ActMain:buscar:e:"+e);}

@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -27,13 +26,20 @@ public class Login
 	private static Context _svcContext;
 		public static void setSvcContext(Context c){_svcContext = c;}
 
-	private static String _sCurrentUserID="";
-		private static void setCurrentUserID(String v){_sCurrentUserID=v;}
-		public static String getCurrentUserID(){return _sCurrentUserID;}
-	private static String _sCurrentUserName="";
-		private static void setCurrentUserName(String v){_sCurrentUserName=v;}
-		public static String getCurrentUserName(){return _sCurrentUserName;}
-
+	private static FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
+	public static String getCurrentUserID()
+	{
+		FirebaseAuth a = FirebaseAuth.getInstance();
+		if(a == null || a.getCurrentUser() == null)return "";
+		return a.getCurrentUser().getUid();
+	}
+	public static String getCurrentUserName()//TODO: throw exception instead of return "" ?
+	{
+		FirebaseAuth a = FirebaseAuth.getInstance();
+		if(a == null || a.getCurrentUser() == null)return "";
+		return a.getCurrentUser().getEmail();
+		//return a.getCurrentUser().getDisplayName();
+	}
 
 	static
 	{
@@ -47,43 +53,37 @@ public class Login
 		void onFallo(Exception e);
 	}
 	//-----
-	private static FirebaseAuth _Auth;
-	private static FirebaseAuth.AuthStateListener _AuthListener;
-	public static void init(final AuthListener listener)
+	/*public static void init()
 	{
 		_Auth = FirebaseAuth.getInstance();
-		_AuthListener = new FirebaseAuth.AuthStateListener()
+		/*FirebaseAuth.AuthStateListener AuthListener = new FirebaseAuth.AuthStateListener()
 		{
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
-            {
+			@Override
+			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+			{
 				FirebaseUser user = firebaseAuth.getCurrentUser();
 				if(user != null)
 				{
-					System.err.println("Login:init:onAuthStateChanged:0: " + user.getDisplayName() + " /"+user.getEmail());
+					System.err.println("Login:init:onAuthStateChanged:0: " + user.getDisplayName() + " /" + user.getEmail());
 					Login.setCurrentUserID(user.getUid());
 					Login.setCurrentUserName(user.getEmail());//user.getDisplayName());
-					listener.onExito(user);
 				}
 				else
 				{
-					System.err.println("Login:init:onAuthStateChanged:1: "+firebaseAuth);
-					System.err.println("Login:init:onAuthStateChanged:1: "+firebaseAuth.getCurrentUser());
-					listener.onFallo(new Exception("onAuthStateChanged:user=null / "+firebaseAuth));
+					System.err.println("Login:init:onAuthStateChanged:1: " + firebaseAuth);
+					System.err.println("Login:init:onAuthStateChanged:1: " + firebaseAuth.getCurrentUser());
 				}
 			}
 		};
-		_Auth.addAuthStateListener(_AuthListener);
+		_Auth.addAuthStateListener(AuthListener);////
 		//OnStop: if(mAuthListener != null)mAuth.removeAuthStateListener(mAuthListener);
-		//Todo en la espera : showProgressDialog
-	}
+	}*/
 
 	public static void addUser(String email, String password, final AuthListener listener)
 	{
 		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
-System.err.println("Login: addUser:" + email + "/"+password);
-
-		_Auth.createUserWithEmailAndPassword(email, password)
+//System.err.println("Login: addUser:" + email + "/"+password);
+		getAuth().createUserWithEmailAndPassword(email, password)
 			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
 			{
 				@Override
@@ -114,13 +114,13 @@ System.err.println("Login: addUser:" + email + "/"+password);
 
 	private static void login2(String email, String password, final AuthListener listener)
 	{
-		_Auth.signInWithEmailAndPassword(email, password)
+		getAuth().signInWithEmailAndPassword(email, password)
 			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
 			{
 				@Override
 				public void onSuccess(AuthResult authResult)
 				{
-					System.err.println("Login:login2:ok:"+authResult.getUser()+"/"+_Auth.getCurrentUser());
+					System.err.println("Login:login2:ok:"+authResult.getUser());
 					listener.onExito(authResult.getUser());
 				}
 			})
@@ -220,21 +220,20 @@ System.err.println("Login.login: "+email+":"+password);
 	//-------
 	public static boolean isLogged()
 	{
-		if(_Auth == null)return false;//TODO:
-		return _Auth.getCurrentUser() != null;
+		return getAuth().getCurrentUser() != null;
 	}
 
 	//-------
 	public static void logout()
 	{
-		_Auth.signOut();
+		getAuth().signOut();
 		delPasswordOnly();//delLogin();
 	}
 
 	//-------
 	public static void restoreUser(final String email, final AuthListener listener)//AuthListener listener
 	{
-		_Auth.sendPasswordResetEmail(email)
+		getAuth().sendPasswordResetEmail(email)
 			.addOnCompleteListener(new OnCompleteListener<Void>()
 			{
 				@Override
@@ -248,8 +247,8 @@ System.err.println("Login.login: "+email+":"+password);
 				@Override
 				public void onSuccess(Void aVoid)
 				{
-					System.err.println("Login:restoreUser:success: ");
-					listener.onExito(_Auth.getCurrentUser());
+					System.err.println("Login:restoreUser:success: "+getAuth().getCurrentUser());
+					listener.onExito(getAuth().getCurrentUser());
 				}
 			})
 			.addOnFailureListener(new OnFailureListener()

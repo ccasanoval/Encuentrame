@@ -4,37 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.Date;
 
-/* FIREBASE Security & Rules
-https://www.firebase.com/docs/security/guide/user-security.html
-{
-    "rules": {
-        ".read": true,
-        ".write": true,
-        "aviso": {
-          ".indexOn": ["activo", "nombre"]
-        },
-        "lugar": {
-          //".read": "auth != null && data.child('uid').val() === auth.uid"
-          //".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid) && newData.hasChild('uid')",
-          ".indexOn": ["nombre"]
-        },
-        "ruta_punto": {
-          ".indexOn": ["idRuta"]
-        },
-
-        "GEO": {
-          "lugar": {
-              ".indexOn": ["g"]
-            }
-        }
-    }
-}*/
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //https://github.com/firebase/geofire-java
-//https://console.firebase.google.com/project/encuentrame-671b9/database/data
 public class Objeto implements Parcelable
 {
 	public static final String GEO = "GEO";
@@ -89,9 +62,6 @@ System.err.println("pasaFiltro----------OK");
 
 	// FIREBASE
 	//______________________________________________________________________________________________
-	//TODO
-	//protected static Firebase newFirebase(){return new Firebase(FIREBASE).child(NOMBRE);}
-	//protected static GeoFire newGeoFire(){return new GeoFire(new Firebase(GEOFIRE).child(NOMBRE));}
 	public interface ObjetoListener<T>
 	{
 		void onData(T[] aData);

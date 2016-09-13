@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name">Encuentrame!</string>
+	<string name="app_name">Encuentrame! Fire</string>
 	<string name="title_activity_act_main">Encuentrame!</string>
 	<string name="title_activity_act_maps">Mapa</string>
 	<string name="title_activity_act_config">Configuración</string>
@@ -8,7 +8,7 @@
 	<string name="title_activity_act_lugar">Lugar</string>
 	<string name="title_activity_act_buscar">Buscar</string>
 
-	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas. Podrás compartir tus geo-datos fácilmente, pues serán almacenados en la nube.\n\n</string>
+	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas. Podrás administrar  tus geo-datos fácilmente, pues serán almacenados en la nube.\n\n</string>
 	<string name="app_lice_tit">Licencia:</string>
 	<string name="app_vers_tit">Versión:</string>
 
@@ -111,4 +111,5 @@
 
 	<string name="widget_lugar">Lugares</string>
 	<string name="widget_ruta">Rutas</string>
+	<string name="login_ok">Bienvenido %s</string>
 </resources>

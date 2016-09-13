@@ -28,7 +28,7 @@ import java.util.Date;
 @IgnoreExtraProperties
 public class Lugar extends Objeto
 {
-	public static final String NOMBRE = "lugar";
+	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
 	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 	protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
@@ -66,13 +66,6 @@ public class Lugar extends Objeto
 	public Lugar()
 	{
 		this.fecha = new Date();
-	}
-	public Lugar(String id, String nombre, String descripcion, Date fecha)
-	{
-		this.id = id;
-		this.nombre = nombre;
-		this.descripcion = descripcion;
-		this.fecha = fecha;
 	}
 	@Override
 	public String toString()
@@ -115,7 +108,7 @@ public class Lugar extends Objeto
 			}
 			_datos.setValue(this, listener);
 		}
-		saveGeo();
+		saveGeo();//TODO: transaccion fire->geo mediante listener... o _datos.runTransaction???
 	}
 
 	//______________________________________________________________________________________________
@@ -178,8 +171,6 @@ System.err.println("--------------------Lugar:"+l);
 			}
 		});
 	}
-	//TODO: BUSQUEDA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//https://github.com/firebase/geofire-java
 	public static void buscarPorGeoFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)
 	{
 		if(filtro.getRadio() < 1)filtro.setRadio(100);

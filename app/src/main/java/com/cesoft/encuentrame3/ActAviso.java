@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -39,7 +38,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -53,7 +51,7 @@ import com.google.firebase.database.DatabaseReference;
 import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraChangeListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
+public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -346,7 +344,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 					System.err.println("ActAviso:guardar:handleFault:f:" + err);
 
 					//*****************************************************************************
-					try{Thread.sleep(500);}catch(InterruptedException e){}
+					try{Thread.sleep(500);}catch(InterruptedException ignored){}
 					_a.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
@@ -424,7 +422,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 
 	//______________________________________________________________________________________________
 	// 4 GoogleMap.OnCameraChangeListener
-	@Override
+	/*@Override
 	public void onCameraChange(CameraPosition cameraPosition)
 	{
 		if(_a.getLatitud() != 0 || _a.getLongitud() != 0)
@@ -434,7 +432,7 @@ public class ActAviso extends AppCompatActivity implements GoogleMap.OnCameraCha
 					.fillColor(0x40ff0000)
 					.strokeColor(Color.TRANSPARENT)
 					.strokeWidth(2));
-	}
+	}*/
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override

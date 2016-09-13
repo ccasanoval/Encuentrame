@@ -26,6 +26,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);
+		_txtNombre.setHint(R.string.nueva_ruta);
 System.err.println("----------------------_txtNombre="+_txtNombre);
 	}
 	@Override

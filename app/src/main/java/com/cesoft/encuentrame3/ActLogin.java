@@ -53,11 +53,6 @@ public class ActLogin extends AppCompatActivity
 		//--- INICIAR
 		_this = this;
 		Login.setSvcContext(this);
-		Login.init(new Login.AuthListener()//TODO:?
-		{
-			@Override	public void onExito(FirebaseUser usr){}
-			@Override	public void onFallo(Exception e){}
-		});
 
 		//Crea servicio si no está ya creado, dentro del servicio se llama a login
 		startService(new Intent(this, CesService.class));

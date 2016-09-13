@@ -3,13 +3,13 @@
 	<string name="email" translatable="false">eMail</string>
 	<string name="lat_lon" translatable="false">Lat/Lon</string>
 
-	<string name="app_name">Find me!</string>
+	<string name="app_name">Find me! Fire</string>
 
 	<string name="app_lice" translatable="false">2016 Cesar Casanova \n(Creative Commons NC-SA)</string>
 	<string name="app_vers" translatable="false">2016 - Ver. %s</string>
 	<string name="app_lice_tit">Licence</string>
 	<string name="app_vers_tit">Version:</string>
-	<string name="app_desc">\nApp for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can share your geo-data easily.\n\n</string>
+	<string name="app_desc">\nApp for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can manage your geo-data easily.\n\n</string>
 
 	<string name="activo">Active</string>
 	<string name="actualizar_posicion">Refresh location</string>
