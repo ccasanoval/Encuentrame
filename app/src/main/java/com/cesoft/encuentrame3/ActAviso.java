@@ -140,7 +140,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		try
 		{
 			_a = getIntent().getParcelableExtra(Aviso.NOMBRE);
-//System.err.println("ActAviso:onCreate:++++++++++++++++"+_a);
 			_bDesdeNotificacion = getIntent().getBooleanExtra("notificacion", false);
 			setValores();
 		}
@@ -167,21 +166,28 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		pideGPS();
 	}
 
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		_GoogleApiClient.unregisterConnectionCallbacks(this);
+		_GoogleApiClient.unregisterConnectionFailedListener(this);
+		_GoogleApiClient.disconnect();
+		_GoogleApiClient = null;
+		_LocationRequest = null;
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
+	}
+
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
 	public void openMain(boolean bDirty, String sMensaje)
 	{
 		if(_bDesdeNotificacion)
-		{
-			/*Intent intent = new Intent(this, ActMain.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(ActMain.PAGINA, ActMain.AVISOS);//pagina);//Go to specific section (ActMain.AVISOS...)
-			intent.putExtra(ActMain.DIRTY, bDirty);
-			intent.putExtra(ActMain.MENSAJE, sMensaje);
-			startActivity(intent);
-			finish();*/
 			Util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
-		}
 		else
 			Util.return2Main(ActAviso.this, bDirty, sMensaje);
 	}
@@ -203,12 +209,11 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 		{
-			//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 			try
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
-			}catch(SecurityException se){System.err.println("ActAviso:startTracking:e:"+se);}
-
+			}
+			catch(SecurityException se){System.err.println("ActAviso:startTracking:e:"+se);}
 		}
 	}
 	private void stopTracking()
@@ -267,9 +272,13 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
-	protected synchronized void buildGoogleApiClient()
+	protected void buildGoogleApiClient()
 	{
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
+		_GoogleApiClient = new GoogleApiClient.Builder(this.getApplicationContext())
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.addApi(LocationServices.API)
+				.build();
 	}
 	private boolean checkPlayServices()
 	{
@@ -352,8 +361,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 						{
 							if(err == null)
 							{
-								CesService.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
-								openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
+								CesService.cargarListaGeoAvisos();
+								openMain(true, getString(R.string.ok_guardar_aviso));
 								_bGuardar = true;
 							}
 							else
@@ -392,7 +401,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 						if(err == null)
 						{
 							System.err.println("ActAviso:eliminar:handleResponse:" + data);
-							//return2Main(true, getString(R.string.ok_eliminar));
 							openMain(true, getString(R.string.ok_eliminar_aviso));
 							_bEliminar=true;
 						}
@@ -421,25 +429,11 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
-	// 4 GoogleMap.OnCameraChangeListener
-	/*@Override
-	public void onCameraChange(CameraPosition cameraPosition)
-	{
-		if(_a.getLatitud() != 0 || _a.getLongitud() != 0)
-			_Map.addCircle(new CircleOptions()
-					.center(new LatLng(_a.getLatitud(), _a.getLongitud()))
-					.radius(_a.getRadio())
-					.fillColor(0x40ff0000)
-					.strokeColor(Color.TRANSPARENT)
-					.strokeWidth(2));
-	}*/
-	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActAviso:onMapReady:e:"+se);}
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
@@ -478,8 +472,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					.position(pos)
 					.title(_a.getNombre()).snippet(_a.getDescripcion());
 			_marker = _Map.addMarker(mo);
-			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
-			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
 
 			if(_circle != null)_circle.remove();
