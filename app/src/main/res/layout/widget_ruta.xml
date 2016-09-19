@@ -44,7 +44,7 @@
 			android:layout_weight="1"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			style="@android:style/TextAppearance.Small"
+			style="@android:style/TextAppearance.Medium"
 			android:gravity="center_horizontal|center_vertical"
 			android:layout_gravity="center_horizontal|center_vertical"
 			android:layout_margin="2dip" />

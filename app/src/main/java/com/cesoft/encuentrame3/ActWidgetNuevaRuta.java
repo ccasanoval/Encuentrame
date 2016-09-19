@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Ruta;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
@@ -27,7 +28,6 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);
 		_txtNombre.setHint(R.string.nueva_ruta);
-System.err.println("----------------------_txtNombre="+_txtNombre);
 	}
 	@Override
 	public void onPause()
@@ -39,7 +39,6 @@ System.err.println("----------------------_txtNombre="+_txtNombre);
 	public void onResume()
 	{
 		super.onResume();
-System.err.println("----------------------5");
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
 		_progressDialog.hide();
 System.err.println("----------------------6");
@@ -47,14 +46,26 @@ System.err.println("----------------------6");
 		//Util.setSvcContext(this);
 		if( ! Login.isLogged())
 		{
-			Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
-			finish();
+			Login.login(new Login.AuthListener()
+			{
+				@Override
+				public void onExito(FirebaseUser usr)
+				{
+					System.err.println("ActWidgetNuevRuta:Login:OK:usr="+usr.getEmail());
+				}
+				@Override
+				public void onFallo(Exception e)
+				{
+					Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+					finish();
+				}
+			});
 		}
 		//
-				//Util.setTrackingRoute("");
-				//_txtNombre.setText("");
-				//TODO: ruta_activa = false
-				//TODO: desactiva boton stop
+		//Util.setTrackingRoute("");
+		//_txtNombre.setText("");
+		//TODO: ruta_activa = false
+		//TODO: desactiva boton stop
 		//
 		ImageButton btnSave = (ImageButton)findViewById(R.id.btnSave);
 		btnSave.setOnClickListener(new View.OnClickListener()
@@ -108,8 +119,7 @@ System.err.println("----------------------6");
 						}
 					}
 				});
-
-    		}
+		  	}
 		});
 	}
 }

@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.cesoft.encuentrame3.Login;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.IgnoreExtraProperties;
@@ -29,8 +28,8 @@ import java.util.Date;
 public class Lugar extends Objeto
 {
 	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
-	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-	protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+	protected static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	protected static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	protected DatabaseReference _datos;
 

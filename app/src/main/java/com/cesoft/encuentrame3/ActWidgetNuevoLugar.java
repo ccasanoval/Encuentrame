@@ -10,9 +10,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -64,6 +61,12 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 				_progressDialog.show();//runOnUiThread(new Runnable()
 
 				Location pos = Util.getLocation(ActWidgetNuevoLugar.this);
+				if(pos == null)
+				{
+					Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.sin_posicion), Toast.LENGTH_SHORT).show();
+					System.err.println("ActWidgetNuevoLugar:onResume:btnSave:onClick: pos == null");
+					return;
+				}
 				final int[] flag = new int[]{0};
 				final Lugar l = new Lugar();
 				l.setLatitud(pos.getLatitude());l.setLongitud(pos.getLongitude());

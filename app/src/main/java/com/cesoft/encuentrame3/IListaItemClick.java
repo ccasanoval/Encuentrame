@@ -8,7 +8,7 @@ import com.cesoft.encuentrame3.models.Objeto;
 public interface IListaItemClick
 {
 	//public static enum tipoLista {LUGAR, RUTA, AVISO};
-	public void onItemEdit(int tipo, Objeto obj);
-	public void onItemMap(int tipo, Objeto obj);
-	public void onRefreshListaRutas();
+	void onItemEdit(int tipo, Objeto obj);
+	void onItemMap(int tipo, Objeto obj);
+	void onRefreshListaRutas();
 }

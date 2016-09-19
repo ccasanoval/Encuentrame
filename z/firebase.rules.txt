@@ -1,0 +1,99 @@
+
+FIREBASE Security & Rules
+https://www.firebase.com/docs/security/guide/user-security.html
+
+
+----------------------------------------------------------------------------------
+{
+    "rules":
+    {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$usuario":
+        {
+            ".read": "$usuario === auth.uid",
+            ".write": "$usuario === auth.uid",
+            "lugar":
+            {
+                ".indexOn": ["nombre"]
+            },
+            "aviso": {
+                ".indexOn": ["activo", "nombre"],
+            },
+            "GEO": {
+                "lugar": {
+                    ".indexOn": ["g"]
+                },
+                "aviso": {
+                    ".indexOn": ["g"]
+                },
+                "ruta_punto": {
+                    ".indexOn": ["g"]
+                }
+            }
+        }
+    }
+}
+
+--------------------------------------------------------------------------
+
+
+
+{
+    "rules":
+    {
+        "$user_id":
+        {
+            ".write": "$user_id === auth.uid",
+            ".read": "$user_id === auth.uid",
+            "aviso": {
+                ".indexOn": ["activo", "nombre"],
+            },
+            "lugar": {
+                ".indexOn": ["nombre"]
+            },
+            "ruta_punto": {
+                ".indexOn": ["idRuta"]
+            },
+            "ruta": {
+               ".indexOn": ["idRuta"]
+            },
+
+            "GEO": {
+                "lugar": {
+                    ".indexOn": ["g"]
+                },
+                "ruta_punto": {
+                    ".indexOn": "idRuta"
+                }
+            }
+        }
+    }
+}
+
+---------------------------------------------------------------------------------------------
+
+
+{
+    "rules": {
+        ".read": "true",
+        ".write": "true",
+        "aviso": {
+          ".indexOn": ["activo", "nombre"]
+        },
+        "lugar": {
+          //".read": "auth != null && data.child('uid').val() === auth.uid"
+          //".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid) && newData.hasChild('uid')",
+          ".indexOn": ["nombre"]
+        },
+        "ruta_punto": {
+          ".indexOn": ["idRuta"]
+        },
+
+        "GEO": {
+          "lugar": {
+              ".indexOn": ["g"]
+            }
+        }
+    }
+}

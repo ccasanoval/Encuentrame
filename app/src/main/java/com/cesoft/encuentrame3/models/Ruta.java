@@ -12,7 +12,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
@@ -36,7 +35,7 @@ public class Ruta extends Objeto implements Parcelable
 {
 	public static final String NOMBRE = "ruta";
 	public static final String IDRUTA = "idRuta";
-	protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	protected static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	protected DatabaseReference _datos;
@@ -325,9 +324,11 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		});
 	}
 	//______________________________________________________________________________________________
-	public static void addPunto(final String idRuta, double lat, double lon, final Transaction.Handler listener)
+	public static void addPunto(final String idRuta, double lat, double lon,
+	                            float precision, double altura, float velocidad, float direccion,
+	                            final Transaction.Handler listener)
 	{
-		RutaPunto pto = new RutaPunto(idRuta, lat, lon);
+		RutaPunto pto = new RutaPunto(idRuta, lat, lon, precision, altura, velocidad, direccion);
 		pto.guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
@@ -368,8 +369,8 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 	public static class RutaPunto implements Parcelable
 	{
 		public static final String NOMBRE = "ruta_punto";//TODO:? or parent?
-		protected static DatabaseReference newFirebase(){return FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-		protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+		protected static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+		protected static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 		@Exclude
 		private DatabaseReference _datos;
 
@@ -391,6 +392,19 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 			public Date getFecha(){return fecha;}
 			public void setFecha(Date v){fecha=v;}
 
+		private float precision;
+			public float getPrecision(){return precision;}
+			//public void setPrecision(float v){precision = v;}
+		private double altura;
+			public double getAltura(){return altura;}
+			//public void setAltura(double v){altura = v;}
+		private float velocidad;
+			public float getVelocidad(){return velocidad;}
+			//public void setVelocidad(float v){velocidad = v;}
+		private float direccion;
+			public float getDireccion(){return direccion;}
+			//public void setDireccion(float v){direccion = v;}
+
 		//__________________________________________________________________________________________
 		@Override
 		public String toString()
@@ -400,12 +414,16 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		}
 		//__________________________________________________________________________________________
 		public RutaPunto(){}//Required for Firebase
-		public RutaPunto(String idRuta, double lat, double lon)
+		public RutaPunto(String idRuta, double lat, double lon, float precision, double altura, float velocidad, float direccion)
 		{
 			this.idRuta = idRuta;
 			this.latitud = lat;
 			this.longitud = lon;
 			this.fecha = new Date();
+			this.precision = precision;
+			this.altura = altura;
+			this.velocidad = velocidad;
+			this.direccion = direccion;
 		}
 
 		//// PARCEL

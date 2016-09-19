@@ -11,8 +11,6 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.backendless.BackendlessCollection;
-import com.cesoft.encuentrame3.models.Objeto;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,12 +27,11 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.text.DateFormat;
 import java.util.Date;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
+import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Ruta;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -87,21 +84,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 				}
 			});
 		if(_iTipo != Util.NADA || _r != null)fab.setVisibility(View.GONE);
-		/*if(_iTipo != Util.NADA || _r != null)
-		{
-			fab.setImageResource(getResources().getIdentifier("@android:drawable/ic_menu_revert", null, null));
-			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-				fab.setForegroundGravity(android.view.Gravity.RIGHT + android.view.Gravity.BOTTOM);
-			fab.setOnClickListener(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View view)
-				{
-					Util.return2Main(ActMaps.this, false, "");
-				}
-			});
-		}
-		else*/
+
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -114,7 +97,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void onComplete(DatabaseError err, DatabaseReference databaseReference)
 						{
-							if(err != null)
+							if(err == null)
 							{
 								Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_LONG).show();
 								Intent data = new Intent();
@@ -137,7 +120,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 						@Override
 						public void onComplete(DatabaseError err, DatabaseReference databaseReference)
 						{
-							if(err != null)
+							if(err == null)
 							{
 								Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_aviso), Toast.LENGTH_LONG).show();
 								Intent data = new Intent();

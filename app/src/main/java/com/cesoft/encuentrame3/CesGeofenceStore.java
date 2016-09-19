@@ -80,7 +80,7 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 			{	// Submitting the request to monitor geofences.
 				PendingResult<Status> pendingResult = LocationServices.GeofencingApi.addGeofences(_GoogleApiClient, GeofencingRequest, _PendingIntent);
 				pendingResult.setResultCallback(this);// Set the result callbacks listener to this class.
-			}catch(SecurityException se){}
+			}catch(SecurityException ignored){}
 		}
 	}
 	@Override

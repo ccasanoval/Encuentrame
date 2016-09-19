@@ -41,9 +41,16 @@ public class Login
 		//return a.getCurrentUser().getDisplayName();
 	}
 
-	static
+	// TODO: Sync data: https://firebase.google.com/docs/database/android/offline-capabilities?hl=es
+	private static FirebaseDatabase _fbdb=null;
+	public static FirebaseDatabase getDBInstance()
 	{
-		FirebaseDatabase.getInstance().setPersistenceEnabled(true);/// Iniciar firebase disk persistence
+		if(_fbdb == null)
+		{
+			_fbdb = FirebaseDatabase.getInstance();
+			_fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
+		}
+		return _fbdb;
 	}
 
 	//-----
@@ -53,31 +60,6 @@ public class Login
 		void onFallo(Exception e);
 	}
 	//-----
-	/*public static void init()
-	{
-		_Auth = FirebaseAuth.getInstance();
-		/*FirebaseAuth.AuthStateListener AuthListener = new FirebaseAuth.AuthStateListener()
-		{
-			@Override
-			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
-			{
-				FirebaseUser user = firebaseAuth.getCurrentUser();
-				if(user != null)
-				{
-					System.err.println("Login:init:onAuthStateChanged:0: " + user.getDisplayName() + " /" + user.getEmail());
-					Login.setCurrentUserID(user.getUid());
-					Login.setCurrentUserName(user.getEmail());//user.getDisplayName());
-				}
-				else
-				{
-					System.err.println("Login:init:onAuthStateChanged:1: " + firebaseAuth);
-					System.err.println("Login:init:onAuthStateChanged:1: " + firebaseAuth.getCurrentUser());
-				}
-			}
-		};
-		_Auth.addAuthStateListener(AuthListener);////
-		//OnStop: if(mAuthListener != null)mAuth.removeAuthStateListener(mAuthListener);
-	}*/
 
 	public static void addUser(String email, String password, final AuthListener listener)
 	{
@@ -159,6 +141,7 @@ public class Login
 	public static void saveLogin(String usr, String pwd)
 	{
 		if(usr == null || usr.isEmpty())return;
+		if(_svcContext == null)return;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		if(!prefs.getBoolean(PREF_SAVE_LOGIN, true))return;
 		SharedPreferences.Editor e = prefs.edit();
@@ -168,6 +151,7 @@ public class Login
 	}
 	public static void delLogin()
 	{
+		if(_svcContext == null)return;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, "");
@@ -176,6 +160,7 @@ public class Login
 	}
 	public static void delPasswordOnly()
 	{
+		if(_svcContext == null)return;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_PWD, "");
@@ -185,6 +170,7 @@ public class Login
 	//-------
 	public static boolean login(AuthListener listener)
 	{
+		if(_svcContext == null)return false;
 		try
 		{
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
@@ -196,7 +182,6 @@ public class Login
 		}catch(Exception e){System.err.println("Login.login2:e:"+e);}
 		String email = getUsuario();
 		String password = getClave();
-System.err.println("Login.login: "+email+":"+password);
 		if(email == null || password == null || email.isEmpty() || password.isEmpty())return false;
 		login2(email, password, listener);
 		return true;

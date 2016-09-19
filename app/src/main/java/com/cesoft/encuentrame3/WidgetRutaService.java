@@ -9,8 +9,6 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -50,12 +48,12 @@ System.err.println("-----WidgetRutaService--onStartCommand---");
 				@Override
 				public void run()
 				{
-					payLoad(intent);
+					payLoad();
 				}
 			};
 			_h.postDelayed(_r, _DELAY_SHORT);
 		}
-		payLoad(intent);
+		payLoad();
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -63,13 +61,13 @@ System.err.println("-----WidgetRutaService--onStartCommand---");
 	@Override public IBinder onBind(Intent intent){return null;}
 
 	//______________________________________________________________________________________________
-	private void payLoad(Intent intent)
+	private void payLoad()
 	{
 		String idRuta = Util.getTrackingRoute(WidgetRutaService.this);
-		System.err.println("-----WidgetRutaService-----"+idRuta+";");
+		System.err.println("-----WidgetRutaService-----idRuta="+idRuta+";");
 		if( ! idRuta.isEmpty())
 		{
-			setRuta(intent);
+			setRuta();
 			_h.postDelayed(_r, _DELAY_SHORT);
 System.err.println("-----WidgetRutaService--SHORT---");
 		}
@@ -88,7 +86,7 @@ System.err.println("-----WidgetRutaService--SHORT---");
 		AppWidgetManager.getInstance(this).updateAppWidget(componentName, remoteViews);
 	}
 	//______________________________________________________________________________________________
-	private void setRuta(final Intent intent)
+	private void setRuta()
 	{
 System.err.println("---------WidgetRutaService:cambiarTextoWidget");
 		try//TODO: activar desactivar botones de widget

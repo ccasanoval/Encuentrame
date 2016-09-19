@@ -7,13 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.backendless.BackendlessCollection;
-import com.backendless.BackendlessUser;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
-import com.cesoft.encuentrame3.models.Aviso;
-import com.cesoft.encuentrame3.models.Ruta;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,6 +19,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,7 +29,8 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import com.cesoft.encuentrame3.models.Aviso;
+import com.cesoft.encuentrame3.models.Ruta;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,12 +40,9 @@ import java.util.Iterator;
 
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
 //TODO: Si el primer punto de ruta es erroneo y esta lejos, los demas no se grabaran por filtro velocidad!!!
-//Backendless GEOFencing service:
-//https://backendless.com/backend-as-a-service/quick-start-guide-for-backendless-geofencing/
-
 public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
-	private static final int GEOFEN_DWELL_TIME = 1*60*1000;//TODO:customize in settings...
+	private static final int GEOFEN_DWELL_TIME = 60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
@@ -58,20 +50,6 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	private static CesService _this;
 	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
-	AsyncCallback<BackendlessUser> resLogin = new AsyncCallback<BackendlessUser>()
-	{
-		@Override
-		public void handleResponse(BackendlessUser backendlessUser)
-		{
-			System.err.println("ENTER-----------(desde CesService)-----------" + backendlessUser);
-			//TODO: hacer OBSERVER para avisar a todos que ya tenemos usuario... (a login para que pase a main...)
-		}
-		@Override
-		public void handleFault(BackendlessFault fault)
-		{
-			System.err.println("CesService:Login:f: -------------------------------------------------- " + fault.getMessage());
-		}
-	};
 
 	//______________________________________________________________________________________________
 	public CesService()
@@ -83,7 +61,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	{
 		super.onCreate();
 		_this = this;
-		//Util.setSvcContext(this);
+		Login.setSvcContext(getApplicationContext());
 		Login.login(new Login.AuthListener()
 		{
 			@Override
@@ -98,7 +76,6 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 				CesService.this.stopSelf();
 			}
 		});
-
 		iniGeoTracking();
 System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
@@ -215,9 +192,9 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 	//TODO: No guardar punto si es igual que el último...
 	//TODO: No guardar si (distancia con ultimo punto)/(tiempo ultimo punto) > 300km/h
 	private static Location _locLastSaved = null;
-	private static long _tmLastSaved = System.currentTimeMillis();
+	//private static long _tmLastSaved = System.currentTimeMillis();
 	//
-	private static Location _locLast = null;
+	//private static Location _loc0 = null, _loc1 = null;
 	private static String _sId = "";
 	public static void saveGeoTracking()
 	{
@@ -276,7 +253,15 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 			System.err.println("CesService:guardarPunto:findById:Util.getLocation()-----------------:NULL");
 			return;
 		}
-		System.err.println("CesService:guardarPunto:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "/" + loc.getLongitude()+":"+(new java.util.Date(loc.getTime())));
+System.err.println("CesService:guardarPunto:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "/" + loc.getLongitude()+":"+(new java.util.Date(loc.getTime())));
+if(loc.hasAccuracy())System.err.println("CesService:guardarPunto:findById:Util.getAccuracy()-------------------:" + loc.getAccuracy());
+if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getSpeed()-------------------:" + loc.getSpeed());
+if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getAltitude()-------------------:" + loc.getAltitude());
+	if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getBearing()-------------------:" + loc.getBearing());
+
+
+		if(!loc.hasAccuracy() || loc.getAccuracy() > 100)return;//TODO:Test
+
 		if( ! _sId.equals(sId))
 		{
 			_sId = sId;
@@ -292,12 +277,44 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 			}
 
 			//Si el nuevo punto no tiene sentido, no se guarda...
+			/*
 			double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
 			if(vel > 200)//kilometros hora a metros segundo : 300km/h = 83m/s
 			{
-				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLast.getLatitude() + "," + _locLast.getLongitude()+" t="+(System.currentTimeMillis() - _tmLastSaved));
+				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " :::  t="+(System.currentTimeMillis() - _tmLastSaved));
 				return;
 			}
+			else
+				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " :::  t="+(System.currentTimeMillis() - _tmLastSaved));
+
+			//TODO: read this
+			//http://gis.stackexchange.com/questions/19683/what-algorithm-should-i-use-to-remove-outliers-in-trace-data
+
+			//Si el nuevo punto no tiene sentido, no se guarda...
+			//if(loc.getAccuracy() > 10) {
+			if(_loc0 == null)
+			{
+				_loc0 = loc;
+			}
+			else if(_loc1 == null)
+			{
+				_loc1 = loc;
+			}
+			else
+			{
+				double dis01 = _loc0.distanceTo(_loc1);
+				double dis02 = _loc0.distanceTo(loc);
+				if(dis01 > 2*dis02 && (System.currentTimeMillis() - _tmLastSaved) < DELAY_LOAD*2)
+				{
+					//TODO: El punto _loc1 es incorrecto, borrar
+					System.err.println("CesService: Punto anterior incorrecto: "+_loc1.getLatitude()+"/"+_loc1.getLongitude());
+				}
+				else
+				{
+					_loc0 = _loc1;
+					_loc1 = loc;
+				}
+			}*/
 		}
 		//TODO: añadir geofence por si quisiera funcionar...?
 		r.guardar(new DatabaseReference.CompletionListener()
@@ -308,7 +325,9 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				if(err == null)
 				{
 					System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + data);
-					Ruta.addPunto(data.getKey(), loc.getLatitude(), loc.getLongitude(), new Transaction.Handler()
+					Ruta.addPunto(data.getKey(), loc.getLatitude(), loc.getLongitude(),
+							loc.getAccuracy(), loc.getAltitude(), loc.getSpeed(), loc.getBearing(),
+							new Transaction.Handler()
 						{
 							@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
 							@Override
@@ -328,7 +347,7 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 					System.err.println("CesService:saveGeoTracking:guardar:err:----------------------:" + err);
 				}
 				_locLastSaved = loc;
-				_tmLastSaved = System.currentTimeMillis();
+				//_tmLastSaved = System.currentTimeMillis();
 			}
 		});
 	}
@@ -540,7 +559,7 @@ if(g.getLatitude() == null)return;
 					System.err.println("LocationSettingsStatusCodes.SUCCESS");
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try{status.startResolutionForResult(null, 1000);}catch(android.content.IntentSender.SendIntentException e){}
+					try{status.startResolutionForResult(null, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
 					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");

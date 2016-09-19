@@ -2,8 +2,9 @@ package com.cesoft.encuentrame3;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
-import android.annotation.SuppressLint;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -14,11 +15,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,23 +43,20 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.geo.GeoPoint;
-
-import com.cesoft.encuentrame3.models.Ruta;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import com.cesoft.encuentrame3.models.Ruta;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
-//, ResultCallback<Status>, GoogleMap.OnCameraChangeListener,
 {
 	private static final int DELAY_LOCATION = 60000;
 
@@ -71,7 +71,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private GoogleMap _Map;
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
-
 	//private CoordinatorLayout _coordinatorLayout;//TODO: eliminar de layout
 
 
@@ -206,6 +205,20 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
+	}
+	//______________________________________________________________________________________________
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		stopTracking();
+		_GoogleApiClient = null;
+		_LocationRequest = null;
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
 	}
 
 	//______________________________________________________________________________________________
@@ -438,6 +451,33 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			//LatLng pos2 = new LatLng(pos.getLatitude(), pos.getLongitude());
 			//_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));
 		}
+
+		//MARCADOR MULTILINEA --------------------------------------------
+		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
+		{
+			@Override
+			public View getInfoWindow(Marker arg0){return null;}
+			@Override
+			public View getInfoContents(Marker marker)
+			{
+				LinearLayout info = new LinearLayout(ActRuta.this);
+				info.setOrientation(LinearLayout.VERTICAL);
+
+				TextView title = new TextView(ActRuta.this);
+				title.setTextColor(Color.BLACK);
+				title.setGravity(Gravity.CENTER);
+				title.setTypeface(null, Typeface.BOLD);
+				title.setText(marker.getTitle());
+
+				TextView snippet = new TextView(ActRuta.this);
+				snippet.setTextColor(Color.GRAY);
+				snippet.setText(marker.getSnippet());
+
+				info.addView(title);
+				info.addView(snippet);
+				return info;
+			}
+		});
 	}
 
 	//______________________________________________________________________________________________
@@ -464,11 +504,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 					// All location settings are satisfied. The client can initialize location requests here.
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try
-					{
-						status.startResolutionForResult(ActRuta.this, 1000);
-					}
-					catch(android.content.IntentSender.SendIntentException e){}
+					try{status.startResolutionForResult(ActRuta.this, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
 					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
@@ -497,7 +533,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 				{
 					System.err.println("ActRuta:startTrackingRecord:handleFault:" + err);
 					//*****************************************************************************
-					try{Thread.sleep(500);}catch(InterruptedException e){}
+					try{Thread.sleep(500);}catch(InterruptedException ignored){}
 					_r.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
@@ -522,7 +558,6 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	//______________________________________________________________________________________________
 	private void stopTrackingRecord()
 	{
-System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 		Util.setTrackingRoute(ActRuta.this, "");
 		Util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
 	}
@@ -555,6 +590,8 @@ System.err.println("ActRuta:stopTrackingRecord:handleFault-----------0:");
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
+		_Map.clear();
+
 System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
@@ -562,40 +599,44 @@ System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 		String FIN = getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
 
+		Ruta.RutaPunto gpAnt = null;
 		Ruta.RutaPunto gpIni = aPts[0];
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
 		for(Ruta.RutaPunto pto : aPts)
 		{
-			MarkerOptions mo = new MarkerOptions();
+			String snippet = "";MarkerOptions mo = new MarkerOptions();
 			mo.title(_r.getNombre());
 			Date date = pto.getFecha();
-			if(date != null)
-				mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
+			if(date != null)snippet += df.format(date);
+			snippet += String.format(Locale.ENGLISH, "\nPrec: %f", pto.getPrecision());
+			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, "\nAlt: %f m", pto.getAltura());
+			if(pto.getVelocidad() > 0)snippet += String.format(Locale.ENGLISH, "\nVel: %f m/s", pto.getVelocidad());
+			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, "\nVel: %.2f", pto.getDireccion());
 
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
-System.err.println("showRuta: " + pos);
+System.err.println("+++++++++++++++++++++++++++++++++++++showRuta: " + pos+" ++++ "+snippet);
 			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
+				mo.snippet(INI + snippet);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-				mo.snippet(INI + df.format(date));
 				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else if(pto == gpFin)//else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
-				mo.snippet(FIN + df.format(date));
+				mo.snippet(FIN + snippet);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mo.rotation(-45);
 				_Map.addMarker(mo.position(pos));
 			}
-			else
+			//if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)//0.000000005 || pto.distancia2(gpFin) > 0.000000005)
+			else if(gpAnt != null && pto.distanciaReal(gpAnt) > 5)
 			{
-				if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)//0.000000005 || pto.distancia2(gpFin) > 0.000000005)
-				{
-					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-					_Map.addMarker(mo.position(pos));
-				}
+				mo.snippet(snippet);
+				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+				_Map.addMarker(mo.position(pos));
 			}
+			gpAnt = pto;
 			po.add(pos);
 		}
 		po.width(5).color(Color.BLUE);

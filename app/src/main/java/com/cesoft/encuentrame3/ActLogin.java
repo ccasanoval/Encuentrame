@@ -52,12 +52,19 @@ public class ActLogin extends AppCompatActivity
 		//
 		//--- INICIAR
 		_this = this;
-		Login.setSvcContext(this);
+		Login.setSvcContext(getApplicationContext());
 
 		//Crea servicio si no está ya creado, dentro del servicio se llama a login
 		startService(new Intent(this, CesService.class));
 		// Rute Widget Svc
 		WidgetRutaService.startServ(this);
+	}
+
+	public void onDestroy()
+	{
+		super.onDestroy();
+		_tabLayout = null;
+		_this = null;
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
