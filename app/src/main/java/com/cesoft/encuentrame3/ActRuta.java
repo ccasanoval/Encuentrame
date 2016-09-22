@@ -15,6 +15,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,6 +59,7 @@ import com.cesoft.encuentrame3.models.Ruta;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
+	private static final String TAG = "CESoft:ActRuta:";
 	private static final int DELAY_LOCATION = 60000;
 
 	private boolean _bNuevo = false;
@@ -156,22 +158,19 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		try
 		{
 			_r = this.getIntent().getParcelableExtra(Ruta.NOMBRE);
-System.err.println("ActRuta:onCreate:++++++++++++++++"+_r);
 			setValores();
 		}
 		catch(Exception e)
 		{
-System.err.println("ActRuta:onCreate:e:"+e);
+			Log.e(TAG, "onCreate:Nueva ruta o error al desempaquetar:"+e);
 			_bNuevo = true;
 			_r = new Ruta();
 		}
-System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		//------------------------------------------------------------------------------------------
 		if(_bNuevo)
 		{
 			setTitle(getString(R.string.nueva_ruta));
 			if(btnStop!=null)btnStop.setVisibility(View.GONE);
-			//findViewById(R.id.layStartStop).setVisibility(View.VISIBLE);
 			try
 			{
 				FragmentTransaction ft = mapFragment.getFragmentManager().beginTransaction();
@@ -212,6 +211,9 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	{
 		super.onDestroy();
 		stopTracking();
+		_GoogleApiClient.unregisterConnectionCallbacks(this);
+		_GoogleApiClient.unregisterConnectionFailedListener(this);
+		_GoogleApiClient.disconnect();
 		_GoogleApiClient = null;
 		_LocationRequest = null;
 		if(_Map != null)
@@ -244,9 +246,8 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			}
 			catch(SecurityException e)
 			{
-				System.err.println("ActRuta:startTracking:e:"+e);
+				Log.e(TAG, "startTracking:e:"+e, e);
 				Toast.makeText(this, "ActRuta:startTracking:e:"+e, Toast.LENGTH_LONG).show();
-				//Snackbar.make(_coordinatorLayout, "ActRuta:startTracking:e:"+e, Snackbar.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -286,14 +287,6 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	{
 		_txtNombre.setText(_r.getNombre());
 		_txtDescripcion.setText(_r.getDescripcion());
-		/*for(int i=0; i < _aiDelay.length; i++)
-		{
-			if(_r.getPeriodo() == _aiDelay[i])
-			{
-				_spnTrackingDelay.setSelection(i);
-				break;
-			}
-		}*/
 		//
 		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
 		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
@@ -321,7 +314,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			System.err.println("ActRuta:checkPlayServices:e:" + result);
+			Log.e(TAG, "checkPlayServices:e:" + result);
 	        return false;
 	    }
 	    return true;
@@ -332,7 +325,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
-		System.err.println("ActRuta:onConnectionFailed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+		Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
 	}
 	@Override
 	public void onConnected(Bundle arg0)
@@ -355,12 +348,12 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			{
 				if(err == null)
 				{
-					System.err.println("ActRuta:guardar:"+data);
+					//Log.w(TAG, "guardar:"+data);
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
 				{
-					System.err.println("ActRuta:guardar:handleFault:f:" + err);
+					Log.e(TAG, "guardar:handleFault:f:" + err);
 					Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 				}
 			}
@@ -398,12 +391,12 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 					{
 						if(err == null)
 						{
-							System.err.println("ActRuta:eliminar:handleResponse:"+data);
+							//Log.w(TAG, "eliminar:handleResponse:"+data);
 							Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
 						}
 						else
 						{
-							System.err.println("ActRuta:eliminar:handleFault:f:" + err);
+							Log.e(TAG, "eliminar:handleFault:f:" + err);
 							Toast.makeText(ActRuta.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
 						}
 					}
@@ -500,14 +493,14 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 				switch(status.getStatusCode())
 				{
 				case LocationSettingsStatusCodes.SUCCESS:
-					System.err.println("LocationSettingsStatusCodes.SUCCESS");
+					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
 					// All location settings are satisfied. The client can initialize location requests here.
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
 					try{status.startResolutionForResult(ActRuta.this, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+					Log.w(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
 					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
 					break;
 				}
@@ -531,9 +524,10 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 				}
 				else
 				{
-					System.err.println("ActRuta:startTrackingRecord:handleFault:" + err);
+					Log.e(TAG, "startTrackingRecord:handleFault:" + err);
 					//*****************************************************************************
 					try{Thread.sleep(500);}catch(InterruptedException ignored){}
+					//TODO: Repetia la op por Backendless, en Firebase quizá podría eliminar este repetitivo
 					_r.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
@@ -546,7 +540,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 							}
 							else
 							{
-								System.err.println("ActRuta:startTrackingRecord:handleFault2:" + err);
+								Log.e(TAG, "startTrackingRecord:handleFault2:" + err);
 								Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
 							}
 						}
@@ -580,7 +574,7 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("ActRuta:showRuta:onCancelled:-----------:"+err);
+				Log.e(TAG, "showRuta:onCancelled:-----------:"+err);
 				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
 			}
 		});
@@ -592,7 +586,6 @@ System.err.println("ActRuta:onCreate:++++" + _bNuevo + "++++++++++++"+_r);
 		if(aPts.length < 1)return;
 		_Map.clear();
 
-System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 
 		String INI = getString(R.string.ini);
@@ -609,12 +602,12 @@ System.err.println("ActRuta:showRutaHelper:-----------:"+aPts.length);
 			Date date = pto.getFecha();
 			if(date != null)snippet += df.format(date);
 			snippet += String.format(Locale.ENGLISH, "\nPrec: %f", pto.getPrecision());
+			if(gpAnt != null)snippet += String.format(Locale.ENGLISH, "\nDis: %.2f", pto.distanciaReal(gpAnt));
 			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, "\nAlt: %f m", pto.getAltura());
 			if(pto.getVelocidad() > 0)snippet += String.format(Locale.ENGLISH, "\nVel: %f m/s", pto.getVelocidad());
 			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, "\nVel: %.2f", pto.getDireccion());
 
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
-System.err.println("+++++++++++++++++++++++++++++++++++++showRuta: " + pos+" ++++ "+snippet);
 			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
 				mo.snippet(INI + snippet);

@@ -8,8 +8,6 @@ import android.content.Intent;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.google.firebase.database.DataSnapshot;

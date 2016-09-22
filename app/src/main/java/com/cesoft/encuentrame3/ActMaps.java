@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -41,6 +42,8 @@ import com.google.firebase.database.ValueEventListener;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
+	private static final String TAG = "CESoft:ActMaps:";
+
 	private GoogleMap _Map;
 	private Location _loc;
 	private Marker _marker;
@@ -65,7 +68,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		try{_r = getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
 		try{_a = getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
 		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
-System.err.println("**********************_iTipo="+_iTipo);
 		//------------------------------------------------------------------------------------------
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -107,7 +109,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 							}
 							else
 							{
-								System.err.println("ActMaps:guardar:handleFault:f:" + err);
+								Log.e(TAG, "guardar:handleFault:f:" + err);
 								Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 							}
 						}
@@ -130,6 +132,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 							}
 							else
 							{
+								Log.e(TAG, "guardar:handleFault:f:" + err);
 								Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 							}
 						}
@@ -137,7 +140,22 @@ System.err.println("**********************_iTipo="+_iTipo);
 				}
 			}
 		});
-
+	}
+	//______________________________________________________________________________________________
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		/*_GoogleApiClient.unregisterConnectionCallbacks(this);
+		_GoogleApiClient.unregisterConnectionFailedListener(this);
+		_GoogleApiClient.disconnect();
+		_GoogleApiClient = null;
+		_LocationRequest = null;*/
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
 	}
 
 	// This callback is triggered when the map is ready to be used. This is where we can add markers or lines, add listeners or move the camera.
@@ -216,7 +234,7 @@ System.err.println("**********************_iTipo="+_iTipo);
 			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
 			_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		}
-		catch(Exception e){System.err.println("ActMaps:setMarker:e:"+e);}
+		catch(Exception e){Log.e(TAG, "setMarker:e:"+e, e);}
 	}
 	private void setMarkerRadius()
 	{
@@ -318,56 +336,11 @@ System.err.println("**********************_iTipo="+_iTipo);
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("ActMaps:showRuta:e:"+err);
-				//Snackbar.make(_coordinatorLayout, getString(R.string.pto_ruta_ko), Snackbar.LENGTH_LONG).show();
+				Log.e(TAG, "showRuta:e:"+err);
 			}
 		});
 	}
 
-	/*private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
-	{
-		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		String INI = getString(R.string.ini);
-		String FIN = getString(R.string.fin);
-		PolylineOptions po = new PolylineOptions();
-		BitmapDescriptor bm = getNextIcon();
-		MarkerOptions mo = new MarkerOptions();
-		mo.title(r.getNombre());
-		Date date = r.getFecha();// .getFechaPunto(pt);
-		if(date != null)
-			mo.snippet(df.format(date));//mo.snippet(dateFormat.format(date) + " " + timeFormat.format(date));
-
-		LatLng pos = new LatLng(pt.getLatitude(), pt.getLongitude());
-		if(pt == gpIni)//It's not possible to establish the z order for the marker...
-		{
-			mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-			mo.snippet(INI + df.format(date));
-			mo.rotation(135);
-			_Map.addMarker(mo.position(pos));
-		}
-		else if(pt == gpFin)
-		{
-			mo.snippet(FIN + df.format(date));
-			mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-			mo.rotation(45);
-			_Map.addMarker(mo.position(pos));
-		}
-		else
-		{
-			double disIni = (pt.getLatitude() - gpIni.getLatitude())*(pt.getLatitude() - gpIni.getLatitude()) + (pt.getLongitude() - gpIni.getLongitude())*(pt.getLongitude() - gpIni.getLongitude());
-			double disFin = (pt.getLatitude() - gpFin.getLatitude())*(pt.getLatitude() - gpFin.getLatitude()) + (pt.getLongitude() - gpFin.getLongitude())*(pt.getLongitude() - gpFin.getLongitude());
-			if(disIni > 0.00000001 || disFin > 0.00000001)
-			{
-				mo.icon(bm);
-				_Map.addMarker(mo.position(pos));
-			}
-		}
-		po.add(pos);
-
-		po.width(5).color(_iColor);
-		_Map.addPolyline(po);//Polyline line =
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitude(), gpIni.getLongitude()), 15));
-	}*/
 	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
@@ -408,7 +381,6 @@ System.err.println("**********************_iTipo="+_iTipo);
 				//if(pto.distanciaSimple(gpIni) > 0.00000001 || pto.distanciaSimple(gpFin) > 0.00000001)
 				if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)
 				{
-					//System.err.println("------- MID " + r.getNombre() + " : " + pos + " : " + df.format(date) + "            " + (pt.getLatitude() - gpIni.getLatitude()));
 					mo.icon(bm);
 					_Map.addMarker(mo.position(pos));
 				}
@@ -431,13 +403,12 @@ System.err.println("**********************_iTipo="+_iTipo);
 			@Override
 			public void onData(Lugar[] aData)
 			{
-				System.err.println("---------LUGARES:GET:OK:"+aData.length);
 				for(Lugar o : aData)showLugar(o);
 			}
 			@Override
 			public void onError(String err)
 			{
-				System.err.println("---------LUGARES:GET:ERROR:" + err);
+				Log.e(TAG, "---------LUGARES:GET:ERROR:" + err);
 			}
 		});
 	}
@@ -448,13 +419,12 @@ System.err.println("**********************_iTipo="+_iTipo);
 			@Override
 			public void onData(Aviso[] aData)
 			{
-				System.err.println("---------AVISOS:GET:OK:"+aData.length);
 				for(Aviso o : aData)showAviso(o);
 			}
 			@Override
 			public void onError(String err)
 			{
-				System.err.println("---------AVISOS:GET:ERROR:" + err);
+				Log.e(TAG, "---------AVISOS:GET:ERROR:" + err);
 			}
 		});
 	}
@@ -465,13 +435,12 @@ System.err.println("**********************_iTipo="+_iTipo);
 			@Override
 			public void onData(Ruta[] aData)
 			{
-				System.err.println("---------RUTAS:GET:OK:" + aData.length);
 				for(Ruta o : aData)showRuta(o);
 			}
 			@Override
 			public void onError(String err)
 			{
-				System.err.println("---------RUTAS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				Log.e(TAG, "---------RUTAS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
 			}
 		});
 	}

@@ -26,7 +26,6 @@ public class Filtro implements Parcelable
 		public void turnOff(){_onOff =false;}
 		public boolean isValid()
 		{
-System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" **** "+_fechaFin+" *** "+_punto);
 			return !(_activo == TODOS && _nombre.isEmpty() && _fechaIni == null && _fechaFin == null && _punto.latitude == 0 && _punto.longitude == 0);
 		}
 
@@ -45,7 +44,7 @@ System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" ***
 	public LatLng getPunto(){return _punto;}
 	public int getRadio(){return _radio;}
 
-	public void setTipo(int v)
+	private void setTipo(int v)
 	{
 		switch(v)
 		{
@@ -100,17 +99,7 @@ System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" ***
 		setTipo(tipo);
 		//Filtro(Util.LUGARES, Filtro.TODOS, "", null, null, null, Util.NADA);
 	}
-	/*public Filtro(int tipo, int activo, String nombre, Date fechaIni, Date fechaFin, LatLng punto, int radio)
-	{
-		turnOn();
-		setTipo(tipo);
-		setActivo(activo);
-		setNombre(nombre);
-		setFechaIni(fechaIni);
-		setFechaFin(fechaFin);
-		setPunto(punto);
-		setRadio(radio);
-	}*/
+
 	//______________________________________________________________________________________________
 	@Override
 	public String toString()
@@ -123,7 +112,7 @@ System.err.println("******** "+_activo+" **** "+_nombre+" **** "+_fechaIni+" ***
 
 	//______________________________________________________________________________________________
 	// 4 PARCELABLE
-	protected Filtro(Parcel in)
+	private Filtro(Parcel in)
 	{
 		_onOff = in.readInt() > 0;
 		_tipo = in.readInt();

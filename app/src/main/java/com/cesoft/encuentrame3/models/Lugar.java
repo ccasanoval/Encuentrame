@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.cesoft.encuentrame3.Login;
 import com.google.firebase.database.DatabaseReference;
@@ -27,11 +28,12 @@ import java.util.Date;
 @IgnoreExtraProperties
 public class Lugar extends Objeto
 {
+	private static final String TAG = "CESoft:Lugar:";
 	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
-	protected static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-	protected static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
-	protected DatabaseReference _datos;
+	private DatabaseReference _datos;
 
 	///______________________________________________________________
 	//Yet Another Firebase Bug:
@@ -128,7 +130,7 @@ public class Lugar extends Objeto
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("Lugar:getLista:onCancelled:"+err);
+				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Lugar:getLista:onCancelled:"+err);
 			}
 		});
@@ -142,9 +144,8 @@ public class Lugar extends Objeto
 		else
 			buscarPorGeoFiltro(listener, filtro);
 	}
-	public static void buscarPorFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
+	private static void buscarPorFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
-System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
 			@Override
@@ -155,22 +156,20 @@ System.err.println("Lugar:buscarPorFiltro:--------------------------0:"+filtro);
 				for(DataSnapshot o : data.getChildren())
 				{
 					Lugar l = o.getValue(Lugar.class);
-System.err.println("--------------------Lugar:"+l);
 					if( ! l.pasaFiltro(filtro))continue;
 					aLugares.add(l);
 				}
 				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
-				System.err.println("--------------------Lugar:N:"+aLugares.size());
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("Lugar:buscarPorFiltro:onCancelled:"+err);
+				Log.e(TAG, "buscarPorFiltro:onCancelled:"+err);
 				listener.onError("Lugar:buscarPorFiltro:onCancelled:"+err);
 			}
 		});
 	}
-	public static void buscarPorGeoFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)
+	private static void buscarPorGeoFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)
 	{
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 		final ArrayList<Lugar> aLugares = new ArrayList<>();
@@ -182,17 +181,14 @@ System.err.println("--------------------Lugar:"+l);
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)
 			{
-System.err.println("____________0Lugar:onDataChange:"+nCount);
 				nCount++;
 				newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)
 					{
-System.err.println("____________Lugar:onDataChange:"+nCount);
 						nCount--;
 						Lugar l = data.getValue(Lugar.class);
-System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pasaFiltro(filtro));
 						if(l.pasaFiltro(filtro))aLugares.add(l);
 						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
@@ -200,7 +196,7 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
-						System.err.println("Lugar:getLista:onKeyEntered:onCancelled:"+err);
+						Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
 						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
 				});
@@ -208,13 +204,12 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 			@Override
 			public void onGeoQueryReady()
 			{
-				System.err.println("Lugar:getLista:onGeoQueryReady:Count:::::::::::::::"+nCount);
 				if(nCount==0)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
-			@Override public void onKeyExited(String key){System.err.println("Lugar:getLista:onKeyExited");}
-			@Override public void onKeyMoved(String key, GeoLocation location){System.err.println("Lugar:getLista:onKeyMoved"+key+", "+location);}
-			@Override public void onGeoQueryError(DatabaseError error){System.err.println("Lugar:getLista:onGeoQueryError:"+error);}
+			@Override public void onKeyExited(String key){Log.i(TAG, "getLista:onKeyExited");}
+			@Override public void onKeyMoved(String key, GeoLocation location){Log.i(TAG, "getLista:onKeyMoved"+key+", "+location);}
+			@Override public void onGeoQueryError(DatabaseError error){Log.e(TAG, "getLista:onGeoQueryError:"+error);}
 		};
 		geoQuery.addGeoQueryEventListener(lisGeo);
 	}
@@ -222,7 +217,7 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 
 	// PARCELABLE
 	//______________________________________________________________________________________________
-	protected Lugar(Parcel in)
+	private Lugar(Parcel in)
 	{
 		//super(in);
 		setId(in.readString());
@@ -273,7 +268,7 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 	{
 		if(_datos.getKey() == null)
 		{
-			System.err.println("Lugar:saveGeo:id==null");
+			Log.e(TAG, "saveGeo:id==null");
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
@@ -283,9 +278,9 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 			public void onComplete(String key, DatabaseError error)
 			{
         		if(error != null)
-            		System.err.println("There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+            		Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
         		else
-            		System.out.println("Location saved on server successfully!");
+            		Log.i(TAG, "Location saved on server successfully!");
 			}
         });
 	}
@@ -293,7 +288,7 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 	{
 		if(_datos.getKey() == null)
 		{
-			System.err.println("Lugar:delGeo:id==null");
+			Log.e(TAG, "delGeo:id==null");
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
@@ -301,5 +296,4 @@ System.err.println("____________Lugar:onDataChange:"+nCount+"___"+l+"____"+l.pas
 	}
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------
-
 }

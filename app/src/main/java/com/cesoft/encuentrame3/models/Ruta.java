@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.cesoft.encuentrame3.Login;
 import com.firebase.geofire.GeoFire;
@@ -33,12 +34,13 @@ import java.util.TreeSet;
 @IgnoreExtraProperties
 public class Ruta extends Objeto implements Parcelable
 {
+	private static final String TAG = "CESoft:Ruta:";
 	public static final String NOMBRE = "ruta";
-	public static final String IDRUTA = "idRuta";
-	protected static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	private static final String IDRUTA = "idRuta";
+	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
-	protected DatabaseReference _datos;
+	private DatabaseReference _datos;
 
 	///______________________________________________________________
 	//Yet Another Firebase Bug:
@@ -157,7 +159,7 @@ public class Ruta extends Objeto implements Parcelable
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("Ruta:getLista:onCancelled:"+err);
+				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Ruta:getLista:onCancelled:"+err);
 			}
 		});
@@ -166,7 +168,7 @@ public class Ruta extends Objeto implements Parcelable
 	//----------------------------------------------------------------------------------------------
 	//----------------------------------------------------------------------------------------------
 	//@Override
-	public boolean pasaFiltro(Filtro filtro, String idRuta, String idRutaAct)
+	private boolean pasaFiltro(Filtro filtro, String idRuta, String idRutaAct)
 	{
 		if( ! super.pasaFiltro(filtro))return false;
 		boolean bActivo = idRuta!=null && idRuta.equals(idRutaAct);//Ruta activa
@@ -181,7 +183,7 @@ public class Ruta extends Objeto implements Parcelable
 			buscarPorGeoFiltro(listener, filtro, idRutaAct);
 	}
 	//----
-	public static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
+	private static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
 		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
@@ -202,15 +204,14 @@ public class Ruta extends Objeto implements Parcelable
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("Ruta:buscarPorFiltro:onCancelled:"+err);
+				Log.e(TAG, String.format("buscarPorFiltro:onCancelled:%s",err));
 				listener.onError(err.toString());
 			}
 		});
 	}
 	//----
-	public static void buscarPorGeoFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
+	private static void buscarPorGeoFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
-System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro);
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
 		final ObjetoListener<String> lis = new ObjetoListener<String>()
@@ -220,7 +221,6 @@ System.err.println("Ruta:buscarPorGeoFiltro:--------------------------:"+filtro)
 			{
 				final ArrayList<Ruta> aRutas = new ArrayList<>();
 				final ArrayList<Ruta> aIgnorados = new ArrayList<>();
-System.err.println("-----------------------------------------------data_r="+aData.length);
 				if(aData.length < 1)listener.onData(new Ruta[0]);
 				else
 				for(String idRuta : aData)
@@ -238,7 +238,7 @@ System.err.println("-----------------------------------------------data_r="+aDat
 						@Override
 						public void onCancelled(DatabaseError err)
 						{
-							System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:"+err);
+							Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:%s",err));
 							if(aRutas.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 						}
 					});
@@ -260,7 +260,6 @@ System.err.println("-----------------------------------------------data_r="+aDat
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)
 			{
-				System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered: idPunto:"+key+", "+location);
 				nCount++;
 				RutaPunto.newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				{
@@ -270,14 +269,13 @@ System.err.println("-----------------------------------------------data_r="+aDat
 						nCount--;
 						RutaPunto rp = data.getValue(RutaPunto.class);
 						asRutas.add(rp.getIdRuta());
-System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered: --------------nCount="+nCount+" : ruta="+rp.getIdRuta());
 						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
 					}
 					@Override
 					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
-						System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered:onCancelled:e:"+err);
+						Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:e:%s",err));
 						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
 					}
 				});
@@ -285,7 +283,6 @@ System.err.println("Ruta:buscarPorGeoFiltro:onKeyEntered: --------------nCount="
 			@Override
 			public void onGeoQueryReady()
 			{
-System.err.println("Ruta:buscarPorGeoFiltro:--------------------------------------------onGeoQueryReady:A:"+nCount);
 				if(nCount == 0)lis.onData(new String[0]);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
@@ -294,7 +291,7 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 			@Override public void onKeyMoved(String key, GeoLocation location){}
 			@Override public void onGeoQueryError(DatabaseError err)
 			{
-				System.err.println("Ruta:buscarPorGeoFiltro:onGeoQueryError:"+err);
+				Log.e(TAG, String.format("buscarPorGeoFiltro:onGeoQueryError:%s",err));
 			}
 		});
 	}
@@ -306,7 +303,6 @@ System.err.println("Ruta:buscarPorGeoFiltro:------------------------------------
 	//______________________________________________________________________________________________
 	public void getPuntos(final ValueEventListener listener)
 	{
-System.err.println("---------Ruta:getPuntos:0:"+getId());
 		RutaPunto.getLista(getId(), new ValueEventListener()
 		{
 			@Override
@@ -351,7 +347,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 						@Override
 						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
-							System.err.println("Ruta:addPunto:inc count:"+err+" "+b+" "+data);
+							//Log.w(TAG, "addPunto:inc count:"+err+" "+b+" "+data);
 							listener.onComplete(err, b, data);
 						}
 					});
@@ -369,8 +365,8 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 	public static class RutaPunto implements Parcelable
 	{
 		public static final String NOMBRE = "ruta_punto";//TODO:? or parent?
-		protected static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-		protected static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+		private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+		private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 		@Exclude
 		private DatabaseReference _datos;
 
@@ -414,7 +410,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		}
 		//__________________________________________________________________________________________
 		public RutaPunto(){}//Required for Firebase
-		public RutaPunto(String idRuta, double lat, double lon, float precision, double altura, float velocidad, float direccion)
+		RutaPunto(String idRuta, double lat, double lon, float precision, double altura, float velocidad, float direccion)
 		{
 			this.idRuta = idRuta;
 			this.latitud = lat;
@@ -427,7 +423,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 		}
 
 		//// PARCEL
-		protected RutaPunto(Parcel in)
+		RutaPunto(Parcel in)
 		{
 			setId(in.readString());
 			setIdRuta(in.readString());
@@ -475,7 +471,7 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
-					System.out.println("RutaPunto:delGeo:e:"+err+" : "+idRuta);
+					Log.e(TAG, "RutaPunto:delGeo:e:"+err+", idRuta:"+idRuta);
 				}
 			});
 		}
@@ -500,9 +496,8 @@ System.err.println("---------Ruta:getPuntos:0:"+getId());
 			}
 			saveGeo();
 		}
-		public static void getLista(String sIdRuta, final ValueEventListener listener)
+		static void getLista(String sIdRuta, final ValueEventListener listener)
 		{
-System.err.println("RutaPunto:getLista---------"+NOMBRE);
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);
 			//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
 			//queryRef.addListenerForSingleValueEvent(listener);
@@ -511,12 +506,11 @@ System.err.println("RutaPunto:getLista---------"+NOMBRE);
 				@Override
 				public void onDataChange(DataSnapshot ds)
 				{
-System.err.println("RutaPunto:getLista:onDataChange---------");
-					for(DataSnapshot o : ds.getChildren())
+					/*for(DataSnapshot o : ds.getChildren())
 					{
 						System.err.println("RutaPunto:getLista:onDataChange:o------------------------"+o);
 						System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+o.getValue(Ruta.RutaPunto.class));
-					}
+					}*/
 					listener.onDataChange(ds);
 				}
 				@Override
@@ -534,7 +528,11 @@ System.err.println("RutaPunto:getLista:onDataChange---------");
 		private void saveGeo()
 		{
 			final double DISTANCIA_MIN = 10/1000.0;//Km
-			if(_datos.getKey() == null){System.err.println("RutaPunto:saveGeo:id==null ----------------------------------------------------------------");return;}
+			if(_datos.getKey() == null)
+			{
+				Log.e(TAG, "RutaPunto:saveGeo:id==null");
+				return;
+			}
 
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(getIdRuta());
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
@@ -542,18 +540,19 @@ System.err.println("RutaPunto:getLista:onDataChange---------");
 				@Override
 				public void onDataChange(DataSnapshot ds)
 				{
+					//Los puntos geofire los utilizo solo para buscar.. de modo que no necesito todos...
 					for(DataSnapshot o : ds.getChildren())
 					{
 						RutaPunto rp = o.getValue(RutaPunto.class);
-						if(rp.distanciaReal(RutaPunto.this) < DISTANCIA_MIN)return;//No se guarda
+						//if(rp.distanciaReal(RutaPunto.this) < DISTANCIA_MIN)return;//No se guarda
+						if(rp.distanciaAprox(RutaPunto.this) < DISTANCIA_MIN)return;//No se guarda
 					}
-System.err.println("------RutaPunto:saveGeo:--------SE GUARDA");
 					saveGeo2();
 				}
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
-					System.err.println("RutaPunto:saveGeo:onCancelled:e:"+err);
+					Log.e(TAG, "RutaPunto:saveGeo:onCancelled:e:"+err);
 				}
 			});
 		}
@@ -565,9 +564,9 @@ System.err.println("------RutaPunto:saveGeo:--------SE GUARDA");
 				public void onComplete(String key, DatabaseError error)
 				{
 					if(error != null)
-						System.err.println("RutaPunto:saveGeo:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
+						Log.e(TAG, "RutaPunto:saveGeo:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
 					else
-						System.err.println("RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
+						Log.w(TAG, "RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
 				}
 			});
 		}
@@ -616,27 +615,49 @@ System.err.println("----------------Ruta:delGeo:"+ds.getRef());
 		{
 			return distanciaReal(getLatitud(), getLongitud(), v.getLatitud(), v.getLongitud());
 		}
-		/*
+		public double distanciaAprox(RutaPunto v)
+		{
+			return distanciaAprox(getLatitud(), getLongitud(), v.getLatitud(), v.getLongitud());
+		}
+		/* http://www.movable-type.co.uk/scripts/latlong.html
 		 * Calculate distance between two points in latitude and longitude taking into account height difference.
 		 * Uses Haversine method as its base.
-		 * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters el2 End altitude in meters
 		 * @returns Distance in Meters
 		 */
-		public static double distanciaReal(double lat1, double lat2, double lon1, double lon2)//, double el1, double el2)
+		static double distanciaReal(double lat1, double lat2, double lon1, double lon2)//, double el1, double el2)
 		{
-			final int R = 6371; // Radius of the earth
+			final int R = 6371; // Radius of the earth (Km)
 			Double latDistance = Math.toRadians(lat2 - lat1);
 			Double lonDistance = Math.toRadians(lon2 - lon1);
 			Double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-					+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+					+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+					* Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
 			Double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//System.err.println("-------------------distanciaReal:"+(R * c * 1000));
 			return R * c * 1000; // convert to meters
 			// -- sin altura --
 			//double distancia = R * c * 1000; // convert to meters
 			//double height = el1 - el2;
 			//distancia = Math.pow(distancia, 2) + Math.pow(height, 2);
 			//return Math.sqrt(distancia);
+		}
+		static double distanciaAprox(double lat1, double lat2, double lon1, double lon2)
+		{
+			final int R = 6371000;
+			/*Haversine
+			double f1 = Math.toRadians(lat1);
+			double f2 = Math.toRadians(lat2);
+			double d1 =  Math.toRadians(lat2-lat1);
+			double d2 =  Math.toRadians(lon2-lon1);
+			double a = Math.sin(d1/2) * Math.sin(d1/2) +
+						Math.cos(f1) * Math.cos(f2) *
+						Math.sin(d2/2) * Math.sin(d2/2);
+			double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+			return R * c;*/
+
+			//Equirectangular approximation
+			double x =(lon2-lon1) * Math.cos((lat1+lat2)/2);
+			double y = lat2-lat1;
+			return Math.sqrt(x*x + y*y) * R;
 		}
 	}
 }

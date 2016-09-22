@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -10,6 +9,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,22 +37,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-
-import com.cesoft.encuentrame3.models.Lugar;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-
 import java.util.Locale;
+import com.cesoft.encuentrame3.models.Lugar;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
 //Todo: cambiar a toast o kitar keyboard antes de enseñar o no se vera.....igual en resto de forms
 public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
-	//GoogleMap.OnCameraChangeListener,
 {
+	private static final String TAG = "CESoft:ActLugar:";
 	private static final int DELAY_LOCATION = 60000;
 
 	private boolean _bNuevo = false;
@@ -139,6 +135,21 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 		pideGPS();
+	}
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		_GoogleApiClient.unregisterConnectionCallbacks(this);
+		_GoogleApiClient.unregisterConnectionFailedListener(this);
+		_GoogleApiClient.disconnect();
+		_GoogleApiClient = null;
+		_LocationRequest = null;
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
 	}
 
 	//______________________________________________________________________________________________
@@ -233,8 +244,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			/*int PLAY_SERVICES_RESOLUTION_REQUEST = 6969;
         	if(googleAPI.isUserResolvableError(result))googleAPI.getErrorDialog(this.getParent(), result, PLAY_SERVICES_RESOLUTION_REQUEST).show();
         	*/
-			System.err.println("ActLugar:checkPlayServices:e:" + result);
-			//Snackbar.make(_coordinatorLayout, "Play Services Error:"+result, Snackbar.LENGTH_LONG).show();
+			Log.e(TAG, "checkPlayServices:e:" + result);
 	        return false;
 	    }
 	    return true;
@@ -245,7 +255,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
-		System.err.println("Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode());
+		Log.e(TAG, "Connection failed: ConnectionResult.getErrorCode() = "+ result.getErrorCode());
 	}
 	@Override
 	public void onConnected(Bundle arg0){}
@@ -273,7 +283,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		}
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			_bGuardar = true;
@@ -293,9 +302,9 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 				}
 				else
 				{
-					System.err.println("ActLugar:guardar:handleFault:f:" + err);
+					Log.e(TAG, String.format("guardar:handleFault:f:%s",err));
 					//*****************************************************************************
-					try{Thread.sleep(500);}catch(InterruptedException e){}
+					try{Thread.sleep(500);}catch(InterruptedException ignore){}
 					_l.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
@@ -345,7 +354,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 						}
 						else
 						{
-							System.err.println("ActLugar:eliminar:handleFault:f:"+err);
+							Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
 							Toast.makeText(ActLugar.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
 							_bEliminar=true;
 						}
@@ -404,7 +413,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	@Override
 	public void onResult(@NonNull Status status)
 	{
-		System.err.println("----------ActLugar:onResult:"+status);
+		Log.w(TAG, "----------:onResult:"+status);
 	}
 
 
@@ -435,7 +444,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
 		}
-		catch(Exception e){System.err.println("ActLugar:setMarker:e:"+e);}
+		catch(Exception e){Log.e(TAG, String.format("setMarker:e:%s",e), e);}
 	}
 
 	//______________________________________________________________________________________________
@@ -459,18 +468,15 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
          		switch(status.getStatusCode())
 				{
              	case LocationSettingsStatusCodes.SUCCESS:
-					System.err.println("LocationSettingsStatusCodes.SUCCESS");
+					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
 					// All location settings are satisfied. The client can initialize location requests here.
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try
-					{
-						status.startResolutionForResult(ActLugar.this, 1000);
-					}
-					catch(android.content.IntentSender.SendIntentException e){}
+					try{status.startResolutionForResult(ActLugar.this, 1000);}
+					catch(android.content.IntentSender.SendIntentException e){Log.e(TAG, String.format("RESOLUTION_REQUIRED:e:%s",e), e);}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+					Log.e(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
 					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
 					break;
 				}

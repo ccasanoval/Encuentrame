@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -17,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
+	private static final String TAG = "CESoft:";
 	private ProgressDialog _progressDialog;
 
 	@Override
@@ -64,7 +66,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 				if(pos == null)
 				{
 					Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.sin_posicion), Toast.LENGTH_SHORT).show();
-					System.err.println("ActWidgetNuevoLugar:onResume:btnSave:onClick: pos == null");
+					Log.e(TAG, "ActWidgetNuevoLugar:onResume:btnSave:onClick: pos == null");
 					return;
 				}
 				final int[] flag = new int[]{0};
@@ -92,7 +94,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 								l.guardar(this);
 								return;
 							}
-							System.err.println("ActWidgetNuevoLugar:addNuevo:backendlessFault: "+err);
+							Log.e(TAG, "ActWidgetNuevoLugar:addNuevo:backendlessFault: "+err);
 							_progressDialog.hide();//if(_progressDialog.isShowing())
 							Toast.makeText(ActWidgetNuevoLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 						}

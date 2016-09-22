@@ -10,19 +10,16 @@ import java.util.Date;
 //https://github.com/firebase/geofire-java
 public class Objeto implements Parcelable
 {
-	public static final String GEO = "GEO";
+	static final String GEO = "GEO";
 	public static final String NOMBRE = "objeto";
 
-	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
+	static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
 	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 
 	//General
 	protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
-	/*protected String uid = null;
-		public String getUid(){return uid;}
-		public void setUid(String v){uid = v;}*/
 
 	protected String nombre;
 	protected String descripcion;
@@ -37,7 +34,7 @@ public class Objeto implements Parcelable
 
 
 	//______________________________________________________________________________________________
-	public Objeto()
+	Objeto()
 	{
 		fecha = new Date();
 	}
@@ -55,8 +52,6 @@ public class Objeto implements Parcelable
 		if(!filtro.getNombre().isEmpty() && !getNombre().contains(filtro.getNombre()))return false;
 		if(filtro.getFechaIni() != null && getFecha().getTime() < filtro.getFechaIni().getTime())return false;
 		if(filtro.getFechaFin() != null && getFecha().getTime() > filtro.getFechaFin().getTime())return false;
-System.err.println("pasaFiltro----------"+filtro.getFechaFin()+" / "+getFecha().getTime());
-System.err.println("pasaFiltro----------OK");
 		return true;
 	}
 
@@ -70,7 +65,7 @@ System.err.println("pasaFiltro----------OK");
 
 	// PARCELABLE
 	//______________________________________________________________________________________________
-	protected Objeto(Parcel in)
+	Objeto(Parcel in)
 	{
 		setId(in.readString());
 		setNombre(in.readString());

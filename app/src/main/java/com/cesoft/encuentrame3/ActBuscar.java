@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,6 +41,8 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
+	private static final String TAG = "CESoft:ActBuscar:";
+
 	private Filtro _filtro;
 	private EditText _txtNombre;
 
@@ -248,7 +251,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		}
 		catch(Exception e)
 		{
-			System.err.println("ActBuscar:onCreate:e:"+e);
+			Log.e(TAG, String.format("ActBuscar:onCreate:e:%s",e));
 			Util.return2Main(this, null);
 		}
 		switch(_filtro.getTipo())
@@ -308,7 +311,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			_marker = _Map.addMarker(mo);
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(_filtro.getPunto(), 15));
 		}
-		catch(Exception e){System.err.println("ActBuscar:setMarker:e:"+e);}
+		catch(Exception e){Log.e(TAG, String.format("ActBuscar:setMarker:e:%s",e), e);}
 	}
 	private void setRadio()
 	{

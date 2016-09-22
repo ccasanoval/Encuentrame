@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,21 +31,22 @@ import com.google.android.gms.location.LocationServices;
 // http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823
 
 //https://www.raywenderlich.com/103540/geofences-googleapiclient
-public class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>
+class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>
 {
+	private static final String TAG = "CESoft:";
+
 	private Context _context;
 	private GoogleApiClient _GoogleApiClient;
 	private PendingIntent _PendingIntent;
 	private ArrayList<Geofence> _aGeofences;
 		public int size(){return _aGeofences==null?0:_aGeofences.size();}
 
-	public CesGeofenceStore(Context context, ArrayList<Geofence> geofences)
+	CesGeofenceStore(Context context, ArrayList<Geofence> geofences)
 	{
 		_context = context;
 		_aGeofences = new ArrayList<>(geofences);
 		_GoogleApiClient = new GoogleApiClient.Builder(context).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
 		_GoogleApiClient.connect();
-System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+this);
 	}
 
 	//// 4 ResultCallback<Status>
@@ -52,25 +54,24 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 	public void onResult(@NonNull Status result)
 	{
 		if(result.isSuccess())
-			System.err.println("CesGeofenceStore:onResult------------------Success!");
+			Log.w(TAG, "CesGeofenceStore:onResult------------------Success!");
 		else if(result.hasResolution())
-			System.err.println("CesGeofenceStore:onResult------------------hasResolution");
+			Log.w(TAG, "CesGeofenceStore:onResult------------------hasResolution");
 		else if(result.isCanceled())
-			System.err.println("CesGeofenceStore:onResult------------------Canceled");
+			Log.w(TAG, "CesGeofenceStore:onResult------------------Canceled");
 		else if(result.isInterrupted())
-			System.err.println("CesGeofenceStore:onResult------------------Interrupted");
+			Log.w(TAG, "CesGeofenceStore:onResult------------------Interrupted");
 	}
 	//// 4 OnConnectionFailedListener
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
 	{
-		System.err.println("CesGeofenceStore:e:Connection failed");
+		Log.e(TAG, "CesGeofenceStore:e:Connection failed");
 	}
 	//// 4 ConnectionCallbacks
 	@Override
 	public void onConnected(Bundle connectionHint)
 	{
-		System.err.println("CesGeofenceStore:onConnected");
 		// We're connected, now we need to create a GeofencingRequest with the geofences we have stored.
 		if(_aGeofences.size() > 0)
 		{
@@ -86,13 +87,12 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 	@Override
 	public void onConnectionSuspended(int cause)
 	{
-		System.err.println("CesGeofenceStore:onConnectionSuspended:e:");
+		Log.w(TAG, "CesGeofenceStore:onConnectionSuspended:e:");
 	}
 
 	//______________________________________________________________________________________________
-	public void clear()
+	void clear()
 	{
-		System.err.println("CesGeofenceStore:clear:"+this);
 		if(_PendingIntent != null)
 			LocationServices.GeofencingApi.removeGeofences(_GoogleApiClient, _PendingIntent);
 	}
@@ -113,5 +113,4 @@ System.err.println("CesGeofenceStore:------------------"+geofences.size()+":"+th
 		// so that sending the PendingIntent again updates the original. Otherwise, Location Services can't match the PendingIntent to requests made with it.
 		return PendingIntent.getBroadcast(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 	}
-
 }

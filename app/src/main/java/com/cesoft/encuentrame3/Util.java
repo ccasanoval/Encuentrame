@@ -1,7 +1,6 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,7 +30,7 @@ public class Util
 		public int getValue(){return value;}
 	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
-	public static final String TIPO = "tipo";
+	static final String TIPO = "tipo";
 //	private static final String PREF_LOGIN = "login";
 //	private static final String PREF_PWD = "password";
 //	private static final String PREF_SAVE_LOGIN = "save_login";
@@ -40,29 +39,22 @@ public class Util
 	// REFRESH LISTA RUTAS
 	//______________________________________________________________________________________________
 	private static IListaItemClick _refresh;
-		public static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
-		public static void refreshListaRutas()
+		static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
+		static void refreshListaRutas()
 		{
 			if(_refresh!=null)_refresh.onRefreshListaRutas();
 		}
 
 	//______________________________________________________________________________________________
-	// INIT
-	//______________________________________________________________________________________________
-	private static Application _app;
-		public static void setApplication(Application app){_app = app;}
-		public static Application getApplication(){return _app;}
-
-	//______________________________________________________________________________________________
 	// LOCATION
 	//______________________________________________________________________________________________
-	protected  static Location _locLast;
+	private static Location _locLast;
 	public static void setLocation(Location loc)
 	{
 		_locLast=loc;
 System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 	}
-	public static Location getLocation(Context c)
+	static Location getLocation(Context c)
 	{
 		Location location1=null, location2=null;
 		try
@@ -144,7 +136,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
-	public static void showAviso(Context c, String sTitulo, Aviso a, Intent intent)
+	static void showAviso(Context c, String sTitulo, Aviso a, Intent intent)
 	{
 		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message_type", true))
@@ -272,7 +264,7 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 	//______________________________________________________________________________________________
 	/// CONFIG
 	//______________________________________________________________________________________________
-	public static boolean isAutoArranque(Context c)
+	static boolean isAutoArranque(Context c)
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		return prefs.getBoolean("is_auto_arranque", true);
@@ -281,14 +273,14 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 	//______________________________________________________________________________________________
 	private static final String PREF_TRACKING = "tracking_prefs";
 	private static final String ID_TRACKING = "id_tracking_route";
-	public static void setTrackingRoute(Context c, String sIdRoute)
+	static void setTrackingRoute(Context c, String sIdRoute)
 	{
 		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
 		editor.apply();//editor.commit(); Aply does it in background
 	}
-	public static String getTrackingRoute(Context c)
+	static String getTrackingRoute(Context c)
 	{
 		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
  		return sp.getString(ID_TRACKING, "");
@@ -297,7 +289,7 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
 	//______________________________________________________________________________________________
-	public static void return2Main(Activity act, boolean bDirty, String sMensaje)
+	static void return2Main(Activity act, boolean bDirty, String sMensaje)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, bDirty);
@@ -305,16 +297,15 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
-	public static void return2Main(Activity act, Filtro filtro)
+	static void return2Main(Activity act, Filtro filtro)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, true);
 		intent.putExtra(Filtro.FILTRO, filtro);
-System.err.println("-----util:return2Main:filtro:"+filtro);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
-	public static void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
+	static void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
 	{
 		Intent intent = new Intent(act, ActMain.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -324,49 +315,5 @@ System.err.println("-----util:return2Main:filtro:"+filtro);
 		act.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
 		act.finish();
 	}
-
-
-	//______________________________________________________________________________________________
-	// LOGIN
-	/*public static String getUsuario(Context c)
-	{
-		if(c == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-		return prefs.getString(PREF_LOGIN, "");
-	}
-	public static String getClave(Context c)
-	{
-		if(c == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-		return prefs.getString(PREF_PWD, "");
-		//}catch(Exception e){System.err.println("Util:getClave:e:"+e);}
-		//return "";
-	}
-	//-------
-	public static void login(Context c, AsyncCallback<BackendlessUser> res)
-	{
-
-		try
-		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-			if(prefs.getBoolean(PREF_SAVE_LOGIN, false))return;
-		}catch(Exception e){System.err.println("Util.login2:e:"+e);}
-		String usr = getUsuario(c);
-		String pwd = getClave(c);
-		login(usr, pwd, c, res);
-	}
-
-
-	public static void logout(final Activity act)
-	{
-		try{
-
-				Intent intent = new Intent(act.getBaseContext(), ActLogin.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				act.startActivity(intent);
-				act.finish();
-
-		}catch(Exception e){System.err.println("Util:logout:e:"+e);}
-	}*/
 
 }

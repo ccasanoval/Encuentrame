@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.app.Service;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -23,6 +24,7 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class WidgetRutaService extends Service
 {
+	private static final String TAG = "CESoft:";
 	private static Handler _h = null;
 	private static Runnable _r = null;
 	private static final int _DELAY_SHORT = 60*1000;
@@ -39,7 +41,6 @@ public class WidgetRutaService extends Service
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
-System.err.println("-----WidgetRutaService--onStartCommand---");
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
 		{
 			_h = new Handler();
@@ -64,12 +65,10 @@ System.err.println("-----WidgetRutaService--onStartCommand---");
 	private void payLoad()
 	{
 		String idRuta = Util.getTrackingRoute(WidgetRutaService.this);
-		System.err.println("-----WidgetRutaService-----idRuta="+idRuta+";");
 		if( ! idRuta.isEmpty())
 		{
 			setRuta();
 			_h.postDelayed(_r, _DELAY_SHORT);
-System.err.println("-----WidgetRutaService--SHORT---");
 		}
 		else
 		{
@@ -88,7 +87,6 @@ System.err.println("-----WidgetRutaService--SHORT---");
 	//______________________________________________________________________________________________
 	private void setRuta()
 	{
-System.err.println("---------WidgetRutaService:cambiarTextoWidget");
 		try//TODO: activar desactivar botones de widget
 		{
 			String idRuta = Util.getTrackingRoute(this);
@@ -101,8 +99,8 @@ System.err.println("---------WidgetRutaService:cambiarTextoWidget");
 
 					try{
 					rutas.getValue(Ruta.class);
-					System.err.println("CesService:saveGeoTracking:Ruta.getById: OOOOOOOOOK");
-					}catch(Exception e){System.err.println("CesService:saveGeoTracking:Ruta.getById:"+rutas);}
+					Log.w(TAG, "WidgetRutaService:saveGeoTracking:Ruta.getById: OOOOOOOOOK");
+					}catch(Exception e){Log.e(TAG, String.format("WidgetRutaService:saveGeoTracking:Ruta.getById:%s",rutas), e);}
 
 					Ruta ruta = null;
 					for(DataSnapshot r : rutas.getChildren())
@@ -112,7 +110,7 @@ System.err.println("---------WidgetRutaService:cambiarTextoWidget");
 					}
 					if(ruta == null)
 					{
-						System.err.println("WidgetRutaService:setRuta:Ruta.getById:NULL---------------");
+						Log.e(TAG, "WidgetRutaService:setRuta:Ruta.getById:NULL---------------");
 						return;
 					}
 
@@ -144,7 +142,7 @@ System.err.println("---------WidgetRutaService:cambiarTextoWidget");
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
-					System.err.println("WidgetRutaService:cambiarTextoWidget:handleFault:f:"+err);
+					Log.e(TAG, String.format("WidgetRutaService:cambiarTextoWidget:handleFault:f:%s", err));
 				}
 			});
 
@@ -152,7 +150,7 @@ System.err.println("---------WidgetRutaService:cambiarTextoWidget");
 		}
 		catch(Exception e)
 		{
-			System.err.println("WidgetRutaService:onStartCommand:e: "+e);
+			Log.e(TAG, String.format("WidgetRutaService:onStartCommand:e:%s",e), e);
 		}
 	}
 }

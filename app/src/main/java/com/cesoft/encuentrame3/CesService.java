@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -36,48 +37,47 @@ import com.cesoft.encuentrame3.models.Ruta;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: CesService:Login:f: -------------------------------------------------- Entity with the specified ID cannot be found: Id - A801DF39-639B-910E-FF23-C9996E781E00
-
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
-//TODO: Si el primer punto de ruta es erroneo y esta lejos, los demas no se grabaran por filtro velocidad!!!
 public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
+	private static final String TAG = "CESoft:CesService:";
 	private static final int GEOFEN_DWELL_TIME = 60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
+	private static final long DELAY_TRACK_MIN = 30*1000;
+	private static final long DELAY_TRACK_MAX = 7*60*1000;
+	private long DELAY_TRACK = 2*60*1000;//TODO: ajustar
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
-	private static CesGeofenceStore _GeofenceStoreAvisos;
 	private static CesService _this;
-	private static ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
+	private CesGeofenceStore _GeofenceStoreAvisos;
+	private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
 
 	//______________________________________________________________________________________________
 	public CesService()
 	{
 		super("EncuentrameSvc");
+		_this = this;
 	}
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		_this = this;
-		Login.setSvcContext(getApplicationContext());
-		Login.login(new Login.AuthListener()
+		Login.login(getApplicationContext(), new Login.AuthListener()
 		{
 			@Override
 			public void onExito(FirebaseUser usr)
 			{
-				System.err.println("CesService:onCreate:login:exito:-------------------------------------------------- ");
+				Log.w(TAG, "onCreate:login:exito:-------------------------------------------------- ");
 			}
 			@Override
 			public void onFallo(Exception e)
 			{
-				System.err.println("CesService:onCreate:login:fallo:-------------------------------------------------- "+e);
+				Log.e(TAG, "onCreate:login:fallo:-------------------------------------------------- "+e, e);
 				CesService.this.stopSelf();
 			}
 		});
 		iniGeoTracking();
-System.err.println("CesService:onCreate:-------------------------------------------------- ");
 	}
 
 	//______________________________________________________________________________________________
@@ -87,24 +87,25 @@ System.err.println("CesService:onCreate:----------------------------------------
 		try
 		{
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
+			long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
 			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
 			{
-System.err.println("CesService:loop-------------------------------------------------------------"+java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
+Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
 				if( ! Login.isLogged())
 				{
-					System.err.println("CesService:loop---sin usuario");
-					Login.login(new Login.AuthListener()
+					Log.w(TAG, "loop---sin usuario");
+					Login.login(getApplicationContext(), new Login.AuthListener()
 					{
 						@Override
 						public void onExito(FirebaseUser usr)
 						{
-							System.err.println("CesService:loop---------Login OK:"+usr);
+							Log.w(TAG, String.format("loop---------Login OK:%s",usr));
 						}
 						@Override
 						public void onFallo(Exception e)
 						{
-							System.err.println("CesService:loop---------Login kk:"+e);
+							Log.e(TAG, String.format("loop---------Login kk:%s",e), e);
 						}
 					});
 					Thread.sleep(DELAY_LOAD / 3);
@@ -115,17 +116,25 @@ System.err.println("CesService:loop---------------------------------------------
 					cargarListaGeoAvisos();
 					tmLoad = System.currentTimeMillis();
 				}
-				saveGeoTracking();
-				Thread.sleep(DELAY_LOAD / 3);
+				//saveGeoTracking();
+				if(tmTrack + DELAY_TRACK < System.currentTimeMillis())
+				{
+					saveGeoTracking();
+					tmTrack = System.currentTimeMillis();
+				}
+				Thread.sleep(DELAY_TRACK);//DELAY_LOAD / 3);
 			}
 		}
-		catch(InterruptedException e){System.err.println("CesService:onHandleIntent:e:"+e);}
+		catch(InterruptedException e){Log.e(TAG, String.format("onHandleIntent:e:%s", e), e);}
 	}
 
 	//______________________________________________________________________________________________
-	public static void cargarListaGeoAvisos()
+	public static void _cargarListaGeoAvisos()
 	{
-System.err.println("CesService:cargarListaGeoAvisos-----------------------------------0------");
+		_this.cargarListaGeoAvisos();///TODO: Mejorar
+	}
+	private void cargarListaGeoAvisos()
+	{
 		try
 		{
 			Aviso.getActivos(new ValueEventListener()
@@ -136,8 +145,8 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 					//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 					boolean bDirty = false;
 					long n = avisos.getChildrenCount();
-System.err.println("CesService:cargarListaGeoAvisos-----********************************************************************------------1------"+n);
-					if(n != _listaGeoAvisos.size())
+//Log.w(TAG, "cargarListaGeoAvisos-----********************************************************************------------1------"+n);
+					if(n != CesService.this._listaGeoAvisos.size())
 					{
 						if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
 						_listaGeoAvisos.clear();
@@ -156,7 +165,6 @@ System.err.println("CesService:cargarListaGeoAvisos-----************************
 								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
 								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
 						aGeofences.add(gf);
-System.err.println("CesService:cargarListaGeoAvisos-----------------------------------2------");
 						if( ! bDirty)
 						{
 							if(_listaGeoAvisos.size() < i)
@@ -165,46 +173,41 @@ System.err.println("CesService:cargarListaGeoAvisos-----------------------------
 								bDirty = true;
 							i++;
 						}
-if(bDirty)System.err.println("Aviso="+a.getId()+" : "+a.getNombre()+":"+a.getDescripcion() + "\t Geof=" + gf.getRequestId());
+if(bDirty)Log.w(TAG, String.format("Aviso=%s  :  %s  :  %s  \t GEOF= %s", a.getId(), a.getNombre(), a.getDescripcion(), gf.getRequestId()));
 					}
 					if(bDirty)
 					{
-System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------DIRTY");
+Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 						_listaGeoAvisos = aAvisos;
-						_GeofenceStoreAvisos = new CesGeofenceStore(_this, aGeofences);//Se puede añadir en lugar de crear desde cero?
+						_GeofenceStoreAvisos = new CesGeofenceStore(CesService.this, aGeofences);//Se puede añadir en lugar de crear desde cero?
 					}
 				}
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
-					System.err.println("CesService:cargarListaGeoAvisos:f:"+err);
+					Log.e(TAG, "cargarListaGeoAvisos:f:"+err);
 				}
 			});
 		}
 		catch(Exception e)
 		{
-			System.err.println("CesService:cargarListaGeoAvisos:e:"+e);
+			Log.e(TAG, String.format("cargarListaGeoAvisos:e:%s", e), e);
 			//_lista.clear();
 		}
 	}
 
 	//______________________________________________________________________________________________
-	//TODO: No guardar punto si es igual que el último...
-	//TODO: No guardar si (distancia con ultimo punto)/(tiempo ultimo punto) > 300km/h
-	private static Location _locLastSaved = null;
-	//private static long _tmLastSaved = System.currentTimeMillis();
-	//
-	//private static Location _loc0 = null, _loc1 = null;
-	private static String _sId = "";
-	public static void saveGeoTracking()
+	private Location _locLastSaved = null;
+	private String _sId = "";
+	public void saveGeoTracking()
 	{
-		final String sId = Util.getTrackingRoute(CesService._this);//TODO: guardar ruta en nube para que no se olvide al reiniciar?
+		final String sId = Util.getTrackingRoute(this);
 		if(sId.isEmpty())
 		{
-			CesService._this.stopTracking();
+			stopTracking();
 			return;
 		}
-		CesService._this.startTracking();
+		startTracking();
 
 		Ruta.getById(sId, new ValueEventListener()
 		{
@@ -213,8 +216,8 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 			{
 				try{
 				rutas.getValue(Ruta.class);
-				System.err.println("CesService:saveGeoTracking:Ruta.getById: OOOOOOOOOK");
-				}catch(Exception e){System.err.println("CesService:saveGeoTracking:Ruta.getById:"+rutas);}
+				Log.w(TAG, "saveGeoTracking:Ruta.getById: OOOOOOOOOK");
+				}catch(Exception e){Log.e(TAG, "saveGeoTracking:Ruta.getById:"+rutas, e);}
 
 				Ruta r = null;
 				for(DataSnapshot ruta : rutas.getChildren())
@@ -224,57 +227,73 @@ System.err.println("CesService:cargarListaGeoAvisos:handleResponse:-------------
 				}
 				if(r == null)
 				{
-					System.err.println("CesService:saveGeoTracking:Ruta.getById:NULL---------------");
+					Log.e(TAG, "saveGeoTracking:Ruta.getById:NULL---------------");
 					return;
 				}
 
-				CesService.handleResponse(r, sId);
+				handleResponse(r, sId);
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("CesService:saveGeoTracking:findById:f:----------------------:" + err);
+				Log.e(TAG, "saveGeoTracking:findById:f:----------------------:" + err);
 			}
 		});
 	}
 
-	public static void handleResponse(Ruta r, String sId)
+	public void handleResponse(Ruta r, String sId)
 	{
-		System.err.println("CesService:handleResponse:"+r);
 		if(r == null)return;
-		final Location loc = Util.getLocation(CesService._this);
+		final Location loc = Util.getLocation(CesService.this);
 		guardarPunto(loc, r, sId);
 	}
 
-	private static void guardarPunto(final Location loc, final Ruta r, final String sId)
+	private void guardarPunto(final Location loc, final Ruta r, final String sId)
 	{
 		if(loc == null)
 		{
-			System.err.println("CesService:guardarPunto:findById:Util.getLocation()-----------------:NULL");
+			Log.e(TAG, "guardarPunto:findById:Util.getLocation()-----------------:NULL");
 			return;
 		}
-System.err.println("CesService:guardarPunto:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "/" + loc.getLongitude()+":"+(new java.util.Date(loc.getTime())));
-if(loc.hasAccuracy())System.err.println("CesService:guardarPunto:findById:Util.getAccuracy()-------------------:" + loc.getAccuracy());
-if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getSpeed()-------------------:" + loc.getSpeed());
-if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getAltitude()-------------------:" + loc.getAltitude());
-	if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getBearing()-------------------:" + loc.getBearing());
+Log.w(TAG, "guardarPunto:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "/" + loc.getLongitude()+":"+(new java.util.Date(loc.getTime())));
+if(loc.hasAccuracy())Log.w(TAG, "CesService:guardarPunto:findById:Util.getAccuracy()-------------------:" + loc.getAccuracy());
+if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getSpeed()-------------------:" + loc.getSpeed());
+if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getAltitude()-------------------:" + loc.getAltitude());
+if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getBearing()-------------------:" + loc.getBearing());
 
-
-		if(!loc.hasAccuracy() || loc.getAccuracy() > 100)return;//TODO:Test
+		//Si el nuevo punto no tiene sentido, no se guarda...
+		if(!loc.hasAccuracy() || loc.getAccuracy() > 50)return;//TODO: Meter en opciones
 
 		if( ! _sId.equals(sId))
 		{
 			_sId = sId;
 			_locLastSaved = null;
-			System.err.println("CesService:guardarPunto:Nueva ruta: " + _sId + " != " + sId);
+			Log.w(TAG, "guardarPunto:Nueva ruta: " + _sId + " != " + sId);
 		}
 		else if(_locLastSaved != null)
 		{
-			if(loc.distanceTo(_locLastSaved) < 2)//Puntos muy cercanos
+			float distLastSaved = loc.distanceTo(_locLastSaved);
+Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Punto dist ant = %f", distLastSaved));
+			if(distLastSaved < 3)//Puntos muy cercanos
 			{
-				System.err.println("CesService:saveGeoTracking:Punto repetido: " + sId + " dist=" + _locLastSaved.distanceTo(loc) + " ::: " + _locLastSaved.getLatitude() + "," + _locLastSaved.getLongitude());
+				Log.w(TAG, String.format("CesService:saveGeoTracking:Punto repetido: %s   dist=%f    pos=%f / %f", sId, distLastSaved, _locLastSaved.getLatitude(), _locLastSaved.getLongitude()));
+				DELAY_TRACK += 30*1000;
+				if(DELAY_TRACK > DELAY_TRACK_MAX)DELAY_TRACK = DELAY_TRACK_MAX;
 				return;
 			}
+			else if(distLastSaved > 200)
+			{
+				DELAY_TRACK -= 2*60*1000;
+			}
+			else if(distLastSaved > 100)
+			{
+				DELAY_TRACK -= 60*1000;
+			}
+			else if(distLastSaved > 30)
+			{
+				DELAY_TRACK -= 30*1000;
+			}
+			if(DELAY_TRACK < DELAY_TRACK_MIN)DELAY_TRACK = DELAY_TRACK_MIN;
 
 			//Si el nuevo punto no tiene sentido, no se guarda...
 			/*
@@ -324,7 +343,7 @@ if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getA
 			{
 				if(err == null)
 				{
-					System.err.println("CesService:saveGeoTracking:guardar:----------------------:" + data);
+					Log.w(TAG, "saveGeoTracking:guardar:----------------------:" + data);
 					Ruta.addPunto(data.getKey(), loc.getLatitude(), loc.getLongitude(),
 							loc.getAccuracy(), loc.getAltitude(), loc.getSpeed(), loc.getBearing(),
 							new Transaction.Handler()
@@ -334,9 +353,9 @@ if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getA
 							public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 							{
 								if(err != null)
-									System.err.println("CesService:saveGeoTracking:guardar:pto:err:----------------------:" + err);
+									Log.e(TAG, "saveGeoTracking:guardar:pto:err:----------------------:" + err);
 								else
-									System.err.println("CesService:saveGeoTracking:guardar:pto:----------------------:" + data);
+									Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
 
 								Util.refreshListaRutas();//Refrescar lista rutas en main..
 							}
@@ -344,7 +363,7 @@ if(loc.hasSpeed())System.err.println("CesService:guardarPunto:findById:Util.getA
 				}
 				else
 				{
-					System.err.println("CesService:saveGeoTracking:guardar:err:----------------------:" + err);
+					Log.e(TAG, "saveGeoTracking:guardar:err:----------------------:" + err);
 				}
 				_locLastSaved = loc;
 				//_tmLastSaved = System.currentTimeMillis();
@@ -454,9 +473,6 @@ if(g.getLatitude() == null)return;
 	}*/
 
 
-
-
-
 	//https://developer.android.com/training/location/change-location-settings.html
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
@@ -466,8 +482,8 @@ if(g.getLatitude() == null)return;
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
 
 	    _LocationRequest = new LocationRequest();
-	    _LocationRequest.setInterval(60*1000);//TODO: ajustar por usuario...
-	    _LocationRequest.setFastestInterval(50*1000);
+	    _LocationRequest.setInterval(DELAY_TRACK_MIN);//TODO: ajustar por usuario...
+	    _LocationRequest.setFastestInterval(DELAY_TRACK_MIN);
 	    _LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		pideGPS();
 	}
@@ -482,7 +498,7 @@ if(g.getLatitude() == null)return;
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			System.err.println("CesService:checkPlayServices:e:" + result);
+			Log.e(TAG, "checkPlayServices:e:" + result);
 	        return false;
 	    }
 	    return true;
@@ -504,7 +520,7 @@ if(g.getLatitude() == null)return;
 			}
 			catch(SecurityException e)
 			{
-				System.err.println("CesService:startTracking:e:"+e);
+				Log.e(TAG, "startTracking:e:"+e, e);
 			}
 		}
 	}
@@ -518,25 +534,25 @@ if(g.getLatitude() == null)return;
 	@Override
 	public void onConnected(@Nullable Bundle bundle)
 	{
-		System.err.println("CesService:onConnected");
+		Log.w(TAG, "CesService:onConnected");
 	}
 	@Override
 	public void onConnectionSuspended(int i)
 	{
-		System.err.println("CesService:onConnectionSuspended:"+i);
+		//Log.w(TAG, "onConnectionSuspended:"+i);
 		if(_GoogleApiClient != null)
 			_GoogleApiClient.connect();
 	}
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		System.err.println("CesService:onLocationChanged:"+location.getLatitude()+"/"+location.getLongitude()+":"+(new java.util.Date(location.getTime())));
+		//Log.w(TAG, "onLocationChanged:"+location.getLatitude()+"/"+location.getLongitude()+":"+(new java.util.Date(location.getTime())));
 		Util.setLocation(location);
 	}
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
 	{
-		System.err.println("CesService:onConnectionFailed:e:" + connectionResult.getErrorCode());
+		Log.w(TAG, String.format("onConnectionFailed:e:%s", connectionResult.getErrorCode()));
 	}
 
 	private void pideGPS()
@@ -556,13 +572,13 @@ if(g.getLatitude() == null)return;
 				switch(status.getStatusCode())
 				{
 				case LocationSettingsStatusCodes.SUCCESS:
-					System.err.println("LocationSettingsStatusCodes.SUCCESS");
+					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
 					try{status.startResolutionForResult(null, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+					Log.w(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
 					break;
 				}
 			}

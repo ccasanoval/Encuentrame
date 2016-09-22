@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -23,9 +24,6 @@ public class Login
 	private static final String PREF_PWD = "password";
 	private static final String PREF_SAVE_LOGIN = "save_login";
 
-	private static Context _svcContext;
-		public static void setSvcContext(Context c){_svcContext = c;}
-
 	private static FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
 	public static String getCurrentUserID()
 	{
@@ -33,7 +31,7 @@ public class Login
 		if(a == null || a.getCurrentUser() == null)return "";
 		return a.getCurrentUser().getUid();
 	}
-	public static String getCurrentUserName()//TODO: throw exception instead of return "" ?
+	static String getCurrentUserName()//TODO: throw exception instead of return "" ?
 	{
 		FirebaseAuth a = FirebaseAuth.getInstance();
 		if(a == null || a.getCurrentUser() == null)return "";
@@ -43,25 +41,27 @@ public class Login
 
 	// TODO: Sync data: https://firebase.google.com/docs/database/android/offline-capabilities?hl=es
 	private static FirebaseDatabase _fbdb=null;
-	public static FirebaseDatabase getDBInstance()
+	public synchronized static FirebaseDatabase getDBInstance()
 	{
 		if(_fbdb == null)
 		{
 			_fbdb = FirebaseDatabase.getInstance();
+			try{
 			_fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
+			}catch(Exception e){Log.e("CESoft:Login", String.format("getDBInstance:e:%s",e), e);}
 		}
 		return _fbdb;
 	}
 
 	//-----
-	public interface AuthListener
+	interface AuthListener
 	{
 		void onExito(FirebaseUser usr);
 		void onFallo(Exception e);
 	}
 	//-----
 
-	public static void addUser(String email, String password, final AuthListener listener)
+	static void addUser(String email, String password, final AuthListener listener)
 	{
 		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
 //System.err.println("Login: addUser:" + email + "/"+password);
@@ -126,97 +126,97 @@ public class Login
 	}
 
 
-	public static String getUsuario()
+	private static String getUsuario(Context c)
 	{
-		if(_svcContext == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		return prefs.getString(PREF_LOGIN, "");
 	}
-	public static String getClave()
+	private static String getClave(Context c)
 	{
-		if(_svcContext == null)return null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		return prefs.getString(PREF_PWD, "");
 	}
-	public static void saveLogin(String usr, String pwd)
+	private static void saveLogin(Context c, String usr, String pwd)
 	{
 		if(usr == null || usr.isEmpty())return;
-		if(_svcContext == null)return;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(!prefs.getBoolean(PREF_SAVE_LOGIN, true))return;
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, usr);
 		e.putString(PREF_PWD, pwd);
 		e.apply();
 	}
-	public static void delLogin()
+	private static void delLogin(Context c)
 	{
-		if(_svcContext == null)return;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_LOGIN, "");
 		e.putString(PREF_PWD, "");
 		e.apply();
 	}
-	public static void delPasswordOnly()
+	private static void delPasswordOnly(Context c)//TODO: Log si c = null
 	{
-		if(_svcContext == null)return;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+		if(c == null)return;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		SharedPreferences.Editor e = prefs.edit();
 		e.putString(PREF_PWD, "");
 		e.apply();
 	}
 
 	//-------
-	public static boolean login(AuthListener listener)
+	public static boolean login(Context c, AuthListener listener)
 	{
-		if(_svcContext == null)return false;
+		if(c == null)return false;
 		try
 		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 			if( ! prefs.getBoolean(PREF_SAVE_LOGIN, true))
 			{
-				delLogin();
+				delLogin(c);
 				return false;
 			}
 		}catch(Exception e){System.err.println("Login.login2:e:"+e);}
-		String email = getUsuario();
-		String password = getClave();
+		String email = getUsuario(c);
+		String password = getClave(c);
 		if(email == null || password == null || email.isEmpty() || password.isEmpty())return false;
 		login2(email, password, listener);
 		return true;
 	}
-	public static void login(String email, String password, final AuthListener listener)
+	public static void login(Context c, String email, String password, final AuthListener listener)
 	{
 		login2(email, password, listener);
-		if(_svcContext != null)
+		if(c != null)
 		{
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(_svcContext);
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 			if(prefs.getBoolean(PREF_SAVE_LOGIN, true))
 			{
 				if(!email.isEmpty())
-				saveLogin(email, password);
+				saveLogin(c, email, password);
 			}
 			else
-				delLogin();
+				delLogin(c);
 		}
 	}
 
 	//-------
-	public static boolean isLogged()
+	static boolean isLogged()
 	{
 		return getAuth().getCurrentUser() != null;
 	}
 
 	//-------
-	public static void logout()
+	static void logout(Context c)
 	{
 		getAuth().signOut();
-		delPasswordOnly();//delLogin();
+		delPasswordOnly(c);//delLogin();
 	}
 
 	//-------
-	public static void restoreUser(final String email, final AuthListener listener)//AuthListener listener
+	static void restoreUser(final String email, final AuthListener listener)//AuthListener listener
 	{
 		getAuth().sendPasswordResetEmail(email)
 			.addOnCompleteListener(new OnCompleteListener<Void>()

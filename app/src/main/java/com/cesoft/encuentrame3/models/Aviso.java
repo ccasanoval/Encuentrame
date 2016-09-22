@@ -1,8 +1,8 @@
 package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
+import android.util.Log;
 
-import com.cesoft.encuentrame3.Login;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -16,6 +16,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Date;
+import com.cesoft.encuentrame3.Login;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
@@ -23,17 +24,18 @@ import java.util.Date;
 @IgnoreExtraProperties
 public class Aviso extends Objeto
 {
+	private static final String TAG = "CESoft:Aviso:";
 	public static final String NOMBRE = "aviso";
-	protected static DatabaseReference newFirebase()
+	private static DatabaseReference newFirebase()
 	{
 		return Login.getDBInstance()
 				.getReference()
 				.child(Login.getCurrentUserID())
 				.child(NOMBRE);
 	}
-	protected static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
-	protected DatabaseReference _datos;
+	private DatabaseReference _datos;
 
 	///______________________________________________________________
 	//Yet Another Firebase Bug:
@@ -48,6 +50,7 @@ public class Aviso extends Objeto
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
+	//protected long fecha;//TODO:?
 	protected Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
@@ -99,7 +102,6 @@ public class Aviso extends Objeto
 		if(this == o)return true;
 		if(!(o instanceof Aviso))return false;
 		Aviso a = (Aviso)o;
-System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 		return getId().equals(a.getId())
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud() && getRadio() == a.getRadio()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
@@ -116,7 +118,6 @@ System.err.println("------------------AVISO-EQUALS-"+o+" : "+this);
 		setLatitud(in.readDouble());
 		setLongitud(in.readDouble());
 		setRadio(in.readDouble());
-System.err.println("----------------Aviso:from parcel 2:" + this);
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -128,7 +129,6 @@ System.err.println("----------------Aviso:from parcel 2:" + this);
 		dest.writeDouble(getLatitud());
 		dest.writeDouble(getLongitud());
 		dest.writeDouble(getRadio());
-System.err.println("----------------Aviso:writeToParcel:"+this);
 	}
 	@Override
 	public int describeContents(){return 0;}
@@ -206,7 +206,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("Aviso:getLista:onCancelled:"+err);
+				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Aviso:getLista:onCancelled:"+err);
 			}
 		});
@@ -217,9 +217,7 @@ System.err.println("----------------Aviso:writeToParcel:"+this);
 	public boolean pasaFiltro(Filtro filtro)
 	{
 		if( ! super.pasaFiltro(filtro))return false;
-System.err.println("----------"+filtro.getActivo()+" : "+isActivo());
 		if(filtro.getActivo()==Filtro.ACTIVO && !isActivo()  ||  filtro.getActivo()==Filtro.INACTIVO && isActivo())return false;
-System.err.println("----------pasaFiltro FINAL");
 		return true;
 	}
 	public static void getLista(ObjetoListener<Aviso> listener, Filtro filtro)
@@ -230,7 +228,7 @@ System.err.println("----------pasaFiltro FINAL");
 			buscarPorGeoFiltro(listener, filtro);
 	}
 	//----
-	public static void buscarPorFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
+	private static void buscarPorFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
 	{
 		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		{
@@ -250,15 +248,14 @@ System.err.println("----------pasaFiltro FINAL");
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("Aviso:buscarPorFiltro:onCancelled:"+err);
+				Log.e(TAG, "buscarPorFiltro:onCancelled:"+err);
 				listener.onError(err.toString());
 			}
 		});
 	}
 	//----
-	public static void buscarPorGeoFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
+	private static void buscarPorGeoFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
 	{
-System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro);
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
 		final ArrayList<Aviso> aAvisos = new ArrayList<>();
@@ -270,7 +267,6 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)
 			{
-				System.err.println("Aviso:buscarPorGeoFiltro:onKeyEntered:"+key+", "+location);
 				nCount++;
 				newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				{
@@ -286,7 +282,7 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
-						System.err.println("Aviso:buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
+						Log.e(TAG, "buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
 						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 				});
@@ -294,14 +290,12 @@ System.err.println("Aviso:buscarPorGeoFiltro:--------------------------:"+filtro
 			@Override
 			public void onGeoQueryReady()
 			{
-System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
 
-			@Override public void onGeoQueryError(DatabaseError err){System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryError:"+err);}
+			@Override public void onGeoQueryError(DatabaseError err){Log.e(TAG, "buscarPorGeoFiltro:onGeoQueryError:"+err);}
 			@Override public void onKeyExited(String key){}
 			@Override public void onKeyMoved(String key, GeoLocation location){}
-
 		};
 		geoQuery.addGeoQueryEventListener(lisGeo);
 	}
@@ -315,7 +309,7 @@ System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
 	{
 		if(_datos.getKey() == null)
 		{
-			System.err.println("Aviso:saveGeo:id==null");
+			Log.e(TAG, "saveGeo:id==null");
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
@@ -325,9 +319,9 @@ System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
     		public void onComplete(String key, DatabaseError error)
 			{
         		if(error != null)
-            		System.err.println("Aviso:saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+            		Log.e(TAG, "saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
         		else
-            		System.out.println("Aviso:saveGeo:Location saved on server successfully!");
+            		Log.w(TAG, "saveGeo:Location saved on server successfully!");
 			}
 		});
 	}
@@ -335,7 +329,7 @@ System.err.println("Aviso:buscarPorGeoFiltro:onGeoQueryReady:"+nCount);
 	{
 		if(_datos.getKey() == null)
 		{
-			System.err.println("Aviso:delGeo:id==null");
+			Log.e(TAG, "delGeo:id==null");
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();

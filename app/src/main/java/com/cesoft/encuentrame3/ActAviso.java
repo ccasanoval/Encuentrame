@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,6 +54,7 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
+	private static final String TAG = "CESoft:ActAviso:";
 	private static final int DELAY_LOCATION = 60000;
 
 	private boolean _bDesdeNotificacion = false;
@@ -213,7 +215,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
 			}
-			catch(SecurityException se){System.err.println("ActAviso:startTracking:e:"+se);}
+			catch(SecurityException se){Log.e(TAG, "startTracking:e:"+se);}
 		}
 	}
 	private void stopTracking()
@@ -286,7 +288,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			System.err.println("ActAviso:checkPlayServices:e:" + result);
+			Log.e(TAG, "checkPlayServices:e:" + result);
 	        return false;
 	    }
 	    return true;
@@ -297,7 +299,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
-		System.err.println("Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+		Log.e(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
 	}
 	@Override
 	public void onConnected(Bundle arg0)
@@ -326,7 +328,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		}
 		if(_txtNombre.getText().toString().isEmpty())
 		{
-			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_nombre), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(ActAviso.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			_bGuardar = true;
@@ -344,13 +345,13 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				if(err == null)
 				{
-					CesService.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
+					CesService._cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
 					openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
 					_bGuardar = true;
 				}
 				else
 				{
-					System.err.println("ActAviso:guardar:handleFault:f:" + err);
+					Log.e(TAG, "guardar:handleFault:f:" + err);
 
 					//*****************************************************************************
 					try{Thread.sleep(500);}catch(InterruptedException ignored){}
@@ -361,13 +362,13 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 						{
 							if(err == null)
 							{
-								CesService.cargarListaGeoAvisos();
+								CesService._cargarListaGeoAvisos();
 								openMain(true, getString(R.string.ok_guardar_aviso));
 								_bGuardar = true;
 							}
 							else
 							{
-								System.err.println("ActAviso:guardar:handleFault2:f:" + err);
+								Log.e(TAG, "guardar:handleFault2:f:" + err);
 								Toast.makeText(ActAviso.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 								_bGuardar = true;
 							}
@@ -400,13 +401,12 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					{
 						if(err == null)
 						{
-							System.err.println("ActAviso:eliminar:handleResponse:" + data);
 							openMain(true, getString(R.string.ok_eliminar_aviso));
 							_bEliminar=true;
 						}
 						else
 						{
-							System.err.println("ActAviso:eliminar:handleFault:f:"+err);
+							Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
 							Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
 							_bEliminar=true;
 						}
@@ -434,7 +434,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActAviso:onMapReady:e:"+se);}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, "onMapReady:e:"+se, se);}
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override
@@ -481,7 +481,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					.strokeColor(Color.TRANSPARENT)
 					.fillColor(0x55AA0000));//Color.BLUE
 		}
-		catch(Exception e){System.err.println("ActAviso:setMarker:e:"+e);}
+		catch(Exception e){Log.e(TAG, String.format("setMarker:e:%s",e), e);}
 	}
 
 	//______________________________________________________________________________________________
@@ -504,7 +504,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 				switch(status.getStatusCode())
 				{
 				case LocationSettingsStatusCodes.SUCCESS:
-					System.err.println("LocationSettingsStatusCodes.SUCCESS");
+					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
 					// All location settings are satisfied. The client can initialize location requests here.
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
@@ -512,10 +512,10 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					{
 						status.startResolutionForResult(ActAviso.this, 1000);
 					}
-					catch(android.content.IntentSender.SendIntentException e){System.err.println("LocationSettingsStatusCodes.RESOLUTION_REQUIRED:e:"+e);}
+					catch(android.content.IntentSender.SendIntentException e){Log.e(TAG, String.format("LocationSettingsStatusCodes.RESOLUTION_REQUIRED:e:%s",e), e);}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					System.err.println("LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+					Log.e(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
 					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
 					break;
 				}

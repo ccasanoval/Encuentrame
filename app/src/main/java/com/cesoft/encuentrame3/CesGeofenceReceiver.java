@@ -3,9 +3,8 @@ package com.cesoft.encuentrame3;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
@@ -21,6 +20,7 @@ import java.util.List;
 //TODO: En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable : eliminar CesServiceAvisoGeo
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
+	private static final String TAG = "CESoft:";
 
 	@Override
 	public void onReceive(Context context, Intent intent)
@@ -33,31 +33,31 @@ public class CesGeofenceReceiver extends BroadcastReceiver
 			switch(transition)
 			{
 			case Geofence.GEOFENCE_TRANSITION_ENTER:
-System.err.println("CesGeofenceReceiver:onReceive:-------------------------------------GEOFENCE_TRANSITION_ENTER");
+Log.w(TAG, "CesGeofenceReceiver:onReceive:-------------------------------------GEOFENCE_TRANSITION_ENTER");
 				for(Geofence geof : geofences)
 				{
 					showAviso(context, geof.getRequestId(), context.getString(R.string.en_zona_aviso));
-					System.err.println("CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
+Log.w(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
 				}
 				break;
 			case Geofence.GEOFENCE_TRANSITION_DWELL:
-System.err.println("CesGeofenceReceiver:onReceive:--------------------------------------GEOFENCE_TRANSITION_DWELL");
+Log.w(TAG, "CesGeofenceReceiver:onReceive:--------------------------------------GEOFENCE_TRANSITION_DWELL");
 				for(Geofence geof : geofences)
 				{
 					showAviso(context, geof.getRequestId(), context.getString(R.string.en_zona_aviso));
-					System.err.println("CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
+					Log.w(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
 				}
 				break;
 			case Geofence.GEOFENCE_TRANSITION_EXIT:
-System.err.println("CesGeofenceReceiver:onReceive:---------------------------------------GEOFENCE_TRANSITION_EXIT");
+Log.w(TAG, "CesGeofenceReceiver:onReceive:---------------------------------------GEOFENCE_TRANSITION_EXIT");
 				for(Geofence geof : geofences)
 				{
-					System.err.println("CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_EXIT:"+geof.getRequestId());
+					Log.w(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_EXIT:"+geof.getRequestId());
 				}
 				//for(Geofence geof : geofences)addTrackingPoint(geof);
 				break;
 			default:
-				System.err.println("CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -----------------------------");
+Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -----------------------------");
 				break;
 			}
 		}
@@ -80,7 +80,7 @@ System.err.println("CesGeofenceReceiver:onReceive:------------------------------
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("CesGeofenceReceiver:showAviso:e:" + err);
+				Log.e(TAG, "CesGeofenceReceiver:showAviso:e:" + err);
 			}
 		});
 	}
@@ -156,11 +156,11 @@ System.err.println("---------------------CesGeofenceReceiver:handleEnterExit");
 			LocalBroadcastManager.getInstance(Util.getApplication().getBaseContext()).sendBroadcast(broadcastIntent);
 
 			// Log the transition type and a message
-			//Log.d(GeofenceUtils.APPTAG, transitionType + ": " + ids);
-			//Log.d(GeofenceUtils.APPTAG,
+			//Log.w(GeofenceUtils.APPTAG, transitionType + ": " + ids);
+			//Log.w(GeofenceUtils.APPTAG,
 			//context.getString(R.string.geofence_transition_notification_text));
 			// In debug mode, log the result
-			//Log.d(GeofenceUtils.APPTAG, "transition");
+			//Log.w(GeofenceUtils.APPTAG, "transition");
 
 				// An invalid transition was reported
 		}

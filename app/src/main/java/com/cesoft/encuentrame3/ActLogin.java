@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +24,9 @@ import com.google.firebase.auth.FirebaseUser;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
 {
+	private static final String TAG = "CESoft:ActLogin:";
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
-	private static ActLogin _this;
+	//private static ActLogin _this;
 
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
@@ -51,9 +53,6 @@ public class ActLogin extends AppCompatActivity
 
 		//
 		//--- INICIAR
-		_this = this;
-		Login.setSvcContext(getApplicationContext());
-
 		//Crea servicio si no está ya creado, dentro del servicio se llama a login
 		startService(new Intent(this, CesService.class));
 		// Rute Widget Svc
@@ -64,20 +63,19 @@ public class ActLogin extends AppCompatActivity
 	{
 		super.onDestroy();
 		_tabLayout = null;
-		_this = null;
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
 	public class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
-		public SectionsPagerAdapter(FragmentManager fm)
+		SectionsPagerAdapter(FragmentManager fm)
 		{
 			super(fm);
 		}
 		@Override
 		public Fragment getItem(int position)
 		{
-			return PlaceholderFragment.newInstance(position);
+			return PlaceholderFragment.newInstance(position, ActLogin.this);
 		}
 		@Override
 		public int getCount()
@@ -124,23 +122,25 @@ public class ActLogin extends AppCompatActivity
 	public static class PlaceholderFragment extends Fragment
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
-		public PlaceholderFragment(){}
+		ActLogin _main;
 
 		// Returns a new instance of this fragment for the given section number.
-		public static PlaceholderFragment newInstance(int sectionNumber)
+		public static PlaceholderFragment newInstance(int sectionNumber, ActLogin main)
 		{
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
+			fragment._main = main;
 			return fragment;
 		}
+
+		public PlaceholderFragment(){}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			if(Login.isLogged())_this.goMain();
-System.err.println("-------------------------------------LOGIN:onCreateView.........................................................................");
+			if(Login.isLogged())_main.goMain();
 
 			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
@@ -163,22 +163,22 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					@Override
 					public void onClick(View v)
 					{
-						_this.iniEsperaLogin();
-						Login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
+						_main.iniEsperaLogin();
+						Login.login(_main.getApplicationContext(), txtEmail.getText().toString(), txtPassword.getText().toString(),
 								new Login.AuthListener()
 								{
 									@Override
 									public void onExito(FirebaseUser usr)
 									{
-										_this.finEsperaLogin();
-										Toast.makeText(_this, String.format(getString(R.string.login_ok), usr.getEmail()), Toast.LENGTH_LONG).show();
-										ActLogin._this.goMain();
+										_main.finEsperaLogin();
+										Toast.makeText(_main, String.format(getString(R.string.login_ok), usr.getEmail()), Toast.LENGTH_LONG).show();
+										_main.goMain();
 									}
 									@Override
 									public void onFallo(Exception e)
 									{
-										_this.finEsperaLogin();
-										Toast.makeText(ActLogin._this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+										_main.finEsperaLogin();
+										Toast.makeText(_main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
 									}
 								});
 					}
@@ -194,25 +194,25 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 					{
 						if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
 						{
-							Toast.makeText(ActLogin._this, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
+							Toast.makeText(_main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
 							return;
 						}
-						_this.iniEsperaLogin();
+						_main.iniEsperaLogin();
 						Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
 								new Login.AuthListener()
 								{
 									@Override
 									public void onExito(FirebaseUser usr)
 									{
-										_this.finEsperaLogin();
+										_main.finEsperaLogin();
 										if(usr != null)//TODO: string value
-										Toast.makeText(ActLogin._this, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
+										Toast.makeText(_main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
 									}
 									@Override
 									public void onFallo(Exception e)
 									{
-										_this.finEsperaLogin();
-										Toast.makeText(ActLogin._this, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
+										_main.finEsperaLogin();//TODO: Añadir %s en la cadena
+										Toast.makeText(_main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
 									}
 								});
 					}
@@ -234,15 +234,15 @@ System.err.println("-------------------------------------LOGIN:onCreateView.....
 								@Override
 								public void onExito(FirebaseUser usr)
 								{
-									System.err.println("ActLogin:RECOVER:"+usr);
+									//System.err.println("ActLogin:RECOVER:"+usr);
 									Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-									TabLayout.Tab t = _this._tabLayout.getTabAt(ENTER);
+									TabLayout.Tab t = _main._tabLayout.getTabAt(ENTER);
 									if(t!=null)t.select();
 								}
 								@Override
 								public void onFallo(Exception e)
 								{
-									System.err.println("ActLogin:RECOVER: e:"+e);//TODO: formatear y tradiucir mensaje?
+									Log.e(TAG, String.format("RECOVER:e:%s",e), e);//TODO: formatear y tradiucir mensaje?
 									Toast.makeText(rootView.getContext(), R.string.recover_ko +"  "+ e.toString(), Toast.LENGTH_LONG).show();
 								}
 							});

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -17,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 
 public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se muestra como dialogo
 {
+	private static final String TAG = "CESoft:";
 	private ProgressDialog _progressDialog;
 	private EditText _txtNombre;
 
@@ -41,21 +43,21 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		super.onResume();
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
 		_progressDialog.hide();
-System.err.println("----------------------6");
 		//
 		//Util.setSvcContext(this);
 		if( ! Login.isLogged())
 		{
-			Login.login(new Login.AuthListener()
+			Login.login(this.getApplicationContext(), new Login.AuthListener()
 			{
 				@Override
 				public void onExito(FirebaseUser usr)
 				{
-					System.err.println("ActWidgetNuevRuta:Login:OK:usr="+usr.getEmail());
+					Log.w(TAG, "ActWidgetNuevRuta:Login:OK:usr="+usr.getEmail());
 				}
 				@Override
 				public void onFallo(Exception e)
 				{
+					Log.e(TAG, "ActWidgetNuevRuta:Login:KO:e="+e, e);
 					Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
 					finish();
 				}
@@ -110,7 +112,7 @@ System.err.println("----------------------6");
 								r.guardar(this);
 								return;
 							}
-							System.err.println("ActWidgetNuevaRuta:addNuevo:backendlessFault: "+err);
+							Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:backendlessFault: "+err);
 							_progressDialog.hide();//if(_progressDialog.isShowing())
 							Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 

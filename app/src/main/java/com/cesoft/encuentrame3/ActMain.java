@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,8 +86,8 @@ Registered SHA-1s:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
+	private static final String TAG = "CESoft:ActMain:";
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
-	private static ActMain _this;
 
 	private ViewPager _viewPager;
 
@@ -95,16 +96,11 @@ public class ActMain extends AppCompatActivity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
-
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);//TODO: Eliminar de layout
-		_this = this;
 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		toolbar.setSubtitle(Login.getCurrentUserName());
-
-		Util.setApplication(getApplication());
-		//Util.initPrefs();
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -127,21 +123,16 @@ public class ActMain extends AppCompatActivity
 			Integer nPagina = getIntent().getIntExtra(PAGINA, -1);
 			if(nPagina >= Util.LUGARES && nPagina <= Util.AVISOS)
 				_viewPager.setCurrentItem(nPagina);
-System.err.println("PAGINA++++++++++++++++"+nPagina);
-
 			String sMensaje = getIntent().getStringExtra(MENSAJE);
 			if(sMensaje != null && !sMensaje.isEmpty())
 				Toast.makeText(ActMain.this, sMensaje, Toast.LENGTH_LONG).show();
-				//Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();
-			//if( ! getIntent().getBooleanExtra(DIRTY, true))return;
 		}
-		catch(Exception e){System.err.println("ActMain:onCreate:e:"+e);}
+		catch(Exception e){Log.e(TAG, String.format("onCreate:e:%s",e), e);}
 	}
 	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
-		_this = null;
 		_viewPager = null;
 	}
 
@@ -161,8 +152,8 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		{
 		case R.id.action_config:
 			try{
-			PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(ActMain._this, ActConfig.class), Util.CONFIG);
-			}catch(Exception e){System.err.println("ActMain: onOptionsItemSelected: action_config: "+e);}
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(this, ActConfig.class), Util.CONFIG);
+			}catch(Exception e){Log.e(TAG, "onOptionsItemSelected: action_config: "+e, e);}
 			return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
@@ -185,14 +176,14 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	public class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
-		public SectionsPagerAdapter(FragmentManager fm)
+		SectionsPagerAdapter(FragmentManager fm)
 		{
 			super(fm);
 		}
 		@Override
 		public Fragment getItem(int position)
 		{
-			return PlaceholderFragment.newInstance(position);
+			return PlaceholderFragment.newInstance(position, ActMain.this);
 		}
 		@Override
 		public int getCount()
@@ -223,14 +214,13 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
+		private ActMain _main;
 		private int _sectionNumber = Util.LUGARES;//Util.NADA;
 		private View _rootView;
 		private ListView _listView;
 
-		public PlaceholderFragment(){}
-
 		// Returns a new instance of this fragment for the given section number.
-		public static PlaceholderFragment newInstance(final int sectionNumber)
+		public static PlaceholderFragment newInstance(final int sectionNumber, ActMain main)
 		{
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
@@ -239,27 +229,29 @@ System.err.println("PAGINA++++++++++++++++"+nPagina);
 			fragment.setRetainInstance(true);
 			_apf[sectionNumber] = fragment;
 			fragment._sectionNumber = sectionNumber;
+			fragment._main = main;
 			return fragment;
 		}
+
+		public PlaceholderFragment(){}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			Bundle args = getArguments();
 			final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-System.err.println("------onCreateView:"+sectionNumber+" ::: "+_sectionNumber+" ::: "+(_sectionNumber < 0 ?"null":_aFiltro[_sectionNumber]));
 			_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 			_listView = (ListView)_rootView.findViewById(R.id.listView);
 			final TextView textView = new TextView(_rootView.getContext());
 
 			if(_sectionNumber < 0)
 			{
-System.err.println("----------------------------ActMain:onCreateView:_sectionNumber < 0 : "+_sectionNumber);
-				Intent intent = new Intent(_this.getBaseContext(), ActLogin.class);
+				Log.e(TAG, "PlaceholderFragment:onCreateView:----------------------------------------");
+				Intent intent = new Intent(_main.getBaseContext(), ActLogin.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				_this.startActivity(intent);
-				_this.finish();
-				_this = null;
+				_main.startActivity(intent);
+				_main.finish();
+				_main = null;
 				return null;
 			}
 			if(_aFiltro[_sectionNumber] == null)
@@ -275,13 +267,13 @@ System.err.println("----------------------------ActMain:onCreateView:_sectionNum
 					switch(sectionNumber)//switch(_viewPager.getCurrentItem())
 					{
 					case Util.LUGARES:
-						startActivityForResult(new Intent(ActMain._this, ActLugar.class), Util.LUGARES);
+						startActivityForResult(new Intent(_main, ActLugar.class), Util.LUGARES);
 						break;
 					case Util.RUTAS:
-						startActivityForResult(new Intent(ActMain._this, ActRuta.class), Util.RUTAS);
+						startActivityForResult(new Intent(_main, ActRuta.class), Util.RUTAS);
 						break;
 					case Util.AVISOS:
-						startActivityForResult(new Intent(ActMain._this, ActAviso.class), Util.AVISOS);
+						startActivityForResult(new Intent(_main, ActAviso.class), Util.AVISOS);
 						break;
 					}
 				}
@@ -355,25 +347,24 @@ System.err.println("----------------------------ActMain:onCreateView:_sectionNum
 		@Override
 		public void onItemEdit(int tipo, Objeto obj)
 		{
-System.err.println("ActMain:onItemEdit:"+obj);
 			Intent i;
 			switch(tipo)
 			{
 			case Util.LUGARES:
-				i = new Intent(_this, ActLugar.class);
+				i = new Intent(_main, ActLugar.class);
 				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, Util.LUGARES);
 				break;
 			case Util.RUTAS:
 				try{
-				i = new Intent(_this, ActRuta.class);
+				i = new Intent(_main, ActRuta.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, Util.RUTAS);
 				}
-				catch(Exception e){System.err.println("------------------ActMain:PlaceholderFragment:onItemEdit:e:"+e);}
+				catch(Exception e){Log.e(TAG, "------------------PlaceholderFragment:onItemEdit:e:"+e, e);}
 				break;
 			case Util.AVISOS:
-				i = new Intent(_this, ActAviso.class);
+				i = new Intent(_main, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, Util.AVISOS);
 				break;
@@ -386,19 +377,19 @@ System.err.println("ActMain:onItemEdit:"+obj);
 			switch(tipo)
 			{
 			case Util.LUGARES:
-				i = new Intent(_this, ActMaps.class);
+				i = new Intent(_main, ActMaps.class);
 				i.putExtra(Lugar.NOMBRE, obj);
 				startActivityForResult(i, Util.LUGARES);
 				break;
 			case Util.RUTAS:
 				try{
-				i = new Intent(_this, ActMaps.class);
+				i = new Intent(_main, ActMaps.class);
 				i.putExtra(Ruta.NOMBRE, obj);
 				startActivityForResult(i, Util.RUTAS);
-				}catch(Exception e){System.err.println("ActMain:onItemMap:RUTAS:"+e+" this:"+_this);}
+				}catch(Exception e){Log.e(TAG, String.format("onItemMap:RUTAS:e:%s   main=%s",e, _main), e);}
 				break;
 			case Util.AVISOS:
-				i = new Intent(ActMain._this, ActMaps.class);
+				i = new Intent(_main, ActMaps.class);
 				i.putExtra(Aviso.NOMBRE, obj);
 				startActivityForResult(i, Util.AVISOS);
 				break;
@@ -408,14 +399,10 @@ System.err.println("ActMain:onItemEdit:"+obj);
 		{
 			try
 			{
-System.err.println("ActMain:buscar:__________"+_sectionNumber);
-System.err.println("ActMain:buscar:__________"+_apf[_sectionNumber].isAdded());
-				//_apf[_sectionNumber].setTargetFragment(
-				//Intent i = new Intent(_apf[_sectionNumber].getContext(), ActBuscar.class);
-				Intent i = new Intent(_this.getApplicationContext(), ActBuscar.class);
+				Intent i = new Intent(_main.getApplicationContext(), ActBuscar.class);
 				i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
-				startActivityForResult(i, Util.BUSCAR);//Fragment PlaceholderFragment{41a89958} not attached to Activity
-			}catch(Exception e){System.err.println("ActMain:buscar:e:"+e);}
+				startActivityForResult(i, Util.BUSCAR);
+			}catch(Exception e){Log.e(TAG, String.format("buscar:e:%s",e), e);}
 		}
 		// Recoge el resultado de startActivityForResult
 		@Override
@@ -425,23 +412,21 @@ System.err.println("ActMain:buscar:__________"+_apf[_sectionNumber].isAdded());
 
 			if(requestCode == Util.CONFIG)
 			{
-				Login.logout();
+				Login.logout(_main.getApplicationContext());
 
-				Intent intent = new Intent(_this.getBaseContext(), ActLogin.class);
+				Intent intent = new Intent(_main.getBaseContext(), ActLogin.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
-				_this.finish();
-				_this = null;
+				_main.finish();
+				_main = null;
 				return;
 			}
 
-System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ requestCode+":"+_sectionNumber);
 			if(data != null)
 			{
 				String sMensaje = data.getStringExtra(MENSAJE);
 				if(sMensaje != null && !sMensaje.isEmpty())
-					Toast.makeText(_this, sMensaje, Toast.LENGTH_LONG).show();
-					//Snackbar.make(ActMain._coordinatorLayout, sMensaje, Snackbar.LENGTH_LONG).show();//getString(R.string.ok_guardar)
+					Toast.makeText(_main, sMensaje, Toast.LENGTH_LONG).show();
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 
 				Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
@@ -449,10 +434,8 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 				{
 					_aFiltro[_sectionNumber] = filtro;
 					if( ! filtro.isOn())
-						Toast.makeText(_this, getString(R.string.sin_filtro), Toast.LENGTH_SHORT).show();
-						//Snackbar.make(ActMain._coordinatorLayout, getString(R.string.sin_filtro), Snackbar.LENGTH_LONG).show();
+						Toast.makeText(_main, getString(R.string.sin_filtro), Toast.LENGTH_SHORT).show();
 				}
-				//else		_aFiltro[_sectionNumber] = new Filtro(requestCode);//, Filtro.TODOS, "", null, null, null, 0);
 			}
 
 			if(requestCode == Util.BUSCAR)requestCode=_aFiltro[_sectionNumber].getTipo();
@@ -470,7 +453,6 @@ System.err.println("-----++++++++++++++++----ActMain:onActivityResult:0:"+ reque
 
 		public void onRefreshListaRutas()
 		{
-System.err.println("---------ActMain:onRefreshListaRutas():");
 			//ActMain._this.runOnUiThread(new Runnable(){public void run(){refreshRutas();}});//No funciona, ha de hacerse mediante broadcast...
 			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(RUTA_REFRESH));
 		}
@@ -481,7 +463,6 @@ System.err.println("---------ActMain:onRefreshListaRutas():");
 		{
 			if(_aFiltro[_sectionNumber].isOn())
 			{
-System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 				checkFechas();
 				Lugar.getLista(_acLugar, _aFiltro[_sectionNumber]);
 			}
@@ -494,29 +475,27 @@ System.err.println("---------FILTRO:" + _aFiltro[_sectionNumber]);
 			public void onData(Lugar[] aLugares)
 			{
 				long n = aLugares.length;
-				System.err.println("---------LUGARES2:GET:OK:" + n);
 				if(n < 1)
 				{
 					try
 					{
-						if(_this._viewPager.getCurrentItem() == Util.LUGARES)
-							try{Toast.makeText(_this, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
+						if(_main._viewPager.getCurrentItem() == Util.LUGARES)
+							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
 					}
-					catch(Exception e){System.err.println("ActMain:_acLugar:"+e);}
+					catch(Exception e){Log.e(TAG, "_acLugar:"+e, e);}
 				}
 				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, PlaceholderFragment.this));
 			}
 			@Override
 			public void onError(String err)//FirebaseError err)
 			{
-				System.err.println("---------LUGARES2:GET:ERROR:" + err);
+				Log.e(TAG, "---------LUGARES2:GET:ERROR:" + err);
 			}
 		};
 
 		//__________________________________________________________________________________________
 		public void refreshRutas()
 		{
-System.err.println("ActMain:refreshRutas()");
 			if(_aFiltro[_sectionNumber].isOn())
 			{
 				checkFechas();
@@ -531,16 +510,14 @@ System.err.println("ActMain:refreshRutas()");
 			public void onData(Ruta[] aRutas)
 			{
 				long n = aRutas.length;
-				System.err.println("---------RUTAS2:GET:OK:" + n);
 				if(n < 1)
 				{
 					try
 					{
-						if(_this._viewPager.getCurrentItem() == Util.RUTAS)
-							try{Toast.makeText(_this, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
+						if(_main._viewPager.getCurrentItem() == Util.RUTAS)
+							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
 					}catch(Exception e){System.err.println("ActMain:_acRuta:e:"+e);}
 				}
-				//_listView.setAdapter(new RutaArrayAdapter(_apf[Util.RUTAS].getContext(), aRutas, _apf[Util.RUTAS]));	//_rootView   raa.notifyDataSetChanged();
 				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();
@@ -548,7 +525,7 @@ System.err.println("ActMain:refreshRutas()");
 			@Override
 			public void onError(String err)
 			{
-				System.err.println("---------RUTAS2:GET:ERROR:" + err);
+				Log.e(TAG, "---------RUTAS2:GET:ERROR:" + err);
 			}
 		};
 
@@ -569,18 +546,17 @@ System.err.println("ActMain:refreshRutas()");
 			public void onData(Aviso[] aAvisos)
 			{
 				long n = aAvisos.length;
-				System.err.println("---------AVISOS2:GET:OK:" + n);
 				if(n < 1)
 				{
-					if(_this._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
-					try{Toast.makeText(_this, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:AVISOS:handleResponse:e:"+e);}
+					if(_main._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
+					try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:AVISOS:handleResponse:e:"+e);}
 				}
 				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, PlaceholderFragment.this));
 			}
 			@Override
 			public void onError(String err)
 			{
-				System.err.println("---------AVISOS2:GET:ERROR:" + err);
+				Log.e(TAG, "---------AVISOS2:GET:ERROR:" + err);
 			}
 		};
 

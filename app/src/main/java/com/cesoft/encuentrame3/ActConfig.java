@@ -18,6 +18,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.List;
@@ -34,6 +35,8 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActConfig extends ActConfigBase
 {
+	private static final String TAG = "CESoft:ActConfig:";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -47,7 +50,6 @@ public class ActConfig extends ActConfigBase
 		super.onHeaderClick(header, position);
 		if(header.id == R.id.pref_logout)
 		{
-System.err.println("ActConfig:onHeaderClick:-------------------------------------------");
 			//Util.logout();		//int pid = android.os.Process.myPid();   	//android.os.Process.killProcess(pid);
 			//Util.return2Main(ActConfig.this, true, getString(R.string.ok_guardar));
 			setResult(Activity.RESULT_OK, new Intent());
@@ -143,8 +145,8 @@ System.err.println("ActConfig:onHeaderClick:------------------------------------
 		}
 		catch(Exception e)
 		{
-			System.err.println("ActConfig:bindPreferenceSummaryToValue:e:"+e);
-			System.err.println("ActConfig:bindPreferenceSummaryToValue:e:title:"+preference.getTitle());
+			Log.e(TAG, String.format("bindPreferenceSummaryToValue:e:%s",e), e);
+			Log.e(TAG, String.format("bindPreferenceSummaryToValue:e:title:%s",preference.getTitle()));
 		}
 	}
 
@@ -185,19 +187,19 @@ System.err.println("ActConfig:onHeaderClick:------------------------------------
 				PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
 				Preference customPref = findPreference("version");//Look at pref_general.xml
 				customPref.setSummary(String.format(getString(R.string.app_vers), pInfo.versionName));
-			}catch(Exception e){System.err.println("ActConfig:GeneralPreferenceFragment:onCreate:e:"+e);}
+			}catch(Exception e){Log.e(TAG, String.format("GeneralPreferenceFragment:onCreate:e:%s",e), e);}
 		}
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-System.err.println("-----------Actconfig:onOptionsItemSelected:GENERAL:"+(item.getItemId() == android.R.id.home));
-			int id = item.getItemId();
+			/*int id = item.getItemId();
 			if(id == android.R.id.home)
 			{
 				startActivity(new Intent(getActivity(), ActConfig.class));
 				return true;
-			}
-			return super.onOptionsItemSelected(item);
+			}*/
+			//return super.onOptionsItemSelected(item);
+			return true;
 		}
 	}
 
