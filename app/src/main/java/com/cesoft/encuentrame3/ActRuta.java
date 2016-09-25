@@ -586,7 +586,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		if(aPts.length < 1)return;
 		_Map.clear();
 
-		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+		DateFormat df = java.text.DateFormat.getDateTimeInstance();//TODO: set 24h
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
@@ -597,27 +597,32 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
 		for(Ruta.RutaPunto pto : aPts)
 		{
-			String snippet = "";MarkerOptions mo = new MarkerOptions();
+			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
+			MarkerOptions mo = new MarkerOptions();
 			mo.title(_r.getNombre());
+
+			String snippet;
+			if(pto == gpIni)snippet = INI;
+			else if(pto == gpFin)snippet = FIN;
+			else snippet = getString(R.string.info_time);
+
 			Date date = pto.getFecha();
 			if(date != null)snippet += df.format(date);
-			snippet += String.format(Locale.ENGLISH, "\nPrec: %f", pto.getPrecision());
-			if(gpAnt != null)snippet += String.format(Locale.ENGLISH, "\nDis: %.2f", pto.distanciaReal(gpAnt));
-			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, "\nAlt: %f m", pto.getAltura());
-			if(pto.getVelocidad() > 0)snippet += String.format(Locale.ENGLISH, "\nVel: %f m/s", pto.getVelocidad());
-			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, "\nVel: %.2f", pto.getDireccion());
+			snippet += String.format(Locale.ENGLISH, getString(R.string.info_prec), pto.getPrecision());
+			if(gpAnt != null)snippet += String.format(Locale.ENGLISH, getString(R.string.info_dist), pto.distanciaReal(gpAnt));
+			if(pto.getVelocidad() > 0)snippet += String.format(Locale.ENGLISH, getString(R.string.info_speed), pto.getVelocidad());
+			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, getString(R.string.info_nor), pto.getDireccion());
+			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, getString(R.string.info_alt), pto.getAltura());
+			mo.snippet(snippet);
 
-			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
 			{
-				mo.snippet(INI + snippet);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else if(pto == gpFin)//else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
 			{
-				mo.snippet(FIN + snippet);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mo.rotation(-45);
 				_Map.addMarker(mo.position(pos));
@@ -625,7 +630,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			//if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)//0.000000005 || pto.distancia2(gpFin) > 0.000000005)
 			else if(gpAnt != null && pto.distanciaReal(gpAnt) > 5)
 			{
-				mo.snippet(snippet);
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 				_Map.addMarker(mo.position(pos));
 			}

@@ -44,7 +44,6 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
 		_progressDialog.hide();
 		//
-		//Util.setSvcContext(this);
 		if( ! Login.isLogged())
 		{
 			Login.login(this.getApplicationContext(), new Login.AuthListener()

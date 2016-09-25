@@ -45,13 +45,15 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
 	private static final long DELAY_TRACK_MIN = 30*1000;
 	private static final long DELAY_TRACK_MAX = 7*60*1000;
-	private long DELAY_TRACK = 2*60*1000;//TODO: ajustar
+	private long DELAY_TRACK = DELAY_TRACK_MIN;//TODO: ajustar
+	private static final long ACCURACY_MAX = 25;//m
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
 	private static CesService _this;
 	private CesGeofenceStore _GeofenceStoreAvisos;
 	private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
+	//TODO: probar a crear una ruta cuando no tienes conexion... no sale de NuevaRutaAct y no muestra amarilla la ruta...
 
 	//______________________________________________________________________________________________
 	public CesService()
@@ -116,7 +118,6 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 					cargarListaGeoAvisos();
 					tmLoad = System.currentTimeMillis();
 				}
-				//saveGeoTracking();
 				if(tmTrack + DELAY_TRACK < System.currentTimeMillis())
 				{
 					saveGeoTracking();
@@ -230,7 +231,6 @@ Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 					Log.e(TAG, "saveGeoTracking:Ruta.getById:NULL---------------");
 					return;
 				}
-
 				handleResponse(r, sId);
 			}
 			@Override
@@ -248,6 +248,7 @@ Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 		guardarPunto(loc, r, sId);
 	}
 
+	Location aLoc[]; int iLoc = 0;
 	private void guardarPunto(final Location loc, final Ruta r, final String sId)
 	{
 		if(loc == null)
@@ -262,23 +263,46 @@ if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getAltitude(
 if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getBearing()-------------------:" + loc.getBearing());
 
 		//Si el nuevo punto no tiene sentido, no se guarda...
-		if(!loc.hasAccuracy() || loc.getAccuracy() > 50)return;//TODO: Meter en opciones
+		Location loc__ = loc;
+		if(!loc__.hasAccuracy() || loc__.getAccuracy() > ACCURACY_MAX)
+		{
+			if(aLoc == null)
+			{
+				aLoc = new Location[3];
+				iLoc = 0;
+			}
+			if(iLoc < aLoc.length)
+			{
+				aLoc[iLoc++] = loc__;
+				return;
+			}
+			else
+			{
+				for(Location l : aLoc)
+					if(loc__.getAccuracy() > l.getAccuracy()) loc__ = l;
+				aLoc = null;
+			}
+		}
+		else aLoc = null;
+Log.w(TAG, "-------------------------------------------"+iLoc);
+		final Location loc_ = loc__;
 
 		if( ! _sId.equals(sId))
 		{
 			_sId = sId;
 			_locLastSaved = null;
-			Log.w(TAG, "guardarPunto:Nueva ruta: " + _sId + " != " + sId);
+			DELAY_TRACK = DELAY_TRACK_MIN;
+			Log.w(TAG, String.format("guardarPunto:Nueva ruta: %s  != %s", _sId, sId));
 		}
 		else if(_locLastSaved != null)
 		{
-			float distLastSaved = loc.distanceTo(_locLastSaved);
+			float distLastSaved = loc_.distanceTo(_locLastSaved);
 Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Punto dist ant = %f", distLastSaved));
-			if(distLastSaved < 3)//Puntos muy cercanos
+			if(distLastSaved < 10 || loc_.getAccuracy() > ACCURACY_MAX)//Puntos muy cercanos
 			{
-				Log.w(TAG, String.format("CesService:saveGeoTracking:Punto repetido: %s   dist=%f    pos=%f / %f", sId, distLastSaved, _locLastSaved.getLatitude(), _locLastSaved.getLongitude()));
+				Log.w(TAG, String.format("CesService:saveGeoTracking:Punto repetido o sin precision: %s   dist=%f    pos=%f / %f", sId, distLastSaved, _locLastSaved.getLatitude(), _locLastSaved.getLongitude()));
 				DELAY_TRACK += 30*1000;
-				if(DELAY_TRACK > DELAY_TRACK_MAX)DELAY_TRACK = DELAY_TRACK_MAX;
+				if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
 				return;
 			}
 			else if(distLastSaved > 200)
@@ -289,11 +313,11 @@ Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Pun
 			{
 				DELAY_TRACK -= 60*1000;
 			}
-			else if(distLastSaved > 30)
+			else if(distLastSaved > 50)
 			{
 				DELAY_TRACK -= 30*1000;
 			}
-			if(DELAY_TRACK < DELAY_TRACK_MIN)DELAY_TRACK = DELAY_TRACK_MIN;
+			if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
 
 			//Si el nuevo punto no tiene sentido, no se guarda...
 			/*
@@ -308,17 +332,12 @@ Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Pun
 
 			//TODO: read this
 			//http://gis.stackexchange.com/questions/19683/what-algorithm-should-i-use-to-remove-outliers-in-trace-data
-
 			//Si el nuevo punto no tiene sentido, no se guarda...
 			//if(loc.getAccuracy() > 10) {
 			if(_loc0 == null)
-			{
 				_loc0 = loc;
-			}
 			else if(_loc1 == null)
-			{
 				_loc1 = loc;
-			}
 			else
 			{
 				double dis01 = _loc0.distanceTo(_loc1);
@@ -344,8 +363,8 @@ Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Pun
 				if(err == null)
 				{
 					Log.w(TAG, "saveGeoTracking:guardar:----------------------:" + data);
-					Ruta.addPunto(data.getKey(), loc.getLatitude(), loc.getLongitude(),
-							loc.getAccuracy(), loc.getAltitude(), loc.getSpeed(), loc.getBearing(),
+					Ruta.addPunto(data.getKey(), loc_.getLatitude(), loc_.getLongitude(),
+							loc_.getAccuracy(), loc_.getAltitude(), loc_.getSpeed(), loc_.getBearing(),
 							new Transaction.Handler()
 						{
 							@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
@@ -365,7 +384,7 @@ Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Pun
 				{
 					Log.e(TAG, "saveGeoTracking:guardar:err:----------------------:" + err);
 				}
-				_locLastSaved = loc;
+				_locLastSaved = loc_;
 				//_tmLastSaved = System.currentTimeMillis();
 			}
 		});

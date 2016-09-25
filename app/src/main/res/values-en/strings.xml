@@ -104,4 +104,10 @@
 	<string name="widget_lugar">Points</string>
 	<string name="widget_ruta">Routes</string>
 	<string name="login_ok">Welcome %s</string>
+	<string name="info_time">Time: </string>
+	<string name="info_prec">\nAccuracy: %.2f m\n</string>
+	<string name="info_dist">\nDistance: %.0f m</string>
+	<string name="info_alt">\nAltitude: %.0f m</string>
+	<string name="info_nor">\nBearing: %.0f º</string>
+	<string name="info_speed">\nSpeed: %.2f m/s</string>
 </resources>

@@ -28,41 +28,52 @@ class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 		_inter = inter;
 	}
 
+	private class ViewHolder
+	{
+		private TextView txtNombre;
+		private TextView txtFecha;
+		private ImageButton btnEditar;
+		private ImageButton btnMapa;
+	}
 	@Override
 	public @NonNull View getView(final int position, View convertView, @NonNull ViewGroup parent)
 	{
-		// Check if an existing view is being reused, otherwise inflate the view
+		final ViewHolder holder;
 		if(convertView == null)
 		{
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
-
-		ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
-		ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
-		btnEditar.setOnClickListener(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					_inter.onItemEdit(Util.AVISOS, _avisos[position]);
-				}
-			});
-		btnMapa.setOnClickListener(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					_inter.onItemMap(Util.AVISOS, _avisos[position]);
-				}
-			});
-
-		TextView txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
-		if(_avisos[position].getFecha()!=null)txtFecha.setText(Aviso.DATE_FORMAT2.format(_avisos[position].getFecha()));
-
-		TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-		txtNombre.setText(_avisos[position].getNombre());
-		if(!_avisos[position].isActivo())txtNombre.setTextColor(Color.GRAY);
-android.util.Log.e("AAAAAAAAAAAAAAAA", "---------"+position+" ACT="+_avisos[position].isActivo()+"  NOM="+_avisos[position].getNombre());
+			holder = new ViewHolder();
+			holder.txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
+			holder.txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
+			holder.btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
+			holder.btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
+			convertView.setTag(holder);
 		}
+		else
+		{
+			holder = (ViewHolder)convertView.getTag();
+		}
+
+		holder.txtNombre.setText(_avisos[position].getNombre());
+		if(_avisos[position].getFecha()!=null)holder.txtFecha.setText(Aviso.DATE_FORMAT2.format(_avisos[position].getFecha()));
+		if(!_avisos[position].isActivo())holder.txtNombre.setTextColor(Color.GRAY);
+		holder.btnEditar.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				_inter.onItemEdit(Util.AVISOS, _avisos[position]);
+			}
+		});
+		holder.btnMapa.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				_inter.onItemMap(Util.AVISOS, _avisos[position]);
+			}
+		});
+
 		return convertView;
 	}
 }

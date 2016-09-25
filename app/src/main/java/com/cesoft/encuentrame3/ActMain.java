@@ -516,8 +516,9 @@ public class ActMain extends AppCompatActivity
 					{
 						if(_main._viewPager.getCurrentItem() == Util.RUTAS)
 							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
-					}catch(Exception e){System.err.println("ActMain:_acRuta:e:"+e);}
+					}catch(Exception e){Log.e(TAG, String.format("_acRuta:e:%s",e),e);}
 				}
+for(Ruta r: aRutas)Log.e(TAG, "******************************"+r.getNombre());
 				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();

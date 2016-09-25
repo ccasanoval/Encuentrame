@@ -30,60 +30,66 @@ class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		_inter = inter;
 	}
 
+
+	private class ViewHolder
+	{
+		private TextView txtNombre;
+		private TextView txtFecha;
+		private ImageButton btnEditar;
+		private ImageButton btnMapa;
+	}
 	@Override
 	public @NonNull View getView(final int position, View convertView, @NonNull ViewGroup parent)
 	{
+		final ViewHolder holder;
 		if(convertView == null)
 		{
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
-			if(_rutas[position] == null)
-			{
-				System.err.println("RutaArrayAdapter:getView: _rutas["+position+"]=null");
-				return convertView;
-			}
-			String sIdRuta = Util.getTrackingRoute(getContext());
-			TextView txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-			txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));
-			ImageButton btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
-			ImageButton btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
-			btnEditar.setOnClickListener(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						_inter.onItemEdit(Util.RUTAS, _rutas[position]);
-					}
-				});
-			btnMapa.setOnClickListener(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						_inter.onItemMap(Util.RUTAS, _rutas[position]);
-					}
-				});
-
-			TextView txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
-			txtFecha.setText(Ruta.DATE_FORMAT2.format(_rutas[position].getFecha()));
-
-			// Si la ruta se está grabando, resaltar
-			//String sIdRuta = Util.getTrackingRoute();
-			if(sIdRuta.equals(_rutas[position].getId()))
-			{
-	//System.err.println("----------------RUTA ACTIVA:"+sIdRuta+" ::: "+_rutas[position]+"..."+position+"....."+convertView);
-				txtNombre.setTextColor(Color.RED);
-				convertView.setBackgroundColor(Color.YELLOW);
-			}
-			else
-			{
-				if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
-					txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem, convertView.getContext().getTheme()));
-				else
-					//noinspection deprecation
-					txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
-				convertView.setBackgroundColor(Color.WHITE);
-			}
+			holder = new ViewHolder();
+			holder.txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
+			holder.txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
+			holder.btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
+			holder.btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
+			convertView.setTag(holder);
 		}
+		else
+		{
+			holder = (ViewHolder)convertView.getTag();
+		}
+		holder.txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));
+		holder.txtFecha.setText(Ruta.DATE_FORMAT2.format(_rutas[position].getFecha()));
+		holder.btnEditar.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				_inter.onItemEdit(Util.RUTAS, _rutas[position]);
+			}
+		});
+		holder.btnMapa.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				_inter.onItemMap(Util.RUTAS, _rutas[position]);
+			}
+		});
+		// Si la ruta se está grabando, resaltar
+		if(_rutas[position].getId().equals(Util.getTrackingRoute(getContext())))
+		{
+			holder.txtNombre.setTextColor(Color.RED);
+			convertView.setBackgroundColor(Color.YELLOW);
+		}
+		else
+		{
+			if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem, convertView.getContext().getTheme()));
+			else
+				//noinspection deprecation
+				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
+			convertView.setBackgroundColor(Color.WHITE);
+		}
+
 		return convertView;
 	}
 }

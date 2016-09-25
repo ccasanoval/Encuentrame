@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.models;
 
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -544,8 +545,7 @@ public class Ruta extends Objeto implements Parcelable
 					for(DataSnapshot o : ds.getChildren())
 					{
 						RutaPunto rp = o.getValue(RutaPunto.class);
-						//if(rp.distanciaReal(RutaPunto.this) < DISTANCIA_MIN)return;//No se guarda
-						if(rp.distanciaAprox(RutaPunto.this) < DISTANCIA_MIN)return;//No se guarda
+						if(rp.distanciaReal(RutaPunto.this) < DISTANCIA_MIN)return;//No se guarda
 					}
 					saveGeo2();
 				}
@@ -611,21 +611,15 @@ System.err.println("----------------Ruta:delGeo:"+ds.getRef());
 			double dLon = getLongitud() - v.getLongitud();
 			return dLat*dLat + dLon*dLon;
 		}*/
-		public double distanciaReal(RutaPunto v)
+		public float distanciaReal(RutaPunto v)
 		{
 			return distanciaReal(getLatitud(), getLongitud(), v.getLatitud(), v.getLongitud());
 		}
-		public double distanciaAprox(RutaPunto v)
+		// http://www.movable-type.co.uk/scripts/latlong.html
+		static float distanciaReal(double lat1, double lon1, double lat2, double lon2)//, double el1, double el2)
 		{
-			return distanciaAprox(getLatitud(), getLongitud(), v.getLatitud(), v.getLongitud());
-		}
-		/* http://www.movable-type.co.uk/scripts/latlong.html
-		 * Calculate distance between two points in latitude and longitude taking into account height difference.
-		 * Uses Haversine method as its base.
-		 * @returns Distance in Meters
-		 */
-		static double distanciaReal(double lat1, double lat2, double lon1, double lon2)//, double el1, double el2)
-		{
+			/*
+			//Haversine
 			final int R = 6371; // Radius of the earth (Km)
 			Double latDistance = Math.toRadians(lat2 - lat1);
 			Double lonDistance = Math.toRadians(lon2 - lon1);
@@ -633,31 +627,19 @@ System.err.println("----------------Ruta:delGeo:"+ds.getRef());
 					+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
 					* Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
 			Double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-			return R * c * 1000; // convert to meters
-			// -- sin altura --
-			//double distancia = R * c * 1000; // convert to meters
-			//double height = el1 - el2;
-			//distancia = Math.pow(distancia, 2) + Math.pow(height, 2);
-			//return Math.sqrt(distancia);
-		}
-		static double distanciaAprox(double lat1, double lat2, double lon1, double lon2)
-		{
-			final int R = 6371000;
-			/*Haversine
-			double f1 = Math.toRadians(lat1);
-			double f2 = Math.toRadians(lat2);
-			double d1 =  Math.toRadians(lat2-lat1);
-			double d2 =  Math.toRadians(lon2-lon1);
-			double a = Math.sin(d1/2) * Math.sin(d1/2) +
-						Math.cos(f1) * Math.cos(f2) *
-						Math.sin(d2/2) * Math.sin(d2/2);
-			double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-			return R * c;*/
+			Log.e(TAG, "-----------0-----"+( R * c * 1000)); // convert to meters
 
 			//Equirectangular approximation
-			double x =(lon2-lon1) * Math.cos((lat1+lat2)/2);
-			double y = lat2-lat1;
-			return Math.sqrt(x*x + y*y) * R;
+			double latD2 = Math.toRadians(lat1+lat2);
+			double la2 = Math.toRadians(lat2);
+			double x = lonDistance * Math.cos(latD2/2);
+			double y = latDistance;
+			Log.e(TAG, "-----------1-----"+( Math.sqrt(x*x + y*y) * R * 1000));*/
+
+			float[] dist = new float[1];
+			android.location.Location.distanceBetween(lat1, lon1, lat2, lon2, dist);
+			//Log.e(TAG, "-----------2-----"+dist[0]);
+			return dist[0];
 		}
 	}
 }
