@@ -30,8 +30,6 @@ import java.util.List;
  * Android Design: Settings</a> for design guidelines and the <a href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-//TODO: No funciona flechita de volver...
-//TODO: Organizate poner la barra de arriba como aqui...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActConfig extends ActConfigBase
 {
@@ -192,14 +190,7 @@ public class ActConfig extends ActConfigBase
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-			/*int id = item.getItemId();
-			if(id == android.R.id.home)
-			{
-				startActivity(new Intent(getActivity(), ActConfig.class));
-				return true;
-			}*/
-			//return super.onOptionsItemSelected(item);
-			return true;
+			return false;
 		}
 	}
 

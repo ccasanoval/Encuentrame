@@ -2,14 +2,18 @@ package com.cesoft.encuentrame3;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.graphics.Color;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,6 +31,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Aviso;
@@ -165,7 +170,33 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){System.err.println("ActAviso:onMapReady:e:"+se);}
+		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("ActAviso:onMapReady:e:%s",se));}
+		//MARCADOR MULTILINEA --------------------------------------------
+		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
+		{
+			@Override
+			public View getInfoWindow(Marker arg0){return null;}
+			@Override
+			public View getInfoContents(Marker marker)
+			{
+				LinearLayout info = new LinearLayout(ActMaps.this);
+				info.setOrientation(LinearLayout.VERTICAL);
+
+				TextView title = new TextView(ActMaps.this);
+				title.setTextColor(Color.BLACK);
+				title.setGravity(Gravity.CENTER);
+				title.setTypeface(null, Typeface.BOLD);
+				title.setText(marker.getTitle());
+
+				TextView snippet = new TextView(ActMaps.this);
+				snippet.setTextColor(Color.GRAY);
+				snippet.setText(marker.getSnippet());
+
+				info.addView(title);
+				info.addView(snippet);
+				return info;
+			}
+		});
 
 		if(_l != null)			/// LUGAR
 		{
@@ -321,7 +352,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	}
 	private void showRuta(final Ruta r)
 	{
-		//if(r.getPuntosCount() < 1)return;
 		r.getPuntos(new ValueEventListener()
 		{
 			@Override
@@ -345,6 +375,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	{
 		if(aPts.length < 1)return;
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
+		float distancia = 0;
+		Ruta.RutaPunto ptoAnt = null;
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
@@ -355,31 +387,37 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
 		for(Ruta.RutaPunto pto : aPts)
 		{
+			if(ptoAnt != null)
+				distancia += pto.distanciaReal(ptoAnt);
+			ptoAnt = pto;
+
 			MarkerOptions mo = new MarkerOptions();
 			mo.title(r.getNombre());
 			Date date = pto.getFecha();
-			if(date != null)
-				mo.snippet(df.format(date));
+
+			String sDist;
+			if(distancia > 3000)	sDist = String.format(Locale.ENGLISH, getString(R.string.info_dist2), distancia/1000);
+			else					sDist = String.format(getString(R.string.info_dist), distancia);
 
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 			if(pto == gpIni)
 			{
+				mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, df.format(date)));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-				mo.snippet(INI + df.format(date));
 				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else if(pto == gpFin)
 			{
-				mo.snippet(FIN + df.format(date));
+				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, df.format(date), sDist));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mo.rotation(-45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else
 			{
-				//if(pto.distanciaSimple(gpIni) > 0.00000001 || pto.distanciaSimple(gpFin) > 0.00000001)
-				if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)
+				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), df.format(date), sDist));
+				//if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)
 				{
 					mo.icon(bm);
 					_Map.addMarker(mo.position(pos));

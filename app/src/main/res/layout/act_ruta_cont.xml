@@ -30,8 +30,8 @@
 			android:layout_height="wrap_content"
 			android:ems="10"
 			android:hint="@string/nombre"
-			android:maxLines="1"
-			android:singleLine="true"/>
+			android:inputType="textCapWords"
+			android:maxLines="1"/>
 	</android.support.design.widget.TextInputLayout>
 
 
@@ -51,9 +51,8 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/descripcion"
 			android:ems="10"
-			android:inputType="textMultiLine"
-			android:maxLines="3"
-			android:singleLine="true"/>
+			android:inputType="textMultiLine|textCapWords"
+			android:maxLines="3"/>
 	</android.support.design.widget.TextInputLayout>
 
 	<TextView

@@ -52,7 +52,7 @@ public class Util
 	public static void setLocation(Location loc)
 	{
 		_locLast=loc;
-System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
+//System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 	}
 	static Location getLocation(Context c)
 	{
@@ -79,7 +79,7 @@ System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getL
 		{
 			se.printStackTrace();
 		}
-System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
+//System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 		return _locLast;
     }
 
@@ -154,7 +154,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		Boolean bLights = prefs.getBoolean("notifications_new_message_lights", false);
 		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
 
-System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"+bVibrate+"     lights:"+bLights);
+//System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"+bVibrate+"     lights:"+bLights);
 
 		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
@@ -315,5 +315,4 @@ System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"
 		act.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
 		act.finish();
 	}
-
 }

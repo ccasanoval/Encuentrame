@@ -609,8 +609,19 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			Date date = pto.getFecha();
 			if(date != null)snippet += df.format(date);
 			snippet += String.format(Locale.ENGLISH, getString(R.string.info_prec), pto.getPrecision());
-			if(gpAnt != null)snippet += String.format(Locale.ENGLISH, getString(R.string.info_dist), pto.distanciaReal(gpAnt));
-			if(pto.getVelocidad() > 0)snippet += String.format(Locale.ENGLISH, getString(R.string.info_speed), pto.getVelocidad());
+			if(gpAnt != null)
+			{
+				float d = pto.distanciaReal(gpAnt);
+				String sDist;
+				if(d > 3000)	sDist = String.format(Locale.ENGLISH, getString(R.string.info_dist2), d/1000);
+				else			sDist = String.format(Locale.ENGLISH, getString(R.string.info_dist), d);
+				snippet += sDist;
+				//snippet += String.format(Locale.ENGLISH, getString(R.string.info_dist), pto.distanciaReal(gpAnt));
+			}
+			if(pto.getVelocidad() > 3)
+				snippet += String.format(Locale.ENGLISH, getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
+			else if(pto.getVelocidad() > 0)
+				snippet += String.format(Locale.ENGLISH, getString(R.string.info_speed), pto.getVelocidad());
 			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, getString(R.string.info_nor), pto.getDireccion());
 			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, getString(R.string.info_alt), pto.getAltura());
 			mo.snippet(snippet);

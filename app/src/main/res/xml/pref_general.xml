@@ -1,24 +1,18 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<EditTextPreference
+	<Preference
 		android:title="@string/app_name"
-		android:editable="false"
-		android:clickable="false"
 		android:icon="@mipmap/ic_launcher"/>
 
-	<EditTextPreference
-		android:editable="false"
-		android:clickable="false"
+	<Preference
 		android:summary="@string/app_desc"/>
 
-	<EditTextPreference
+	<Preference
 		android:title="@string/app_lice_tit"
-		android:editable="false"
 		android:summary="@string/app_lice"/>
 
-	<EditTextPreference
+	<Preference
 		android:title="@string/app_vers_tit"
-		android:editable="false"
 		android:key="version"
 		android:summary="@string/app_vers"/>
 

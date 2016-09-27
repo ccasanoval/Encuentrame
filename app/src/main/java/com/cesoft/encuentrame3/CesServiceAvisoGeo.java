@@ -18,7 +18,6 @@ import com.google.firebase.database.ValueEventListener;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Diferenciar entre los avisos geofence y los tracking geofence...
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo=> activar solo cuando guarde...?
 public class CesServiceAvisoGeo extends IntentService
 {
@@ -40,31 +39,31 @@ public class CesServiceAvisoGeo extends IntentService
 			switch(transition)
 			{
 			case Geofence.GEOFENCE_TRANSITION_ENTER:
-System.err.println("CesServiceAvisoGeo:onHandleIntent:-------------------------------------GEOFENCE_TRANSITION_ENTER");
+//System.err.println("CesServiceAvisoGeo:onHandleIntent:-------------------------------------GEOFENCE_TRANSITION_ENTER");
 				for(Geofence geof : geofences)
 				{
 					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso), getBaseContext());
-					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
+					//System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
 				}
 				break;
 			case Geofence.GEOFENCE_TRANSITION_DWELL:
-System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------------------GEOFENCE_TRANSITION_DWELL");
-				for(Geofence geof : geofences)
+//System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------------------GEOFENCE_TRANSITION_DWELL");
+				/*for(Geofence geof : geofences)
 				{
 					//showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso));
-					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
-				}
+					//System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
+				}*/
 				break;
 			case Geofence.GEOFENCE_TRANSITION_EXIT:
-System.err.println("CesServiceAvisoGeo:onHandleIntent:---------------------------------------GEOFENCE_TRANSITION_EXIT");
-				for(Geofence geof : geofences)
+//System.err.println("CesServiceAvisoGeo:onHandleIntent:---------------------------------------GEOFENCE_TRANSITION_EXIT");
+				/*for(Geofence geof : geofences)
 				{
 					System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_EXIT:"+geof.getRequestId());
-				}
+				}*/
 				//for(Geofence geof : geofences)addTrackingPoint(geof);
 				break;
 			default:
-				System.err.println("CesServiceAvisoGeo:onHandleIntent:e: Unknown Geofence Transition -----------------------------");
+				//System.err.println("CesServiceAvisoGeo:onHandleIntent:e: Unknown Geofence Transition -----------------------------");
 				break;
 			}
 		}
@@ -86,7 +85,7 @@ System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				System.err.println("CesServiceAvisoGeo:showAviso:e:"+err);
+				android.util.Log.e("CESoft", String.format("CesServiceAvisoGeo:showAviso:e:%s",err));
 			}
 		});
 	}
@@ -96,7 +95,6 @@ System.err.println("CesServiceAvisoGeo:onHandleIntent:--------------------------
 	{
 		//GeoPoint.getById(sId);
 System.err.println("CesServiceAvisoGeo:addTrackingPoint-----------*****************************************------------"+geof);
-		//TODO: Hallar posicion, borrar este geofence y crear otro con centro en posicion...
 
 		GeoPoint geoPoint = Backendless.Persistence.of(GeoPoint.class).findFirst();
 		if(geoPoint == null)
@@ -114,11 +112,10 @@ System.err.println("CesServiceAvisoGeo:addTrackingPoint-----------**************
 		}
 		else
 		{
-			//TODO: comprobar maximo numero de puntos... si max cerrar ruta
 			Location loc = Util.getLocation();
 System.err.println("CesServiceAvisoGeo:addTrackingPoint:------------loc----------:" + loc.getLatitude()+", "+loc.getLongitude());
 			Ruta r = Backendless.Persistence.of(Ruta.class).findById(sId);
-			r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));//TODO: Add date...
+			r.addPunto(new GeoPoint(loc.getLatitude(), loc.getLongitude()));
 			r.guardar(new AsyncCallback<Ruta>()
 				{
 					@Override public void handleResponse(Ruta ruta)

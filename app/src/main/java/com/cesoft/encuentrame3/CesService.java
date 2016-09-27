@@ -43,7 +43,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	private static final String TAG = "CESoft:CesService:";
 	private static final int GEOFEN_DWELL_TIME = 60*1000;//TODO:customize in settings...
 	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
-	private static final long DELAY_TRACK_MIN = 30*1000;
+	private static final long DELAY_TRACK_MIN = 40*1000;
 	private static final long DELAY_TRACK_MAX = 7*60*1000;
 	private long DELAY_TRACK = DELAY_TRACK_MIN;//TODO: ajustar
 	private static final long ACCURACY_MAX = 25;//m
@@ -89,10 +89,10 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 		try
 		{
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
-			long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
+			//long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
 			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
-			{
+			{//TODO: si no hay ruta, ralentizar hasta DELAY_LOAD?????
 Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
 				if( ! Login.isLogged())
 				{
@@ -118,10 +118,10 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 					cargarListaGeoAvisos();
 					tmLoad = System.currentTimeMillis();
 				}
-				if(tmTrack + DELAY_TRACK < System.currentTimeMillis())
+				//if(tmTrack + DELAY_TRACK < System.currentTimeMillis())
 				{
 					saveGeoTracking();
-					tmTrack = System.currentTimeMillis();
+					//tmTrack = System.currentTimeMillis();
 				}
 				Thread.sleep(DELAY_TRACK);//DELAY_LOAD / 3);
 			}
@@ -146,7 +146,6 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 					//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 					boolean bDirty = false;
 					long n = avisos.getChildrenCount();
-//Log.w(TAG, "cargarListaGeoAvisos-----********************************************************************------------1------"+n);
 					if(n != CesService.this._listaGeoAvisos.size())
 					{
 						if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
@@ -174,11 +173,11 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 								bDirty = true;
 							i++;
 						}
-if(bDirty)Log.w(TAG, String.format("Aviso=%s  :  %s  :  %s  \t GEOF= %s", a.getId(), a.getNombre(), a.getDescripcion(), gf.getRequestId()));
+//if(bDirty)Log.w(TAG, String.format("Aviso=%s  :  %s  :  %s  \t GEOF= %s", a.getId(), a.getNombre(), a.getDescripcion(), gf.getRequestId()));
 					}
 					if(bDirty)
 					{
-Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
+//Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 						_listaGeoAvisos = aAvisos;
 						_GeofenceStoreAvisos = new CesGeofenceStore(CesService.this, aGeofences);//Se puede añadir en lugar de crear desde cero?
 					}
@@ -223,7 +222,7 @@ Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 				Ruta r = null;
 				for(DataSnapshot ruta : rutas.getChildren())
 				{
-					r = ruta.getValue(Ruta.class);//om.firebase.client.FirebaseException: Failed to bounce to type
+					r = ruta.getValue(Ruta.class);
 					if(r != null)break;
 				}
 				if(r == null)
@@ -249,22 +248,16 @@ Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 	}
 
 	Location aLoc[]; int iLoc = 0;
-	private void guardarPunto(final Location loc, final Ruta r, final String sId)
+	private void guardarPunto(Location loc, Ruta r, String sId)
 	{
 		if(loc == null)
 		{
 			Log.e(TAG, "guardarPunto:findById:Util.getLocation()-----------------:NULL");
 			return;
 		}
-Log.w(TAG, "guardarPunto:findById:Util.getLocation()----------------------:" + loc.getLatitude() + "/" + loc.getLongitude()+":"+(new java.util.Date(loc.getTime())));
-if(loc.hasAccuracy())Log.w(TAG, "CesService:guardarPunto:findById:Util.getAccuracy()-------------------:" + loc.getAccuracy());
-if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getSpeed()-------------------:" + loc.getSpeed());
-if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getAltitude()-------------------:" + loc.getAltitude());
-if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getBearing()-------------------:" + loc.getBearing());
 
 		//Si el nuevo punto no tiene sentido, no se guarda...
-		Location loc__ = loc;
-		if(!loc__.hasAccuracy() || loc__.getAccuracy() > ACCURACY_MAX)
+		if(!loc.hasAccuracy() || loc.getAccuracy() > ACCURACY_MAX)
 		{
 			if(aLoc == null)
 			{
@@ -273,19 +266,26 @@ if(loc.hasSpeed())Log.w(TAG, "CesService:guardarPunto:findById:Util.getBearing()
 			}
 			if(iLoc < aLoc.length)
 			{
-				aLoc[iLoc++] = loc__;
+				aLoc[iLoc++] = loc;
 				return;
 			}
 			else
 			{
 				for(Location l : aLoc)
-					if(loc__.getAccuracy() > l.getAccuracy()) loc__ = l;
+					if(loc.getAccuracy() > l.getAccuracy()) loc = l;
 				aLoc = null;
 			}
 		}
-		else aLoc = null;
-Log.w(TAG, "-------------------------------------------"+iLoc);
-		final Location loc_ = loc__;
+		else
+		{
+			if(_locLastSaved!= null && loc.distanceTo(_locLastSaved) > 500)
+			{
+				for(Location l : aLoc)
+					if(loc.getAccuracy() > l.getAccuracy()) loc = l;
+				r.guardar(new GuardarListener(loc));
+			}
+			aLoc = null;
+		}
 
 		if( ! _sId.equals(sId))
 		{
@@ -296,200 +296,58 @@ Log.w(TAG, "-------------------------------------------"+iLoc);
 		}
 		else if(_locLastSaved != null)
 		{
-			float distLastSaved = loc_.distanceTo(_locLastSaved);
-Log.w(TAG, String.format("------------------------CesService:saveGeoTracking:Punto dist ant = %f", distLastSaved));
-			if(distLastSaved < 10 || loc_.getAccuracy() > ACCURACY_MAX)//Puntos muy cercanos
+			float distLastSaved = loc.distanceTo(_locLastSaved);
+//Log.w(TAG, String.format("------------------------saveGeoTracking:Punto dist ant = %f", distLastSaved));
+			if(distLastSaved < 30 || loc.getAccuracy() > ACCURACY_MAX)//Puntos muy cercanos
 			{
-				Log.w(TAG, String.format("CesService:saveGeoTracking:Punto repetido o sin precision: %s   dist=%f    pos=%f / %f", sId, distLastSaved, _locLastSaved.getLatitude(), _locLastSaved.getLongitude()));
-				DELAY_TRACK += 30*1000;
+				Log.w(TAG, String.format("saveGeoTracking:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
+				DELAY_TRACK += 10*1000;
 				if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
 				return;
 			}
 			else if(distLastSaved > 200)
-			{
-				DELAY_TRACK -= 2*60*1000;
-			}
+				DELAY_TRACK = DELAY_TRACK_MIN;
 			else if(distLastSaved > 100)
-			{
 				DELAY_TRACK -= 60*1000;
-			}
-			else if(distLastSaved > 50)
-			{
+			else if(distLastSaved > 75)
 				DELAY_TRACK -= 30*1000;
-			}
+			//else if(distLastSaved > 50)
 			if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
-
-			//Si el nuevo punto no tiene sentido, no se guarda...
-			/*
-			double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
-			if(vel > 200)//kilometros hora a metros segundo : 300km/h = 83m/s
-			{
-				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " :::  t="+(System.currentTimeMillis() - _tmLastSaved));
-				return;
-			}
-			else
-				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " :::  t="+(System.currentTimeMillis() - _tmLastSaved));
-
-			//TODO: read this
-			//http://gis.stackexchange.com/questions/19683/what-algorithm-should-i-use-to-remove-outliers-in-trace-data
-			//Si el nuevo punto no tiene sentido, no se guarda...
-			//if(loc.getAccuracy() > 10) {
-			if(_loc0 == null)
-				_loc0 = loc;
-			else if(_loc1 == null)
-				_loc1 = loc;
-			else
-			{
-				double dis01 = _loc0.distanceTo(_loc1);
-				double dis02 = _loc0.distanceTo(loc);
-				if(dis01 > 2*dis02 && (System.currentTimeMillis() - _tmLastSaved) < DELAY_LOAD*2)
-				{
-					//TODO: El punto _loc1 es incorrecto, borrar
-					System.err.println("CesService: Punto anterior incorrecto: "+_loc1.getLatitude()+"/"+_loc1.getLongitude());
-				}
-				else
-				{
-					_loc0 = _loc1;
-					_loc1 = loc;
-				}
-			}*/
 		}
-		//TODO: añadir geofence por si quisiera funcionar...?
-		r.guardar(new DatabaseReference.CompletionListener()
-		{
-			@Override
-			public void onComplete(DatabaseError err, DatabaseReference data)
-			{
-				if(err == null)
-				{
-					Log.w(TAG, "saveGeoTracking:guardar:----------------------:" + data);
-					Ruta.addPunto(data.getKey(), loc_.getLatitude(), loc_.getLongitude(),
-							loc_.getAccuracy(), loc_.getAltitude(), loc_.getSpeed(), loc_.getBearing(),
-							new Transaction.Handler()
-						{
-							@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
-							@Override
-							public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
-							{
-								if(err != null)
-									Log.e(TAG, "saveGeoTracking:guardar:pto:err:----------------------:" + err);
-								else
-									Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
-
-								Util.refreshListaRutas();//Refrescar lista rutas en main..
-							}
-						});
-				}
-				else
-				{
-					Log.e(TAG, "saveGeoTracking:guardar:err:----------------------:" + err);
-				}
-				_locLastSaved = loc_;
-				//_tmLastSaved = System.currentTimeMillis();
-			}
-		});
+		r.guardar(new GuardarListener(loc));
+		_locLastSaved = loc;
 	}
 
-	//TODO: por que no funciona tracking con geofence?????
-	/*//______________________________________________________________________________________________
-	public static void cargarGeoTracking()
+	class GuardarListener implements DatabaseReference.CompletionListener
 	{
-System.err.println("CesService:cargarGeoTracking---------------------------------0--------");
-		if(_GeofenceStoreTracking != null)_GeofenceStoreTracking.clear();//TODO: si es el mismo no hay necesidad de recrearlo: comprobar...
-		//TODO: Investigar posibilidades de Backendless.Geo
-
-		RutaPto.getTrackingPto(new AsyncCallback<RutaPto>()
+		private Location _loc = null;
+		GuardarListener(Location loc){_loc = loc;}
+		@Override
+		public void onComplete(DatabaseError err, DatabaseReference data)
 		{
-			@Override
-			public void handleResponse(RutaPto ptoTrackin)
+			if(err == null)
 			{
-//System.err.println("CesService:cargarGeoTracking-----------------------------------------:" + ptoTrackin);
-				if(Util.getTrackingRoute().isEmpty())
-				{
-					System.err.println("CesService:cargarGeoTracking-----------------------------------------:No hay ruta activa:Eliminando..." + ptoTrackin);
-					ptoTrackin.removeTrackingPto(new AsyncCallback<Long>()
+				//Log.w(TAG, "saveGeoTracking:guardar:----------------------:" + data);
+				Ruta.addPunto(data.getKey(), _loc.getLatitude(), _loc.getLongitude(),
+						_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
+						new Transaction.Handler()
 					{
+						@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
 						@Override
-						public void handleResponse(Long aLong)
+						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
-							System.err.println("CesService:cargarGeoTracking-----------------------------------------:Eliminado:"+aLong);
-						}
-						@Override
-						public void handleFault(BackendlessFault backendlessFault)
-						{
-							System.err.println("CesService:cargarGeoTracking-----------------------------------------:Eliminado FALLO:" + backendlessFault);
+							if(err != null)	Log.e(TAG, "saveGeoTracking:guardar:pto:err:----------------------:" + err);
+							//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
+							Util.refreshListaRutas();//Refrescar lista rutas en main..
 						}
 					});
-					return;
-				}
-System.err.println("CesService:cargarGeoTracking---------------------------------pto.loc--------:" + ptoTrackin.getLatitud()+","+ ptoTrackin.getLongitud());
-				Geofence gf = new Geofence.Builder()
-					.setRequestId(ptoTrackin.getObjectId())
-					.setCircularRegion(ptoTrackin.getLatitud(), ptoTrackin.getLongitud(), RADIO_TRACKING)
-					.setExpirationDuration(Geofence.NEVER_EXPIRE)
-					.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-					.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER)
-					.build();
-				ArrayList<Geofence> aGeofences = new ArrayList<>();
-				aGeofences.add(gf);
-				_GeofenceStoreTracking = new CesGeofenceStore(CesService._this, aGeofences);
-	System.err.println("CesService:cargarGeoTracking-----------------------------------------:Se añadio la geofence para tracking:"+gf);
 			}
-			@Override
-			public void handleFault(BackendlessFault backendlessFault)
+			else
 			{
-				System.err.println("CesService:cargarGeoTracking-----------------------------------------:Sin puntos");
-				//TODO:Si hubiese ruta activa habria que crear el punto...
-				//TODO: hay que añadir fecha a los puntos...
-				Util.setTrackingRoute("");//TODO:refrescar lista de rutas para quitar ruta activa...
-				return;
+				Log.e(TAG, "saveGeoTracking:guardar:err:----------------------:" + err);
 			}
-		});
-	}*/
-	//______________________________________________________________________________________________
-	//TODO: Varias rutas al mismo tiempo, si tendrían los mismos puntos?
-	/*private void cargarListaGeoTracking()
-	{
-		try
-		{
-			if(_GeofenceStoreTracking != null)_GeofenceStoreTracking.clear();
-
-			//BackendlessDataQuery query = new BackendlessDataQuery();
-			Backendless.Persistence.of(GeoPoint.class).find(new AsyncCallback<BackendlessCollection<GeoPoint>>()
-			{
-				@Override
-				public void handleResponse(BackendlessCollection<GeoPoint> gs)
-				{
-					int n = gs.getTotalObjects();
-					if(n < 1)return;
-					ArrayList<Geofence> aGeofences = new ArrayList<>();
-					Iterator<GeoPoint> it = gs.getCurrentPage().iterator();
-					while(it.hasNext())
-					{
-						GeoPoint g = it.next();
-						//_listaGeoTracking.add(g);
-if(g.getLatitude() == null)return;
-						aGeofences.add(new Geofence.Builder().setRequestId(g.getObjectId())
-							.setCircularRegion(g.getLatitude(), g.getLongitude(), RADIO_TRACKING)
-							.setExpirationDuration(Geofence.NEVER_EXPIRE)
-							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
-							.build());
-					}
-					_GeofenceStoreTracking = new CesGeofenceStore(CesService.this, aGeofences);
-				}
-				@Override
-				public void handleFault(BackendlessFault backendlessFault)
-				{
-					System.err.println("CesService:cargarListaGeoTracking:e:" + backendlessFault);//BackendlessFault{ code: '2024', message: 'Wrong entity name: name must not have a symbol '.'' }
-				}
-			});
 		}
-		catch(Exception e)
-		{
-			System.err.println("CesService:cargarListaGeoTracking:e:"+e);
-			//_lista.clear();
-		}
-	}*/
+	}
 
 
 	//https://developer.android.com/training/location/change-location-settings.html
@@ -566,6 +424,7 @@ if(g.getLatitude() == null)return;
 	public void onLocationChanged(Location location)
 	{
 		//Log.w(TAG, "onLocationChanged:"+location.getLatitude()+"/"+location.getLongitude()+":"+(new java.util.Date(location.getTime())));
+		Log.w(TAG, "onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
 		Util.setLocation(location);
 	}
 	@Override
@@ -606,3 +465,136 @@ if(g.getLatitude() == null)return;
 
 }
 
+//Si el nuevo punto no tiene sentido, no se guarda...
+			/*
+			double vel = _locLastSaved.distanceTo(loc) * 3600 / (System.currentTimeMillis() - _tmLastSaved);//Km/h
+			if(vel > 200)//kilometros hora a metros segundo : 300km/h = 83m/s
+			{
+				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " :::  t="+(System.currentTimeMillis() - _tmLastSaved));
+				return;
+			}
+			else
+				System.err.println("CesService:saveGeoTracking:Punto FALSO: " + vel+ " dist=" + _locLastSaved.distanceTo(loc) + " :::  t="+(System.currentTimeMillis() - _tmLastSaved));
+
+			//TODO: read this
+			//http://gis.stackexchange.com/questions/19683/what-algorithm-should-i-use-to-remove-outliers-in-trace-data
+			//Si el nuevo punto no tiene sentido, no se guarda...
+			//if(loc.getAccuracy() > 10) {
+			if(_loc0 == null)
+				_loc0 = loc;
+			else if(_loc1 == null)
+				_loc1 = loc;
+			else
+			{
+				double dis01 = _loc0.distanceTo(_loc1);
+				double dis02 = _loc0.distanceTo(loc);
+				if(dis01 > 2*dis02 && (System.currentTimeMillis() - _tmLastSaved) < DELAY_LOAD*2)
+				{
+					// El punto _loc1 es incorrecto, borrar
+					System.err.println("CesService: Punto anterior incorrecto: "+_loc1.getLatitude()+"/"+_loc1.getLongitude());
+				}
+				else
+				{
+					_loc0 = _loc1;
+					_loc1 = loc;
+				}
+			}*/
+
+
+//TODO: por que no funciona tracking con geofence?????
+	/*//______________________________________________________________________________________________
+	public static void cargarGeoTracking()
+	{
+System.err.println("CesService:cargarGeoTracking---------------------------------0--------");
+		if(_GeofenceStoreTracking != null)_GeofenceStoreTracking.clear();//TODO: si es el mismo no hay necesidad de recrearlo: comprobar...
+
+		RutaPto.getTrackingPto(new AsyncCallback<RutaPto>()
+		{
+			@Override
+			public void handleResponse(RutaPto ptoTrackin)
+			{
+//System.err.println("CesService:cargarGeoTracking-----------------------------------------:" + ptoTrackin);
+				if(Util.getTrackingRoute().isEmpty())
+				{
+					System.err.println("CesService:cargarGeoTracking-----------------------------------------:No hay ruta activa:Eliminando..." + ptoTrackin);
+					ptoTrackin.removeTrackingPto(new AsyncCallback<Long>()
+					{
+						@Override
+						public void handleResponse(Long aLong)
+						{
+							System.err.println("CesService:cargarGeoTracking-----------------------------------------:Eliminado:"+aLong);
+						}
+						@Override
+						public void handleFault(BackendlessFault backendlessFault)
+						{
+							System.err.println("CesService:cargarGeoTracking-----------------------------------------:Eliminado FALLO:" + backendlessFault);
+						}
+					});
+					return;
+				}
+System.err.println("CesService:cargarGeoTracking---------------------------------pto.loc--------:" + ptoTrackin.getLatitud()+","+ ptoTrackin.getLongitud());
+				Geofence gf = new Geofence.Builder()
+					.setRequestId(ptoTrackin.getObjectId())
+					.setCircularRegion(ptoTrackin.getLatitud(), ptoTrackin.getLongitud(), RADIO_TRACKING)
+					.setExpirationDuration(Geofence.NEVER_EXPIRE)
+					.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+					.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER)
+					.build();
+				ArrayList<Geofence> aGeofences = new ArrayList<>();
+				aGeofences.add(gf);
+				_GeofenceStoreTracking = new CesGeofenceStore(CesService._this, aGeofences);
+	System.err.println("CesService:cargarGeoTracking-----------------------------------------:Se añadio la geofence para tracking:"+gf);
+			}
+			@Override
+			public void handleFault(BackendlessFault backendlessFault)
+			{
+				System.err.println("CesService:cargarGeoTracking-----------------------------------------:Sin puntos");
+				Util.setTrackingRoute("");
+				return;
+			}
+		});
+	}*/
+	//______________________________________________________________________________________________
+	//Varias rutas al mismo tiempo, si tendrían los mismos puntos?
+	/*private void cargarListaGeoTracking()
+	{
+		try
+		{
+			if(_GeofenceStoreTracking != null)_GeofenceStoreTracking.clear();
+
+			//BackendlessDataQuery query = new BackendlessDataQuery();
+			Backendless.Persistence.of(GeoPoint.class).find(new AsyncCallback<BackendlessCollection<GeoPoint>>()
+			{
+				@Override
+				public void handleResponse(BackendlessCollection<GeoPoint> gs)
+				{
+					int n = gs.getTotalObjects();
+					if(n < 1)return;
+					ArrayList<Geofence> aGeofences = new ArrayList<>();
+					Iterator<GeoPoint> it = gs.getCurrentPage().iterator();
+					while(it.hasNext())
+					{
+						GeoPoint g = it.next();
+						//_listaGeoTracking.add(g);
+if(g.getLatitude() == null)return;
+						aGeofences.add(new Geofence.Builder().setRequestId(g.getObjectId())
+							.setCircularRegion(g.getLatitude(), g.getLongitude(), RADIO_TRACKING)
+							.setExpirationDuration(Geofence.NEVER_EXPIRE)
+							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+							.build());
+					}
+					_GeofenceStoreTracking = new CesGeofenceStore(CesService.this, aGeofences);
+				}
+				@Override
+				public void handleFault(BackendlessFault backendlessFault)
+				{
+					System.err.println("CesService:cargarListaGeoTracking:e:" + backendlessFault);//BackendlessFault{ code: '2024', message: 'Wrong entity name: name must not have a symbol '.'' }
+				}
+			});
+		}
+		catch(Exception e)
+		{
+			System.err.println("CesService:cargarListaGeoTracking:e:"+e);
+			//_lista.clear();
+		}
+	}*/

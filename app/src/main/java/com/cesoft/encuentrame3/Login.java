@@ -20,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 /// Created by Cesar_Casanova on 28/04/2016.
 public class Login
 {
+	private static final String TAG = "CESoft:Login";
 	private static final String PREF_LOGIN = "login";
 	private static final String PREF_PWD = "password";
 	private static final String PREF_SAVE_LOGIN = "save_login";
@@ -31,7 +32,7 @@ public class Login
 		if(a == null || a.getCurrentUser() == null)return "";
 		return a.getCurrentUser().getUid();
 	}
-	static String getCurrentUserName()//TODO: throw exception instead of return "" ?
+	static String getCurrentUserName()
 	{
 		FirebaseAuth a = FirebaseAuth.getInstance();
 		if(a == null || a.getCurrentUser() == null)return "";
@@ -71,7 +72,7 @@ public class Login
 				@Override
 				public void onSuccess(AuthResult authResult)
 				{
-					System.err.println("Login:addUser:success: "+authResult.getUser());
+					//System.err.println("Login:addUser:success: "+authResult.getUser());
 					listener.onExito(authResult.getUser());
 				}
 			})
@@ -80,7 +81,7 @@ public class Login
 				@Override
 				public void onFailure(@NonNull Exception e)
 				{
-					System.err.println("Login:addUser:failure: "+e);
+					//System.err.println("Login:addUser:failure: "+e);
 					listener.onFallo(e);
 				}
 			})
@@ -89,7 +90,7 @@ public class Login
 				@Override
 				public void onComplete(@NonNull Task<AuthResult> task)
 				{
-					System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
+					//System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
                 }
             });
 	}
@@ -102,7 +103,7 @@ public class Login
 				@Override
 				public void onSuccess(AuthResult authResult)
 				{
-					System.err.println("Login:login2:ok:"+authResult.getUser());
+					//System.err.println("Login:login2:ok:"+authResult.getUser());
 					listener.onExito(authResult.getUser());
 				}
 			})
@@ -111,7 +112,7 @@ public class Login
 				@Override
 				public void onFailure(@NonNull Exception e)
 				{
-					System.err.println("Login:login2:e:"+e);
+					//System.err.println("Login:login2:e:"+e);
 					listener.onFallo(e);
 				}
 			})
@@ -120,7 +121,7 @@ public class Login
 				@Override
 				public void onComplete(@NonNull Task<AuthResult> task)
 				{
-					System.err.println("Login:login2:task:"+task);
+					//System.err.println("Login:login2:task:"+task);
 				}
 			});
 	}
@@ -158,7 +159,7 @@ public class Login
 		e.putString(PREF_PWD, "");
 		e.apply();
 	}
-	private static void delPasswordOnly(Context c)//TODO: Log si c = null
+	private static void delPasswordOnly(Context c)
 	{
 		if(c == null)return;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
@@ -179,7 +180,7 @@ public class Login
 				delLogin(c);
 				return false;
 			}
-		}catch(Exception e){System.err.println("Login.login2:e:"+e);}
+		}catch(Exception e){Log.e(TAG, String.format("Login.login2:e:%s",e),e);}
 		String email = getUsuario(c);
 		String password = getClave(c);
 		if(email == null || password == null || email.isEmpty() || password.isEmpty())return false;
@@ -224,7 +225,7 @@ public class Login
 				@Override
 				public void onComplete(@NonNull Task<Void> task)
 				{
-					System.err.println("Login:restoreUser:complete: "+task);
+					//System.err.println("Login:restoreUser:complete: "+task);
 				}
 			})
 			.addOnSuccessListener(new OnSuccessListener<Void>()
@@ -232,7 +233,7 @@ public class Login
 				@Override
 				public void onSuccess(Void aVoid)
 				{
-					System.err.println("Login:restoreUser:success: "+getAuth().getCurrentUser());
+					//System.err.println("Login:restoreUser:success: "+getAuth().getCurrentUser());
 					listener.onExito(getAuth().getCurrentUser());
 				}
 			})
@@ -241,7 +242,7 @@ public class Login
 				@Override
 				public void onFailure(@NonNull Exception e)
 				{
-					System.err.println("Login:restoreUser:failure: "+e);
+					//System.err.println("Login:restoreUser:failure: "+e);
 					listener.onFallo(e);
 				}
 			});

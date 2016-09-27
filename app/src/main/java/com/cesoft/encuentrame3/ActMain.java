@@ -480,16 +480,17 @@ public class ActMain extends AppCompatActivity
 					try
 					{
 						if(_main._viewPager.getCurrentItem() == Util.LUGARES)
-							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:LUGARES:handleResponse:e:"+e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
+							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
+							catch(Exception e){Log.e(TAG, String.format("LUGARES:handleResponse:e:%s",e),e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
 					}
-					catch(Exception e){Log.e(TAG, "_acLugar:"+e, e);}
+					catch(Exception e){Log.e(TAG, String.format("_acLugar:%s",e), e);}
 				}
 				_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, PlaceholderFragment.this));
 			}
 			@Override
 			public void onError(String err)//FirebaseError err)
 			{
-				Log.e(TAG, "---------LUGARES2:GET:ERROR:" + err);
+				Log.e(TAG, String.format("LUGARES2:GET:e:%s",err));
 			}
 		};
 
@@ -515,10 +516,10 @@ public class ActMain extends AppCompatActivity
 					try
 					{
 						if(_main._viewPager.getCurrentItem() == Util.RUTAS)
-							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:RUTAS:handleResponse:e:"+e);}
+							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
+							catch(Exception e){Log.e(TAG, String.format("RUTAS:handleResponse:e:%s",e), e);}
 					}catch(Exception e){Log.e(TAG, String.format("_acRuta:e:%s",e),e);}
 				}
-for(Ruta r: aRutas)Log.e(TAG, "******************************"+r.getNombre());
 				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();
@@ -526,7 +527,7 @@ for(Ruta r: aRutas)Log.e(TAG, "******************************"+r.getNombre());
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "---------RUTAS2:GET:ERROR:" + err);
+				Log.e(TAG, String.format("RUTAS2:GET:e:%s",err));
 			}
 		};
 
@@ -550,14 +551,15 @@ for(Ruta r: aRutas)Log.e(TAG, "******************************"+r.getNombre());
 				if(n < 1)
 				{
 					if(_main._viewPager.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
-					try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}catch(Exception e){System.err.println("ActMain:AVISOS:handleResponse:e:"+e);}
+					try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
+					catch(Exception e){Log.e(TAG, String.format("AVISOS:handleResponse:e:%s",e), e);}
 				}
 				_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, PlaceholderFragment.this));
 			}
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "---------AVISOS2:GET:ERROR:" + err);
+				Log.e(TAG, String.format("AVISOS2:GET:e:%s",err));
 			}
 		};
 

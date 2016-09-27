@@ -115,7 +115,9 @@
 	<string name="info_time">Fecha: </string>
 	<string name="info_prec">\nPrecisión: %.2f m\n</string>
 	<string name="info_dist">\nDistancia: %.0f m</string>
+	<string name="info_dist2">\nDistancia: %.1f Km</string>
 	<string name="info_alt">\nAltitud: %.0f m</string>
 	<string name="info_nor">\nNorte: %.0f º</string>
 	<string name="info_speed">\nVelocidad: %.2f m/s</string>
+	<string name="info_speed2">\nVelocidad: %.0f Km/h</string>
 </resources>

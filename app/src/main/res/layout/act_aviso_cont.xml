@@ -38,9 +38,8 @@
 			android:layout_height="wrap_content"
 			android:ems="10"
 			android:hint="@string/nombre"
-			android:inputType="text"
-			android:maxLines="1"
-			android:singleLine="true"/>
+			android:inputType="textCapWords"
+			android:maxLines="1"/>
 	</android.support.design.widget.TextInputLayout>
 
 
@@ -60,9 +59,8 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/aviso"
 			android:ems="10"
-			android:inputType="textMultiLine"
-			android:maxLines="3"
-			android:singleLine="true"/>
+			android:inputType="textMultiLine|textCapWords"
+			android:maxLines="3"/>
 	</android.support.design.widget.TextInputLayout>
 
 	<!-- DATE CREATED and MODIFIED ? -->
@@ -93,7 +91,7 @@
 			android:textAppearance="?android:attr/textAppearanceLarge"
 			android:layout_marginRight="2dp"
 			android:layout_marginEnd="2dp"
-			android:text="0.0/0.0"
+			android:text=""
 			android:layout_gravity="center_vertical"/>
 		<ImageButton
 			android:id="@+id/btnActPos"
@@ -128,7 +126,6 @@
 			android:prompt="@string/radio" />
 	</LinearLayout>
 
-
 	<fragment
 		android:id="@+id/map"
 		android:layout_below="@+id/layRadio"
@@ -140,6 +137,5 @@
 		android:layout_height="match_parent"
 		tools:context=".ActAviso"
 		/>
-
 
 </RelativeLayout>

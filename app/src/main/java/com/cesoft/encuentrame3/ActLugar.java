@@ -318,7 +318,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 							else
 							{
 								_bGuardar = true;
-								System.err.println("ActLugar:guardar:handleFault2:f:" + err);
+								Log.e(TAG, String.format("guardar:handleFault2:f:%s",err));
 								Toast.makeText(ActLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 							}
 						}

@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3.models;
 
-import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -375,7 +374,7 @@ public class Ruta extends Objeto implements Parcelable
 			public String getId(){return id;}
 			public void setId(String v){id = v;}
 
-		protected String idRuta = null;
+		String idRuta = null;
 			public String getIdRuta(){return idRuta;}
 			public void setIdRuta(String v){idRuta = v;}
 
