@@ -373,6 +373,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 
 	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
+		try{
 		if(aPts.length < 1)return;
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 		float distancia = 0;
@@ -428,12 +429,11 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		po.width(5).color(_iColor);
 		_Map.addPolyline(po);//Polyline line =
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), 15));
+		}catch(Exception e){Log.e(TAG, String.format("showRutaHelper:e:%s",e), e);}
 	}
 
 
-
 	//______________________________________________________________________________________________
-
 	private void showLugares()
 	{
 		Lugar.getLista(new Objeto.ObjetoListener<Lugar>()

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import java.util.ArrayList;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -29,7 +30,6 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
 
@@ -42,11 +42,11 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 {
 	private static final String TAG = "CESoft:CesService:";
 	private static final int GEOFEN_DWELL_TIME = 60*1000;//TODO:customize in settings...
-	private static final long DELAY_LOAD = 5*60*1000;//TODO: ajustar
 	private static final long DELAY_TRACK_MIN = 40*1000;
 	private static final long DELAY_TRACK_MAX = 7*60*1000;
 	private long DELAY_TRACK = DELAY_TRACK_MIN;//TODO: ajustar
 	private static final long ACCURACY_MAX = 25;//m
+	private static final long DELAY_LOAD = DELAY_TRACK_MAX;//TODO: PUEDES HACER QUE SE CARGUEN CUANDO CAMBIAN DATOS EN HOST: FIREBASE AJAX..
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
 	private static CesService _this;
@@ -70,12 +70,12 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 			@Override
 			public void onExito(FirebaseUser usr)
 			{
-				Log.w(TAG, "onCreate:login:exito:-------------------------------------------------- ");
+				Log.w(TAG, "onCreate:login:exito:--------------------------------------------------");
 			}
 			@Override
 			public void onFallo(Exception e)
 			{
-				Log.e(TAG, "onCreate:login:fallo:-------------------------------------------------- "+e, e);
+				Log.e(TAG, String.format("onCreate:login:fallo:--------------------------------------------------%s",e), e);
 				CesService.this.stopSelf();
 			}
 		});
@@ -83,16 +83,18 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	}
 
 	//______________________________________________________________________________________________
+	//private Thread _hiloLoop = null;
 	@Override
 	protected void onHandleIntent(Intent workIntent)
 	{
+		//_hiloLoop = Thread.currentThread();
 		try
 		{
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
-			//long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
+			long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
 			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
-			{//TODO: si no hay ruta, ralentizar hasta DELAY_LOAD?????
+			{
 Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
 				if( ! Login.isLogged())
 				{
@@ -110,7 +112,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 							Log.e(TAG, String.format("loop---------Login kk:%s",e), e);
 						}
 					});
-					Thread.sleep(DELAY_LOAD / 3);
+					try{Thread.sleep(DELAY_TRACK_MIN);}catch(InterruptedException ignored){}
 					continue;
 				}
 				if(tmLoad + DELAY_LOAD < System.currentTimeMillis())
@@ -118,17 +120,23 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 					cargarListaGeoAvisos();
 					tmLoad = System.currentTimeMillis();
 				}
-				//if(tmTrack + DELAY_TRACK < System.currentTimeMillis())
+				if(tmTrack + DELAY_TRACK < System.currentTimeMillis())
 				{
 					saveGeoTracking();
-					//tmTrack = System.currentTimeMillis();
+					tmTrack = System.currentTimeMillis();
 				}
-				Thread.sleep(DELAY_TRACK);//DELAY_LOAD / 3);
+				try{Thread.sleep(DELAY_TRACK/4);}catch(InterruptedException e){Log.e(TAG, "INTERRUPTED ROUTE SLEEP---------------");}
 			}
 		}
-		catch(InterruptedException e){Log.e(TAG, String.format("onHandleIntent:e:%s", e), e);}
+		catch(Exception e){Log.e(TAG, String.format("onHandleIntent:e:%s", e), e);}
 	}
 
+	//______________________________________________________________________________________________
+	public static void _startRuta()
+	{
+		_this.DELAY_TRACK = DELAY_TRACK_MIN;
+		//if(_hiloLoop!=null)_hiloLoop.interrupt();Doesnt work
+	}
 	//______________________________________________________________________________________________
 	public static void _cargarListaGeoAvisos()
 	{
@@ -185,7 +193,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
-					Log.e(TAG, "cargarListaGeoAvisos:f:"+err);
+					Log.e(TAG, String.format("cargarListaGeoAvisos:e:%s",err));
 				}
 			});
 		}
@@ -201,7 +209,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 	private String _sId = "";
 	public void saveGeoTracking()
 	{
-		final String sId = Util.getTrackingRoute(this);
+		final String sId = Util.getTrackingRoute(getApplicationContext());
 		if(sId.isEmpty())
 		{
 			stopTracking();
@@ -216,8 +224,8 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 			{
 				try{
 				rutas.getValue(Ruta.class);
-				Log.w(TAG, "saveGeoTracking:Ruta.getById: OOOOOOOOOK");
-				}catch(Exception e){Log.e(TAG, "saveGeoTracking:Ruta.getById:"+rutas, e);}
+				//Log.w(TAG, "saveGeoTracking:Ruta.getById: OOOOOOOOOK");
+				}catch(Exception e){Log.e(TAG, String.format("saveGeoTracking:Ruta.getById:%s",rutas), e);}
 
 				Ruta r = null;
 				for(DataSnapshot ruta : rutas.getChildren())
@@ -227,7 +235,9 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 				}
 				if(r == null)
 				{
-					Log.e(TAG, "saveGeoTracking:Ruta.getById:NULL---------------");
+					Log.e(TAG, "saveGeoTracking:Ruta.getById:NULL---------------"+sId);
+					Util.setTrackingRoute(getApplicationContext(), "");
+					stopTracking();
 					return;
 				}
 				handleResponse(r, sId);
@@ -252,12 +262,17 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 	{
 		if(loc == null)
 		{
-			Log.e(TAG, "guardarPunto:findById:Util.getLocation()-----------------:NULL");
+			Log.w(TAG, "guardarPunto:loc==NULL------------------------");
 			return;
 		}
-
+		if(!loc.hasAccuracy())
+		{
+			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------");
+			return;
+		}
+Log.w(TAG, "guardarPunto:--------------------------"+loc.getAccuracy()+" "+loc.toString());
 		//Si el nuevo punto no tiene sentido, no se guarda...
-		if(!loc.hasAccuracy() || loc.getAccuracy() > ACCURACY_MAX)
+		if(loc.getAccuracy() > ACCURACY_MAX)
 		{
 			if(aLoc == null)
 			{
@@ -278,11 +293,13 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 		}
 		else
 		{
-			if(_locLastSaved!= null && loc.distanceTo(_locLastSaved) > 500)
+			if(aLoc!=null && _locLastSaved!= null && loc.distanceTo(_locLastSaved) > 500)
 			{
-				for(Location l : aLoc)
-					if(loc.getAccuracy() > l.getAccuracy()) loc = l;
-				r.guardar(new GuardarListener(loc));
+				//for(Location l : aLoc)if(loc.getAccuracy() > l.getAccuracy()) loc = l;
+				Location l0 = aLoc[0];
+				for(int i=1; i < aLoc.length && aLoc[i]!=null; i++)
+					if(l0.getAccuracy() > aLoc[i].getAccuracy()) l0 = aLoc[i];
+				r.guardar(new GuardarListener(l0));
 			}
 			aLoc = null;
 		}
@@ -297,20 +314,21 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 		else if(_locLastSaved != null)
 		{
 			float distLastSaved = loc.distanceTo(_locLastSaved);
-//Log.w(TAG, String.format("------------------------saveGeoTracking:Punto dist ant = %f", distLastSaved));
-			if(distLastSaved < 30 || loc.getAccuracy() > ACCURACY_MAX)//Puntos muy cercanos
+			if(distLastSaved < 30 || loc.getAccuracy() > ACCURACY_MAX)//Puntos muy cercanos o sin gps
 			{
-				Log.w(TAG, String.format("saveGeoTracking:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
+				Log.w(TAG, String.format("guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
 				DELAY_TRACK += 10*1000;
 				if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
 				return;
 			}
 			else if(distLastSaved > 200)
 				DELAY_TRACK = DELAY_TRACK_MIN;
+			else if(distLastSaved > 150)
+				DELAY_TRACK -= 3*60*1000;
 			else if(distLastSaved > 100)
-				DELAY_TRACK -= 60*1000;
+				DELAY_TRACK -= 2*60*1000;
 			else if(distLastSaved > 75)
-				DELAY_TRACK -= 30*1000;
+				DELAY_TRACK -= 60*1000;
 			//else if(distLastSaved > 50)
 			if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
 		}
@@ -336,7 +354,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 						@Override
 						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
-							if(err != null)	Log.e(TAG, "saveGeoTracking:guardar:pto:err:----------------------:" + err);
+							if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
 							//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
 							Util.refreshListaRutas();//Refrescar lista rutas en main..
 						}
@@ -344,7 +362,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 			}
 			else
 			{
-				Log.e(TAG, "saveGeoTracking:guardar:err:----------------------:" + err);
+				Log.e(TAG, String.format("saveGeoTracking:guardar:err:-------------------------:%s",err));
 			}
 		}
 	}
@@ -375,7 +393,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			Log.e(TAG, "checkPlayServices:e:" + result);
+			Log.e(TAG, String.format("checkPlayServices:e:%s",result));
 	        return false;
 	    }
 	    return true;
@@ -397,7 +415,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 			}
 			catch(SecurityException e)
 			{
-				Log.e(TAG, "startTracking:e:"+e, e);
+				Log.e(TAG, String.format("startTracking:e:%s",e), e);
 			}
 		}
 	}
@@ -405,13 +423,14 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 			LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
+		DELAY_TRACK = DELAY_TRACK_MAX;
 	}
 
 
 	@Override
 	public void onConnected(@Nullable Bundle bundle)
 	{
-		Log.w(TAG, "CesService:onConnected");
+		Log.w(TAG, "onConnected");
 	}
 	@Override
 	public void onConnectionSuspended(int i)
@@ -423,9 +442,8 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		//Log.w(TAG, "onLocationChanged:"+location.getLatitude()+"/"+location.getLongitude()+":"+(new java.util.Date(location.getTime())));
-		Log.w(TAG, "onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
 		Util.setLocation(location);
+		Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
 	}
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)

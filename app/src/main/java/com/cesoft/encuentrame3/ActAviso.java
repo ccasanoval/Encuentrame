@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3;
 
+import android.app.ProgressDialog;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -314,16 +315,28 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 
 
 	//______________________________________________________________________________________________
+	private ProgressDialog _progressDialog;
+	public void iniEspera()
+	{
+		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+	}
+	public void finEspera()
+	{
+		if(_progressDialog!=null)_progressDialog.dismiss();
+	}
+	//______________________________________________________________________________________________
 	private boolean _bGuardar = true;
-	private void guardar()
+	private synchronized void guardar()
 	{
 		if(!_bGuardar)return;
 		_bGuardar = false;
+		iniEspera();
+
 		if(_a.getLatitud()==0 && _a.getLongitud()==0)
 		{
-			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
 			Toast.makeText(ActAviso.this, getString(R.string.sin_lugar), Toast.LENGTH_LONG).show();
 			_bGuardar = true;
+			finEspera();
 			return;
 		}
 		if(_txtNombre.getText().toString().isEmpty())
@@ -331,6 +344,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			Toast.makeText(ActAviso.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
 			_txtNombre.requestFocus();
 			_bGuardar = true;
+			finEspera();
 			return;
 		}
 		_a.setNombre(_txtNombre.getText().toString());
@@ -348,6 +362,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					CesService._cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
 					openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
 					_bGuardar = true;
+					finEspera();
 				}
 				else
 				{
@@ -360,29 +375,28 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 						@Override
 						public void onComplete(DatabaseError err, DatabaseReference data)
 						{
+							finEspera();
+							_bGuardar = true;
 							if(err == null)
 							{
 								CesService._cargarListaGeoAvisos();
 								openMain(true, getString(R.string.ok_guardar_aviso));
-								_bGuardar = true;
 							}
 							else
 							{
 								Log.e(TAG, "guardar:handleFault2:f:" + err);
 								Toast.makeText(ActAviso.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-								_bGuardar = true;
 							}
 						}
 					});
 				}
 			}
 		});
-
 	}
 
 	//______________________________________________________________________________________________
 	private boolean _bEliminar = true;
-	private void eliminar()
+	private synchronized void eliminar()
 	{
 		if(!_bEliminar)return;
 		_bEliminar=false;
@@ -394,21 +408,22 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
+				iniEspera();
 				_a.eliminar(new DatabaseReference.CompletionListener()
 				{
 					@Override
 					public void onComplete(DatabaseError err, DatabaseReference data)
 					{
+						finEspera();
+						_bEliminar=true;
 						if(err == null)
 						{
 							openMain(true, getString(R.string.ok_eliminar_aviso));
-							_bEliminar=true;
 						}
 						else
 						{
 							Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
 							Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-							_bEliminar=true;
 						}
 					}
 				});

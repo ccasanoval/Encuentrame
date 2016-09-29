@@ -151,9 +151,16 @@ public class ActMain extends AppCompatActivity
 		switch(id)
 		{
 		case R.id.action_config:
-			try{
-			PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(this, ActConfig.class), Util.CONFIG);
-			}catch(Exception e){Log.e(TAG, "onOptionsItemSelected: action_config: "+e, e);}
+			try
+			{
+				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(this, ActConfig.class), Util.CONFIG);
+			}
+			catch(Exception e)
+			{
+				//TODO: restaurar _apf
+				PlaceholderFragment._apf[_viewPager.getCurrentItem()] = PlaceholderFragment.newInstance(_viewPager.getCurrentItem(), ActMain.this);
+				Log.e(TAG, "onOptionsItemSelected: action_config: "+e, e);
+			}
 			return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
@@ -161,7 +168,9 @@ public class ActMain extends AppCompatActivity
 			startActivity(i);
 			return true;
 		case R.id.action_buscar:
-			PlaceholderFragment._apf[_viewPager.getCurrentItem()].buscar();
+			if(PlaceholderFragment._apf[_viewPager.getCurrentItem()] != null)
+				PlaceholderFragment._apf[_viewPager.getCurrentItem()].buscar();
+			else Log.e(TAG, "PlaceholderFragment._apf["+_viewPager.getCurrentItem()+"] == NULL");
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

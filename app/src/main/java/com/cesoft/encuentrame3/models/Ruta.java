@@ -145,7 +145,8 @@ public class Ruta extends Objeto implements Parcelable
 
 	public static void getLista(final ObjetoListener<Ruta> listener)
 	{
-		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -185,7 +186,8 @@ public class Ruta extends Objeto implements Parcelable
 	//----
 	private static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
-		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -226,6 +228,7 @@ public class Ruta extends Objeto implements Parcelable
 				for(String idRuta : aData)
 				{
 					Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
+					//Ruta.newFirebase().child(idRuta).addValueEventListener(new ValueEventListener()//AJAX
 					{
 						@Override
 						public void onDataChange(DataSnapshot data)
@@ -262,6 +265,7 @@ public class Ruta extends Objeto implements Parcelable
 			{
 				nCount++;
 				RutaPunto.newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				//RutaPunto.newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)
@@ -364,7 +368,7 @@ public class Ruta extends Objeto implements Parcelable
 	@IgnoreExtraProperties
 	public static class RutaPunto implements Parcelable
 	{
-		public static final String NOMBRE = "ruta_punto";//TODO:? or parent?
+		public static final String NOMBRE = "ruta_punto";
 		private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 		private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 		@Exclude
@@ -454,9 +458,9 @@ public class Ruta extends Objeto implements Parcelable
 		// FIREBASE
 		public static void eliminar(final String idRuta)
 		{
-			//delGeo(idRuta);
-
-			RutaPunto.getLista(idRuta, new ValueEventListener()
+			//RutaPunto.getLista(idRuta, new ValueEventListener()
+			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(idRuta);
+			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
 			{
 				@Override
 				public void onDataChange(DataSnapshot ds)
@@ -471,7 +475,7 @@ public class Ruta extends Objeto implements Parcelable
 				@Override
 				public void onCancelled(DatabaseError err)
 				{
-					Log.e(TAG, "RutaPunto:delGeo:e:"+err+", idRuta:"+idRuta);
+					Log.e(TAG, "RutaPunto:eliminar:e:"+err+", idRuta:"+idRuta);
 				}
 			});
 		}
@@ -498,27 +502,9 @@ public class Ruta extends Objeto implements Parcelable
 		}
 		static void getLista(String sIdRuta, final ValueEventListener listener)
 		{
-			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);
-			//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
+			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
+			queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc
 			//queryRef.addListenerForSingleValueEvent(listener);
-			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot ds)
-				{
-					/*for(DataSnapshot o : ds.getChildren())
-					{
-						System.err.println("RutaPunto:getLista:onDataChange:o------------------------"+o);
-						System.err.println("RutaPunto:getLista:onDataChange:rutPto---------------------"+o.getValue(Ruta.RutaPunto.class));
-					}*/
-					listener.onDataChange(ds);
-				}
-				@Override
-				public void onCancelled(DatabaseError err)
-				{
-					listener.onCancelled(err);
-				}
-			});
 		}
 		// FIREBASE
 		//----------------------------------------------------------------------------------------------
@@ -564,8 +550,8 @@ public class Ruta extends Objeto implements Parcelable
 				{
 					if(error != null)
 						Log.e(TAG, "RutaPunto:saveGeo:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
-					else
-						Log.w(TAG, "RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
+					//else
+					//	Log.w(TAG, "RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
 				}
 			});
 		}
@@ -573,26 +559,6 @@ public class Ruta extends Objeto implements Parcelable
 		{
 			final GeoFire datGeo = newGeoFire();
 			datGeo.removeLocation(idRutaPunto);
-			/*RutaPunto.getLista(idRuta, new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot ds)
-				{
-					for(DataSnapshot o : ds.getChildren())
-					{
-						RutaPunto rp = o.getValue(RutaPunto.class);
-						datGeo.removeLocation(rp.getId());
-						newFirebase().child(rp.getId()).setValue(null, null);
-System.err.println("----------------Ruta:delGeo:deleting:"+rp.getId());
-					}
-System.err.println("----------------Ruta:delGeo:"+ds.getRef());
-				}
-				@Override
-				public void onCancelled(DatabaseError err)
-				{
-					System.out.println("RutaPunto:delGeo:e:"+err+" : "+idRuta);
-				}
-			});*/
 		}
 		// GEOFIRE
 		//----------------------------------------------------------------------------------------------
@@ -600,10 +566,7 @@ System.err.println("----------------Ruta:delGeo:"+ds.getRef());
 
 		//----------------------------------------------------------------------------------------------
 		//----------- HELPING FUNC
-		/*public boolean equalTo(RutaPunto v)
-		{
-			return (getLatitud() == v.getLatitud() && getLongitud() == v.getLongitud());
-		}
+		/*
 		public double distanciaSimple(RutaPunto v)
 		{
 			double dLat = getLatitud() - v.getLatitud();

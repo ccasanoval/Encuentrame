@@ -50,7 +50,7 @@ public class Aviso extends Objeto
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
-	//protected long fecha;//TODO:?
+	//protected long fecha;//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
 	protected Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
@@ -186,8 +186,8 @@ public class Aviso extends Objeto
 	public static void getActivos(ValueEventListener listener)
 	{
 		Query queryRef = newFirebase().orderByChild(ACTIVO).equalTo(true);	//Query queryRef = ref.equalTo(true, ACTIVO);//NO PIRULA
-		queryRef.addListenerForSingleValueEvent(listener);
-    	//queryRef.addChildEventListener(listener);//TODO:Cual mejor?
+		//queryRef.addListenerForSingleValueEvent(listener);
+    	queryRef.addValueEventListener(listener);//AJAX
 	}
 	public static void getLista(final ObjetoListener<Aviso> listener)
 	{
@@ -230,7 +230,8 @@ public class Aviso extends Objeto
 	//----
 	private static void buscarPorFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
 	{
-		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -268,7 +269,8 @@ public class Aviso extends Objeto
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				nCount++;
-				newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)

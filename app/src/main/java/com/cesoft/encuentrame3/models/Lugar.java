@@ -146,7 +146,8 @@ public class Lugar extends Objeto
 	}
 	private static void buscarPorFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
-		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -164,8 +165,9 @@ public class Lugar extends Objeto
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				Log.e(TAG, "buscarPorFiltro:onCancelled:"+err);
-				listener.onError("Lugar:buscarPorFiltro:onCancelled:"+err);
+				String s = String.format("Lugar:buscarPorFiltro:onCancelled:e:%s",err);
+				Log.e(TAG, s);
+				listener.onError(s);
 			}
 		});
 	}
@@ -182,7 +184,8 @@ public class Lugar extends Objeto
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				nCount++;
-				newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
 					public void onDataChange(DataSnapshot data)
@@ -279,8 +282,8 @@ public class Lugar extends Objeto
 			{
         		if(error != null)
             		Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
-        		else
-            		Log.i(TAG, "Location saved on server successfully!");
+        		//else
+            	//	Log.i(TAG, "Location saved on server successfully!");
 			}
         });
 	}

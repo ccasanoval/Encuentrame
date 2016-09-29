@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import android.app.ProgressDialog;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
@@ -339,16 +340,34 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	}
 
 	//______________________________________________________________________________________________
+	private ProgressDialog _progressDialog;
+	public void iniEspera()
+	{
+		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+	}
+	public void finEspera()
+	{
+		if(_progressDialog!=null)_progressDialog.dismiss();
+	}
+	//______________________________________________________________________________________________
+	private boolean _bGuardar = true;
 	private synchronized void guardar()
 	{
+		if(!_bGuardar)return;
+		_bGuardar = false;
+		iniEspera();
+
 		guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
 			public void onComplete(DatabaseError err, DatabaseReference data)
 			{
+				_bGuardar = true;
+				finEspera();
 				if(err == null)
 				{
 					//Log.w(TAG, "guardar:"+data);
+					CesService._startRuta();
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -358,7 +377,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				}
 			}
 		});
-
 	}
 	private void guardar(DatabaseReference.CompletionListener res)
 	{
@@ -374,8 +392,12 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	}
 
 	//______________________________________________________________________________________________
+	private boolean _bEliminar = true;
 	private synchronized void eliminar()
 	{
+		if(!_bEliminar)return;
+		_bEliminar=false;
+
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_r.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
@@ -384,11 +406,16 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
+				iniEspera();
+				if(_r.getId().equals(Util.getTrackingRoute(ActRuta.this)))
+					Util.setTrackingRoute(ActRuta.this, "");
 				_r.eliminar(new DatabaseReference.CompletionListener()
 				{
 					@Override
 					public void onComplete(DatabaseError err, DatabaseReference data)
 					{
+						_bEliminar = true;
+						finEspera();
 						if(err == null)
 						{
 							//Log.w(TAG, "eliminar:handleResponse:"+data);
@@ -413,16 +440,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	{
 		Util.setLocation(location);
 	}
-	//______________________________________________________________________________________________
-	//// 4 ResultCallback
-	/*@Override public void onResult(@NonNull Status status)
-	{
-		System.err.println("----------ActRuta:onResult:"+status);
-	}*/
-
-	//______________________________________________________________________________________________
-	// 4 GoogleMap.OnCameraChangeListener
-	//@Override public void onCameraChange(CameraPosition cameraPosition){}
 
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
@@ -430,7 +447,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
 
 		if(_bNuevo)
@@ -439,10 +455,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		}
 		else// if(_r.getPuntos().size() > 0)
 		{
-			showRuta();//showMarkers();
-			//GeoPoint pos = _r.getPuntos().get(0);
-			//LatLng pos2 = new LatLng(pos.getLatitude(), pos.getLongitude());
-			//_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos2, 15));
+			showRuta();
 		}
 
 		//MARCADOR MULTILINEA --------------------------------------------
@@ -527,7 +540,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 					Log.e(TAG, "startTrackingRecord:handleFault:" + err);
 					//*****************************************************************************
 					try{Thread.sleep(500);}catch(InterruptedException ignored){}
-					//TODO: Repetia la op por Backendless, en Firebase quizá podría eliminar este repetitivo
+					//Repito la op por Backendless, en Firebase quizá podría eliminar el reintento
 					_r.guardar(new DatabaseReference.CompletionListener()
 					{
 						@Override
@@ -567,7 +580,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
 				for(DataSnapshot o : ds.getChildren())
 				{
-					aPts[i++] = o.getValue(Ruta.RutaPunto.class);//TODO:go to map pos
+					aPts[i++] = o.getValue(Ruta.RutaPunto.class);
 				}
 				showRutaHelper(aPts);
 			}

@@ -56,7 +56,19 @@ class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 
 		holder.txtNombre.setText(_avisos[position].getNombre());
 		if(_avisos[position].getFecha()!=null)holder.txtFecha.setText(Aviso.DATE_FORMAT2.format(_avisos[position].getFecha()));
-		if(!_avisos[position].isActivo())holder.txtNombre.setTextColor(Color.GRAY);
+		if(!_avisos[position].isActivo())
+		{
+			holder.txtNombre.setTextColor(Color.GRAY);
+		}
+		else
+		{
+			//holder.txtNombre.setTextColor(Color.GREEN);
+			if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem, convertView.getContext().getTheme()));
+			else
+				//noinspection deprecation
+				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
+		}
 		holder.btnEditar.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
