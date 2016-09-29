@@ -366,8 +366,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				finEspera();
 				if(err == null)
 				{
-					//Log.w(TAG, "guardar:"+data);
-					CesService._startRuta();
+Log.w(TAG, "guardar:--------------------------------------------------------------"+data);
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -525,6 +524,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
+		Util.setTrackingRoute(ActRuta.this, _r.getId());
+		CesService._restartDelayRuta();
 		guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
@@ -534,12 +535,15 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				{
 					Util.setTrackingRoute(ActRuta.this, _r.getId());
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+					CesService._restartDelayRuta();
 				}
 				else
 				{
-					Log.e(TAG, "startTrackingRecord:handleFault:" + err);
+					Util.setTrackingRoute(ActRuta.this, "");
+					Log.e(TAG, String.format("startTrackingRecord:handleFault:%s", err));
+					Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
 					//*****************************************************************************
-					try{Thread.sleep(500);}catch(InterruptedException ignored){}
+					/*try{Thread.sleep(500);}catch(InterruptedException ignored){}
 					//Repito la op por Backendless, en Firebase quizá podría eliminar el reintento
 					_r.guardar(new DatabaseReference.CompletionListener()
 					{
@@ -557,7 +561,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 								Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
 							}
 						}
-					});
+					});*/
 				}
 			}
 		});
@@ -587,16 +591,17 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				Log.e(TAG, "showRuta:onCancelled:-----------:"+err);
+				Log.e(TAG, String.format("showRuta:onCancelled:-----------:%s",err));
 				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
 			}
 		});
 	}
 
-
+	//______________________________________________________________________________________________
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
+		if(_Map==null)return;
 		_Map.clear();
 
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();//TODO: set 24h

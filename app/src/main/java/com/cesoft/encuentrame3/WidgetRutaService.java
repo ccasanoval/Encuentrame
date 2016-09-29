@@ -99,7 +99,7 @@ public class WidgetRutaService extends Service
 
 					try{
 					rutas.getValue(Ruta.class);
-					Log.w(TAG, "WidgetRutaService:saveGeoTracking:Ruta.getById: OOOOOOOOOK");
+					//Log.w(TAG, "WidgetRutaService:saveGeoTracking:Ruta.getById: OOOOOOOOOK");
 					}catch(Exception e){Log.e(TAG, String.format("WidgetRutaService:saveGeoTracking:Ruta.getById:%s",rutas), e);}
 
 					Ruta ruta = null;

@@ -227,8 +227,8 @@ public class Ruta extends Objeto implements Parcelable
 				else
 				for(String idRuta : aData)
 				{
-					Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
-					//Ruta.newFirebase().child(idRuta).addValueEventListener(new ValueEventListener()//AJAX
+					//Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
+					Ruta.newFirebase().child(idRuta).addValueEventListener(new ValueEventListener()//AJAX
 					{
 						@Override
 						public void onDataChange(DataSnapshot data)
@@ -503,8 +503,8 @@ public class Ruta extends Objeto implements Parcelable
 		static void getLista(String sIdRuta, final ValueEventListener listener)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
-			queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc
-			//queryRef.addListenerForSingleValueEvent(listener);
+			//queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc
+			queryRef.addListenerForSingleValueEvent(listener);
 		}
 		// FIREBASE
 		//----------------------------------------------------------------------------------------------
