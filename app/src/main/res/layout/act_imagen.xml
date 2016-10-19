@@ -1,0 +1,45 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			 xmlns:tools="http://schemas.android.com/tools"
+			 android:layout_width="match_parent"
+			 android:layout_height="match_parent"
+			 android:background="#000000"
+			 tools:context="com.cesoft.encuentrame3.ActImagen">
+
+	<ImageView
+		android:id="@+id/imagen"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="center"
+		android:keepScreenOn="true"
+		android:contentDescription="@string/imagen"
+		/>
+
+	<!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fitsSystemWindows="true">
+
+		<LinearLayout
+			android:id="@+id/fullscreen_content_controls"
+			style="?metaButtonBarStyle"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom|center_horizontal"
+			android:background="@color/black_overlay"
+			android:orientation="horizontal"
+			tools:ignore="UselessParent">
+
+			<Button
+				android:id="@+id/tomar_foto"
+				style="?metaButtonBarButtonStyle"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:text="@string/tomar_imagen"/>
+
+		</LinearLayout>
+	</FrameLayout>
+
+</FrameLayout>
