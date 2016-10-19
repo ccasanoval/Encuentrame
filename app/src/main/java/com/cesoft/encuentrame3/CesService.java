@@ -42,10 +42,10 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 {
 	private static final String TAG = "CESoft:CesService:";
 	private static final int GEOFEN_DWELL_TIME = 60*1000;//TODO:customize in settings...
-	private static final long DELAY_TRACK_MIN = 40*1000;
+	private static final long DELAY_TRACK_MIN = 30*1000;
 	private static final long DELAY_TRACK_MAX = 7*60*1000;
 	private static long DELAY_TRACK = DELAY_TRACK_MIN;//TODO: ajustar
-	private static final long ACCURACY_MAX = 25;//m
+	private static final long ACCURACY_MAX = 24;//m
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;//TODO: PUEDES HACER QUE SE CARGUEN CUANDO CAMBIAN DATOS EN HOST: FIREBASE AJAX..
 	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
 
@@ -127,7 +127,11 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 					_tmTrack = System.currentTimeMillis();
 				}
 Log.w(TAG, "LOOP before sleeping------------------------"+(DELAY_TRACK/4000));
-				try{Thread.sleep(DELAY_TRACK/4);}catch(InterruptedException e){Log.e(TAG, "INTERRUPTED ROUTE SLEEP---------------");}
+				try{
+					//if(DELAY_TRACK > DELAY_TRACK_MIN+20*1000)
+						Thread.sleep(DELAY_TRACK/4);
+					//else Thread.sleep(DELAY_TRACK/3);
+				}catch(InterruptedException e){Log.e(TAG, "---------------- LOOP SLEEP INTERRUPTED---------------");}
 			}
 		}
 		catch(Exception e){Log.e(TAG, String.format("onHandleIntent:e:%s", e), e);}
@@ -263,7 +267,6 @@ Log.w(TAG, "handleResponse------------------------------ruta="+sId+"  "+r);
 		guardarPunto(loc, r, sId);
 	}
 
-	Location aLoc[]; int iLoc = 0;
 	private void guardarPunto(Location loc, Ruta r, String sId)
 	{
 		if(loc == null)
@@ -276,39 +279,10 @@ Log.w(TAG, "handleResponse------------------------------ruta="+sId+"  "+r);
 			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------");
 			return;
 		}
+
 Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAccuracy()+" "+loc.toString());
 		//Si el nuevo punto no tiene sentido, no se guarda...
-		if(loc.getAccuracy() > ACCURACY_MAX)
-		{
-			if(aLoc == null)
-			{
-				aLoc = new Location[3];
-				iLoc = 0;
-			}
-			if(iLoc < aLoc.length)
-			{
-				aLoc[iLoc++] = loc;
-				return;
-			}
-			else
-			{
-				for(Location l : aLoc)
-					if(loc.getAccuracy() > l.getAccuracy()) loc = l;
-				aLoc = null;
-			}
-		}
-		else
-		{
-			if(aLoc!=null && _locLastSaved!= null && loc.distanceTo(_locLastSaved) > 500)
-			{
-				//for(Location l : aLoc)if(loc.getAccuracy() > l.getAccuracy()) loc = l;
-				Location l0 = aLoc[0];
-				for(int i=1; i < aLoc.length && aLoc[i]!=null; i++)
-					if(l0.getAccuracy() > aLoc[i].getAccuracy()) l0 = aLoc[i];
-				r.guardar(new GuardarListener(l0));
-			}
-			aLoc = null;
-		}
+		if(loc.getAccuracy() > ACCURACY_MAX)return;
 
 		if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
 		{
@@ -320,7 +294,7 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 		else if(_locLastSaved != null)
 		{
 			float distLastSaved = loc.distanceTo(_locLastSaved);
-			if(distLastSaved < 30 || loc.getAccuracy() > ACCURACY_MAX)//Puntos muy cercanos o sin gps
+			if(distLastSaved < 30)//Puntos muy cercanos
 			{
 				Log.w(TAG, String.format("guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
 				DELAY_TRACK += 10*1000;
@@ -621,4 +595,38 @@ if(g.getLatitude() == null)return;
 			System.err.println("CesService:cargarListaGeoTracking:e:"+e);
 			//_lista.clear();
 		}
-	}*/
+	}
+
+
+
+	if(loc.getAccuracy() > ACCURACY_MAX)
+		{
+			if(aLoc == null){
+				aLoc = new Location[3];
+				iLoc = 0;
+			}
+			if(iLoc < aLoc.length){
+				aLoc[iLoc++] = loc;
+				return;
+			}
+			else{
+				for(Location l : aLoc)
+					if(loc.getAccuracy() > l.getAccuracy()) loc = l;
+				aLoc = null;
+			}
+		}
+		else
+		{
+			if(aLoc!=null && _locLastSaved!= null && loc.distanceTo(_locLastSaved) > 500)
+			{
+				//for(Location l : aLoc)if(loc.getAccuracy() > l.getAccuracy()) loc = l;
+				Location l0 = aLoc[0];
+				for(int i=1; i < aLoc.length && aLoc[i]!=null; i++)
+					if(l0.getAccuracy() > aLoc[i].getAccuracy()) l0 = aLoc[i];
+				r.guardar(new GuardarListener(l0));
+			}
+			aLoc = null;
+		}
+
+
+	*/

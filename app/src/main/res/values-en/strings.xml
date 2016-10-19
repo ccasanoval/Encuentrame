@@ -23,6 +23,7 @@
 	<string name="editar_lugar">Edit Point</string>
 	<string name="editar_ruta">Edit Route</string>
 	<string name="eliminar">Remove</string>
+	<string name="imagen">Picture</string>
 	<string name="en_zona_aviso">Inside warning zone</string>
 	<string name="enter">Enter</string>
 	<string name="enter_lbl">Input login</string>
@@ -40,6 +41,7 @@
 	<string name="nuevo">New</string>
 	<string name="nuevo_aviso">New Warning</string>
 	<string name="nuevo_lugar">New Point</string>
+	<string name="salir">Exit anyway</string>
 	<string name="periodo">Period</string>
 	<string name="radio">Radius</string>
 	<string name="recover">Remember</string>
@@ -52,6 +54,7 @@
 	<string name="register_ok">You have just registered! \n Now check your email</string>
 	<string name="rutas">Routes</string>
 	<string name="seguro_eliminar">Are you sure you want to remove?</string>
+	<string name="seguro_salir">You made changes. Do you want to save?</string>
 	<string name="send">Send</string>
 	<string name="sin_lugar">A location must be stablished…</string>
 	<string name="sin_nombre">A name must be stablished…</string>
@@ -112,4 +115,8 @@
 	<string name="info_nor">\nBearing: %.0f º</string>
 	<string name="info_speed">\nSpeed: %.2f m/s</string>
 	<string name="info_speed2">\nSpeed: %.0f Km/h</string>
+	<string name="guardar_imagen">Save the picture</string>
+	<string name="tomar_imagen">Take a picture</string>
+	<string name="title_act_imagen">Picture</string>
+	<string name="sin_camara">There is no camera on this device</string>
 </resources>

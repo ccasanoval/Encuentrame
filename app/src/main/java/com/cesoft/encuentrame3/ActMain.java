@@ -56,27 +56,13 @@ Registered SHA-1s:
 
 //https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
 //TODO: Cambiar ListView por recyclerview
-//TODO: las listas no hacen scroll???? Si, pero tienen una linea menos, seeguramente por menu....mirar organizate
-
 //TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras's
-//TODO: si falla una vez el puto backendless intentar de nuevo automaticamente una vez mas?
-//TODO: no molestar mas por hoy
+//TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
-//TODO:Fragments : mostrar lista de lugares ademas del lugar que se esta editando...
-//http://developer.android.com/intl/es/training/basics/fragments/index.html
-
 //TODO: Egg?
 //TODO: Google auth?
-//TODO: CONFIF: usr/pwd de backendless, delay to tracking routes, geofence radius?... HACER QUE FUNCIONE lo que has configurado...
-//TODO: widget para ruta start/stop... widget para guardar punto...
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
-
-//TODO: Add photo to lugar & alerta n save it in backendless...
 //TODO: Develop a web app for points management : connect to backendless by REST API...
-
-
-//TODO: dialogo que pida activar gps! si no esta activo
-//http://stackoverflow.com/questions/29801368/how-to-show-enable-location-dialog-like-google-maps
 //TODO: Preparar para tablet
 //http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
 // small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
@@ -157,7 +143,6 @@ public class ActMain extends AppCompatActivity
 			}
 			catch(Exception e)
 			{
-				//TODO: restaurar _apf
 				PlaceholderFragment._apf[_viewPager.getCurrentItem()] = PlaceholderFragment.newInstance(_viewPager.getCurrentItem(), ActMain.this);
 				Log.e(TAG, "onOptionsItemSelected: action_config: "+e, e);
 			}
@@ -532,6 +517,8 @@ public class ActMain extends AppCompatActivity
 				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();
+				if(android.os.Build.VERSION.SDK_INT>=19)
+				_listView.scrollListBy(_listView.getMaxScrollAmount());
 			}
 			@Override
 			public void onError(String err)

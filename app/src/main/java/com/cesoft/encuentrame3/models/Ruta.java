@@ -506,6 +506,11 @@ public class Ruta extends Objeto implements Parcelable
 			//queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc
 			queryRef.addListenerForSingleValueEvent(listener);
 		}
+		public static void getListaSync(String sIdRuta, final ValueEventListener listener)
+		{
+			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
+			queryRef.addValueEventListener(listener);//AJAX
+		}
 		// FIREBASE
 		//----------------------------------------------------------------------------------------------
 

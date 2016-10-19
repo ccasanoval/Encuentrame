@@ -37,6 +37,7 @@
 	<string name="guardar">Guardar</string>
 	<string name="editar">Editar</string>
 	<string name="eliminar">Eliminar</string>
+	<string name="imagen">Imagen</string>
 	<string name="nuevo">Nuevo</string>
 	<string name="actualizar_posicion">Actualizar posición</string>
 	<string name="ver_mapa">Ver mapa</string>
@@ -51,8 +52,10 @@
 	<string name="fecha">Fecha</string>
 	<string name="sin_posicion">Sin posición</string>
 	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
+	<string name="seguro_salir">Ha hecho cambios. ¿Quiere guardarlos?</string>
 	<string name="en_zona_aviso">En zona de aviso</string>
 
+	<string name="salir">Salir</string>
 	<string name="nuevo_lugar">Nuevo Lugar</string>
 	<string name="nuevo_aviso">Nuevo Aviso</string>
 	<string name="nueva_ruta">Nueva Ruta</string>
@@ -115,9 +118,13 @@
 	<string name="info_time">Fecha: </string>
 	<string name="info_prec">\nPrecisión: %.2f m\n</string>
 	<string name="info_dist">\nDistancia: %.0f m</string>
-	<string name="info_dist2">\nDistancia: %.1f Km</string>
+	<string name="info_dist2">\nDistancia: %.1f km</string>
 	<string name="info_alt">\nAltitud: %.0f m</string>
 	<string name="info_nor">\nNorte: %.0f º</string>
 	<string name="info_speed">\nVelocidad: %.2f m/s</string>
-	<string name="info_speed2">\nVelocidad: %.0f Km/h</string>
+	<string name="info_speed2">\nVelocidad: %.0f km/h</string>
+	<string name="guardar_imagen">Guardar la imagen</string>
+	<string name="tomar_imagen">Tomar imagen</string>
+	<string name="title_act_imagen">Imagen</string>
+	<string name="sin_camara">Este dispositivo no tiene cámara</string>
 </resources>

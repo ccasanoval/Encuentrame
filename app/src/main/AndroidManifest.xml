@@ -12,15 +12,17 @@
 	<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
 	<uses-permission android:name="com.javapapers.android.maps.path.permission.MAPS_RECEIVE"/>
 
-	<uses-feature android:name="android.hardware.location.gps" />
+	<uses-feature android:name="android.hardware.location.gps"/>
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
 
 	<application
-		android:name="com.cesoft.encuentrame3.App"
+		android:name=".App"
 		android:allowBackup="true"
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
+
 		<!-- android:name="android.support.multidex.MultiDexApplication" -->
 
 		<receiver
@@ -92,13 +94,13 @@
 		<activity
 			android:name=".ActBuscar"
 			android:label="@string/title_activity_act_buscar"
-			android:theme="@style/AppTheme.NoActionBar" />
+			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
 			android:name=".ActWidgetNuevoLugar"
-			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />
+			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"/>
 		<activity
 			android:name=".ActWidgetNuevaRuta"
-			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />
+			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"/>
 
 		<!-- ************** META DATA ************** -->
 		<!--
@@ -129,12 +131,14 @@
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
 				<action android:name="com.cesoft.encuentrame3.WidgetLugar.ACTION_WIDGET_SHOWAPP"/>
 			</intent-filter>
+
 			<meta-data
 				android:name="android.appwidget.provider"
 				android:resource="@xml/widget_lugar"/>
 		</receiver>
 
-		<service android:name=".WidgetRutaService" />
+		<service android:name=".WidgetRutaService"/>
+
 		<receiver
 			android:name=".WidgetRuta"
 			android:label="@string/widget_ruta">
@@ -142,12 +146,20 @@
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
 				<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_SHOWAPP"/>
 				<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_RUTA_ADD"/>
-            	<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_RUTA_STOP"/>
+				<action android:name="com.cesoft.encuentrame3.WidgetRuta.ACTION_WIDGET_RUTA_STOP"/>
 			</intent-filter>
+
 			<meta-data
 				android:name="android.appwidget.provider"
 				android:resource="@xml/widget_ruta"/>
 		</receiver>
 
+		<activity
+			android:name=".ActImagen"
+			android:configChanges="orientation|keyboardHidden|screenSize"
+			android:label="@string/title_act_imagen"
+			android:theme="@style/FullscreenTheme">
+		</activity>
 	</application>
+
 </manifest>

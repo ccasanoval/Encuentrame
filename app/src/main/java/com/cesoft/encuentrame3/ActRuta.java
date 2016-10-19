@@ -56,7 +56,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import com.cesoft.encuentrame3.models.Ruta;
 
-
+//TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
@@ -67,9 +67,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private Ruta _r;
 	private EditText _txtNombre;
 	private EditText _txtDescripcion;
-	//private Spinner _spnTrackingDelay;
-	//private static final String[] _asDelay = {"2 min", "5 min", "10 min", "15 min", "20 min", "25 min", "30 min", "45 min", "1 h", "2 h", "3 h", "4 h", "5 h", "6 h", "12 h"};
-	//private static final int[]    _aiDelay = { 2,       5,       10,       15,       20,       25,       30,       45,       60,    2*60,  3*60,  4*60,  5*60,  6*60,  12*60 };//*60*1000
 
 	private GoogleMap _Map;
 	private LocationRequest _LocationRequest;
@@ -84,33 +81,12 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_ruta);
 
-		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
-		//_spnTrackingDelay = (Spinner)findViewById(R.id.spnTrackingDelay);
-//TODO: si se hace tracking mediante geofence no necesito esto... cambiarlo por radio de feofence...
-		/*View layPeriodo = findViewById(R.id.layPeriodo);
-		if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asDelay);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		_spnTrackingDelay.setAdapter(adapter);
-		_spnTrackingDelay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-		{
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-			{
-				_r.setPeriodo(_aiDelay[position] * 60 * 1000);
-			}
-			@Override
-			public void onNothingSelected(AdapterView<?> parent)
-			{
-				_r.setPeriodo(2 * 60 * 1000);//TODO:radio por defecto en settings
-			}
-		});*/
 		//-----------
 		final ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
 		if(btnStart != null)
@@ -123,6 +99,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				{
 					//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
 					btnStart.setEnabled(false);
+					btnStart.setAlpha(0.5f);
 					startTrackingRecord();
 				}
 			});
@@ -137,6 +114,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				public void onClick(View v)
 				{
 					btnStop.setEnabled(false);
+					btnStop.setAlpha(0.5f);
 					stopTrackingRecord();
 				}
 			});
@@ -315,7 +293,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			Log.e(TAG, "checkPlayServices:e:" + result);
+			Log.e(TAG, String.format("checkPlayServices:e:%d",result));
 	        return false;
 	    }
 	    return true;
@@ -340,22 +318,11 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	}
 
 	//______________________________________________________________________________________________
-	private ProgressDialog _progressDialog;
-	public void iniEspera()
-	{
-		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
-	}
-	public void finEspera()
-	{
-		if(_progressDialog!=null)_progressDialog.dismiss();
-	}
-	//______________________________________________________________________________________________
 	private boolean _bGuardar = true;
 	private synchronized void guardar()
 	{
 		if(!_bGuardar)return;
 		_bGuardar = false;
-		iniEspera();
 
 		guardar(new DatabaseReference.CompletionListener()
 		{
@@ -366,7 +333,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				finEspera();
 				if(err == null)
 				{
-Log.w(TAG, "guardar:--------------------------------------------------------------"+data);
+Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
 					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -521,11 +488,19 @@ Log.w(TAG, "guardar:------------------------------------------------------------
 	}
 
 
+	private ProgressDialog _progressDialog;
+	public void iniEspera()
+	{
+		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+	}
+	public void finEspera()
+	{
+		if(_progressDialog!=null)_progressDialog.dismiss();
+	}
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
-		Util.setTrackingRoute(ActRuta.this, _r.getId());
-		CesService._restartDelayRuta();
+		iniEspera();
 		guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
@@ -534,34 +509,16 @@ Log.w(TAG, "guardar:------------------------------------------------------------
 				if(err == null)
 				{
 					Util.setTrackingRoute(ActRuta.this, _r.getId());
-					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 					CesService._restartDelayRuta();
+					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+//Log.e(TAG, "startTrackingRecord-----------------------------------ID:"+_r.getId()+" data="+data);
 				}
 				else
 				{
+					finEspera();
 					Util.setTrackingRoute(ActRuta.this, "");
 					Log.e(TAG, String.format("startTrackingRecord:handleFault:%s", err));
 					Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
-					//*****************************************************************************
-					/*try{Thread.sleep(500);}catch(InterruptedException ignored){}
-					//Repito la op por Backendless, en Firebase quizá podría eliminar el reintento
-					_r.guardar(new DatabaseReference.CompletionListener()
-					{
-						@Override
-						public void onComplete(DatabaseError err, DatabaseReference data)
-						{
-							if(err == null)
-							{
-								Util.setTrackingRoute(ActRuta.this, _r.getId());
-								Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
-							}
-							else
-							{
-								Log.e(TAG, "startTrackingRecord:handleFault2:" + err);
-								Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
-							}
-						}
-					});*/
 				}
 			}
 		});
@@ -575,7 +532,8 @@ Log.w(TAG, "guardar:------------------------------------------------------------
 
 	private void showRuta()
 	{
-		_r.getPuntos(new ValueEventListener()
+		//_r.getPuntos(new ValueEventListener()
+		Ruta.RutaPunto.getListaSync(_r.getId(), new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot ds)
@@ -671,24 +629,3 @@ Log.w(TAG, "guardar:------------------------------------------------------------
 	}
 }
 
-/*
-//TODO: try geofence for tracking again????
-				/// Crear geofence con pos actual
-				RutaPto rp = new RutaPto();
-				rp.setIdRuta(r.getObjectId());
-				rp.setLatLon(loc.getLatitude(), loc.getLongitude());
-				rp.saveTrackingPto(new AsyncCallback<RutaPto>()
-				{
-					@Override public void handleResponse(RutaPto rutaPto)
-					{
-System.err.println("ActRuta:startTrackingRecord-----------8:" + rutaPto);
-						//CesService.cargarGeoTracking();
-						Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar));
-					}
-					@Override public void handleFault(BackendlessFault backendlessFault)
-					{
-						Snackbar.make(_coordinatorLayout, String.format(getString(R.string.error_guardar), backendlessFault), Snackbar.LENGTH_LONG).show();
-						System.err.println("ActRuta:startTrackingRecord:handleFault:"+backendlessFault);
-					}
-				});
- */

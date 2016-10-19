@@ -1,15 +1,17 @@
 package com.cesoft.encuentrame3;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,12 +48,12 @@ import com.cesoft.encuentrame3.models.Lugar;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
-//Todo: cambiar a toast o kitar keyboard antes de enseñar o no se vera.....igual en resto de forms
 public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
 	private static final String TAG = "CESoft:ActLugar:";
 	private static final int DELAY_LOCATION = 60000;
 
+	private boolean _bSucio = false;
 	private boolean _bNuevo = false;
 	private Lugar _l = new Lugar();
 	private TextView _lblPosicion;
@@ -62,10 +64,62 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	private LocationRequest _LocationRequest;
 	private GoogleMap _Map;
 	private Marker _marker;
+	//CoordinatorLayout _coordinatorLayout;
+	private String _imgURLnew =null;
 
-	CoordinatorLayout _coordinatorLayout;
 
-
+	//______________________________________________________________________________________________
+	private void onSalir()
+	{
+		if(_bSucio)
+		{
+			AlertDialog.Builder dialog = new AlertDialog.Builder(ActLugar.this);
+			dialog.setTitle(_l.getNombre());
+			dialog.setMessage(getString(R.string.seguro_salir));
+			dialog.setPositiveButton(getString(R.string.guardar), new DialogInterface.OnClickListener()
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which)
+				{
+					guardar();
+				}
+			});
+			dialog.setCancelable(true);
+			dialog.setNegativeButton(getString(R.string.salir), new DialogInterface.OnClickListener()
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which)
+				{
+					ActLugar.this.finish();
+				}
+			});
+			dialog.create().show();
+		}
+		else
+		ActLugar.this.finish();
+	}
+	@Override
+	public void onBackPressed()
+	{
+		onSalir();
+		//super.onBackPressed();
+	}
+	class CesTextWatcher implements TextWatcher
+	{
+		private TextView _tv;
+		private String _str;
+		CesTextWatcher(TextView tv, String str){_tv = tv; _str = str;}
+		@Override
+		public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override
+		public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override
+		public void afterTextChanged(Editable editable)
+		{
+			if(_str == null && _tv.getText().length() > 0)_bSucio=true;
+			if(_str != null && _tv.getText().toString().compareTo(_str) != 0)_bSucio=true;
+		}
+	}
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -73,7 +127,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_lugar);
 
-		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
@@ -87,7 +140,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(View view)
 			{
-				ActLugar.this.finish();
+				onSalir();
 			}
 		});
 
@@ -111,14 +164,16 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		try
 		{
 			_l = getIntent().getParcelableExtra(Lugar.NOMBRE);
-//System.err.println("*************OBJ:"+_l);
 			setValores();
+			_txtNombre.addTextChangedListener(new CesTextWatcher(_txtNombre, _l.getNombre()));
+			_txtDescripcion.addTextChangedListener(new CesTextWatcher(_txtDescripcion, _l.getDescripcion()));
 		}
 		catch(Exception e)
 		{
-//System.err.println("*************ERR:"+e);
 			_bNuevo = true;
 			_l = new Lugar();
+			_txtNombre.addTextChangedListener(new CesTextWatcher(_txtNombre, null));
+			_txtDescripcion.addTextChangedListener(new CesTextWatcher(_txtDescripcion, null));
 		}
 
 		//------------------------------------------------------------------------------------------
@@ -160,16 +215,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		super.onStart();
 		if(checkPlayServices())buildGoogleApiClient();
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		/*Action viewAction = Action.newAction(Action.TYPE_VIEW, // choose an action type.
-				"ActLugar Page", // Define a title for the content shown.
-				// If you have web page content that matches this app activity's content,
-				// make sure this auto-generated web page URL is correct. Otherwise, set the URL to null.
-				Uri.parse("http://host/path"),
-				// Make sure this auto-generated app deep link URI is correct.
-				Uri.parse("android-app://com.cesoft.encuentrame/http/host/path"));
-		AppIndex.AppIndexApi.start(_GoogleApiClient, viewAction);*/
 	}
 	@Override
 	protected void onPause()
@@ -187,7 +232,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 		{
-			//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 			try
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
@@ -218,6 +262,8 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			guardar();
 		else if(item.getItemId() == R.id.menu_eliminar)
 			eliminar();
+		else if(item.getItemId() == R.id.menu_img)
+			imagen();
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -304,6 +350,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		}
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
+		//if(_imgURLnew != null)_l.setImagen(_imgURLnew);
 		_l.guardar(new DatabaseReference.CompletionListener()
 		{
 			@Override
@@ -311,34 +358,19 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				if(err == null)
 				{
+					Log.e(TAG, "guardar----------------------"+ _imgURLnew);
+					if(_imgURLnew != null)_l.uploadImg(_imgURLnew);
+
 					Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
 					_bGuardar = true;
 					finEspera();
 				}
 				else
 				{
+					finEspera();
+					_bGuardar = true;
 					Log.e(TAG, String.format("guardar:handleFault:f:%s",err));
-					//*****************************************************************************
-					//Puedes simplificar, eso era necesario solo con Backendless no con Firebase
-					try{Thread.sleep(500);}catch(InterruptedException ignore){}
-					_l.guardar(new DatabaseReference.CompletionListener()
-					{
-						@Override
-						public void onComplete(DatabaseError err, DatabaseReference data)
-						{
-							finEspera();
-							_bGuardar = true;
-							if(err == null)
-							{
-								Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
-							}
-							else
-							{
-								Log.e(TAG, String.format("guardar:handleFault2:f:%s",err));
-								Toast.makeText(ActLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-							}
-						}
-					});
+					Toast.makeText(ActLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 				}
 			}
 		});
@@ -395,21 +427,21 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
-	// 4 GoogleMap.OnCameraChangeListener
-	//@Override public void onCameraChange(CameraPosition cameraPosition){}
-	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		//if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
+		//TODO:
+		//https://developers.google.com/maps/documentation/android-api/map?hl=es-419
+		//_Map.setMapType(GoogleMap.MAP_TYPE_NORMAL y GoogleMap.MAP_TYPE_SATELLITE
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
 		{
 			@Override
 			public void onMapClick(LatLng latLng)
 			{
+				_bSucio = true;
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
@@ -500,6 +532,34 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 				}
 			}
 		});
+	}
+
+	//TODO: avisar a usuario de que no hay gps?????????????????????????!!!!!!!!!!!!!!!
+	//TODO: añadir altura, velocidad, etc en punto guardado y en aviso?
+	//______________________________________________________________________________________________
+	private void imagen()
+	{
+		Intent i = new Intent(this, ActImagen.class);
+		//todo si hay imagen en disco, mostrarla en vista con boton de borrar...
+		//todo modificar adecuadamente el flag sucio
+Log.e(TAG, "onActivityResult-----------------LUGAR---2-------- "+ _imgURLnew);
+		i.putExtra(ActImagen.PARAM_IMG_PATH, _imgURLnew);
+		i.putExtra(ActImagen.PARAM_LUGAR, _l);
+		startActivityForResult(i, ActImagen.IMAGE_CAPTURE);
+
+	}
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		Log.e(TAG, "onActivityResult-------------"+requestCode+" --------------- "+resultCode);
+		if(requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK)
+		{
+			_imgURLnew = data.getStringExtra(ActImagen.PARAM_IMG_PATH);
+			_bSucio = true;//TODO: boton borrar en actImagen
+			Log.e(TAG, "onActivityResult-----------------LUGAR----------- "+ _imgURLnew);
+		}
+		else
+			Log.e(TAG, "onActivityResult-----------------LUGAR ERROR----------- ");
 	}
 
 }

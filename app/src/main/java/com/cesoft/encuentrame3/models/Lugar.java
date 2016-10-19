@@ -1,10 +1,19 @@
 package com.cesoft.encuentrame3.models;
 
+import android.app.Activity;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -16,7 +25,15 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -35,6 +52,7 @@ public class Lugar extends Objeto
 	@Exclude
 	private DatabaseReference _datos;
 
+
 	///______________________________________________________________
 	//Yet Another Firebase Bug:
 	//Serialization of inherited properties from the base class, is missing in the current release of the
@@ -42,16 +60,13 @@ public class Lugar extends Objeto
 	protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
-	/*protected String uid = null;
-		public String getUid(){return uid;}
-		public void setUid(String v){uid = v;}*/
 	protected String nombre;
 	protected String descripcion;
 		public String getNombre(){return nombre;}
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
-	protected Date fecha;
+	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
 	///______________________________________________________________
@@ -89,8 +104,9 @@ public class Lugar extends Objeto
 			_datos.setValue(null, listener);
 		}
 		delGeo();
+		delImg();
 	}
-	public void guardar(DatabaseReference.CompletionListener listener)//TODO: todos igual, llevar a objeto?
+	public void guardar(DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -298,5 +314,184 @@ public class Lugar extends Objeto
 		_datGeo.removeLocation(_datos.getKey());
 	}
 	// GEOFIRE
+	//----------------------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------------------
+	// IMAGEN
+	//______________________________________________________________________________________________
+	//https://firebase.google.com/docs/storage/android/upload-files?hl=es
+	public void uploadImg(String path)
+	{
+		if(_datos == null)
+		{
+			if(getId() == null)
+			{
+				Log.e(TAG, "delImg: getId() == null");
+				return;//Es un nuevo objeto, no puede tener imagen en store...
+			}
+			_datos = newFirebase().child(getId());
+		}
+		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+		storageRef.delete().addOnCompleteListener(new OnCompleteListener<Void>()
+		{
+			@Override
+			public void onComplete(@NonNull Task<Void> task)
+			{
+				Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString());
+			}
+		});
+
+		Uri file = Uri.fromFile(new File(path));
+		UploadTask uploadTask = storageRef.putFile(file);
+		uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>()
+		{
+			@Override
+			public void onProgress(UploadTask.TaskSnapshot t)
+			{
+				Log.e(TAG, "uploadImagen:onProgress:"+t.getBytesTransferred());
+			}
+		});
+
+
+		uploadTask.addOnFailureListener(new OnFailureListener()
+		{
+			@Override
+			public void onFailure(@NonNull Exception exception)
+			{
+				Log.e(TAG, "uploadImagen:onFailure:"+exception, exception);
+			}
+		})
+		.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+		{
+			@Override
+			public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+			{
+				// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+				//TODO: delete anterior _img ...
+				/*if(_img != null)
+				{
+					StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
+				}*/
+				Uri img = taskSnapshot.getDownloadUrl();
+				Log.e(TAG, "uploadImagen:onSuccess:"+img+"::::"+taskSnapshot.toString());
+			}
+		});
+	}
+	//______________________________________________________________________________________________
+	public void downloadImg(final ImageView iv, final Activity act, final ObjetoListener<String> listener)
+	{
+		if(_datos == null)
+		{
+			if(getId() == null)
+			{
+				Log.e(TAG, "delImg: getId() == null");
+				return;//Es un nuevo objeto, no puede tener imagen en store...
+			}
+			_datos = newFirebase().child(getId());
+		}
+		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+
+		storageRef.getDownloadUrl()
+			.addOnSuccessListener(new OnSuccessListener<Uri>()
+			{
+				@Override
+				public void onSuccess(Uri uri)
+				{
+					Log.e(TAG, "downloadImagen: onSuccess: uri: "+uri);
+					loadFromPicaso(uri, iv, act);
+					listener.onData(new String[]{uri.toString()});
+				}
+			})
+			.addOnFailureListener(new OnFailureListener()
+			{
+				@Override
+				public void onFailure(@NonNull Exception exception)
+				{
+					Log.e(TAG, "downloadImagen:onFailure:e: "+exception);
+					listener.onError(exception.toString());
+				}
+			});
+
+		//StorageReference storageRef = FirebaseStorage.getInstance().reference().child("folderName/file.jpg");
+//storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener() {
+/*
+		final long ONE_MEGABYTE = 1024 * 1024;
+		storageRef.getBytes(ONE_MEGABYTE)
+			.addOnSuccessListener(new OnSuccessListener<byte[]>()
+			{
+				@Override
+				public void onSuccess(byte[] bytes)
+				{
+					// Data for "images/island.jpg" is returns, use this as needed
+				}
+			})
+			.addOnFailureListener(new OnFailureListener()
+			{
+				@Override
+				public void onFailure(@NonNull Exception exception)
+				{
+					// Handle any errors
+				}
+			});*/
+	}
+	//______________________________________________________________________________________________
+	private void loadFromPicaso(final Uri imgUri, final ImageView iv, final Activity act)
+	{
+		Picasso.with(act)
+			.load(imgUri)
+			.networkPolicy(NetworkPolicy.OFFLINE)
+			.into(iv, new Callback()
+			{
+				@Override
+				public void onSuccess()
+				{
+					Log.e(TAG, "loadFromPicaso:onSuccess");
+				}
+				@Override
+				public void onError()
+				{
+					//Try again online if cache failed
+					Picasso.with(act)
+						.load(imgUri)
+						.error(R.string.error_eliminar)//TODO:
+						.into(iv, new Callback()
+						{
+							@Override
+							public void onSuccess()
+							{
+								Log.e(TAG, "loadFromPicaso:onSuccess 2");
+							}
+							@Override
+							public void onError()
+							{
+								Log.v("Picasso","Could not fetch image");
+							}
+						});
+					}
+				});
+	}
+	//______________________________________________________________________________________________
+	public void delImg()
+	{
+		if(_datos == null)
+		{
+			if(getId() == null)
+			{
+				Log.e(TAG, "delImg: getId() == null");
+				return;//Es un nuevo objeto, no puede tener imagen en store...
+			}
+			_datos = newFirebase().child(getId());
+		}
+		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+		storageRef.delete().addOnCompleteListener(new OnCompleteListener<Void>()
+		{
+			@Override
+			public void onComplete(@NonNull Task<Void> task)
+			{
+				Log.e(TAG, "delImg:addOnCompleteListener:"+task.toString());
+			}
+		});
+	}
+	// IMAGEN
 	//----------------------------------------------------------------------------------------------
 }

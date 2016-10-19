@@ -43,7 +43,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-
+//TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
@@ -320,7 +320,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 
 	private void showLugar(Lugar l)
 	{
-		//try{
 		LatLng pos = new LatLng(l.getLatitud(), l.getLongitud());
 		MarkerOptions mo = new MarkerOptions()
 				.position(pos)
@@ -329,7 +328,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				.snippet(l.getDescripcion());
 		_marker = _Map.addMarker(mo);
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
-		//}catch(Exception e){System.err.println("ActLugar:setMarker:e:"+e);}
 	}
 	private void showAviso(Aviso a)
 	{
@@ -350,9 +348,10 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				//.fillColor(0x55AA0000));//Color.BLUE
 		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
 	}
-	private void showRuta(final Ruta r)
+	private synchronized void showRuta(final Ruta r)
 	{
-		r.getPuntos(new ValueEventListener()
+		//r.getPuntos(new ValueEventListener()
+		Ruta.RutaPunto.getListaSync(_r.getId(), new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot ds)
@@ -366,7 +365,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
-				Log.e(TAG, "showRuta:e:"+err);
+				Log.e(TAG, String.format("showRuta:e:%s",err));
 			}
 		});
 	}
@@ -446,7 +445,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "---------LUGARES:GET:ERROR:" + err);
+				Log.e(TAG, String.format("---------LUGARES:GET:ERROR:%s",err));
 			}
 		});
 	}
@@ -462,7 +461,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "---------AVISOS:GET:ERROR:" + err);
+				Log.e(TAG, String.format("---------AVISOS:GET:ERROR:%s",err));
 			}
 		});
 	}
@@ -478,234 +477,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "---------RUTAS:GET:ERROR:" + err);//LUGARES:GET:ERROR:BackendlessFault{ code: '1009', message: 'Unable to retrieve data - unknown entity' }
+				Log.e(TAG, String.format("---------RUTAS:GET:ERROR:%s",err));
 			}
 		});
 	}
 
-
-/*
-	//______________________________________________________________________________________________
-	private String getMapsApiDirectionsUrl(GeoPoint[] pts)
-	{
-		StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?waypoints=optimize:true|");
-		for(GeoPoint pt : pts)//for(int i=0; i < pts.length; i++)
-		{
-			sb.append(pt.getLatitude());
-			sb.append(",");
-			sb.append(pt.getLongitude());
-			sb.append("|");
-		}
-		sb.append("&sensor=false");
-		return sb.toString();
-	}
-
-	private void addMarkers(GeoPoint[] pts)
-	{
-		if(_Map != null)
-		{
-			for(GeoPoint pt : pts)
-				_Map.addMarker(new MarkerOptions().position(new LatLng(pt.getLatitude(), pt.getLongitude())));//.title("")
-		}
-	}
-
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	private class ReadTask extends AsyncTask<String, Void, String>
-	{
-		@Override
-		protected String doInBackground(String... sURL)
-		{
-			String data = "";
-			HttpURLConnection c = null;
-			try
-			{
-				URL u = new URL(sURL[0]);
-				c = (HttpURLConnection) u.openConnection();
-				c.setRequestMethod("GET");
-				c.setRequestProperty("Content-length", "0");
-				c.setUseCaches(false);
-				c.setAllowUserInteraction(false);
-				//c.setConnectTimeout(1000);
-				//c.setReadTimeout(1000);
-				c.connect();
-				int status = c.getResponseCode();
-
-				switch (status)
-				{
-				case 200:
-				case 201:
-					BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
-					StringBuilder sb = new StringBuilder();
-					String line;
-					while((line = br.readLine()) != null)
-					{
-						sb.append(line);
-						sb.append("\n");
-					}
-					br.close();
-					return sb.toString();
-				}
-			}
-			catch(Exception e)
-			{
-				System.err.println("");
-			}
-			finally
-			{
-				if(c != null)try{c.disconnect();}catch(Exception e){System.err.println("ReadTask:doInBackground:e:"+e);}
-			}
-			return data;
-		}
-
-		@Override
-		protected void onPostExecute(String result)
-		{
-			super.onPostExecute(result);
-			new ParserTask().execute(result);
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>>
-	{
-		@Override
-		protected List<List<HashMap<String, String>>> doInBackground(String... jsonData)
-		{
-			JSONObject jObject;
-			List<List<HashMap<String, String>>> routes = null;
-			try
-			{
-				jObject = new JSONObject(jsonData[0]);
-				PathJSONParser parser = new PathJSONParser();
-				routes = parser.parse(jObject);
-			}
-			catch(Exception e){e.printStackTrace();}
-			return routes;
-		}
-
-		@Override
-		protected void onPostExecute(List<List<HashMap<String, String>>> routes)
-		{
-			ArrayList<LatLng> points;
-			PolylineOptions polyLineOptions = null;
-
-			// traversing through routes
-			for(int i = 0; i < routes.size(); i++)
-			{
-				points = new ArrayList<>();
-				polyLineOptions = new PolylineOptions();
-				List<HashMap<String, String>> path = routes.get(i);
-
-				for(int j=0; j < path.size(); j++)
-				{
-					HashMap<String, String> point = path.get(j);
-					double lat = Double.parseDouble(point.get("lat"));
-					double lng = Double.parseDouble(point.get("lng"));
-					LatLng position = new LatLng(lat, lng);
-					points.add(position);
-				}
-
-				polyLineOptions.addAll(points);
-				polyLineOptions.width(2);
-				polyLineOptions.color(Color.BLUE);
-			}
-
-			_Map.addPolyline(polyLineOptions);
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	class PathJSONParser
-	{
-		public List<List<HashMap<String, String>>> parse(JSONObject jObject)
-		{
-			List<List<HashMap<String, String>>> routes = new ArrayList<>();
-			JSONArray jRoutes, jLegs, jSteps;
-			try
-			{
-				jRoutes = jObject.getJSONArray("routes");
-				// Traversing all routes
-				for (int i = 0; i < jRoutes.length(); i++)
-				{
-					jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
-					List<HashMap<String, String>> path = new ArrayList<>();
-
-					// Traversing all legs
-					for (int j = 0; j < jLegs.length(); j++)
-					{
-						jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
-
-						// Traversing all steps
-						for (int k = 0; k < jSteps.length(); k++)
-						{
-							String polyline = (String)((JSONObject) ((JSONObject)jSteps.get(k)).get("polyline")).get("points");
-							List<LatLng> list = decodePoly(polyline);
-
-							// Traversing all points
-							for (int l = 0; l < list.size(); l++)
-							{
-								HashMap<String, String> hm = new HashMap<>();
-								hm.put("lat", Double.toString((list.get(l)).latitude));
-								hm.put("lng", Double.toString((list.get(l)).longitude));
-								path.add(hm);
-							}
-						}
-						routes.add(path);
-					}
-				}
-
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-			return routes;
-		}
-
-//
-//		 * Method Courtesy :
-//		 * jeffreysambells.com/2010/05/27
-//		 * /decoding-polylines-from-google-maps-direction-api-with-java
-//		 *
-		private List<LatLng> decodePoly(String encoded)
-		{
-			List<LatLng> poly = new ArrayList<>();
-			int index = 0, len = encoded.length();
-			int lat = 0, lng = 0;
-
-			while (index < len)
-			{
-				int b, shift = 0, result = 0;
-				do
-				{
-					b = encoded.charAt(index++) - 63;
-					result |= (b & 0x1f) << shift;
-					shift += 5;
-				}
-				while (b >= 0x20);
-				int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-				lat += dlat;
-
-				shift = 0;
-				result = 0;
-				do
-				{
-					b = encoded.charAt(index++) - 63;
-					result |= (b & 0x1f) << shift;
-					shift += 5;
-				}
-				while (b >= 0x20);
-				int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-				lng += dlng;
-
-				LatLng p = new LatLng((((double) lat / 1E5)), (((double) lng / 1E5)));
-				poly.add(p);
-			}
-			return poly;
-		}
-	}
-	*/
 }
