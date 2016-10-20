@@ -2,8 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.app.Application;
 
-import com.squareup.picasso.OkHttpDownloader;
-import com.squareup.picasso.Picasso;
+
 //import com.squareup.leakcanary.LeakCanary;
 
 /**
@@ -17,11 +16,11 @@ public class App extends Application
 
 		//LeakCanary.install(this);
 
-		Picasso.Builder builder = new Picasso.Builder(this);
+		/*Picasso.Builder builder = new Picasso.Builder(this);
 		builder.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
 		Picasso built = builder.build();
 		built.setIndicatorsEnabled(true);
 		built.setLoggingEnabled(true);
-		Picasso.setSingletonInstance(built);
+		Picasso.setSingletonInstance(built);*/
 	}
 }

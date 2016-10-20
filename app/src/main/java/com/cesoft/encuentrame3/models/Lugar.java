@@ -11,7 +11,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.bumptech.glide.Glide;
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,9 +34,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 //TODO: listado AJAX como rutas....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -397,7 +396,7 @@ public class Lugar extends Objeto
 				public void onSuccess(Uri uri)
 				{
 					Log.e(TAG, "downloadImagen: onSuccess: uri: "+uri);
-					loadFromPicasso(uri, iv, act);
+					loadFromCache(uri, iv, act);
 					listener.onData(new String[]{uri.toString()});
 				}
 			})
@@ -435,65 +434,15 @@ public class Lugar extends Objeto
 	}
 	//______________________________________________________________________________________________
 	//TODO: listener para avisar que picasso no pudo cargar la imagen.......... toas y poner imagen de cruz
-	private void loadFromPicasso(final Uri imgUri, final ImageView iv, final Activity act)
+	private void loadFromCache(final Uri imgUri, final ImageView iv, final Activity act)
 	{
-		int max0 = Util.getMaxTextureSize();		Log.e(TAG, "loadFromPicaso-----------MAX SIZE:"+max0);
-		if(max0 == 0)max0=2048;
-		final int max = 800;//max0;
-
-		Picasso.Builder builder = new Picasso.Builder(act);
-		builder.listener(new Picasso.Listener()
-		{
-			@Override
-			public void onImageLoadFailed(Picasso picasso, Uri uri, Exception e)
-			{
-				Log.e(TAG, String.format("loadFromPicasso:e:%s",e),e);
-			}
-		});
-		Picasso p = builder.build();//Picasso.with(act);
-		//p.setIndicatorsEnabled(false);
-		p.setIndicatorsEnabled(true);//Red = network.  Green = cache memory.  Blue = disk memory.
-		p.load(imgUri)
-			.networkPolicy(NetworkPolicy.OFFLINE)
-			//.resize(max,max)
+		//https://futurestud.io/tutorials/glide-placeholders-fade-animations
+		Glide.with(act)
+			.load(imgUri)
 			//.centerCrop()
-			//.onlyScaleDown()
-			.fit()
-			.into(iv, new Callback()
-			{
-				@Override
-				public void onSuccess()
-				{
-					Log.e(TAG, "loadFromPicaso:onSuccess---------------------------------------");
-				}
-				@Override
-				public void onError()
-				{
-					Log.e(TAG, "loadFromPicaso:onError:----------------------------------------");
-					//Try again online if cache failed
-					Picasso p = Picasso.with(act);
-					p.setIndicatorsEnabled(true);
-					//p.error(R.string.error_eliminar)//TODO:
-					p.load(imgUri)
-						/*.resize(max, max)
-						.centerCrop()
-						.onlyScaleDown()*/
-						//.fit()
-						.into(iv, new Callback()
-						{
-							@Override
-							public void onSuccess()
-							{
-								Log.e(TAG, "loadFromPicaso:onSuccess 2---------------");
-							}
-							@Override
-							public void onError()
-							{
-								Log.v(TAG, "loadFromPicaso: Could not fetch image-----------");
-							}
-						});
-					}
-				});
+		    .placeholder(android.R.drawable.gallery_thumb)
+		    .crossFade()
+		    .into(iv);
 	}
 	//______________________________________________________________________________________________
 	public void delImg()
