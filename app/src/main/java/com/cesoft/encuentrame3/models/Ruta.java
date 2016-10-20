@@ -152,10 +152,17 @@ public class Ruta extends Objeto implements Parcelable
 			public void onDataChange(DataSnapshot data)
 			{
 				int n = (int)data.getChildrenCount();
-				ArrayList<Ruta> aRutas = new ArrayList<>(n);
-				for(DataSnapshot o : data.getChildren())
-					aRutas.add(o.getValue(Ruta.class));
-				listener.onData(aRutas.toArray(new Ruta[n]));
+				if(n > 0)
+				{
+					ArrayList<Ruta> aRutas = new ArrayList<>(n);
+					for(DataSnapshot o : data.getChildren())
+						aRutas.add(o.getValue(Ruta.class));
+					listener.onData(aRutas.toArray(new Ruta[n]));
+				}
+				else
+				{
+					listener.onData(new Ruta[0]);
+				}
 			}
 			@Override
 			public void onCancelled(DatabaseError err)

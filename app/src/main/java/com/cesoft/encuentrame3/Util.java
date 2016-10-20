@@ -7,21 +7,32 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.opengl.GLES10;
+import android.opengl.GLES20;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
+
+import javax.microedition.khronos.opengles.GL10;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/03/2016.
 public class Util
 {
+	private static final String TAG = "CESoft:Util:";
 	/*public enum Tipo
 	{
 		NADA(-1), LUGAR(1), RUTA(2), AVISO(3), BUSCAR(9);
@@ -315,4 +326,59 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		act.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
 		act.finish();
 	}
+
+	//----------------------------------------------------------------------------------------------
+	// IMAGEN
+	public static int getMaxTextureSize()
+	{
+		/*int[] maxTextureSize = new int[1];
+		GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
+		return  maxTextureSize[0];*/
+		int[] maxSize = new int[1];
+		GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxSize, 0);
+		return maxSize[0];
+	}
+	public static Bitmap imgResize(Bitmap b, int x, int y)
+	{
+		Bitmap background = Bitmap.createBitmap((int)x, (int)y, Bitmap.Config.ARGB_8888);
+		float originalWidth = b.getWidth(), originalHeight = b.getHeight();
+		Canvas canvas = new Canvas(background);
+		float scale = x/originalWidth;
+		float xTranslation = 0.0f, yTranslation = (y - originalHeight * scale)/2.0f;
+		Matrix transformation = new Matrix();
+		transformation.postTranslate(xTranslation, yTranslation);
+		transformation.preScale(scale, scale);
+		Paint paint = new Paint();
+		paint.setFilterBitmap(true);
+		canvas.drawBitmap(b, transformation, paint);
+		return background;
+	}
+	public static Bitmap imgScaleCompress(Bitmap b, String path)
+	{
+
+		/*Bitmap photo = (Bitmap) "your Bitmap image";
+photo = Bitmap.createScaledBitmap(photo, 100, 100, false);
+ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+photo.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+
+File f = new File(Environment.getExternalStorageDirectory()
+        + File.separator + "Imagename.jpg");
+f.createNewFile();
+FileOutputStream fo = new FileOutputStream(f);
+fo.write(bytes.toByteArray());
+fo.close();*/
+		try
+		{
+			java.io.OutputStream imagefile = new java.io.FileOutputStream(path);
+			//b.compress(Bitmap.CompressFormat.PNG, 95, imagefile);
+			b.compress(Bitmap.CompressFormat.JPEG, 95, imagefile);
+			return BitmapFactory.decodeFile(path);
+		}
+		catch(Exception e)
+		{
+			Log.e(TAG, String.format("imgScaleCompress:e:%s",e), e);
+			return null;
+		}
+	}
+
 }

@@ -3,10 +3,9 @@ package com.cesoft.encuentrame3;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.provider.MediaStore;
+import android.net.Uri;
+import android.opengl.GLES10;
+import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,11 +18,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import java.io.File;
 
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
+
+import javax.microedition.khronos.opengles.GL10;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,47 +142,66 @@ public class ActImagen extends AppCompatActivity
 			}
 		});
 		//----
+		int[] maxTextureSize = new int[1];
+		GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
 
+Log.e(TAG, "zzzzzz-------- max: "+maxTextureSize[0]);
+Log.e(TAG, "zzzzzz-------- max: "+Util.getMaxTextureSize());
 		//------------------------------------------------------------------------------------------
 		try
 		{
 			_imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
 			_l = getIntent().getParcelableExtra(PARAM_LUGAR);
+Log.e(TAG, "00000-------- : "+_imgURLnew+" "+_l.getId());
 			if(_imgURLnew != null)
 			{
 				File file = new File(_imgURLnew);
+Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 				if(file.exists())
 				{
-					Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-					_iv.setImageBitmap(myBitmap);
+					try{
+					//Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+					//_iv.setImageBitmap(myBitmap);
+					_iv.setImageURI(Uri.fromFile(new File(_imgURLnew)));
 					refreshMenu(ESTADO.NEW_IMG);
+					}
+					catch(OutOfMemoryError e)
+					{
+						//TODO: por que las imagenes no se ven en todos los dispositivos, HACER COMPATIBLES!!!!!!!!
+						//TODO: guardar imagen reducida a 1Mb
+						Log.e(TAG, "onCreate:BitmapFactory.decodeFile:e"+e,e);
+					}
 				}
 				else
 					_imgURLnew = null;
 			}
-			if(_imgURLnew == null && _l != null)
+			if(_imgURLnew == null)
 			{
-				_l.downloadImg(_iv, this, new Objeto.ObjetoListener<String>()
+				if(_l != null && _l.getId() != null)
 				{
-					@Override
-					public void onData(String[] aData)
+					_l.downloadImg(_iv, this, new Objeto.ObjetoListener<String>()
 					{
-						Log.e(TAG, "onCreate:tiene imagen y se establecio-------------- OK: ");
-						refreshMenu(ESTADO.OLD_IMG);
-					}
-					@Override
-					public void onError(String err)
-					{
-						Log.e(TAG, "onCreate: no tiene imagen o error--------------: "+err);
-						refreshMenu(ESTADO.SIN_IMG);
-						dispatchTakePictureIntent();
-					}
-				});
-			}
-			else if(_l == null)
-			{
-				refreshMenu(ESTADO.SIN_IMG);
-				dispatchTakePictureIntent();
+						@Override
+						public void onData(String[] aData)
+						{
+							Log.e(TAG, "onCreate:tiene imagen y se establecio-------------- OK: ");
+							refreshMenu(ESTADO.OLD_IMG);
+						}
+						@Override
+						public void onError(String err)
+						{
+							Log.e(TAG, "onCreate: no tiene imagen o error--------------: "+err);
+							refreshMenu(ESTADO.SIN_IMG);
+							dispatchTakePictureIntent();
+						}
+					});
+				}
+				else if(_l == null || _l.getId() == null)
+				{
+					Log.e(TAG, "onCreate: no existe url ni Lugar --------------: ");
+					refreshMenu(ESTADO.SIN_IMG);
+					dispatchTakePictureIntent();
+				}
 			}
 		}
 		catch(Exception e)
@@ -282,7 +301,31 @@ public class ActImagen extends AppCompatActivity
 	/// MENU
 
 	//______________________________________________________________________________________________
-	private String _penultimaImg = null;
+	private final static String _imgPath = getImgPath();
+	private static String getImgPath()
+	{
+		/*String[] projection = { MediaStore.Images.Media.DATA };
+		Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+		//managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+		if(cursor == null)return null;
+		cursor.moveToLast();
+		int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+		String s = cursor.getString(column_index_data);
+		cursor.close();*/
+		//return s;
+
+		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CESoft");
+		if( ! mediaStorageDir.exists())
+		{
+			if( ! mediaStorageDir.mkdirs())
+				return (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Encuentrame.jpg")).getPath();
+		}
+		return (new File(mediaStorageDir, "CESoftEncuentrame.jpg")).getPath();
+		//return Uri.fromFile(new File(Environment.getExternalStorageDirectory(), "CESoftEncuentrame.jpg")).getPath();
+		//return Uri.fromFile(new File(getFilesDir(), "CESoftEncuentrame.jpg")).getPath(); DOESNT WORK
+	}
+
+	//______________________________________________________________________________________________
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 	private void dispatchTakePictureIntent()
 	{
@@ -292,8 +335,9 @@ public class ActImagen extends AppCompatActivity
 			finish();
 			return;
 		}
-		_penultimaImg = getLastImgPath();
 		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+Log.e(TAG, "dispatchTakePictureIntent222---------------------");
+		i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(_imgPath)));
 		if(i.resolveActivity(getPackageManager()) != null)
 			startActivityForResult(i, REQUEST_IMAGE_CAPTURE);
 	}
@@ -306,41 +350,24 @@ public class ActImagen extends AppCompatActivity
 			refreshMenu(ESTADO.NEW_IMG);
 			show();
 
-			//_imgURLnew = getOriginalImagePath(); !!! Me devuelve la penultima, no la recien tomada !!!
-			long tm0 = System.currentTimeMillis();
-			do
+			//int max = Util.getMaxTextureSize();Log.e(TAG, "AAA-----------------------------------------"+max);
+			_imgURLnew = _imgPath;
+			try
 			{
-				_imgURLnew = getLastImgPath();
-				Log.e(TAG, "-----------------------------------------URL: "+_imgURLnew + " :: "+(System.currentTimeMillis()-tm0));
-				if( ! _imgURLnew.equals(_penultimaImg))break;
-				try{Thread.sleep(100);}catch(Exception ignored){}
-			} while(System.currentTimeMillis() < tm0 + 5000);
-
-			_iv.setImageBitmap(BitmapFactory.decodeFile(_imgURLnew));
-
-			/*final Handler handler = new Handler();
-			handler.postDelayed(new Runnable()
+				_iv.setImageURI(Uri.fromFile(new File(_imgURLnew)));
+			}
+			catch(Exception e)
 			{
-				@Override public void run(){_imgURLnew = getLastImgPath();}
-			}, 50);*/
+				Log.e(TAG, String.format("onActivityResult:e:%s",e), e);
+			}
 		}
 		else
+		{
 			finish();
+			Log.e(TAG, "onActivityResult:---------else finish");
+		}
 	}
 
-	//______________________________________________________________________________________________
-	public String getLastImgPath()
-	{
-		String[] projection = { MediaStore.Images.Media.DATA };
-		Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
-		//managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
-		if(cursor == null)return null;
-		cursor.moveToLast();
-		int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		String s = cursor.getString(column_index_data);
-		cursor.close();
-		return s;
-	}
 
 	//______________________________________________________________________________________________
 	public static final int IMAGE_CAPTURE = 6969;

@@ -451,7 +451,7 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
 					break;
 				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try{status.startResolutionForResult(null, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
+					try{status.startResolutionForResult(null, 1000);}catch(Exception ignored){}//catch(android.content.IntentSender.SendIntentException ignored){}
 					break;
 				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
 					Log.w(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");

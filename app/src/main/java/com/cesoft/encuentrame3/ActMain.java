@@ -32,29 +32,9 @@ import com.cesoft.encuentrame3.models.Ruta;
 
 import java.util.Date;
 
-// PLAY STORE DEVELOPER CONSOLE : https://play.google.com/apps/publish/?hl=es&dev_acc=11164117065791896000
-// MAP API CREDENTIAL: https://console.developers.google.com/apis/credentials?project=shining-medium-121911
-// GOOGLE API SIGN : https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=Default%20Demo%20App&cntpkg=com.google.samples.quickstart.signin&cnturl=https:%2F%2Fdevelopers.google.com%2Fidentity%2Fsign-in%2Fandroid%2Fstart%3Fconfigured%3Dtrue&cntlbl=Continue%20with%20Try%20Sign-In
-// LAUNCH SIGNED APK : https://www.jetbrains.com/idea/help/generating-a-signed-release-apk-through-an-artifact.html
-
-/*
-GoogleService failed to initialize, status: 10, Missing an expected resource: 'R.string.google_app_id' for initializing Google services.
-Possible causes are missing google-services.json or com.google.gms.google-services gradle plugin.
-Scheduler not set. Not logging error/warn.
-Uploading is not possible. App measurement disabled
-
-https://developers.google.com/identity/sign-in/android/start?hl=en
-https://developers.google.com/mobile/add?platform=android&cntapi=signin&cntapp=Default%20Demo%20App&cntpkg=com.google.samples.quickstart.signin&cnturl=https:%2F%2Fdevelopers.google.com%2Fidentity%2Fsign-in%2Fandroid%2Fstart%3Fconfigured%3Dtrue&cntlbl=Continue%20with%20Try%20Sign-In
-Registered SHA-1s:
-74:42:64:98:0E:57:EF:75:02:50:5C:DC:FB:C2:88:B1:EE:8A:4C:A8
-*/
-
-//ActRuta:startTrackingRecord:handleFault:BackendlessFault{ code: 'Server.Processing', message: 'java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect string value: '\xAC\xED\x00\x05sr...' for column 'DATE_FORMAT.CD30A1B6-E235-CD8C-FFD2-65ABA6ADFF00' at row 1' }
-// ActLugar:guardar:handleFault:f:BackendlessFault{         code: 'Server.Processing', message: 'java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect string value: '\xAC\xED\x00\x05sr...' for column 'DATE_FORMAT.54687BF6-31C9-02E5-FF07-0908E50A4600' at row 1' }
-
-//CesService:saveGeoTracking:findById:f:----------------------:BackendlessFault{ code: '1023', message: 'Unable to retrieve data. Query contains invalid object related properties.' }
-
 //https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
+//https://developer.android.com/training/permissions/requesting.html
+//MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 //TODO: Cambiar ListView por recyclerview
 //TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras's
 //TODO: AVISO: no molestar mas por hoy
@@ -64,11 +44,10 @@ Registered SHA-1s:
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
 //TODO: Develop a web app for points management : connect to backendless by REST API...
 //TODO: Preparar para tablet
+//TODO: Opcion que diga no preguntar por activar GPS (en tablet que no tiene gps... es un coñazo)
 //http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
 // small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
-//MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
-//BACKENDLESS: Permisos de objeto: Owner: ALL, AuthUser: NEW+UPDATE+DEL, Otros: NADA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity
 {
@@ -132,20 +111,18 @@ public class ActMain extends AppCompatActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+		if(PlaceholderFragment._apf[_viewPager.getCurrentItem()] == null)
+		{
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()] = PlaceholderFragment.newInstance(_viewPager.getCurrentItem(), ActMain.this);
+			Log.e(TAG, "onOptionsItemSelected:PlaceholderFragment._apf["+_viewPager.getCurrentItem()+"] == NULL     !!!!????");
+		}
+
 		Intent i;// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		switch(id)
 		{
 		case R.id.action_config:
-			try
-			{
-				PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(this, ActConfig.class), Util.CONFIG);
-			}
-			catch(Exception e)
-			{
-				PlaceholderFragment._apf[_viewPager.getCurrentItem()] = PlaceholderFragment.newInstance(_viewPager.getCurrentItem(), ActMain.this);
-				Log.e(TAG, "onOptionsItemSelected: action_config: "+e, e);
-			}
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()].startActivityForResult(new Intent(this, ActConfig.class), Util.CONFIG);
 			return true;
 		case R.id.action_mapa:
 			i = new Intent(this, ActMaps.class);
@@ -153,9 +130,7 @@ public class ActMain extends AppCompatActivity
 			startActivity(i);
 			return true;
 		case R.id.action_buscar:
-			if(PlaceholderFragment._apf[_viewPager.getCurrentItem()] != null)
-				PlaceholderFragment._apf[_viewPager.getCurrentItem()].buscar();
-			else Log.e(TAG, "PlaceholderFragment._apf["+_viewPager.getCurrentItem()+"] == NULL");
+			PlaceholderFragment._apf[_viewPager.getCurrentItem()].buscar();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -260,7 +235,7 @@ public class ActMain extends AppCompatActivity
 				{
 					switch(sectionNumber)//switch(_viewPager.getCurrentItem())
 					{
-					case Util.LUGARES:
+					case Util.LUGARES://TODO: evitar esta referencia a main!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 						startActivityForResult(new Intent(_main, ActLugar.class), Util.LUGARES);
 						break;
 					case Util.RUTAS:
@@ -418,9 +393,12 @@ public class ActMain extends AppCompatActivity
 
 			if(data != null)
 			{
+				try
+				{
 				String sMensaje = data.getStringExtra(MENSAJE);
 				if(sMensaje != null && !sMensaje.isEmpty())
 					Toast.makeText(_main, sMensaje, Toast.LENGTH_LONG).show();
+				}catch(Exception e){Log.e(TAG, "onActivityResult:e:"+e,e);}
 				if( ! data.getBooleanExtra(DIRTY, true))return;
 
 				Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
@@ -509,7 +487,7 @@ public class ActMain extends AppCompatActivity
 				{
 					try
 					{
-						if(_main._viewPager.getCurrentItem() == Util.RUTAS)
+						if(_main._viewPager!= null && _main._viewPager.getCurrentItem() == Util.RUTAS)
 							try{Toast.makeText(_main, getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 							catch(Exception e){Log.e(TAG, String.format("RUTAS:handleResponse:e:%s",e), e);}
 					}catch(Exception e){Log.e(TAG, String.format("_acRuta:e:%s",e),e);}
