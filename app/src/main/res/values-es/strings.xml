@@ -127,4 +127,6 @@
 	<string name="tomar_imagen">Tomar imagen</string>
 	<string name="title_act_imagen">Imagen</string>
 	<string name="sin_camara">Este dispositivo no tiene cámara</string>
+	<string name="estadisticas">Estadísticas</string>
+	<string name="estadisticas_format" formatted="false">Longitud:\t\t\t\t\t\t%s\nTiempo:\t\t\t\t\t\t\t%s\nVelocidad.Med:\t\t%s\nVelocidad Min:\t\t%s\nVelocidad Max:\t\t%s\nAltitud Min:\t\t\t\t%s\nAltitud Max:\t\t\t\t%s\n</string>
 </resources>

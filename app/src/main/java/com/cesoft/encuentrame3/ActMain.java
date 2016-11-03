@@ -35,6 +35,7 @@ import java.util.Date;
 //https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
 //https://developer.android.com/training/permissions/requesting.html
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
+//TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
 //TODO: Cambiar ListView por recyclerview
 //TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras's
 //TODO: AVISO: no molestar mas por hoy

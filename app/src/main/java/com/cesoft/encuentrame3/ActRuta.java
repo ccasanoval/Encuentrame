@@ -1,8 +1,10 @@
 package com.cesoft.encuentrame3;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import android.app.ProgressDialog;
 import android.graphics.Typeface;
@@ -242,11 +244,12 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		getMenuInflater().inflate(R.menu.menu_aviso, menu);
+		getMenuInflater().inflate(R.menu.menu_ruta, menu);
 		if(_bNuevo)
 		{
 			menu.findItem(R.id.menu_guardar).setVisible(false);
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
+			menu.findItem(R.id.menu_estadisticas).setVisible(false);
 		}
 		return true;
 	}
@@ -257,6 +260,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			guardar();
 		else if(item.getItemId() == R.id.menu_eliminar)
 			eliminar();
+		else if(item.getItemId() == R.id.menu_estadisticas)
+			estadisticas();
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -626,6 +631,113 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 		po.width(5).color(Color.BLUE);
 		_Map.addPolyline(po);
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), 15));
+	}
+
+	//______________________________________________________________________________________________
+	private void estadisticas()
+	{
+		//Calcular
+		_r.getPuntos(new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+				double fMaxAlt = 0, fMinAlt = 99999;
+				double fMaxVel = 0, fMinVel = 99999;
+				double fDistancia = 0;
+
+				int i = 0;
+				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
+				for(DataSnapshot o : ds.getChildren())
+				{
+					Ruta.RutaPunto pto = o.getValue(Ruta.RutaPunto.class);
+					if(fMaxAlt < pto.getAltura())fMaxAlt = pto.getAltura();
+					if(pto.getAltura() != 0.0 && fMinAlt > pto.getAltura())fMinAlt = pto.getAltura();
+					if(fMaxVel < pto.getVelocidad())fMaxVel = pto.getVelocidad();
+					if(pto.getVelocidad() != 0.0 && fMinVel > pto.getVelocidad())fMinVel = pto.getVelocidad();
+					if(i>0)fDistancia += pto.distanciaReal(aPts[i-1]);
+					aPts[i++] = pto;
+				}
+
+				Locale loc = Locale.getDefault();
+				String sDistancia;
+				if(fDistancia < 2000)   sDistancia = String.format(loc, "%.0f m", fDistancia);
+				else					sDistancia = String.format(loc, "%.1f Km", fDistancia/1000);
+
+				long t = aPts[i-1].getFecha().getTime() - aPts[0].getFecha().getTime();
+				String sTiempo = formatTiempo(t);
+
+				String sVelMed;
+				if(t > 0)
+				{
+					double d = fDistancia*1000/t;
+					if(d > 3)
+					{
+						d = d*3600/1000;
+						sVelMed = String.format(loc, "%.1f Km/h", d);
+					}
+					else
+						sVelMed = String.format(loc, "%.1f m/s", d);
+				}
+				else sVelMed = "-";
+
+				String sAltMin;
+				if(fMinAlt==99999)sAltMin = "-";
+				else sAltMin = String.format(loc, "%.0f m",fMinAlt);
+
+				String sAltMax;
+				if(fMaxAlt==0)sAltMax = "-";
+				else sAltMax = String.format(loc, "%.0f m",fMaxAlt);
+
+				String sVelMin;
+				if(fMinVel==99999)sVelMin = "-";
+				else
+				{
+					if(fMinVel > 3)
+					{
+						fMinVel = fMinVel*3600/1000;
+						sVelMin = String.format(loc, "%.1f Km/h", fMinVel);
+					}
+					else
+						sVelMin = String.format(loc, "%.1f m/s", fMinVel);
+				}
+
+				String sVelMax;
+				if(fMaxVel == 0)sVelMax = "-";
+				else if(fMaxVel > 3)
+				{
+					fMaxVel = fMaxVel*3600/1000;
+					sVelMax = String.format(loc, "%.1f Km/h", fMaxVel);
+				}
+				else
+					sVelMax = String.format(loc, "%.1f m/s", fMaxVel);
+
+				estadisticasShow(String.format(getString(R.string.estadisticas_format),
+					sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
+			}
+			@Override
+			public void onCancelled(DatabaseError err)
+			{
+				Log.e(TAG, String.format("estadisticas:onCancelled:-----------:%s",err));
+				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
+			}
+		});
+	}
+	private void estadisticasShow(String s)
+	{
+		//Mostrar
+		AlertDialog alertDialog = new AlertDialog.Builder(ActRuta.this).create();
+		alertDialog.setTitle(getString(R.string.estadisticas));
+		alertDialog.setMessage(s);
+		alertDialog.show();
+	}
+
+	private static String formatTiempo(long t)//TODO: meter en util
+	{
+		Date d = new Date(t);
+		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
+		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return df.format(d);
 	}
 }
 

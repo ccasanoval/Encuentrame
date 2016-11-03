@@ -9,7 +9,7 @@
 		android:orderInCategory="100"
 		android:title="@string/eliminar"
 		android:icon="@android:drawable/ic_menu_delete"
-		app:showAsAction="ifRoom">
+		app:showAsAction="always">
 	</item>
 	<item
 		android:id="@+id/menu_guardar"

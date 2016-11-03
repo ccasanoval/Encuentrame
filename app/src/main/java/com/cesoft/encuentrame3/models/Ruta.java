@@ -587,6 +587,7 @@ public class Ruta extends Objeto implements Parcelable
 		}*/
 		public float distanciaReal(RutaPunto v)
 		{
+			if(v == null)return 0;
 			return distanciaReal(getLatitud(), getLongitud(), v.getLatitud(), v.getLongitud());
 		}
 		// http://www.movable-type.co.uk/scripts/latlong.html

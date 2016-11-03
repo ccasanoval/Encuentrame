@@ -41,13 +41,13 @@ import com.cesoft.encuentrame3.models.Ruta;
 public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
 	private static final String TAG = "CESoft:CesService:";
-	private static final int GEOFEN_DWELL_TIME = 60*1000;//TODO:customize in settings...
+	private static final int GEOFEN_DWELL_TIME = 60*1000;
 	private static final long DELAY_TRACK_MIN = 30*1000;
 	private static final long DELAY_TRACK_MAX = 7*60*1000;
-	private static long DELAY_TRACK = DELAY_TRACK_MIN;//TODO: ajustar
+	private static long DELAY_TRACK = DELAY_TRACK_MIN;
 	private static final long ACCURACY_MAX = 24;//m
-	private static final long DELAY_LOAD = DELAY_TRACK_MAX;//TODO: PUEDES HACER QUE SE CARGUEN CUANDO CAMBIAN DATOS EN HOST: FIREBASE AJAX..
-	//private static final int RADIO_TRACKING = 10;//TODO: El radio es el nuevo periodo, config al crear NUEVA ruta...
+	private static final long DELAY_LOAD = DELAY_TRACK_MAX;
+	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
 
 	private static CesService _this;
 	private CesGeofenceStore _GeofenceStoreAvisos;
@@ -126,7 +126,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 					saveGeoTracking();
 					_tmTrack = System.currentTimeMillis();
 				}
-Log.w(TAG, "LOOP before sleeping------------------------"+(DELAY_TRACK/4000));
+//Log.w(TAG, "LOOP before sleeping------------------------"+(DELAY_TRACK/4000));
 				try{
 					//if(DELAY_TRACK > DELAY_TRACK_MIN+20*1000)
 						Thread.sleep(DELAY_TRACK/4);
@@ -190,11 +190,9 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 								bDirty = true;
 							i++;
 						}
-//if(bDirty)Log.w(TAG, String.format("Aviso=%s  :  %s  :  %s  \t GEOF= %s", a.getId(), a.getNombre(), a.getDescripcion(), gf.getRequestId()));
 					}
 					if(bDirty)
 					{
-//Log.w(TAG, "cargarListaGeoAvisos:handleResponse:-------------DIRTY");
 						_listaGeoAvisos = aAvisos;
 						_GeofenceStoreAvisos = new CesGeofenceStore(CesService.this, aGeofences);//Se puede añadir en lugar de crear desde cero?
 					}
@@ -219,7 +217,6 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 	public void saveGeoTracking()
 	{
 		final String sId = Util.getTrackingRoute(getApplicationContext());
-Log.w(TAG, "saveGeoTracking------------------------------ruta="+sId);
 		if(sId.isEmpty())
 		{
 			stopTracking();
@@ -261,7 +258,6 @@ Log.w(TAG, "saveGeoTracking------------------------------ruta="+sId);
 
 	public void handleResponse(Ruta r, String sId)
 	{
-Log.w(TAG, "handleResponse------------------------------ruta="+sId+"  "+r);
 		if(r == null)return;
 		final Location loc = Util.getLocation(CesService.this);
 		guardarPunto(loc, r, sId);
@@ -280,7 +276,7 @@ Log.w(TAG, "handleResponse------------------------------ruta="+sId+"  "+r);
 			return;
 		}
 
-Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAccuracy()+" "+loc.toString());
+//Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAccuracy()+" "+loc.toString());
 		//Si el nuevo punto no tiene sentido, no se guarda...
 		if(loc.getAccuracy() > ACCURACY_MAX)return;
 
@@ -325,7 +321,7 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 		{
 			if(err == null)
 			{
-				Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
+				//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
 				Ruta.addPunto(data.getKey(), _loc.getLatitude(), _loc.getLongitude(),
 						_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
 						new Transaction.Handler()
@@ -335,7 +331,7 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
 							if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
-							else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
+							//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
 							Util.refreshListaRutas();//Refrescar lista rutas en main..
 						}
 					});
@@ -355,7 +351,6 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 	{
 		if(checkPlayServices())buildGoogleApiClient();
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
-
 	    _LocationRequest = new LocationRequest();
 	    _LocationRequest.setInterval(DELAY_TRACK_MIN);//TODO: ajustar por usuario...
 	    _LocationRequest.setFastestInterval(DELAY_TRACK_MIN);
@@ -373,13 +368,35 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			Log.e(TAG, String.format("checkPlayServices:e:%s",result));
+			Log.e(TAG, String.format("checkPlayServices: No tiene Google Services? result = %s !!!!!!!!!!!!!!!",result));
 	        return false;
+	/*
+	public static final int SUCCESS = 0;
+    public static final int SERVICE_MISSING = 1;
+    public static final int SERVICE_VERSION_UPDATE_REQUIRED = 2;
+    public static final int SERVICE_DISABLED = 3;
+    public static final int SIGN_IN_REQUIRED = 4;
+    public static final int INVALID_ACCOUNT = 5;
+    public static final int RESOLUTION_REQUIRED = 6;
+    public static final int NETWORK_ERROR = 7;
+    public static final int INTERNAL_ERROR = 8;
+    public static final int SERVICE_INVALID = 9;
+    public static final int DEVELOPER_ERROR = 10;
+    public static final int LICENSE_CHECK_FAILED = 11;
+    public static final int CANCELED = 13;
+    public static final int TIMEOUT = 14;
+    public static final int INTERRUPTED = 15;
+    public static final int API_UNAVAILABLE = 16;
+    public static final int SIGN_IN_FAILED = 17;
+    public static final int SERVICE_UPDATING = 18;
+    public static final int SERVICE_MISSING_PERMISSION = 19;
+    public static final int RESTRICTED_PROFILE = 20;*/
 	    }
 	    return true;
 	}
 
 
+	//______________________________________________________________________________________________
 	private void startTracking()
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
@@ -423,7 +440,7 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 	public void onLocationChanged(Location location)
 	{
 		Util.setLocation(location);
-		Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
+		//Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
 	}
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
@@ -438,6 +455,11 @@ Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAcc
 				.addLocationRequest(_LocationRequest)
 				.setAlwaysShow(true)//so it ask for GPS activation like google maps
 				;
+		if(_GoogleApiClient == null)
+		{
+			Log.e(TAG, "pideGPS: ERROR _GoogleApiClient == null");
+			return;
+		}
 		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(_GoogleApiClient, builder.build());
 		result.setResultCallback(new ResultCallback<LocationSettingsResult>()
 		{

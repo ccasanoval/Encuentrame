@@ -184,6 +184,18 @@ public class ActLogin extends AppCompatActivity
 								});
 					}
 				});
+				txtPassword.setOnEditorActionListener(new android.widget.TextView.OnEditorActionListener()
+				{
+					public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event)
+					{
+						if((event != null && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER))
+								|| (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE))
+						{
+							btnSend.callOnClick();
+                        }
+                        return false;
+			        }
+			    });
 				break;
 
 			case REGISTER://------------------------------------------------------------------------
