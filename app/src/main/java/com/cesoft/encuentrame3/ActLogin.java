@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 //https://www.firebase.com/docs/web/guide/user-auth.html
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +41,6 @@ public class ActLogin extends AppCompatActivity
 {
 	private static final String TAG = "CESoft:ActLogin:";
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
-	//private static ActLogin _this;
 
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
@@ -120,10 +133,68 @@ public class ActLogin extends AppCompatActivity
 	//----------------------------------------------------------------------------------------------
 	//
 	//----------------------------------------------------------------------------------------------
-	public static class PlaceholderFragment extends Fragment
+	public static class PlaceholderFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		ActLogin _main;
+
+		//------------------------------------------------------------------------------------------
+		//GOOGLE LOG IN
+		private static final int RC_SIGN_IN = 9001;
+		private GoogleApiClient _GoogleApiClient;
+		private FirebaseAuth _FirebaseAuth;
+		@Override
+		public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+		{
+			// An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
+			Log.e(TAG, "onConnectionFailed:" + connectionResult);
+			Toast.makeText(this.getActivity(), "Google Play Services Error", Toast.LENGTH_SHORT).show();
+		}
+		@Override
+		public void onActivityResult(int requestCode, int resultCode, Intent data)
+		{
+			super.onActivityResult(requestCode, resultCode, data);
+			if(requestCode == RC_SIGN_IN)
+			{
+				GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+				if(result.isSuccess())
+				{
+					GoogleSignInAccount account = result.getSignInAccount();
+					firebaseAuthWithGoogle(account);
+				}
+				else
+				{
+					Log.e(TAG, "Google Sign In failed: "+result.toString()+" --- "+result.getStatus()+" --- "+result.getSignInAccount());
+				}
+			}
+		}
+		private void firebaseAuthWithGoogle(GoogleSignInAccount acct)
+		{
+			final String usr = acct.getEmail();
+			Log.e(TAG, "firebaseAuthWithGoogle:"+acct.getId()+" ::: "+acct.getEmail());
+			AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+			_FirebaseAuth.signInWithCredential(credential).addOnCompleteListener(this.getActivity(),
+				new OnCompleteListener<AuthResult>()
+				{
+					@Override
+					public void onComplete(@NonNull Task<AuthResult> task)
+					{
+						if (!task.isSuccessful())
+						{
+							//Log.w(TAG, "signInWithCredential", task.getException());
+							Toast.makeText(PlaceholderFragment.this._main, "Authentication failed.", Toast.LENGTH_SHORT).show();
+						}
+						else
+						{
+							//Log.w(TAG, "signInWithCredential: "+task.getResult());
+							_main.finEsperaLogin();
+							Toast.makeText(_main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
+							_main.goMain();
+						}
+					}
+				});
+		}
+
 
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(int sectionNumber, ActLogin main)
@@ -150,7 +221,7 @@ public class ActLogin extends AppCompatActivity
 			final EditText txtPassword2 = (EditText)rootView.findViewById(R.id.txtPassword2);
 			final EditText txtEmail = (EditText)rootView.findViewById(R.id.txtEmail);
 			final Button btnSend = (Button)rootView.findViewById(R.id.btnSend);
-
+			final SignInButton btnGoogle = (SignInButton)rootView.findViewById(R.id.btnGoogle);
 			final TextInputLayout lblPassword = (TextInputLayout)rootView.findViewById(R.id.lblPassword);
 			final TextInputLayout lblPassword2 = (TextInputLayout)rootView.findViewById(R.id.lblPassword2);
 
@@ -196,9 +267,28 @@ public class ActLogin extends AppCompatActivity
                         return false;
 			        }
 			    });
+				GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+					.requestIdToken(getString(R.string.default_web_client_id))
+					.requestEmail()
+					.build();
+				_GoogleApiClient = new GoogleApiClient.Builder(this.getContext())
+						.enableAutoManage(this.getActivity()/* FragmentActivity */, this/* OnConnectionFailedListener */)
+						.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+						.build();
+				_FirebaseAuth = FirebaseAuth.getInstance();
+				btnGoogle.setOnClickListener(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View view)
+					{
+						Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(_GoogleApiClient);
+						startActivityForResult(signInIntent, RC_SIGN_IN);
+					}
+				});
 				break;
 
 			case REGISTER://------------------------------------------------------------------------
+				btnGoogle.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.register_lbl));
 				btnSend.setOnClickListener(new View.OnClickListener()
 				{
@@ -233,6 +323,7 @@ public class ActLogin extends AppCompatActivity
 				break;
 
 			case RECOVER://-------------------------------------------------------------------------
+				btnGoogle.setVisibility(View.GONE);
 				lblPassword.setVisibility(View.GONE);
 				lblPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.recover_lbl));
