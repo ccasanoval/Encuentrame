@@ -33,8 +33,7 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/email"
 			android:inputType="textEmailAddress"
-			android:maxLines="1"
-			android:singleLine="true"/>
+			android:maxLines="1"/>
 	</android.support.design.widget.TextInputLayout>
 
 	<android.support.design.widget.TextInputLayout
@@ -49,8 +48,7 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/clave"
 			android:inputType="textPassword"
-			android:maxLines="1"
-			android:singleLine="true"/>
+			android:maxLines="1"/>
 	</android.support.design.widget.TextInputLayout>
 
 	<android.support.design.widget.TextInputLayout
@@ -65,8 +63,7 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/clave_confirmar"
 			android:inputType="textPassword"
-			android:maxLines="1"
-			android:singleLine="true"/>
+			android:maxLines="1"/>
 	</android.support.design.widget.TextInputLayout>
 
 	<android.support.v7.widget.LinearLayoutCompat
@@ -84,6 +81,21 @@
 			style="@style/btnStyle"
 			android:text="@string/send"
 			/>
+	</android.support.v7.widget.LinearLayoutCompat>
+
+	<android.support.v7.widget.LinearLayoutCompat
+		android:id="@+id/layBotonGoogle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/layBoton"
+		android:layout_centerHorizontal="true"
+		android:layout_marginTop="25dp">
+		<com.google.android.gms.common.SignInButton
+			android:id="@+id/btnGoogle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:visibility="visible"
+			android:layout_gravity="center"/>
 	</android.support.v7.widget.LinearLayoutCompat>
 
 </RelativeLayout>
