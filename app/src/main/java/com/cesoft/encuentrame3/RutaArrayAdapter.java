@@ -22,12 +22,14 @@ class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
 	private final Ruta[] _rutas;
 	private IListaItemClick _inter;
+	private Util _util;
 
-	RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
+	RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter, Util util)
 	{
 		super(context, -1, rutas);
 		_rutas = rutas;
 		_inter = inter;
+		_util = util;
 	}
 
 
@@ -75,7 +77,7 @@ class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			}
 		});
 		// Si la ruta se está grabando, resaltar
-		if(_rutas[position].getId().equals(Util.getTrackingRoute(getContext())))
+		if(_rutas[position].getId().equals(_util.getTrackingRoute()))
 		{
 			holder.txtNombre.setTextColor(Color.RED);
 			convertView.setBackgroundColor(Color.YELLOW);

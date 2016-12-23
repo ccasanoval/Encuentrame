@@ -38,10 +38,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
 	private static final String TAG = "CESoft:ActBuscar:";
+
+	private Util _util;
 
 	private Filtro _filtro;
 	private EditText _txtNombre;
@@ -61,6 +65,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_buscar);
+
+		_util = ((App)getApplication()).getGlobalComponent().util();
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
@@ -252,7 +258,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		catch(Exception e)
 		{
 			Log.e(TAG, String.format("ActBuscar:onCreate:e:%s",e));
-			Util.return2Main(this, null);
+			_util.return2Main(this, null);
 		}
 		switch(_filtro.getTipo())
 		{
@@ -278,7 +284,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		_Map = googleMap;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("onMapReady:setMyLocationEnabled:e:%s",se), se);}
-		Location loc = Util.getLocation(this);
+		Location loc = _util.getLocation();
 		if(loc == null)return;
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
@@ -327,7 +333,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		Util.setLocation(location);
+		_util.setLocation(location);
 	}
 
 
@@ -353,7 +359,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private void eliminar()
 	{
 		_filtro.turnOff();
-		Util.return2Main(this, _filtro);
+		_util.return2Main(this, _filtro);
 	}
 	private void buscar()
 	{
@@ -361,7 +367,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		if(_filtro.isValid())
 		{
 			_filtro.turnOn();
-			Util.return2Main(this, _filtro);
+			_util.return2Main(this, _filtro);
 		}
 		else
 		{

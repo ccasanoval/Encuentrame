@@ -30,6 +30,8 @@ public class WidgetRutaService extends Service
 	private static final int _DELAY_SHORT = 60*1000;
 	private static final int _DELAY_LONG = 5*60*1000;
 
+	private Util _util;
+
 	public static void startServ(android.content.Context c)//android.app.Activity act)//
 	{
 		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
@@ -41,6 +43,7 @@ public class WidgetRutaService extends Service
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
+		_util = ((App)getApplication()).getGlobalComponent().util();
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
 		{
 			_h = new Handler();
@@ -64,7 +67,7 @@ public class WidgetRutaService extends Service
 	//______________________________________________________________________________________________
 	private void payLoad()
 	{
-		String idRuta = Util.getTrackingRoute(WidgetRutaService.this);
+		String idRuta = _util.getTrackingRoute();
 		if( ! idRuta.isEmpty())
 		{
 			setRuta();
@@ -89,7 +92,7 @@ public class WidgetRutaService extends Service
 	{
 		try//TODO: activar desactivar botones de widget
 		{
-			String idRuta = Util.getTrackingRoute(this);
+			String idRuta = _util.getTrackingRoute();
 			Ruta.getById(idRuta, new ValueEventListener()
 			{
 				@Override

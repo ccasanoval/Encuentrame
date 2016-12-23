@@ -38,7 +38,7 @@ public class ActImagen extends AppCompatActivity
 	private String _imgURLnew;
 
 	//private boolean _bSucio = false;//TODO: ?
-	private enum ESTADO {SIN_IMG, OLD_IMG, NEW_IMG};
+	private enum ESTADO {SIN_IMG, OLD_IMG, NEW_IMG}
 	private ESTADO _estado;
 
 
@@ -145,18 +145,18 @@ public class ActImagen extends AppCompatActivity
 		int[] maxTextureSize = new int[1];
 		GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
 
-Log.e(TAG, "zzzzzz-------- max: "+maxTextureSize[0]);
-Log.e(TAG, "zzzzzz-------- max: "+Util.getMaxTextureSize());
+//Log.e(TAG, "zzzzzz-------- max: "+maxTextureSize[0]);
+//Log.e(TAG, "zzzzzz-------- max: "+_util.getMaxTextureSize());
 		//------------------------------------------------------------------------------------------
 		try
 		{
 			_imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
 			_l = getIntent().getParcelableExtra(PARAM_LUGAR);
-Log.e(TAG, "00000-------- : "+_imgURLnew+" "+_l.getId());
+//Log.e(TAG, "00000-------- : "+_imgURLnew+" "+_l.getId());
 			if(_imgURLnew != null)
 			{
 				File file = new File(_imgURLnew);
-Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
+//Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 				if(file.exists())
 				{
 					try{
@@ -397,72 +397,3 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 		}
 	}
 }
-
-
-/*public String getImgTaken()
-	{
-		String[] projection = new String[]{
-			MediaStore.Images.ImageColumns._ID,
-			MediaStore.Images.ImageColumns.DATA,
-			MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
-			MediaStore.Images.ImageColumns.DATE_TAKEN,
-			MediaStore.Images.ImageColumns.MIME_TYPE
-		};
-		final Cursor cursor = getContentResolver()
-			.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
-
-		String s = null;
-		if(cursor == null)return null;
-		if(cursor.moveToFirst()) s = cursor.getString(1);
-		cursor.close();
-		return s;
-	}
-*/
-	/*public static final String CAMERA_IMAGE_BUCKET_NAME = android.os.Environment.getExternalStorageDirectory().toString() + "/DCIM/Camera";
-	public static final String CAMERA_IMAGE_BUCKET_ID = getBucketId(CAMERA_IMAGE_BUCKET_NAME);
-	//Matches code in MediaProvider.computeBucketValues. Should be a common function.
-	public static String getBucketId(String path){return String.valueOf(path.toLowerCase().hashCode());}
-	public String getLastCameraImage()
-	{
-		final String[] projection = { MediaStore.Images.Media.DATA };
-		final String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
-		final String[] selectionArgs = { CAMERA_IMAGE_BUCKET_ID };
-		final Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null);
-		//ArrayList<String> result = new ArrayList<String>(cursor.getCount());
-		if(cursor == null)return null;
-		String s=null;
-		if(cursor.moveToFirst())
-		{
-			final int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			do
-			{
-				s = cursor.getString(dataColumn);
-			} while (cursor.moveToNext());
-		}
-		//cursor.moveToLast();
-		cursor.close();
-		return s;
-	}*/
-	/*public Uri getImageUri(Context inContext, Bitmap inImage)
-	{
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-		String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-		return Uri.parse(path);
-	}
-	public String getRealPathFromURI(Uri uri)
-	{
-		String s = null;
-		Cursor cursor = null;
-		try
-		{
-			cursor = getContentResolver().query(uri, null, null, null, null);
-			if(cursor == null)return null;
-			cursor.moveToFirst();
-			int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-			s = cursor.getString(idx);
-		}
-		catch(Exception e){Log.e(TAG, "getRealPathFromURI:e:", e);}
-		finally{if(cursor != null)cursor.close();}
-		return s;
-	}*/

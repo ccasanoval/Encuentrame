@@ -53,6 +53,9 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	private static final String TAG = "CESoft:ActLugar:";
 	private static final int DELAY_LOCATION = 60000;
 
+	//@Inject
+	private Util _util;
+
 	private boolean _bSucio = false;
 	private boolean _bNuevo = false;
 	private Lugar _l = new Lugar();
@@ -127,6 +130,10 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_lugar);
 
+		_util = ((App)getApplication()).getGlobalComponent().util();
+		//_util = DaggerGlobalComponent.create();
+		//((App)getApplication()).getGlobalComponent().inject(this);
+
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
@@ -155,7 +162,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(View v)
 			{
-				Location loc = Util.getLocation(ActLugar.this);
+				Location loc = _util.getLocation();
 				if(loc != null)setPosLugar(loc);
 			}
 		});
@@ -361,7 +368,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 					Log.e(TAG, "guardar----------------------"+ _imgURLnew);
 					if(_imgURLnew != null)_l.uploadImg(_imgURLnew);
 
-					Util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
+					_util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
 					_bGuardar = true;
 					finEspera();
 				}
@@ -401,7 +408,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 						_bEliminar = true;
 						if(err == null)
 						{
-							Util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
+							_util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
 						}
 						else
 						{
@@ -421,7 +428,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		Util.setLocation(location);
+		_util.setLocation(location);
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 			setPosLugar(location);
 	}
@@ -448,7 +455,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
-			Location loc = Util.getLocation(ActLugar.this);
+			Location loc = _util.getLocation();
 			if(loc != null)
 			{
 				_l.setLatitud(loc.getLatitude());

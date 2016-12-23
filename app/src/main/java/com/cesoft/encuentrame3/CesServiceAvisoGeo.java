@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3;
 
 import java.util.List;
 
+import android.app.Application;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import javax.inject.Inject;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
@@ -21,6 +24,9 @@ import com.google.firebase.database.ValueEventListener;
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo=> activar solo cuando guarde...?
 public class CesServiceAvisoGeo extends IntentService
 {
+	private	Application _app;
+	private	Util _util;
+
 	//______________________________________________________________________________________________
 	public CesServiceAvisoGeo()
 	{
@@ -31,6 +37,9 @@ public class CesServiceAvisoGeo extends IntentService
 	@Override
 	protected void onHandleIntent(Intent intent)
 	{
+		_app = getApplication();
+		_util = ((App)getApplication()).getGlobalComponent().util();
+
 		GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 		if( ! geofencingEvent.hasError())
 		{
@@ -42,7 +51,7 @@ public class CesServiceAvisoGeo extends IntentService
 //System.err.println("CesServiceAvisoGeo:onHandleIntent:-------------------------------------GEOFENCE_TRANSITION_ENTER");
 				for(Geofence geof : geofences)
 				{
-					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso), getBaseContext());
+					showAviso(geof.getRequestId(), getString(R.string.en_zona_aviso));//, getBaseContext()
 					//System.err.println("CesServiceAvisoGeo:onHandleIntent:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
 				}
 				break;
@@ -70,7 +79,7 @@ public class CesServiceAvisoGeo extends IntentService
 	}
 
 	//______________________________________________________________________________________________
-	protected void showAviso(String sId, final String sTitle, final Context c)
+	protected void showAviso(String sId, final String sTitle)//, final Context c)
 	{
 		Aviso.getById(sId, new ValueEventListener()
 		{
@@ -78,9 +87,9 @@ public class CesServiceAvisoGeo extends IntentService
 			public void onDataChange(DataSnapshot aviso)
 			{
 				Aviso a = aviso.getValue(Aviso.class);
-				Intent i = new Intent(c, ActAviso.class);//CesServiceAvisoGeo.this
+				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
 				i.putExtra(Aviso.NOMBRE, a);
-				Util.showAviso(c, sTitle, a, i);//CesServiceAvisoGeo.this
+				_util.showAviso(sTitle, a, i);//CesServiceAvisoGeo.this
 			}
 			@Override
 			public void onCancelled(DatabaseError err)

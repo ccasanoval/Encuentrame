@@ -13,6 +13,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 //http://stackoverflow.com/questions/21414160/how-to-increase-consistency-of-android-geofence-enter-exit-notifications
 //http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,10 +23,12 @@ import java.util.List;
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
 	private static final String TAG = "CESoft:";
+	private Util _util;
 
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
+		_util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 		GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 		if( ! geofencingEvent.hasError())
 		{
@@ -75,7 +79,7 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 				Intent i = new Intent(context, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, a);
 				i.putExtra("notificacion", true);
-				Util.showAviso(context, sTitle, a, i);
+				_util.showAviso(sTitle, a, i);
 			}
 			@Override
 			public void onCancelled(DatabaseError err)

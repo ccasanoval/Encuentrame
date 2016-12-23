@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3;
 
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +32,7 @@ import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
 
 import java.util.Date;
+import javax.inject.Inject;
 
 //https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
 //https://developer.android.com/training/permissions/requesting.html
@@ -56,6 +58,8 @@ public class ActMain extends AppCompatActivity
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 
 	private ViewPager _viewPager;
+
+	//@Inject	Application _app;//http://stackoverflow.com/questions/24656967/how-to-inject-into-static-classes-using-dagger
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -184,6 +188,8 @@ public class ActMain extends AppCompatActivity
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
+		private	Util _util;
+		private Application _app;
 		private ActMain _main;
 		private int _sectionNumber = Util.LUGARES;//Util.NADA;
 		private View _rootView;
@@ -192,6 +198,8 @@ public class ActMain extends AppCompatActivity
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(final int sectionNumber, ActMain main)
 		{
+			//_util = ((App)getApplication()).getGlobalComponent().util();
+
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -200,6 +208,8 @@ public class ActMain extends AppCompatActivity
 			_apf[sectionNumber] = fragment;
 			fragment._sectionNumber = sectionNumber;
 			fragment._main = main;
+			fragment._util = ((App)main.getApplication()).getGlobalComponent().util();
+			fragment._app = main.getApplication();
 			return fragment;
 		}
 
@@ -369,7 +379,7 @@ public class ActMain extends AppCompatActivity
 		{
 			try
 			{
-				Intent i = new Intent(_main.getApplicationContext(), ActBuscar.class);
+				Intent i = new Intent(_app, ActBuscar.class);//_main.getApplicationContext
 				i.putExtra(Filtro.FILTRO, _aFiltro[_sectionNumber]);
 				startActivityForResult(i, Util.BUSCAR);
 			}catch(Exception e){Log.e(TAG, String.format("buscar:e:%s",e), e);}
@@ -382,7 +392,7 @@ public class ActMain extends AppCompatActivity
 
 			if(requestCode == Util.CONFIG)
 			{
-				Login.logout(_main.getApplicationContext());
+				Login.logout(_app);//_main.getApplicationContext()
 
 				Intent intent = new Intent(_main.getBaseContext(), ActLogin.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -473,7 +483,7 @@ public class ActMain extends AppCompatActivity
 			if(_aFiltro[_sectionNumber].isOn())
 			{
 				checkFechas();
-				Ruta.getLista(_acRuta, _aFiltro[_sectionNumber], Util.getTrackingRoute(this.getContext()));
+				Ruta.getLista(_acRuta, _aFiltro[_sectionNumber], _util.getTrackingRoute());
 			}
 			else
 				Ruta.getLista(_acRuta);
@@ -493,7 +503,7 @@ public class ActMain extends AppCompatActivity
 							catch(Exception e){Log.e(TAG, String.format("RUTAS:handleResponse:e:%s",e), e);}
 					}catch(Exception e){Log.e(TAG, String.format("_acRuta:e:%s",e),e);}
 				}
-				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this);
+				RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, PlaceholderFragment.this, _util);
 				_listView.setAdapter(r);
 				r.notifyDataSetChanged();
 				if(android.os.Build.VERSION.SDK_INT>=19)

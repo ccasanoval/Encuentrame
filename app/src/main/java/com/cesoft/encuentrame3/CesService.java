@@ -33,6 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
 
+import javax.inject.Inject;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
@@ -48,6 +50,8 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	private static final long ACCURACY_MAX = 24;//m
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
+
+	private	Util _util;
 
 	private static CesService _this;
 	private CesGeofenceStore _GeofenceStoreAvisos;
@@ -65,6 +69,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	public void onCreate()
 	{
 		super.onCreate();
+		_util = ((App)getApplication()).getGlobalComponent().util();
 		Login.login(getApplicationContext(), new Login.AuthListener()
 		{
 			@Override
@@ -216,7 +221,7 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 	private String _sId = "";
 	public void saveGeoTracking()
 	{
-		final String sId = Util.getTrackingRoute(getApplicationContext());
+		final String sId = _util.getTrackingRoute();
 		if(sId.isEmpty())
 		{
 			stopTracking();
@@ -242,7 +247,7 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 				if(r == null)
 				{
 					Log.e(TAG, "saveGeoTracking:Ruta.getById:NULL---------------"+sId);
-					Util.setTrackingRoute(getApplicationContext(), "");
+					_util.setTrackingRoute("");
 					stopTracking();
 					return;
 				}
@@ -259,7 +264,7 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 	public void handleResponse(Ruta r, String sId)
 	{
 		if(r == null)return;
-		final Location loc = Util.getLocation(CesService.this);
+		final Location loc = _util.getLocation();
 		guardarPunto(loc, r, sId);
 	}
 
@@ -439,7 +444,7 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		Util.setLocation(location);
+		_util.setLocation(location);
 		//Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
 	}
 	@Override

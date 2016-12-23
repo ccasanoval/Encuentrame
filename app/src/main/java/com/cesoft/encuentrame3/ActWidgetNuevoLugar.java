@@ -15,10 +15,13 @@ import com.cesoft.encuentrame3.models.Lugar;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
+import javax.inject.Inject;
+
 
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = "CESoft:";
+	private	Util _util;
 	private ProgressDialog _progressDialog;
 
 	@Override
@@ -27,6 +30,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		_util = ((App)getApplication()).getGlobalComponent().util();
 	}
 	@Override
 	public void onPause()
@@ -62,7 +66,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 				}
 				_progressDialog.show();//runOnUiThread(new Runnable()
 
-				Location pos = Util.getLocation(ActWidgetNuevoLugar.this);
+				Location pos = _util.getLocation();
 				if(pos == null)
 				{
 					Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.sin_posicion), Toast.LENGTH_SHORT).show();

@@ -1,38 +1,33 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.opengl.GLES10;
-import android.opengl.GLES20;
 import android.os.PowerManager;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 
-import javax.microedition.khronos.opengles.GL10;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/03/2016.
+@Singleton
 public class Util
 {
-	private static final String TAG = "CESoft:Util:";
+	//private static final String TAG = "CESoft:Util:";
 	/*public enum Tipo
 	{
 		NADA(-1), LUGAR(1), RUTA(2), AVISO(3), BUSCAR(9);
@@ -42,10 +37,22 @@ public class Util
 	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
 	static final String TIPO = "tipo";
-//	private static final String PREF_LOGIN = "login";
-//	private static final String PREF_PWD = "password";
-//	private static final String PREF_SAVE_LOGIN = "save_login";
 
+	//______________________________________________________________________________________________
+	private Application _app;
+	private SharedPreferences _sp;
+	private LocationManager _lm;
+	private NotificationManager _nm;
+	private PowerManager _pm;
+	@Inject
+	public Util(Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm)
+	{
+		_app = app;
+		_sp = sp;
+		_lm = lm;
+		_nm = nm;
+		_pm = pm;
+	}
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
 	//______________________________________________________________________________________________
@@ -60,25 +67,25 @@ public class Util
 	// LOCATION
 	//______________________________________________________________________________________________
 	private static Location _locLast;
-	public static void setLocation(Location loc)
+	public void setLocation(Location loc)
 	{
 		_locLast=loc;
 //System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 	}
-	static Location getLocation(Context c)
+	Location getLocation()
 	{
 		Location location1=null, location2=null;
 		try
 		{
-			if(c == null)return null;
-			LocationManager locationManager = (LocationManager)c.getSystemService(Context.LOCATION_SERVICE);
-			if(locationManager == null)return _locLast;
-			boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-			boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			//if(c == null)return null;
+			//LocationManager locationManager = (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
+			if(_lm == null)return _locLast;
+			boolean isGPSEnabled = _lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+			boolean isNetworkEnabled = _lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 			if(isNetworkEnabled)
-				location1 = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+				location1 = _lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			if(isGPSEnabled)
-				location2 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				location2 = _lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			if(location1==null && location2==null)return _locLast;
 			if(_locLast == null)_locLast = location1!=null?location1:location2;
 			if(location1 != null && location1.getTime() > _locLast.getTime())
@@ -133,51 +140,46 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
     }
 
 	//______________________________________________________________________________________________
-	private static void showLights(Context c, int color)
+	private void showLights(int color)
 	{
-		NotificationManager notif = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
-		notif.cancel(1); // clear previous notification
+		_nm.cancel(1); // clear previous notification
 		final Notification notification = new Notification();
 		notification.ledARGB = color;
 		notification.ledOnMS = 1000;
 		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		notif.notify(1, notification);
+		_nm.notify(1, notification);
 	}
 
 	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
-	static void showAviso(Context c, String sTitulo, Aviso a, Intent intent)
+	void showAviso(String sTitulo, Aviso a, Intent intent)
 	{
 		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message_type", true))
 			showNotificacionDlg(c, a, intent);
 		else*/
-			showNotificacion(c, sTitulo, a, intent);
+			showNotificacion(sTitulo, a, intent);
 	}
 	//______________________________________________________________________________________________
 	//private static int _idNotificacion = 1;
-	private static void showNotificacion(Context c, String titulo, Aviso a, Intent intent)
+	private void showNotificacion(String titulo, Aviso a, Intent intent)
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-		String sSound = prefs.getString("notifications_new_message_ringtone", "");
-		Boolean bVibrate = prefs.getBoolean("notifications_new_message_vibrate", false);
-		Boolean bLights = prefs.getBoolean("notifications_new_message_lights", false);
+		String sSound = _sp.getString("notifications_new_message_ringtone", "");
+		Boolean bVibrate = _sp.getBoolean("notifications_new_message_vibrate", false);
+		Boolean bLights = _sp.getBoolean("notifications_new_message_lights", false);
 		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
 
-//System.err.println("------showNotificacion:      sound:"+sSound+"      vibrate:"+bVibrate+"     lights:"+bLights);
-
-		PowerManager pm = (PowerManager)c.getSystemService(Context.POWER_SERVICE);
-		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
+		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire();
 
 		Integer idNotificacion = _conversor(a.getId());
-		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c)
+		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app)
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
-				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.getResources(), R.mipmap.ic_launcher))
+				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(titulo)
 				.setContentText(a.getNombre()+":"+a.getDescripcion())
-				.setContentIntent(PendingIntent.getActivity(c, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
+				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
 				//.setDefaults(Notification.DEFAULT_ALL)
 				;
@@ -185,17 +187,16 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		else						notificationBuilder.setSound(null);
 
 		if(bLights)					//notificationBuilder.setLights(android.graphics.Color.RED, 500, 500);			//notificationBuilder.setLights(0xff00ff00, 300, 500);
-			showLights(c, android.graphics.Color.RED);//TODO: no funciona, llamar directamente a luces
+			showLights(android.graphics.Color.RED);//TODO: no funciona, llamar directamente a luces
 		else						notificationBuilder.setLights(0, 0, 0);
 
 		if(bVibrate)				//notificationBuilder.setVibrate(new long[]{1000L});//TODO: no funciona, llamar directamente a vibrar
-			vibrate(c);
+			vibrate(_app);
 		else						notificationBuilder.setVibrate(null);
 
 			//notificationBuilder.setSound(Uri.parse(sSound));
 		//visibility 	int: One of VISIBILITY_PRIVATE (the default), VISIBILITY_PUBLIC, or VISIBILITY_SECRET.
-		NotificationManager notificationManager = (NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(idNotificacion, notificationBuilder.build());
+		_nm.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
 
 		//http://stackoverflow.com/questions/18094791/android-notification-pendingintent-open-activity-per-notification-click
@@ -275,32 +276,31 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	/// CONFIG
 	//______________________________________________________________________________________________
-	static boolean isAutoArranque(Context c)
+	boolean isAutoArranque()
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-		return prefs.getBoolean("is_auto_arranque", true);
+		return _sp.getBoolean("is_auto_arranque", true);
 	}
 
 	//______________________________________________________________________________________________
-	private static final String PREF_TRACKING = "tracking_prefs";
+	//private static final String PREF_TRACKING = "tracking_prefs";
 	private static final String ID_TRACKING = "id_tracking_route";
-	static void setTrackingRoute(Context c, String sIdRoute)
+	void setTrackingRoute(String sIdRoute)
 	{
-		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
-		SharedPreferences.Editor editor = sp.edit();
+		//SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+		SharedPreferences.Editor editor = _sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
-		editor.apply();//editor.commit(); Aply does it in background
+		editor.apply();//editor.commit(); Apply does it in background
 	}
-	static String getTrackingRoute(Context c)
+	String getTrackingRoute()
 	{
-		SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
- 		return sp.getString(ID_TRACKING, "");
+		//SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
+ 		return _sp.getString(ID_TRACKING, "");
 	}
 
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
 	//______________________________________________________________________________________________
-	static void return2Main(Activity act, boolean bDirty, String sMensaje)
+	void return2Main(Activity act, boolean bDirty, String sMensaje)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, bDirty);
@@ -308,7 +308,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
-	static void return2Main(Activity act, Filtro filtro)
+	void return2Main(Activity act, Filtro filtro)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, true);
@@ -316,7 +316,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
-	static void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
+	void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
 	{
 		Intent intent = new Intent(act, ActMain.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -329,16 +329,13 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 
 	//----------------------------------------------------------------------------------------------
 	// IMAGEN
-	public static int getMaxTextureSize()
+	/*int getMaxTextureSize()
 	{
-		/*int[] maxTextureSize = new int[1];
-		GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
-		return  maxTextureSize[0];*/
 		int[] maxSize = new int[1];
-		GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxSize, 0);
+		android.opengl.GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxSize, 0);
 		return maxSize[0];
-	}
-	public static Bitmap imgResize(Bitmap b, int x, int y)
+	}*/
+	/*public static Bitmap imgResize(Bitmap b, int x, int y)
 	{
 		Bitmap background = Bitmap.createBitmap((int)x, (int)y, Bitmap.Config.ARGB_8888);
 		float originalWidth = b.getWidth(), originalHeight = b.getHeight();
@@ -352,21 +349,9 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		paint.setFilterBitmap(true);
 		canvas.drawBitmap(b, transformation, paint);
 		return background;
-	}
+	}*//*
 	public static Bitmap imgScaleCompress(Bitmap b, String path)
 	{
-
-		/*Bitmap photo = (Bitmap) "your Bitmap image";
-photo = Bitmap.createScaledBitmap(photo, 100, 100, false);
-ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-photo.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-
-File f = new File(Environment.getExternalStorageDirectory()
-        + File.separator + "Imagename.jpg");
-f.createNewFile();
-FileOutputStream fo = new FileOutputStream(f);
-fo.write(bytes.toByteArray());
-fo.close();*/
 		try
 		{
 			java.io.OutputStream imagefile = new java.io.FileOutputStream(path);
@@ -379,6 +364,6 @@ fo.close();*/
 			Log.e(TAG, String.format("imgScaleCompress:e:%s",e), e);
 			return null;
 		}
-	}
+	}*/
 
 }

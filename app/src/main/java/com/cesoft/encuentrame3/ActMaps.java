@@ -49,6 +49,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
 	private static final String TAG = "CESoft:ActMaps:";
 
+	private Util _util;
 	private GoogleMap _Map;
 	private Location _loc;
 	private Marker _marker;
@@ -67,6 +68,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_maps);
+
+		_util = ((App)getApplication()).getGlobalComponent().util();
 
 		//------------------------------------------------------------------------------------------
 		try{_l = getIntent().getParcelableExtra(Lugar.NOMBRE);}catch(Exception e){_l=null;}
@@ -87,7 +90,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				@Override
 				public void onClick(View view)
 				{
-					Util.return2Main(ActMaps.this, false, "");
+					_util.return2Main(ActMaps.this, false, "");
 				}
 			});
 		if(_iTipo != Util.NADA || _r != null)fab.setVisibility(View.GONE);

@@ -22,6 +22,8 @@ public class WidgetRuta extends AppWidgetProvider
 		Intent iSvc = new Intent(context, WidgetRutaService.class);
 		context.startService(iSvc);
 
+		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
+
 		if(ACTION_WIDGET_RUTA_ADD.equals(intent.getAction()))
 		{
 			Intent i = new Intent(context, ActWidgetNuevaRuta.class);
@@ -30,7 +32,7 @@ public class WidgetRuta extends AppWidgetProvider
 		}
 		else if(ACTION_WIDGET_RUTA_STOP.equals(intent.getAction()))
 		{
-			Util.setTrackingRoute(context, "");
+			_util.setTrackingRoute("");
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 			remoteViews.setTextViewText(R.id.txtRuta, "");
 			remoteViews.setViewVisibility(R.id.btnStop, View.INVISIBLE);

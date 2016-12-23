@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = "CESoft:";
+	private Util _util;
 	private ProgressDialog _progressDialog;
 	private EditText _txtNombre;
 
@@ -30,6 +31,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);
 		_txtNombre.setHint(R.string.nueva_ruta);
+		_util = ((App)getApplication()).getGlobalComponent().util();
 	}
 	@Override
 	public void onPause()
@@ -96,7 +98,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 					{
 						if(err == null)
 						{
-							Util.setTrackingRoute(ActWidgetNuevaRuta.this, data.getKey());
+							_util.setTrackingRoute(data.getKey());
 							_progressDialog.dismiss();
 							Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 							ActWidgetNuevaRuta.this.finish();

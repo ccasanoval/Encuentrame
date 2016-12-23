@@ -58,12 +58,16 @@ import com.google.firebase.database.ValueEventListener;
 
 import com.cesoft.encuentrame3.models.Ruta;
 
+import javax.inject.Inject;
+
 //TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
 	private static final String TAG = "CESoft:ActRuta:";
 	private static final int DELAY_LOCATION = 60000;
+
+	private	Util _util;
 
 	private boolean _bNuevo = false;
 	private Ruta _r;
@@ -82,6 +86,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_ruta);
+
+		_util = ((App)getApplication()).getGlobalComponent().util();
 
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
@@ -166,7 +172,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			if(btnStart!=null)btnStart.setVisibility(View.GONE);
 			//if(layPeriodo != null)layPeriodo.setVisibility(View.GONE);
 			//si está activo muestra btnStop
-			String sId = Util.getTrackingRoute(ActRuta.this);
+			String sId = _util.getTrackingRoute();
 			View layStartStop = findViewById(R.id.layStartStop);
 			if( ! sId.equals(_r.getId()))
 			{
@@ -339,7 +345,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				if(err == null)
 				{
 Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
-					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+					_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
 				{
@@ -378,8 +384,8 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 			public void onClick(DialogInterface dialog, int which)
 			{
 				iniEspera();
-				if(_r.getId().equals(Util.getTrackingRoute(ActRuta.this)))
-					Util.setTrackingRoute(ActRuta.this, "");
+				if(_r.getId().equals(_util.getTrackingRoute()))
+					_util.setTrackingRoute("");
 				_r.eliminar(new DatabaseReference.CompletionListener()
 				{
 					@Override
@@ -390,7 +396,7 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 						if(err == null)
 						{
 							//Log.w(TAG, "eliminar:handleResponse:"+data);
-							Util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
+							_util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
 						}
 						else
 						{
@@ -409,7 +415,7 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 	//// 4 LocationListener
 	@Override public void onLocationChanged(Location location)
 	{
-		Util.setLocation(location);
+		_util.setLocation(location);
 	}
 
 	//______________________________________________________________________________________________
@@ -513,15 +519,15 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 			{
 				if(err == null)
 				{
-					Util.setTrackingRoute(ActRuta.this, _r.getId());
+					_util.setTrackingRoute(_r.getId());
 					CesService._restartDelayRuta();
-					Util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+					_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 //Log.e(TAG, "startTrackingRecord-----------------------------------ID:"+_r.getId()+" data="+data);
 				}
 				else
 				{
 					finEspera();
-					Util.setTrackingRoute(ActRuta.this, "");
+					_util.setTrackingRoute("");
 					Log.e(TAG, String.format("startTrackingRecord:handleFault:%s", err));
 					Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
 				}
@@ -531,8 +537,8 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 	//______________________________________________________________________________________________
 	private void stopTrackingRecord()
 	{
-		Util.setTrackingRoute(ActRuta.this, "");
-		Util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
+		_util.setTrackingRoute("");
+		_util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
 	}
 
 	private void showRuta()

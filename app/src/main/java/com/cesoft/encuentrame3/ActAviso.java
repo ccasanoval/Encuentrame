@@ -58,6 +58,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	private static final String TAG = "CESoft:ActAviso:";
 	private static final int DELAY_LOCATION = 60000;
 
+	private Util _util;
+
 	private boolean _bDesdeNotificacion = false;
 	private boolean _bNuevo = false;
 	private Aviso _a;
@@ -76,6 +78,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	private Marker _marker;
 	private Circle _circle;
 
+
 	//private CoordinatorLayout _coordinatorLayout;TODO: eliminar de layout
 
 	//______________________________________________________________________________________________
@@ -84,6 +87,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_aviso);
+
+		_util = ((App)getApplication()).getGlobalComponent().util();
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
@@ -97,7 +102,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onClick(View v)
 			{
-				Location loc = Util.getLocation(ActAviso.this);
+				Location loc = _util.getLocation();
 				if(loc != null)setPosLugar(loc);
 			}
 		});
@@ -150,7 +155,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		{
 			_bNuevo = true;
 			_a = new Aviso();
-			Location loc = Util.getLocation(ActAviso.this);
+			Location loc = _util.getLocation();
 			if(loc != null)setPosLugar(loc);
 		}
 		//------------------------------------------------------------------------------------------
@@ -190,9 +195,9 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	public void openMain(boolean bDirty, String sMensaje)
 	{
 		if(_bDesdeNotificacion)
-			Util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
+			_util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
 		else
-			Util.return2Main(ActAviso.this, bDirty, sMensaje);
+			_util.return2Main(ActAviso.this, bDirty, sMensaje);
 	}
 
 	//______________________________________________________________________________________________
@@ -438,7 +443,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		Util.setLocation(location);
+		_util.setLocation(location);
 		if(_a.getLatitud() == 0 && _a.getLongitud() == 0)
 			setPosLugar(location);
 	}

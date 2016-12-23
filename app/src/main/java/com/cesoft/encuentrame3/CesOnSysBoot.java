@@ -13,7 +13,8 @@ public class CesOnSysBoot extends BroadcastReceiver
 	public void onReceive(Context context, Intent intent)
 	{
 //System.err.println("------------------CesOnSysBoot : onReceive : action="+intent.getAction()+":::"+ Util.isAutoArranque(context));
-		if(intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED) && Util.isAutoArranque(context))
+		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
+		if(intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED) && _util.isAutoArranque())
 		{
 			// Geotracking Svc
 			Intent serviceIntent = new Intent(context, CesService.class);
