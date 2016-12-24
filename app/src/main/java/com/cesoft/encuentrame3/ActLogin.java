@@ -137,6 +137,7 @@ public class ActLogin extends AppCompatActivity
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		ActLogin _main;
+		Login _login;
 
 		//------------------------------------------------------------------------------------------
 		//GOOGLE LOG IN
@@ -204,6 +205,7 @@ public class ActLogin extends AppCompatActivity
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
 			fragment._main = main;
+			fragment._login = ((App)fragment._main.getApplication()).getGlobalComponent().login();
 			return fragment;
 		}
 
@@ -212,7 +214,7 @@ public class ActLogin extends AppCompatActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			if(Login.isLogged())_main.goMain();
+			if(_login.isLogged())_main.goMain();
 
 			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
@@ -225,6 +227,8 @@ public class ActLogin extends AppCompatActivity
 			final TextInputLayout lblPassword = (TextInputLayout)rootView.findViewById(R.id.lblPassword);
 			final TextInputLayout lblPassword2 = (TextInputLayout)rootView.findViewById(R.id.lblPassword2);
 
+
+
 			switch(sectionNumber)
 			{
 			case ENTER://----------------------- ----------------------------------------------------
@@ -236,7 +240,7 @@ public class ActLogin extends AppCompatActivity
 					public void onClick(View v)
 					{
 						_main.iniEsperaLogin();
-						Login.login(_main.getApplicationContext(), txtEmail.getText().toString(), txtPassword.getText().toString(),
+						_login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
 								new Login.AuthListener()
 								{
 									@Override

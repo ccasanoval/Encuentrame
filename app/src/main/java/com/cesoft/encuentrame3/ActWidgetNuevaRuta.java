@@ -16,10 +16,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
+import javax.inject.Inject;
+
 public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = "CESoft:";
-	private Util _util;
+	@Inject	Util _util;
+	@Inject Login _login;
 	private ProgressDialog _progressDialog;
 	private EditText _txtNombre;
 
@@ -31,7 +34,8 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);
 		_txtNombre.setHint(R.string.nueva_ruta);
-		_util = ((App)getApplication()).getGlobalComponent().util();
+		//_util = ((App)getApplication()).getGlobalComponent().util();
+		((App)getApplication()).getGlobalComponent().inject(this);
 	}
 	@Override
 	public void onPause()
@@ -46,9 +50,10 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
 		_progressDialog.hide();
 		//
-		if( ! Login.isLogged())
+		//Login _login = ((App)getApplication()).getGlobalComponent().login();
+		if( ! _login.isLogged())
 		{
-			Login.login(this.getApplicationContext(), new Login.AuthListener()
+			_login.login(new Login.AuthListener()
 			{
 				@Override
 				public void onExito(FirebaseUser usr)

@@ -51,7 +51,8 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
 
-	private	Util _util;
+	@Inject	Util _util;
+	@Inject Login _login;
 
 	private static CesService _this;
 	private CesGeofenceStore _GeofenceStoreAvisos;
@@ -69,8 +70,9 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	public void onCreate()
 	{
 		super.onCreate();
-		_util = ((App)getApplication()).getGlobalComponent().util();
-		Login.login(getApplicationContext(), new Login.AuthListener()
+		//_util = ((App)getApplication()).getGlobalComponent().util();
+		((App)getApplication()).getGlobalComponent().inject(this);
+		_login.login(new Login.AuthListener()
 		{
 			@Override
 			public void onExito(FirebaseUser usr)
@@ -101,16 +103,16 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
 			{
-Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
-				if( ! Login.isLogged())
+//Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
+				if( ! _login.isLogged())
 				{
-					Log.w(TAG, "loop---sin usuario");
-					Login.login(getApplicationContext(), new Login.AuthListener()
+					//Log.w(TAG, "loop---sin usuario");
+					_login.login(new Login.AuthListener()
 					{
 						@Override
 						public void onExito(FirebaseUser usr)
 						{
-							Log.w(TAG, String.format("loop---------Login OK:%s",usr));
+							//Log.w(TAG, String.format("loop---------Login OK:%s",usr));
 						}
 						@Override
 						public void onFallo(Exception e)
@@ -146,7 +148,7 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 	public static void _restartDelayRuta()
 	{
 		DELAY_TRACK = DELAY_TRACK_MIN;
-Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TRACK));
+//Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TRACK));
 		_this.saveGeoTracking();
 		_this._tmTrack = System.currentTimeMillis();
 		//if(_hiloLoop!=null)_hiloLoop.interrupt();Doesnt work

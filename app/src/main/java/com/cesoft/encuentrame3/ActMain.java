@@ -188,7 +188,9 @@ public class ActMain extends AppCompatActivity
 		private static final String ARG_SECTION_NUMBER = "section_number";
 		private static PlaceholderFragment[] _apf = new PlaceholderFragment[3];
 
-		private	Util _util;
+		//private	Util _util;
+		@Inject Util _util;
+		@Inject Login _login;
 		private Application _app;
 		private ActMain _main;
 		private int _sectionNumber = Util.LUGARES;//Util.NADA;
@@ -198,8 +200,6 @@ public class ActMain extends AppCompatActivity
 		// Returns a new instance of this fragment for the given section number.
 		public static PlaceholderFragment newInstance(final int sectionNumber, ActMain main)
 		{
-			//_util = ((App)getApplication()).getGlobalComponent().util();
-
 			PlaceholderFragment fragment = new PlaceholderFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -208,8 +208,9 @@ public class ActMain extends AppCompatActivity
 			_apf[sectionNumber] = fragment;
 			fragment._sectionNumber = sectionNumber;
 			fragment._main = main;
-			fragment._util = ((App)main.getApplication()).getGlobalComponent().util();
 			fragment._app = main.getApplication();
+			//fragment._util = ((App)main.getApplication()).getGlobalComponent().util();
+			((App)main.getApplication()).getGlobalComponent().inject(fragment);
 			return fragment;
 		}
 
@@ -392,7 +393,7 @@ public class ActMain extends AppCompatActivity
 
 			if(requestCode == Util.CONFIG)
 			{
-				Login.logout(_app);//_main.getApplicationContext()
+				_login.logout();
 
 				Intent intent = new Intent(_main.getBaseContext(), ActLogin.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -21,7 +21,8 @@ import javax.inject.Inject;
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = "CESoft:";
-	private	Util _util;
+	@Inject	Util _util;
+	@Inject	Login _login;
 	private ProgressDialog _progressDialog;
 
 	@Override
@@ -30,7 +31,8 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		_util = ((App)getApplication()).getGlobalComponent().util();
+		//_util = ((App)getApplication()).getGlobalComponent().util();
+		((App)getApplication()).getGlobalComponent().inject(this);
 	}
 	@Override
 	public void onPause()
@@ -46,7 +48,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 		_progressDialog.hide();
 		//
 		//Util.setSvcContext(this);
-		if( ! Login.isLogged())
+		if( ! _login.isLogged())
 		{
 			Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
 			finish();
