@@ -1,12 +1,6 @@
 package com.cesoft.encuentrame3;
 
-import android.app.Application;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.LocationManager;
-import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 

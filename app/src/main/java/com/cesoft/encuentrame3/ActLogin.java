@@ -205,7 +205,7 @@ public class ActLogin extends AppCompatActivity
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
 			fragment._main = main;
-			fragment._login = ((App)fragment._main.getApplication()).getGlobalComponent().login();
+			fragment._login = App.getInstance().getGlobalComponent().login();
 			return fragment;
 		}
 

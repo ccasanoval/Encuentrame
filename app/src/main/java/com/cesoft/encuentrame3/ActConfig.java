@@ -139,7 +139,9 @@ public class ActConfig extends ActConfigBase
 			// Set the listener to watch for value changes.
 			preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 			// Trigger the listener immediately with the preference's current value.
-			sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+			sBindPreferenceSummaryToValueListener.onPreferenceChange(
+					preference,
+					PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
 		}
 		catch(Exception e)
 		{

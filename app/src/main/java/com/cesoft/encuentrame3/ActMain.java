@@ -210,7 +210,7 @@ public class ActMain extends AppCompatActivity
 			fragment._main = main;
 			fragment._app = main.getApplication();
 			//fragment._util = ((App)main.getApplication()).getGlobalComponent().util();
-			((App)main.getApplication()).getGlobalComponent().inject(fragment);
+			App.getInstance().getGlobalComponent().inject(fragment);
 			return fragment;
 		}
 

@@ -14,25 +14,30 @@ import com.cesoft.encuentrame3.di.modules.GlobalModule;
 // Created by CESoft on 15/09/2016
 public class App extends Application
 {
-	GlobalComponent _globalComponent;
+	private static App _app = new App();
+	public static App getInstance(){return _app;}
+
+	private static GlobalComponent _globalComponent;
 
 	@Override public void onCreate()
 	{
 		super.onCreate();
-
+		getGlobalComponent();
 		//LeakCanary.install(this);
-
 		/*Picasso.Builder builder = new Picasso.Builder(this);
 		builder.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
 		Picasso built = builder.build();
 		built.setIndicatorsEnabled(true);
 		built.setLoggingEnabled(true);
 		Picasso.setSingletonInstance(built);*/
-
-		_globalComponent = DaggerGlobalComponent.builder()
-                .globalModule(new GlobalModule(this))
-                .build();
 	}
 
-	 public GlobalComponent getGlobalComponent() { return _globalComponent; }
+	 public GlobalComponent getGlobalComponent()
+	 {
+		 if(_globalComponent == null)
+			_globalComponent = DaggerGlobalComponent.builder()
+                .globalModule(new GlobalModule(this))
+                .build();
+		 return _globalComponent;
+	 }
 }
