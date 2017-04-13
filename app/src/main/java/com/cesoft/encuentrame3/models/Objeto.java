@@ -28,7 +28,7 @@ public class Objeto implements Parcelable
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
 
-	protected Date fecha;
+	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
 

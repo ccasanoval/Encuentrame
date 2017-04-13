@@ -107,7 +107,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		onSalir();
 		//super.onBackPressed();
 	}
-	class CesTextWatcher implements TextWatcher
+	private class CesTextWatcher implements TextWatcher
 	{
 		private TextView _tv;
 		private String _str;
