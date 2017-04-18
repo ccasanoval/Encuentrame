@@ -28,7 +28,7 @@ public class Objeto implements Parcelable
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
 
-	protected Date fecha;
+	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
 
@@ -49,7 +49,9 @@ public class Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public boolean pasaFiltro(Filtro filtro)
 	{
-		if(!filtro.getNombre().isEmpty() && !getNombre().contains(filtro.getNombre()))return false;
+		String n1 = filtro.getNombre().toLowerCase();
+		String n2 = getNombre().toLowerCase();
+		if(!n1.isEmpty() && !n2.contains(n1))return false;
 		if(filtro.getFechaIni() != null && getFecha().getTime() < filtro.getFechaIni().getTime())return false;
 		if(filtro.getFechaFin() != null && getFecha().getTime() > filtro.getFechaFin().getTime())return false;
 		return true;
@@ -57,11 +59,11 @@ public class Objeto implements Parcelable
 
 	// FIREBASE
 	//______________________________________________________________________________________________
-	public interface ObjetoListener<T>
+	/*public interface ObjetoListener<T>
 	{
 		void onData(T[] aData);
 		void onError(String err);
-	}
+	}*/
 
 	// PARCELABLE
 	//______________________________________________________________________________________________

@@ -143,10 +143,13 @@ public class Ruta extends Objeto implements Parcelable
 		queryRef.addListenerForSingleValueEvent(listener);//queryRef.addChildEventListener(listener);
 	}
 
-	public static void getLista(final ObjetoListener<Ruta> listener)
+	public static void getLista(final Fire.ObjetoListener<Ruta> listener)
 	{
-		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
+		DatabaseReference ddbb = newFirebase();
+		listener.setRef(ddbb);
+		ValueEventListener vel = listener.getListener();
+		if(vel != null)ddbb.removeEventListener(vel);
+		vel = new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -170,7 +173,9 @@ public class Ruta extends Objeto implements Parcelable
 				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Ruta:getLista:onCancelled:"+err);
 			}
-		});
+		};
+		listener.setListener(vel);
+		ddbb.addValueEventListener(vel);	//.addListenerForSingleValueEvent(new ValueEventListener()
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -183,7 +188,7 @@ public class Ruta extends Objeto implements Parcelable
 		if(filtro.getActivo()==Filtro.ACTIVO && !bActivo  ||  filtro.getActivo()==Filtro.INACTIVO && bActivo)return false;
 		return true;
 	}
-	public static void getLista(ObjetoListener<Ruta> listener, Filtro filtro, String idRutaAct)
+	public static void getLista(Fire.ObjetoListener<Ruta> listener, Filtro filtro, String idRutaAct)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro, idRutaAct);
@@ -191,10 +196,14 @@ public class Ruta extends Objeto implements Parcelable
 			buscarPorGeoFiltro(listener, filtro, idRutaAct);
 	}
 	//----
-	private static void buscarPorFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
+	private static void buscarPorFiltro(final Fire.ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
+		DatabaseReference ddbb = newFirebase();
+		listener.setRef(ddbb);
+		ValueEventListener vel = listener.getListener();
+		if(vel != null)ddbb.removeEventListener(vel);
 		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
+		vel = new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -209,21 +218,22 @@ public class Ruta extends Objeto implements Parcelable
 				}
 				listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
 			}
-
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
 				Log.e(TAG, String.format("buscarPorFiltro:onCancelled:%s",err));
 				listener.onError(err.toString());
 			}
-		});
+		};
+		listener.setListener(vel);
+		ddbb.addValueEventListener(vel);
 	}
 	//----
-	private static void buscarPorGeoFiltro(final ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
+	private static void buscarPorGeoFiltro(final Fire.SimpleListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 
-		final ObjetoListener<String> lis = new ObjetoListener<String>()
+		final Fire.SimpleListener<String> lis = new Fire.SimpleListener<String>()
 		{
 			@Override
 			public void onData(final String[] aData)

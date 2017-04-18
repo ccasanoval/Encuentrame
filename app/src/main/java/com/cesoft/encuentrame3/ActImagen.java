@@ -1,11 +1,15 @@
 package com.cesoft.encuentrame3;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.opengl.GLES10;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,8 +24,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import java.io.File;
 
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
-import com.cesoft.encuentrame3.models.Objeto;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -29,7 +33,7 @@ import javax.microedition.khronos.opengles.GL10;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActImagen extends AppCompatActivity
 {
-	private static final String TAG = "CESoft:ActImagen:";
+	private static final String TAG = ActImagen.class.getSimpleName();
 	public static final String PARAM_LUGAR = "lugar";
 	public static final String PARAM_IMG_PATH = "img_path";
 
@@ -179,7 +183,7 @@ public class ActImagen extends AppCompatActivity
 			{
 				if(_l != null && _l.getId() != null)
 				{
-					_l.downloadImg(_iv, this, new Objeto.ObjetoListener<String>()
+					_l.downloadImg(_iv, this, new Fire.SimpleListener<String>()
 					{
 						@Override
 						public void onData(String[] aData)
@@ -208,6 +212,8 @@ public class ActImagen extends AppCompatActivity
 		{
 			Log.e(TAG, String.format("onCreate:e:%s",e),e);
 		}
+
+		pedirCamara();
 	}
 
 	@Override
@@ -329,6 +335,7 @@ public class ActImagen extends AppCompatActivity
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 	private void dispatchTakePictureIntent()
 	{
+		if( ! isCamara())return;
 		if( ! getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
 		{
 			Toast.makeText(this, getString(R.string.sin_camara), Toast.LENGTH_LONG).show();
@@ -395,5 +402,29 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 			finish();
 			break;
 		}
+	}
+
+	//----------------------------------------------------------------------------------------------
+	private boolean isCamara()
+	{
+		int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+		Log.e(TAG, "isCamara------------------------"+permissionCheck+" ::: "+(permissionCheck == PackageManager.PERMISSION_DENIED));
+		return permissionCheck == PackageManager.PERMISSION_GRANTED;
+	}
+	private void pedirCamara()
+	{
+		if( ! isCamara())
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 6970);
+		else
+			dispatchTakePictureIntent();
+	}
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
+	{
+		Log.e(TAG, "-------------------------------------------------------------------------------- requestCode = "+requestCode+" : ");
+		dispatchTakePictureIntent();
+		/*if(requestCode == 6969)
+			if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+				try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignore){}*/
 	}
 }

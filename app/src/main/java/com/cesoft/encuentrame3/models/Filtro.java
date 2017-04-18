@@ -3,7 +3,7 @@ package com.cesoft.encuentrame3.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.cesoft.encuentrame3.Util;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
@@ -22,8 +22,8 @@ public class Filtro implements Parcelable
 
 	private boolean _onOff = false;
 		public boolean isOn(){return _onOff;}
-		public void turnOn(){_onOff =true;}
-		public void turnOff(){_onOff =false;}
+		public void turnOn(){_onOff = true;}
+		public void turnOff(){_onOff = false;}
 		public boolean isValid()
 		{
 			return !(_activo == TODOS && _nombre.isEmpty() && _fechaIni == null && _fechaFin == null && _punto.latitude == 0 && _punto.longitude == 0);
@@ -105,7 +105,7 @@ public class Filtro implements Parcelable
 	public String toString()
 	{
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
-		return String.format(Locale.ENGLISH, "%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s",
+		return String.format(Locale.ENGLISH, "{%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s}",
 				_onOff, _tipo, _activo, _nombre, _punto.latitude, _punto.longitude, _radio,
 				_fechaIni==null?"null":df.format(_fechaIni), _fechaFin==null?"null":df.format(_fechaFin));
 	}

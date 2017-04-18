@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -6,6 +6,10 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
+
+import com.cesoft.encuentrame3.ActLogin;
+import com.cesoft.encuentrame3.ActWidgetNuevoLugar;
+import com.cesoft.encuentrame3.R;
 
 //http://www.vogella.com/tutorials/AndroidWidgets/article.html
 //http://developer.android.com/intl/es/guide/topics/appwidgets/index.html

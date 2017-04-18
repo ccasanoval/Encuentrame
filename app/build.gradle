@@ -2,70 +2,76 @@ apply plugin: 'com.android.application'
 //apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "23.0.3"
+	compileSdkVersion 25
+	buildToolsVersion '25.0.2'
 
-    defaultConfig {
-        applicationId "com.cesoft.encuentrame3"
-        minSdkVersion 15
-        targetSdkVersion 25
-        versionCode 13
-        versionName "1.93"
-        multiDexEnabled true
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+	defaultConfig {
+		applicationId "com.cesoft.encuentrame3"
+		minSdkVersion 15
+		targetSdkVersion 25
+		versionCode 14
+		versionName "1.94"
+		multiDexEnabled true
+	}
+	buildTypes {
+		release {
+			minifyEnabled false
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+		}
+	}
 
-    /*//---------------------------------------------------------
-    if (project.hasProperty('keyAlias')) {
-        signingConfigs.release.keyAlias = keyAlias
-    }
-    if (project.hasProperty('keyPassword')) {
-        signingConfigs.release.keyPassword = keyPassword
-    }
-    if (project.hasProperty('storePassword')) {
-        signingConfigs.release.storePassword = storePassword
-    }
-    if (project.hasProperty('storeFile')) {
-        signingConfigs.release.storeFile = storeFile
-    }
-    */
+	/*//---------------------------------------------------------
+	if (project.hasProperty('keyAlias')) {
+		signingConfigs.release.keyAlias = keyAlias
+	}
+	if (project.hasProperty('keyPassword')) {
+		signingConfigs.release.keyPassword = keyPassword
+	}
+	if (project.hasProperty('storePassword')) {
+		signingConfigs.release.storePassword = storePassword
+	}
+	if (project.hasProperty('storeFile')) {
+		signingConfigs.release.storeFile = storeFile
+	}
+	*/
 
-    return true
+	return true
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+	compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    /*debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4'*/
-    compile 'org.jetbrains:annotations:13.0'
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:design:25.0.1'
-    compile 'com.android.support:support-v4:25.0.1'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.google.android.gms:play-services-location:10.0.1'
-    compile 'com.google.android.gms:play-services-auth:10.0.1'
-    compile 'com.google.android.gms:play-services-maps:10.0.1'
-    compile 'com.google.android.gms:play-services-gcm:10.0.1'
-    compile 'com.google.firebase:firebase-auth:10.0.1'
-    compile 'com.google.firebase:firebase-core:10.0.1'
-    compile 'com.google.firebase:firebase-database:10.0.1'
-    compile 'com.google.firebase:firebase-storage:10.0.1'
-    compile 'com.firebase:geofire-android:2.1.0'
-    //compile 'com.squareup.picasso:picasso:2.5.2'
-    //compile 'com.squareup.okhttp:okhttp:2.4.0'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.android.support:support-v4:25.0.1'
+	compile 'org.jetbrains:annotations:13.0'
+	compile 'com.android.support:multidex:1.0.1'
 
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
-    compile 'com.google.dagger:dagger:2.8'
-    provided 'javax.annotation:jsr250-api:1.0'
+	compile 'com.android.support:appcompat-v7:25.3.1'
+	compile 'com.android.support:design:25.3.1'
+	compile 'com.android.support:support-v4:25.3.1'
+	compile 'com.google.android.gms:play-services-location:10.2.1'
+	compile 'com.google.android.gms:play-services-auth:10.2.1'
+	compile 'com.google.android.gms:play-services-maps:10.2.1'
+	compile 'com.google.android.gms:play-services-gcm:10.2.1'
+	compile 'com.google.firebase:firebase-auth:10.2.1'
+	compile 'com.google.firebase:firebase-core:10.2.1'
+	compile 'com.google.firebase:firebase-database:10.2.1'
+	compile 'com.google.firebase:firebase-storage:10.2.1'
+	compile 'com.google.firebase:firebase-crash:10.2.1'
+	compile 'com.firebase:geofire-android:2.1.0'
+	//compile 'com.squareup.picasso:picasso:2.5.2'
+	//compile 'com.squareup.okhttp:okhttp:2.4.0'
+	compile 'com.github.bumptech.glide:glide:3.7.0'
+
+
+	annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
+	compile 'com.google.dagger:dagger:2.8'
+	provided 'javax.annotation:jsr250-api:1.0'
+
+	// Leak Canary
+	debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+	releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+	testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+
+	//
 }
 
 apply plugin: 'com.google.gms.google-services'

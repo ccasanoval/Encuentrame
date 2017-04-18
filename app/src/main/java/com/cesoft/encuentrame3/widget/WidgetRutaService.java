@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

@@ -135,4 +135,7 @@
 
 	<string name="estadisticas_format" formatted="false">Length:\t\t\t\t\t\t%s\nTime:\t\t\t\t\t\t\t%s\nAvg Speed:\t\t\t\t%s\nMin Speed:\t\t\t\t%s\nMax Speed:\t\t\t%s\nMin Altitude:\t\t%s\nMax Altitude:\t\t%s\n</string>
 
+	<!-- TODO: Remove or change this placeholder text -->
+	<string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

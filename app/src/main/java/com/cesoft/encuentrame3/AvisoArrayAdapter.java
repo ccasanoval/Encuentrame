@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.models.Aviso;
+import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016

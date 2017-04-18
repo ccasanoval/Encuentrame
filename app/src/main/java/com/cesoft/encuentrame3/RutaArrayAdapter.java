@@ -11,25 +11,30 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Util;
 
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //http://www.vogella.com/tutorials/AndroidListView/article.html
-class RutaArrayAdapter extends ArrayAdapter<Ruta>
+public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
 	private final Ruta[] _rutas;
 	private IListaItemClick _inter;
-	private Util _util;
 
-	RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter, Util util)
+	@Inject	Util _util;
+
+	RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
 	{
 		super(context, -1, rutas);
 		_rutas = rutas;
 		_inter = inter;
-		_util = util;
+		_util = App.getInstance().getGlobalComponent().util();
 	}
 
 
@@ -77,6 +82,7 @@ class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			}
 		});
 		// Si la ruta se está grabando, resaltar
+//Log.e("RutaArrayAdapter", "----------------------------_util.getTrackingRoute() == "+_util.getTrackingRoute());//TODO: por que se llama tanto?
 		if(_rutas[position].getId().equals(_util.getTrackingRoute()))
 		{
 			holder.txtNombre.setTextColor(Color.RED);

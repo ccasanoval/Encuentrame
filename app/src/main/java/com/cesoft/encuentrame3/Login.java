@@ -64,7 +64,7 @@ public class Login
 	}
 
 	//-----
-	interface AuthListener
+	public interface AuthListener
 	{
 		void onExito(FirebaseUser usr);
 		void onFallo(Exception e);
@@ -192,7 +192,7 @@ public class Login
 	}
 
 	//-------
-	boolean isLogged()
+	public boolean isLogged()
 	{
 		return getAuth().getCurrentUser() != null;
 	}

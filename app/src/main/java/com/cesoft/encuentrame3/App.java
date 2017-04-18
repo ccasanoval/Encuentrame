@@ -5,6 +5,7 @@ import android.app.Application;
 import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent;
 import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
+import com.squareup.leakcanary.LeakCanary;
 //import com.cesoft.encuentrame3.di.modules.UtilModule;
 
 
@@ -22,8 +23,17 @@ public class App extends Application
 	@Override public void onCreate()
 	{
 		super.onCreate();
+
+		if(LeakCanary.isInAnalyzerProcess(this))
+		{
+			// This process is dedicated to LeakCanary for heap analysis.
+			// You should not init your app in this process.
+			return;
+		}
+		LeakCanary.install(this);
+
 		getGlobalComponent();
-		//LeakCanary.install(this);
+
 		/*Picasso.Builder builder = new Picasso.Builder(this);
 		builder.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
 		Picasso built = builder.build();

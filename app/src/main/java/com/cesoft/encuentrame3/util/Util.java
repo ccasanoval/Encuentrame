@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.util;
 
 import android.app.Activity;
 import android.app.Application;
@@ -15,8 +15,15 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 
+import com.cesoft.encuentrame3.ActAviso;
+import com.cesoft.encuentrame3.ActMain;
+import com.cesoft.encuentrame3.IListaItemClick;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,7 +34,7 @@ import javax.inject.Singleton;
 @Singleton
 public class Util
 {
-	//private static final String TAG = "CESoft:Util:";
+	private static final String TAG = Util.class.getSimpleName();
 	/*public enum Tipo
 	{
 		NADA(-1), LUGAR(1), RUTA(2), AVISO(3), BUSCAR(9);
@@ -36,7 +43,7 @@ public class Util
 		public int getValue(){return value;}
 	}*/
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
-	static final String TIPO = "tipo";
+	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
 	private Application _app;
@@ -57,8 +64,8 @@ public class Util
 	// REFRESH LISTA RUTAS
 	//______________________________________________________________________________________________
 	private static IListaItemClick _refresh;
-		static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
-		static void refreshListaRutas()
+		public static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
+		public static void refreshListaRutas()
 		{
 			if(_refresh!=null)_refresh.onRefreshListaRutas();
 		}
@@ -72,20 +79,26 @@ public class Util
 		_locLast=loc;
 //System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 	}
-	Location getLocation()
+	public Location getLocation()
 	{
 		Location location1=null, location2=null;
 		try
 		{
 			//if(c == null)return null;
 			//LocationManager locationManager = (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
+
 			if(_lm == null)return _locLast;
 			boolean isGPSEnabled = _lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			boolean isNetworkEnabled = _lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-			if(isNetworkEnabled)
-				location1 = _lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if(isGPSEnabled)
-				location2 = _lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			try
+			{
+				if(isNetworkEnabled) location1 = _lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			}catch(SecurityException se){Log.e(TAG, "Network Loc:e:---------------------------------",se);}
+			try
+			{
+				if(isGPSEnabled)location2 = _lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			}catch(SecurityException se){Log.e(TAG, "GPS Loc:e:-------------------------------------",se);}
+
 			if(location1==null && location2==null)return _locLast;
 			if(_locLast == null)_locLast = location1!=null?location1:location2;
 			if(location1 != null && location1.getTime() > _locLast.getTime())
@@ -153,7 +166,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
-	void showAviso(String sTitulo, Aviso a, Intent intent)
+	public void showAviso(String sTitulo, Aviso a, Intent intent)
 	{
 		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message_type", true))
@@ -276,7 +289,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	/// CONFIG
 	//______________________________________________________________________________________________
-	boolean isAutoArranque()
+	public boolean isAutoArranque()
 	{
 		return _sp.getBoolean("is_auto_arranque", true);
 	}
@@ -284,14 +297,14 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	//private static final String PREF_TRACKING = "tracking_prefs";
 	private static final String ID_TRACKING = "id_tracking_route";
-	void setTrackingRoute(String sIdRoute)
+	public void setTrackingRoute(String sIdRoute)
 	{
 		//SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = _sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
 		editor.apply();//editor.commit(); Apply does it in background
 	}
-	String getTrackingRoute()
+	public String getTrackingRoute()
 	{
 		//SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
  		return _sp.getString(ID_TRACKING, "");
@@ -300,7 +313,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
 	//______________________________________________________________________________________________
-	void return2Main(Activity act, boolean bDirty, String sMensaje)
+	public void return2Main(Activity act, boolean bDirty, String sMensaje)
 	{
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, bDirty);
@@ -308,15 +321,16 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
-	void return2Main(Activity act, Filtro filtro)
+	public void return2Main(Activity act, Filtro filtro)
 	{
+android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 		Intent intent = new Intent();
 		intent.putExtra(ActMain.DIRTY, true);
 		intent.putExtra(Filtro.FILTRO, filtro);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
-	void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
+	public void openMain(Activity act, boolean bDirty, String sMensaje, int pagina)
 	{
 		Intent intent = new Intent(act, ActMain.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -325,6 +339,27 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		intent.putExtra(ActMain.MENSAJE, sMensaje);
 		act.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
 		act.finish();
+	}
+
+	//______________________________________________________________________________________________
+	public void showAvisoGeo(String sId)
+	{
+		Aviso.getById(sId, new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot aviso)
+			{
+				Aviso a = aviso.getValue(Aviso.class);
+				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
+				i.putExtra(Aviso.NOMBRE, a);
+				showAviso(_app.getString(R.string.en_zona_aviso), a, i);//CesServiceAvisoGeo.this
+			}
+			@Override
+			public void onCancelled(DatabaseError err)
+			{
+				Log.e("CESoft", String.format("CesServiceAvisoGeo:showAviso:e:%s",err));
+			}
+		});
 	}
 
 	//----------------------------------------------------------------------------------------------

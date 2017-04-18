@@ -1,10 +1,14 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.svc;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.cesoft.encuentrame3.ActAviso;
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
@@ -13,7 +17,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
-import javax.inject.Inject;
 
 //http://stackoverflow.com/questions/21414160/how-to-increase-consistency-of-android-geofence-enter-exit-notifications
 //http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823

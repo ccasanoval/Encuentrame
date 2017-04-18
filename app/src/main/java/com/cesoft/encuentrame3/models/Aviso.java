@@ -51,7 +51,7 @@ public class Aviso extends Objeto
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
 	//protected long fecha;//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
-	protected Date fecha;
+	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
 	///______________________________________________________________
@@ -189,10 +189,13 @@ public class Aviso extends Objeto
 		//queryRef.addListenerForSingleValueEvent(listener);
     	queryRef.addValueEventListener(listener);//AJAX
 	}
-	public static void getLista(final ObjetoListener<Aviso> listener)
+	public static void getLista(final Fire.ObjetoListener<Aviso> listener)
 	{
-		//newFirebase().addValueEventListener(listener);//TODO:Cual mejor?
-		newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
+		DatabaseReference ddbb = newFirebase();
+		listener.setRef(ddbb);
+		ValueEventListener vel = listener.getListener();
+		if(vel != null)ddbb.removeEventListener(vel);
+		vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -209,18 +212,18 @@ public class Aviso extends Objeto
 				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Aviso:getLista:onCancelled:"+err);
 			}
-		});
+		};
+		listener.setListener(vel);
+		ddbb.addValueEventListener(vel);//.addListenerForSingleValueEvent
 	}
 
 	//----------------------------------------------------------------------------------------------
 	@Override
 	public boolean pasaFiltro(Filtro filtro)
 	{
-		if( ! super.pasaFiltro(filtro))return false;
-		if(filtro.getActivo()==Filtro.ACTIVO && !isActivo()  ||  filtro.getActivo()==Filtro.INACTIVO && isActivo())return false;
-		return true;
+		return super.pasaFiltro(filtro) && !(filtro.getActivo() == Filtro.ACTIVO && !isActivo() || filtro.getActivo() == Filtro.INACTIVO && isActivo());
 	}
-	public static void getLista(ObjetoListener<Aviso> listener, Filtro filtro)
+	public static void getLista(Fire.ObjetoListener<Aviso> listener, Filtro filtro)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro);
@@ -228,10 +231,13 @@ public class Aviso extends Objeto
 			buscarPorGeoFiltro(listener, filtro);
 	}
 	//----
-	private static void buscarPorFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
+	private static void buscarPorFiltro(final Fire.ObjetoListener<Aviso> listener, final Filtro filtro)
 	{
-		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
+		DatabaseReference ddbb = newFirebase();
+		listener.setRef(ddbb);
+		ValueEventListener vel = listener.getListener();
+		if(vel != null)ddbb.removeEventListener(vel);
+		vel = new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -252,10 +258,12 @@ public class Aviso extends Objeto
 				Log.e(TAG, "buscarPorFiltro:onCancelled:"+err);
 				listener.onError(err.toString());
 			}
-		});
+		};
+		listener.setListener(vel);
+		ddbb.addValueEventListener(vel);//.addListenerForSingleValueEvent
 	}
 	//----
-	private static void buscarPorGeoFiltro(final ObjetoListener<Aviso> listener, final Filtro filtro)
+	private static void buscarPorGeoFiltro(final Fire.SimpleListener<Aviso> listener, final Filtro filtro)
 	{
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 

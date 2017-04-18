@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Lugar;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
@@ -21,7 +22,8 @@ import javax.inject.Inject;
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = "CESoft:";
-	@Inject	Util _util;
+	@Inject
+	Util _util;
 	@Inject	Login _login;
 	private ProgressDialog _progressDialog;
 

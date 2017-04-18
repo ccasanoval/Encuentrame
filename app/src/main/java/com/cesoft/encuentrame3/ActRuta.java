@@ -29,6 +29,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -58,8 +60,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import com.cesoft.encuentrame3.models.Ruta;
 
-import javax.inject.Inject;
-
 //TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
@@ -67,7 +67,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private static final String TAG = "CESoft:ActRuta:";
 	private static final int DELAY_LOCATION = 60000;
 
-	private	Util _util;
+	private Util _util;
 
 	private boolean _bNuevo = false;
 	private Ruta _r;

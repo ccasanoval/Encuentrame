@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.svc;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -6,9 +6,12 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import java.util.ArrayList;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,7 +55,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
 
 	@Inject	Util _util;
-	@Inject Login _login;
+	@Inject	Login _login;
 
 	private static CesService _this;
 	private CesGeofenceStore _GeofenceStoreAvisos;

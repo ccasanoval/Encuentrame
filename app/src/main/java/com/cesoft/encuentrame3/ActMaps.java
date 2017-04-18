@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,7 +35,6 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Ruta;
@@ -151,19 +152,32 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	}
 	//______________________________________________________________________________________________
 	@Override
-	protected void onDestroy()
+	protected void onStart()
 	{
-		super.onDestroy();
-		/*_GoogleApiClient.unregisterConnectionCallbacks(this);
-		_GoogleApiClient.unregisterConnectionFailedListener(this);
-		_GoogleApiClient.disconnect();
-		_GoogleApiClient = null;
-		_LocationRequest = null;*/
+		super.onStart();
+		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+		mapFragment.getMapAsync(this);
+		newListeners();
+	}
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
+		super.onStop();
 		if(_Map != null)
 		{
 			_Map.clear();
 			_Map = null;
 		}
+		delListeners();
+		/*if(_GoogleApiClient != null)
+		{
+			_GoogleApiClient.unregisterConnectionCallbacks(this);
+			_GoogleApiClient.unregisterConnectionFailedListener(this);
+			_GoogleApiClient.disconnect();
+			_GoogleApiClient = null;
+		}
+		_LocationRequest = null;*/
 	}
 
 	// This callback is triggered when the map is ready to be used. This is where we can add markers or lines, add listeners or move the camera.
@@ -353,6 +367,11 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	}
 	private synchronized void showRuta(final Ruta r)
 	{
+		if(r == null)
+		{
+			Log.e(TAG, "showRuta:e:----------------------------------------------------------------- r == NULL");
+			return;
+		}
 		//r.getPuntos(new ValueEventListener()
 		Ruta.RutaPunto.getListaSync(_r.getId(), new ValueEventListener()
 		{
@@ -436,9 +455,34 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 
 
 	//______________________________________________________________________________________________
+	private Fire.ObjetoListener<Lugar> _lisLugar;
+	private Fire.ObjetoListener<Aviso> _lisAviso;
+	private Fire.ObjetoListener<Ruta> _lisRuta;
+	//----------------------------------------------------------------------------------------------
 	private void showLugares()
 	{
-		Lugar.getLista(new Objeto.ObjetoListener<Lugar>()
+		Lugar.getLista(_lisLugar);
+	}
+	//---
+	private void showAvisos()
+	{
+		Aviso.getLista(_lisAviso);
+	}
+	//---
+	private void showRutas()
+	{
+		Ruta.getLista(_lisRuta);
+	}
+	//----------------------------------------------------------------------------------------------
+	private void delListeners()
+	{
+		_lisLugar.delListener();
+		_lisAviso.delListener();
+		_lisRuta.delListener();
+	}
+	private void newListeners()
+	{
+		_lisLugar = new Fire.ObjetoListener<Lugar>()
 		{
 			@Override
 			public void onData(Lugar[] aData)
@@ -448,13 +492,10 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("---------LUGARES:GET:ERROR:%s",err));
+				Log.e(TAG, String.format("showLugares:e:--------------------------------------------LUGARES:GET:ERROR:%s",err));
 			}
-		});
-	}
-	private void showAvisos()
-	{
-		Aviso.getLista(new Objeto.ObjetoListener<Aviso>()
+		};
+		_lisAviso = new Fire.ObjetoListener<Aviso>()
 		{
 			@Override
 			public void onData(Aviso[] aData)
@@ -464,25 +505,25 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("---------AVISOS:GET:ERROR:%s",err));
+				Log.e(TAG, String.format("showAvisos:e:---------------------------------------------AVISOS:GET:ERROR:%s",err));
 			}
-		});
-	}
-	private void showRutas()
-	{
-		Ruta.getLista(new Objeto.ObjetoListener<Ruta>()
+		};
+		_lisRuta = new Fire.ObjetoListener<Ruta>()
 		{
 			@Override
 			public void onData(Ruta[] aData)
 			{
-				for(Ruta o : aData)showRuta(o);
+				Log.e(TAG, "--------------------getLista : "+aData.length);
+				for(Ruta o : aData)
+					showRuta(o);
 			}
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("---------RUTAS:GET:ERROR:%s",err));
+				Log.e(TAG, String.format("showRutas:e:----------------------------------------------RUTAS:GET:ERROR:%s",err));
 			}
-		});
+		};
+
 	}
 
 }

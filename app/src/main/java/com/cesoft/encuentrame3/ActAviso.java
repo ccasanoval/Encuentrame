@@ -24,6 +24,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -55,7 +57,7 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
-	private static final String TAG = "CESoft:ActAviso:";
+	private static final String TAG = ActAviso.class.getSimpleName();
 	private static final int DELAY_LOCATION = 60000;
 
 	private Util _util;
@@ -88,7 +90,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_aviso);
 
-		//_util = ((App)getApplication()).getGlobalComponent().util();
 		_util = App.getInstance().getGlobalComponent().util();
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
@@ -166,39 +167,62 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			setTitle(getString(R.string.editar_aviso));
 
 		//------------------------------------------------------------------------------------------
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+		/*_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
 		_GoogleApiClient.connect();
 		_LocationRequest = new LocationRequest();
 		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);*/
 		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();
 	}
 
+	//______________________________________________________________________________________________
 	@Override
-	public void onDestroy()
+	public void onStart()
 	{
-		super.onDestroy();
-		_GoogleApiClient.unregisterConnectionCallbacks(this);
-		_GoogleApiClient.unregisterConnectionFailedListener(this);
-		_GoogleApiClient.disconnect();
-		_GoogleApiClient = null;
-		_LocationRequest = null;
+		super.onStart();
+		if(checkPlayServices())buildGoogleApiClient();
+		if(_GoogleApiClient != null)
+		{
+			_GoogleApiClient.connect();
+			pideGPS();
+		}
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+	}
+	@Override
+	public void onStop()
+	{
+		super.onStop();
 		if(_Map != null)
 		{
 			_Map.clear();
 			_Map = null;
 		}
+		if(_GoogleApiClient != null)
+		{
+			_GoogleApiClient.unregisterConnectionCallbacks(this);
+			_GoogleApiClient.unregisterConnectionFailedListener(this);
+			_GoogleApiClient.disconnect();
+			_GoogleApiClient = null;
+		}
+		_LocationRequest = null;
 	}
-
 	//______________________________________________________________________________________________
-	// GET BACK TO MAIN
-	public void openMain(boolean bDirty, String sMensaje)
+	protected void buildGoogleApiClient()
 	{
-		if(_bDesdeNotificacion)
-			_util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
-		else
-			_util.return2Main(ActAviso.this, bDirty, sMensaje);
+		_GoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.addApi(LocationServices.API)
+				.build();
+	}
+	private boolean checkPlayServices()
+	{
+		GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+		int result = googleAPI.isGooglePlayServicesAvailable(this);
+		if(result != ConnectionResult.SUCCESS)Log.e(TAG, "checkPlayServices:e:--------------------------------------------------------"+result);
+		return result == ConnectionResult.SUCCESS;
 	}
 
 	//______________________________________________________________________________________________
@@ -271,34 +295,15 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		}
 	}
 
-	//______________________________________________________________________________________________
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		if(checkPlayServices())buildGoogleApiClient();
-		if(_GoogleApiClient != null)_GoogleApiClient.connect();
-	}
 
 	//______________________________________________________________________________________________
-	protected void buildGoogleApiClient()
+	// GET BACK TO MAIN
+	public void openMain(boolean bDirty, String sMensaje)
 	{
-		_GoogleApiClient = new GoogleApiClient.Builder(this.getApplicationContext())
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.addApi(LocationServices.API)
-				.build();
-	}
-	private boolean checkPlayServices()
-	{
-    	GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-    	int result = googleAPI.isGooglePlayServicesAvailable(this);
-    	if(result != ConnectionResult.SUCCESS)
-		{
-			Log.e(TAG, "checkPlayServices:e:" + result);
-	        return false;
-	    }
-	    return true;
+		if(_bDesdeNotificacion)
+			_util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
+		else
+			_util.return2Main(ActAviso.this, bDirty, sMensaje);
 	}
 
 	//______________________________________________________________________________________________
@@ -485,6 +490,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 	private void setMarker()
 	{
+		if(_Map == null)return;
 		try
 		{
 			if(_marker != null)_marker.remove();
@@ -502,7 +508,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					.strokeColor(Color.TRANSPARENT)
 					.fillColor(0x55AA0000));//Color.BLUE
 		}
-		catch(Exception e){Log.e(TAG, String.format("setMarker:e:%s",e), e);}
+		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
 
 	//______________________________________________________________________________________________

@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -50,7 +51,7 @@ import com.cesoft.encuentrame3.models.Lugar;
 //TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
 public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
-	private static final String TAG = "CESoft:ActLugar:";
+	private static final String TAG = ActLugar.class.getSimpleName();
 	private static final int DELAY_LOCATION = 60000;
 
 	//@Inject
@@ -107,7 +108,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		onSalir();
 		//super.onBackPressed();
 	}
-	class CesTextWatcher implements TextWatcher
+	private class CesTextWatcher implements TextWatcher
 	{
 		private TextView _tv;
 		private String _str;
@@ -191,28 +192,8 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		//------------------------------------------------------------------------------------------
 
 		//------------------------------------------------------------------------------------------
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();
-	}
-	@Override
-	public void onDestroy()
-	{
-		super.onDestroy();
-		_GoogleApiClient.unregisterConnectionCallbacks(this);
-		_GoogleApiClient.unregisterConnectionFailedListener(this);
-		_GoogleApiClient.disconnect();
-		_GoogleApiClient = null;
-		_LocationRequest = null;
-		if(_Map != null)
-		{
-			_Map.clear();
-			_Map = null;
-		}
+		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+		//_GoogleApiClient.connect();
 	}
 
 	//______________________________________________________________________________________________
@@ -221,8 +202,35 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		super.onStart();
 		if(checkPlayServices())buildGoogleApiClient();
-		if(_GoogleApiClient != null)_GoogleApiClient.connect();
+		if(_GoogleApiClient != null)
+		{
+			_GoogleApiClient.connect();
+			pideGPS();
+		}
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
+		if(_GoogleApiClient != null)
+		{
+			_GoogleApiClient.unregisterConnectionCallbacks(this);
+			_GoogleApiClient.unregisterConnectionFailedListener(this);
+			_GoogleApiClient.disconnect();
+			_GoogleApiClient = null;
+		}
+		_LocationRequest = null;
+	}
+
+	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onPause()
 	{

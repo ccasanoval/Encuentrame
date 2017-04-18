@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -8,6 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
+
+import com.cesoft.encuentrame3.ActLogin;
+import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class WidgetRuta extends AppWidgetProvider

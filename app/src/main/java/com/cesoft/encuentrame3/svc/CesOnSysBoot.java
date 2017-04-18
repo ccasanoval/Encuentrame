@@ -1,8 +1,12 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.svc;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 03/02/2016

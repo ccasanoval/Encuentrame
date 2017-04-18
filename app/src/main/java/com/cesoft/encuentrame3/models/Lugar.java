@@ -13,8 +13,6 @@ import java.util.Date;
 
 import com.bumptech.glide.Glide;
 import com.cesoft.encuentrame3.Login;
-import com.cesoft.encuentrame3.R;
-import com.cesoft.encuentrame3.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -45,13 +43,16 @@ public class Lugar extends Objeto
 {
 	private static final String TAG = "CESoft:Lugar:";
 	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
-	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	//private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	private static DatabaseReference newFirebase()
+	{
+		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
+	}
 	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	private DatabaseReference _datos;
 
-
-	///______________________________________________________________
+	///---------------------------------------------------------------------------------------------
 	//Yet Another Firebase Bug:
 	//Serialization of inherited properties from the base class, is missing in the current release of the
 	// Firebase Database SDK for Android. It will be added back in an upcoming version.
@@ -127,10 +128,13 @@ public class Lugar extends Objeto
 	}
 
 	//______________________________________________________________________________________________
-	public static void getLista(final Objeto.ObjetoListener<Lugar> listener)
+	public static void getLista(final Fire.ObjetoListener<Lugar> listener)
 	{
-		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
+		DatabaseReference ddbb = newFirebase();
+		listener.setRef(ddbb);
+		ValueEventListener vel = listener.getListener();
+		if(vel != null)ddbb.removeEventListener(vel);
+		vel = new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -140,28 +144,36 @@ public class Lugar extends Objeto
 				for(DataSnapshot o : data.getChildren())
 					aLugares.add(o.getValue(Lugar.class));
 				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+				//ddbb.removeEventListener(this);
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
 				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Lugar:getLista:onCancelled:"+err);
+				//ddbb.removeEventListener(this);
 			}
-		});
+		};
+		listener.setListener(vel);
+		ddbb.addValueEventListener(vel);
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public static void getLista(Objeto.ObjetoListener<Lugar> listener, Filtro filtro)
+	public static void getLista(Fire.ObjetoListener<Lugar> listener, Filtro filtro)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro);
 		else
 			buscarPorGeoFiltro(listener, filtro);
 	}
-	private static void buscarPorFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
+	private static void buscarPorFiltro(final Fire.ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
 		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-		newFirebase().addValueEventListener(new ValueEventListener()//AJAX
+		DatabaseReference ddbb = newFirebase();
+		listener.setRef(ddbb);
+		ValueEventListener vel = listener.getListener();
+		if(vel != null)ddbb.removeEventListener(vel);
+		vel = new ValueEventListener()//AJAX
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
@@ -183,51 +195,61 @@ public class Lugar extends Objeto
 				Log.e(TAG, s);
 				listener.onError(s);
 			}
-		});
-	}
-	private static void buscarPorGeoFiltro(final Objeto.ObjetoListener<Lugar> listener, final Filtro filtro)
-	{
-		if(filtro.getRadio() < 1)filtro.setRadio(100);
-		final ArrayList<Lugar> aLugares = new ArrayList<>();
-		GeoFire geoFire = newGeoFire();
-		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
-		GeoQueryEventListener lisGeo = new GeoQueryEventListener()
-		{
-			private int nCount = 0;
-			@Override
-			public void onKeyEntered(String key, GeoLocation location)
-			{
-				nCount++;
-				//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
-				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
-				{
-					@Override
-					public void onDataChange(DataSnapshot data)
-					{
-						nCount--;
-						Lugar l = data.getValue(Lugar.class);
-						if(l.pasaFiltro(filtro))aLugares.add(l);
-						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
-					}
-					@Override
-					public void onCancelled(DatabaseError err)
-					{
-						nCount--;
-						Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
-					}
-				});
-			}
-			@Override
-			public void onGeoQueryReady()
-			{
-				if(nCount==0)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
-				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
-			}
-			@Override public void onKeyExited(String key){Log.i(TAG, "getLista:onKeyExited");}
-			@Override public void onKeyMoved(String key, GeoLocation location){Log.i(TAG, "getLista:onKeyMoved"+key+", "+location);}
-			@Override public void onGeoQueryError(DatabaseError error){Log.e(TAG, "getLista:onGeoQueryError:"+error);}
 		};
+		listener.setListener(vel);
+		ddbb.addValueEventListener(vel);
+	}
+	private static void buscarPorGeoFiltro(final Fire.SimpleListener<Lugar> listener, final Filtro filtro)
+	{
+		GeoFire geoFire = newGeoFire();
+		//listener.setGeoFire(geoFire);
+
+		if(filtro.getRadio() < 1)filtro.setRadio(100);
+		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
+
+		GeoQueryEventListener lisGeo;
+		//lisGeo = listener.getListenerGeo();
+		//if(lisGeo == null)
+		{
+			final ArrayList<Lugar> aLugares = new ArrayList<>();
+			lisGeo = new GeoQueryEventListener()
+			{
+				private int nCount = 0;
+				@Override
+				public void onKeyEntered(String key, GeoLocation location)
+				{
+					nCount++;
+					//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+					newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
+					{
+						@Override
+						public void onDataChange(DataSnapshot data)
+						{
+							nCount--;
+							Lugar l = data.getValue(Lugar.class);
+							if(l.pasaFiltro(filtro))aLugares.add(l);
+							if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+						}
+						@Override
+						public void onCancelled(DatabaseError err)
+						{
+							nCount--;
+							Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
+							if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+						}
+					});
+				}
+				@Override
+				public void onGeoQueryReady()
+				{
+					if(nCount==0)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+					geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
+				}
+				@Override public void onKeyExited(String key){Log.i(TAG, "getLista:onKeyExited");}
+				@Override public void onKeyMoved(String key, GeoLocation location){Log.i(TAG, "getLista:onKeyMoved"+key+", "+location);}
+				@Override public void onGeoQueryError(DatabaseError error){Log.e(TAG, "getLista:onGeoQueryError:"+error);}
+			};
+		}
 		geoQuery.addGeoQueryEventListener(lisGeo);
 	}
 
@@ -305,7 +327,7 @@ public class Lugar extends Objeto
 	{
 		if(_datos.getKey() == null)
 		{
-			Log.e(TAG, "delGeo:id==null");
+			Log.e(TAG, "delGeo:id==null-------------------------------------------------------------");
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
@@ -346,7 +368,9 @@ public class Lugar extends Objeto
 			@Override
 			public void onProgress(UploadTask.TaskSnapshot t)
 			{
-				Log.e(TAG, "uploadImagen:onProgress:"+t.getBytesTransferred());
+				@SuppressWarnings("VisibleForTests")
+				long n = t.getBytesTransferred();
+				Log.e(TAG, "uploadImagen:onProgress:"+n);
 			}
 		});
 
@@ -370,13 +394,13 @@ public class Lugar extends Objeto
 				{
 					StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
 				}*/
-				Uri img = taskSnapshot.getDownloadUrl();
+				@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
 				Log.e(TAG, "uploadImagen:onSuccess:"+img+"::::"+taskSnapshot.toString());
 			}
 		});
 	}
 	//______________________________________________________________________________________________
-	public void downloadImg(final ImageView iv, final Activity act, final ObjetoListener<String> listener)
+	public void downloadImg(final ImageView iv, final Activity act, final Fire.SimpleListener<String> listener)
 	{
 		if(_datos == null)
 		{
@@ -395,7 +419,7 @@ public class Lugar extends Objeto
 				@Override
 				public void onSuccess(Uri uri)
 				{
-					Log.e(TAG, "downloadImagen: onSuccess: uri: "+uri);
+					Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
 					loadFromCache(uri, iv, act);
 					listener.onData(new String[]{uri.toString()});
 				}
@@ -405,7 +429,7 @@ public class Lugar extends Objeto
 				@Override
 				public void onFailure(@NonNull Exception exception)
 				{
-					Log.e(TAG, "downloadImagen:onFailure:e: "+exception);
+					Log.e(TAG, "downloadImagen:onFailure:e: ----------------------------------------"+exception);
 					listener.onError(exception.toString());
 				}
 			});

@@ -11,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +19,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -80,7 +82,7 @@ public class ActLogin extends AppCompatActivity
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
-	public class SectionsPagerAdapter extends FragmentPagerAdapter
+	private class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
 		SectionsPagerAdapter(FragmentManager fm)
 		{
@@ -101,12 +103,9 @@ public class ActLogin extends AppCompatActivity
 		{
 			switch(position)
 			{
-			case ENTER:
-				return getString(R.string.enter_lbl);
-			case REGISTER:
-				return getString(R.string.register_lbl);
-			case RECOVER:
-				return getString(R.string.recover_lbl);
+			case ENTER:		return getString(R.string.enter_lbl);
+			case REGISTER:	return getString(R.string.register_lbl);
+			case RECOVER:	return getString(R.string.recover_lbl);
 			}
 			return null;
 		}
@@ -165,7 +164,9 @@ public class ActLogin extends AppCompatActivity
 				}
 				else
 				{
-					Log.e(TAG, "Google Sign In failed: "+result.toString()+" --- "+result.getStatus()+" --- "+result.getSignInAccount());
+					//ERROR en SHA1 y google-services.json?
+					Log.e(TAG, "onActivityResult: Google Sign In failed: "+result.toString()+" --- "+result.getStatus()+" --- "+result.getSignInAccount());
+					Toast.makeText(getContext(), R.string.login_error, Toast.LENGTH_LONG).show();
 				}
 			}
 		}
@@ -226,8 +227,6 @@ public class ActLogin extends AppCompatActivity
 			final SignInButton btnGoogle = (SignInButton)rootView.findViewById(R.id.btnGoogle);
 			final TextInputLayout lblPassword = (TextInputLayout)rootView.findViewById(R.id.lblPassword);
 			final TextInputLayout lblPassword2 = (TextInputLayout)rootView.findViewById(R.id.lblPassword2);
-
-
 
 			switch(sectionNumber)
 			{

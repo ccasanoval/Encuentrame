@@ -4,7 +4,6 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.cesoft.encuentrame3.models.Filtro;
+import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,7 +41,7 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
-	private static final String TAG = "CESoft:ActBuscar:";
+	private static final String TAG = ActBuscar.class.getSimpleName();
 
 	private Util _util;
 
@@ -50,6 +50,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 	private EditText _txtFechaIni, _txtFechaFin;
 	private DatePickerDialog _datePickerDialogIni, _datePickerDialogFin;
+
 
 	private String[] _asRadio = {"-",		 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
 	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
@@ -64,7 +65,6 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_buscar);
 
-		//_util = ((App)getApplication()).getGlobalComponent().util();
 		_util = App.getInstance().getGlobalComponent().util();
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
@@ -141,12 +141,12 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		//------------------------------------------------------------------------------------------
 		/// FECHAS
 		Calendar newCalendar = Calendar.getInstance();
-		Locale locale;
+		/*Locale locale;
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
 			locale = getResources().getConfiguration().getLocales().get(0);
 		else
-			locale = getResources().getConfiguration().locale;
-		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", locale);
+			locale = getResources().getConfiguration().locale;*/
+		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 		_datePickerDialogIni = new DatePickerDialog(this,
 			new DatePickerDialog.OnDateSetListener()
 			{
@@ -259,21 +259,21 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			Log.e(TAG, String.format("ActBuscar:onCreate:e:%s",e));
 			_util.return2Main(this, null);
 		}
+
+		View viewActivo = findViewById(R.id.layActivo);
 		switch(_filtro.getTipo())
 		{
 		case Util.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
-			//_spnActivo.setVisibility(View.GONE);
-			View v = findViewById(R.id.layActivo);
-			if(v != null)v.setVisibility(View.GONE);
+			viewActivo.setVisibility(View.GONE);
 			break;
 		case Util.RUTAS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
-			//_spnActivo.setVisibility(View.VISIBLE);
-			//findViewById(R.id.layActivo).setVisibility(View.VISIBLE);
+			viewActivo.setVisibility(View.VISIBLE);
 			break;
 		case Util.AVISOS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.avisos)));
+			viewActivo.setVisibility(View.VISIBLE);
 			break;
 		}
 	}
