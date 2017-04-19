@@ -41,7 +41,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
 {
-	private static final String TAG = "CESoft:ActLogin:";
+	private static final String TAG = ActLogin.class.getSimpleName();
 	private static final int ENTER=0, REGISTER=1, RECOVER=2;
 
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.

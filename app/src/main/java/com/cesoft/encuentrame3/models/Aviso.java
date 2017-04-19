@@ -1,8 +1,8 @@
 package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
-import android.util.Log;
 
+import com.cesoft.encuentrame3.util.Log;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -24,7 +24,7 @@ import com.cesoft.encuentrame3.Login;
 @IgnoreExtraProperties
 public class Aviso extends Objeto
 {
-	private static final String TAG = "CESoft:Aviso:";
+	private static final String TAG =  Aviso.class.getSimpleName();
 	public static final String NOMBRE = "aviso";
 	private static DatabaseReference newFirebase()
 	{
@@ -179,9 +179,22 @@ public class Aviso extends Objeto
 	}
 
 	//______________________________________________________________________________________________
-	public static void getById(String sId, ValueEventListener listener)
+	public static void getById(String sId, final Fire.SimpleListener<Aviso> listener) //ValueEventListener listener)
 	{
-		newFirebase().child(sId).addListenerForSingleValueEvent(listener);
+		newFirebase().child(sId).addListenerForSingleValueEvent(new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+				Aviso a = ds.getValue(Aviso.class);
+				listener.onData(new Aviso[]{a});
+			}
+			@Override
+			public void onCancelled(DatabaseError err)
+			{
+				listener.onError(err.getMessage());
+			}
+		});
 	}
 	public static void getActivos(ValueEventListener listener)
 	{

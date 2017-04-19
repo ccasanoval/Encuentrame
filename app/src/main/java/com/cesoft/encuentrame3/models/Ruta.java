@@ -2,9 +2,9 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Log;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -34,7 +34,7 @@ import java.util.TreeSet;
 @IgnoreExtraProperties
 public class Ruta extends Objeto implements Parcelable
 {
-	private static final String TAG = "CESoft:Ruta:";
+	private static final String TAG = Ruta.class.getSimpleName();
 	public static final String NOMBRE = "ruta";
 	private static final String IDRUTA = "idRuta";
 	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
@@ -185,8 +185,7 @@ public class Ruta extends Objeto implements Parcelable
 	{
 		if( ! super.pasaFiltro(filtro))return false;
 		boolean bActivo = idRuta!=null && idRuta.equals(idRutaAct);//Ruta activa
-		if(filtro.getActivo()==Filtro.ACTIVO && !bActivo  ||  filtro.getActivo()==Filtro.INACTIVO && bActivo)return false;
-		return true;
+		return !(filtro.getActivo() == Filtro.ACTIVO && !bActivo || filtro.getActivo() == Filtro.INACTIVO && bActivo);
 	}
 	public static void getLista(Fire.ObjetoListener<Ruta> listener, Filtro filtro, String idRutaAct)
 	{
@@ -322,9 +321,24 @@ public class Ruta extends Objeto implements Parcelable
 	private long puntosCount = 0;
 	public long getPuntosCount(){return puntosCount;}
 	//______________________________________________________________________________________________
-	public void getPuntos(final ValueEventListener listener)
+	public void getPuntos(final Fire.SimpleListener<Ruta.RutaPunto> listener)//final ValueEventListener listener)
 	{
-		RutaPunto.getLista(getId(), new ValueEventListener()
+		RutaPunto.getLista(getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
+		{
+			@Override
+			public void onData(RutaPunto[] aData)
+			{
+				puntosCount = aData.length;
+				listener.onData(aData);
+			}
+			@Override
+			public void onError(String err)
+			{
+				puntosCount = 0;
+				listener.onError(err);
+			}
+		});
+				/*new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot ds)
@@ -338,7 +352,7 @@ public class Ruta extends Objeto implements Parcelable
 				puntosCount = 0;
 				listener.onCancelled(err);
 			}
-		});
+		});*/
 	}
 	//______________________________________________________________________________________________
 	public static void addPunto(final String idRuta, double lat, double lon,
@@ -517,16 +531,57 @@ public class Ruta extends Objeto implements Parcelable
 			}
 			saveGeo();
 		}
-		static void getLista(String sIdRuta, final ValueEventListener listener)
+		public static void getLista(String sIdRuta, final Fire.SimpleListener<Ruta.RutaPunto> listener)//final ValueEventListener listener)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
 			//queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc
-			queryRef.addListenerForSingleValueEvent(listener);
+			queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+				@Override
+				public void onDataChange(DataSnapshot ds)
+				{
+					int i = 0;
+					Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
+					for(DataSnapshot o : ds.getChildren())
+					{
+						Ruta.RutaPunto pto = o.getValue(Ruta.RutaPunto.class);
+						aPts[i++] = pto;
+					}
+					listener.onData(aPts);
+				}
+				@Override
+				public void onCancelled(DatabaseError err)
+				{
+					listener.onError("Ruta:getLista:onCancelled:e:"+err);
+				}
+			});
 		}
-		public static void getListaSync(String sIdRuta, final ValueEventListener listener)
+		public static void getListaRep(String sIdRuta, final Fire.ObjetoListener<Ruta.RutaPunto> listener) //final ValueEventListener listener)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
-			queryRef.addValueEventListener(listener);//AJAX
+			listener.setRef(queryRef.getRef());
+			ValueEventListener vel = listener.getListener();
+			if(vel != null)queryRef.getRef().removeEventListener(vel);
+			vel = new ValueEventListener()//AJAX
+			{
+				@Override
+				public void onDataChange(DataSnapshot data)
+				{
+					long n = data.getChildrenCount();
+					ArrayList<Ruta.RutaPunto> a = new ArrayList<>((int)n);
+					for(DataSnapshot o : data.getChildren())
+						a.add(o.getValue(Ruta.RutaPunto.class));
+					listener.onData(a.toArray(new Ruta.RutaPunto[a.size()]));
+				}
+				@Override
+				public void onCancelled(DatabaseError err)
+				{
+					Log.e(TAG, "getListaAsync:onCancelled:"+err);
+					listener.onError("Ruta:getListaAsync:onCancelled:"+err);
+					//ddbb.removeEventListener(this);
+				}
+			};
+			listener.setListener(vel);
+			queryRef.addValueEventListener(vel);//AJAX
 		}
 		// FIREBASE
 		//----------------------------------------------------------------------------------------------

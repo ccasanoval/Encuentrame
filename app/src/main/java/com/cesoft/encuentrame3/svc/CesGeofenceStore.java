@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -33,13 +33,13 @@ import com.google.android.gms.location.LocationServices;
 //https://www.raywenderlich.com/103540/geofences-googleapiclient
 class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>
 {
-	private static final String TAG = "CESoft:";
+	private static final String TAG = CesGeofenceStore.class.getSimpleName();
 
 	private Context _context;
 	private GoogleApiClient _GoogleApiClient;
 	private PendingIntent _PendingIntent;
 	private ArrayList<Geofence> _aGeofences;
-		public int size(){return _aGeofences==null?0:_aGeofences.size();}
+		//public int size(){return _aGeofences==null?0:_aGeofences.size();}
 
 	CesGeofenceStore(Context context, ArrayList<Geofence> geofences)
 	{

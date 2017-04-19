@@ -2,8 +2,8 @@ package com.cesoft.encuentrame3;
 
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,7 +21,7 @@ import javax.inject.Singleton;
 @Singleton
 public class Login
 {
-	private static final String TAG = "CESoft:Login";
+	private static final String TAG = Login.class.getSimpleName();
 	private static final String PREF_LOGIN = "login";
 	private static final String PREF_PWD = "password";
 	private static final String PREF_SAVE_LOGIN = "save_login";

@@ -3,17 +3,16 @@ package com.cesoft.encuentrame3.svc;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
 //TODO: En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable : eliminar CesServiceAvisoGeo
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
-	private static final String TAG = "CESoft:";
+	private static final String TAG = CesGeofenceReceiver.class.getSimpleName();
 	private Util _util;
 
 	@Override
@@ -73,7 +72,23 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 	//______________________________________________________________________________________________
 	protected void showAviso(final Context context, String sId, final String sTitle)
 	{
-		Aviso.getById(sId, new ValueEventListener()
+		Aviso.getById(sId, new Fire.SimpleListener<Aviso>()
+		{
+			@Override
+			public void onData(Aviso[] aData)
+			{
+				Intent i = new Intent(context, ActAviso.class);
+				i.putExtra(Aviso.NOMBRE, aData[0]);
+				i.putExtra("notificacion", true);
+				_util.showAviso(sTitle, aData[0], i);
+			}
+			@Override
+			public void onError(String err)
+			{
+				Log.e(TAG, "showAviso:e:------------------------------------------------------------" + err);
+			}
+		});
+				/*new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(com.google.firebase.database.DataSnapshot data)
@@ -89,7 +104,7 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 			{
 				Log.e(TAG, "CesGeofenceReceiver:showAviso:e:" + err);
 			}
-		});
+		});*/
 	}
 
 	/*

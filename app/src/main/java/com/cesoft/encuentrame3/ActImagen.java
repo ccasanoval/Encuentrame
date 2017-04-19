@@ -14,7 +14,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -24,13 +23,16 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import java.io.File;
 
+import com.bumptech.glide.Glide;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
+import com.cesoft.encuentrame3.util.Log;
 
 import javax.microedition.khronos.opengles.GL10;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 public class ActImagen extends AppCompatActivity
 {
 	private static final String TAG = ActImagen.class.getSimpleName();
@@ -156,17 +158,20 @@ public class ActImagen extends AppCompatActivity
 		{
 			_imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
 			_l = getIntent().getParcelableExtra(PARAM_LUGAR);
-//Log.e(TAG, "00000-------- : "+_imgURLnew+" "+_l.getId());
+Log.e(TAG, "00000-------- : "+_imgURLnew+" "+_l.getId());
 			if(_imgURLnew != null)
 			{
 				File file = new File(_imgURLnew);
-//Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
+Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 				if(file.exists())
 				{
 					try{
 					//Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
 					//_iv.setImageBitmap(myBitmap);
-					_iv.setImageURI(Uri.fromFile(new File(_imgURLnew)));
+
+
+					Glide.with(this).load(_imgURLnew).into(_iv);
+					//_iv.setImageURI(Uri.fromFile(new File(_imgURLnew)));
 					refreshMenu(ESTADO.NEW_IMG);
 					}
 					catch(OutOfMemoryError e)
@@ -188,32 +193,30 @@ public class ActImagen extends AppCompatActivity
 						@Override
 						public void onData(String[] aData)
 						{
-							Log.e(TAG, "onCreate:tiene imagen y se establecio-------------- OK: ");
+							Log.e(TAG, "onCreate: tiene imagen y se establecio----------------------- OK: ");
 							refreshMenu(ESTADO.OLD_IMG);
 						}
 						@Override
 						public void onError(String err)
 						{
-							Log.e(TAG, "onCreate: no tiene imagen o error--------------: "+err);
+							Log.e(TAG, "onCreate: no tiene imagen o error---------------------------: "+err);
 							refreshMenu(ESTADO.SIN_IMG);
-							dispatchTakePictureIntent();
+							pedirCamara();
 						}
 					});
 				}
 				else if(_l == null || _l.getId() == null)
 				{
-					Log.e(TAG, "onCreate: no existe url ni Lugar --------------: ");
+					Log.e(TAG, "onCreate: no existe url ni Lugar -----------------------------------");
 					refreshMenu(ESTADO.SIN_IMG);
-					dispatchTakePictureIntent();
+					pedirCamara();
 				}
 			}
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, String.format("onCreate:e:%s",e),e);
+			Log.e(TAG, "onCreate:e:-----------------------------------------------------------------",e);
 		}
-
-		pedirCamara();
 	}
 
 	@Override
@@ -335,7 +338,11 @@ public class ActImagen extends AppCompatActivity
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 	private void dispatchTakePictureIntent()
 	{
-		if( ! isCamara())return;
+		if( ! isCamara())
+		{
+			Toast.makeText(this, getString(R.string.sin_permiso_camara), Toast.LENGTH_LONG).show();
+			return;
+		}
 		if( ! getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
 		{
 			Toast.makeText(this, getString(R.string.sin_camara), Toast.LENGTH_LONG).show();
@@ -408,7 +415,6 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 	private boolean isCamara()
 	{
 		int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-		Log.e(TAG, "isCamara------------------------"+permissionCheck+" ::: "+(permissionCheck == PackageManager.PERMISSION_DENIED));
 		return permissionCheck == PackageManager.PERMISSION_GRANTED;
 	}
 	private void pedirCamara()

@@ -18,7 +18,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,8 +28,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -53,18 +56,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
-import com.cesoft.encuentrame3.models.Ruta;
 
 //TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
-	private static final String TAG = "CESoft:ActRuta:";
+	private static final String TAG = ActRuta.class.getSimpleName();
 	private static final int DELAY_LOCATION = 60000;
 
 	private Util _util;
@@ -77,7 +77,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private GoogleMap _Map;
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
-	//private CoordinatorLayout _coordinatorLayout;//TODO: eliminar de layout
 
 
 	//______________________________________________________________________________________________
@@ -131,8 +130,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
-		if(fab != null)
-		fab.setOnClickListener(new View.OnClickListener()
+		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View view)
@@ -181,33 +179,32 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			else
 				_txtNombre.setTextColor(Color.RED);
 		}
-
-		//------------------------------------------------------------------------------------------
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setFastestInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();
 	}
 	//______________________________________________________________________________________________
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
+	}
+
+	//______________________________________________________________________________________________
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		if(checkPlayServices())
+			buildGoogleApiClient();
+		buildLocationRequest();
+		pideGPS();
+		newListeners();
+	}
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+		delListeners();
 		stopTracking();
-		_GoogleApiClient.unregisterConnectionCallbacks(this);
-		_GoogleApiClient.unregisterConnectionFailedListener(this);
-		_GoogleApiClient.disconnect();
-		_GoogleApiClient = null;
-		_LocationRequest = null;
-		if(_Map != null)
-		{
-			_Map.clear();
-			_Map = null;
-		}
+		clean();
 	}
 
 	//______________________________________________________________________________________________
@@ -285,18 +282,10 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	}
 
 	//______________________________________________________________________________________________
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		if(checkPlayServices())buildGoogleApiClient();
-		if(_GoogleApiClient != null)_GoogleApiClient.connect();
-	}
-
-	//______________________________________________________________________________________________
 	protected synchronized void buildGoogleApiClient()
 	{
 		_GoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
+		_GoogleApiClient.connect();
 	}
 	private boolean checkPlayServices()
 	{
@@ -304,10 +293,32 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			Log.e(TAG, String.format("checkPlayServices:e:%d",result));
+			Log.e(TAG, String.format(Locale.getDefault(), "checkPlayServices:e:------------------------------------------%d",result));
 	        return false;
 	    }
 	    return true;
+	}
+	private void buildLocationRequest()
+	{
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setFastestInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+	}
+	private void clean()
+	{
+		_GoogleApiClient.unregisterConnectionCallbacks(this);
+		_GoogleApiClient.unregisterConnectionFailedListener(this);
+		_GoogleApiClient.disconnect();
+		_GoogleApiClient = null;
+
+		_LocationRequest = null;
+
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
 	}
 
 	//______________________________________________________________________________________________
@@ -464,7 +475,7 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 	}
 
 	//______________________________________________________________________________________________
-	private void pideGPS()
+	private void pideGPS()//TODO Standarizar...
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -541,32 +552,39 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 		_util.return2Main(ActRuta.this, true, getString(R.string.ok_stop_tracking));
 	}
 
-	private void showRuta()
+	//----------------------------------------------------------------------------------------------
+	private Fire.ObjetoListener<Ruta.RutaPunto> _lisRuta;
+	private void delListeners()
 	{
-		//_r.getPuntos(new ValueEventListener()
-		Ruta.RutaPunto.getListaSync(_r.getId(), new ValueEventListener()
+		if(_lisRuta != null)_lisRuta.delListener();
+		_lisRuta = null;
+	}
+	private void newListeners()
+	{
+		if(_lisRuta != null)_lisRuta.delListener();
+		_lisRuta = new Fire.ObjetoListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot ds)
+			public void onData(Ruta.RutaPunto[] aData)
 			{
-				int i = 0;
-				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
-				for(DataSnapshot o : ds.getChildren())
-				{
-					aPts[i++] = o.getValue(Ruta.RutaPunto.class);
-				}
-				showRutaHelper(aPts);
+				showRutaHelper(aData);
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onError(String err)
 			{
 				Log.e(TAG, String.format("showRuta:onCancelled:-----------:%s",err));
 				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
 			}
-		});
+		};
 	}
 
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
+	private void showRuta()
+	{
+		Ruta.RutaPunto.getListaRep(_r.getId(), _lisRuta);
+	}
+
+	//----------------------------------------------------------------------------------------------
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1)return;
@@ -639,38 +657,33 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), 15));
 	}
 
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	private void estadisticas()
 	{
-		//Calcular
-		_r.getPuntos(new ValueEventListener()
+		_r.getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot ds)
+			public void onData(Ruta.RutaPunto[] aData)
 			{
 				double fMaxAlt = 0, fMinAlt = 99999;
 				double fMaxVel = 0, fMinVel = 99999;
 				double fDistancia = 0;
 
-				int i = 0;
-				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
-				for(DataSnapshot o : ds.getChildren())
+				for(int i=0; i < aData.length; i++)
 				{
-					Ruta.RutaPunto pto = o.getValue(Ruta.RutaPunto.class);
+					Ruta.RutaPunto pto = aData[i];
 					if(fMaxAlt < pto.getAltura())fMaxAlt = pto.getAltura();
 					if(pto.getAltura() != 0.0 && fMinAlt > pto.getAltura())fMinAlt = pto.getAltura();
 					if(fMaxVel < pto.getVelocidad())fMaxVel = pto.getVelocidad();
 					if(pto.getVelocidad() != 0.0 && fMinVel > pto.getVelocidad())fMinVel = pto.getVelocidad();
-					if(i>0)fDistancia += pto.distanciaReal(aPts[i-1]);
-					aPts[i++] = pto;
+					if(i>0)fDistancia += pto.distanciaReal(aData[i-1]);
 				}
-
 				Locale loc = Locale.getDefault();
 				String sDistancia;
 				if(fDistancia < 2000)   sDistancia = String.format(loc, "%.0f m", fDistancia);
 				else					sDistancia = String.format(loc, "%.1f Km", fDistancia/1000);
 
-				long t = aPts[i-1].getFecha().getTime() - aPts[0].getFecha().getTime();
+				long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
 				String sTiempo = formatTiempo(t);
 
 				String sVelMed;
@@ -719,10 +732,10 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 					sVelMax = String.format(loc, "%.1f m/s", fMaxVel);
 
 				estadisticasShow(String.format(getString(R.string.estadisticas_format),
-					sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
+						sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onError(String err)
 			{
 				Log.e(TAG, String.format("estadisticas:onCancelled:-----------:%s",err));
 				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();

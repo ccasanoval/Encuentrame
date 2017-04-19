@@ -6,17 +6,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
 import com.bumptech.glide.Glide;
-import com.cesoft.encuentrame3.Login;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,16 +24,22 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.Exclude;
 
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQuery;
-import com.firebase.geofire.GeoQueryEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-//TODO: listado AJAX como rutas....
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Log;
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,13 +47,9 @@ import com.google.firebase.storage.UploadTask;
 @IgnoreExtraProperties
 public class Lugar extends Objeto
 {
-	private static final String TAG = "CESoft:Lugar:";
+	private static final String TAG = Lugar.class.getSimpleName();
 	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
-	//private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-	private static DatabaseReference newFirebase()
-	{
-		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
-	}
+	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude
 	private DatabaseReference _datos;
@@ -68,6 +70,9 @@ public class Lugar extends Objeto
 	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
+	private String imgUrl;
+		public String getImgUrl(){return imgUrl;}
+		public void setImgUrl(String v){imgUrl = v;}
 	///______________________________________________________________
 
 	//______________________________________________________________________________________________
@@ -85,8 +90,8 @@ public class Lugar extends Objeto
 	@Override
 	public String toString()
 	{
-		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
-				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
+		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s', img='%s'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha), getImgUrl());
 	}
 
 	//// FIREBASE
@@ -128,7 +133,7 @@ public class Lugar extends Objeto
 	}
 
 	//______________________________________________________________________________________________
-	public static void getLista(final Fire.ObjetoListener<Lugar> listener)
+	public static void getLista(@NotNull final Fire.ObjetoListener<Lugar> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
 		listener.setRef(ddbb);
@@ -245,8 +250,8 @@ public class Lugar extends Objeto
 					if(nCount==0)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
 					geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 				}
-				@Override public void onKeyExited(String key){Log.i(TAG, "getLista:onKeyExited");}
-				@Override public void onKeyMoved(String key, GeoLocation location){Log.i(TAG, "getLista:onKeyMoved"+key+", "+location);}
+				@Override public void onKeyExited(String key){Log.w(TAG, "getLista:onKeyExited");}
+				@Override public void onKeyMoved(String key, GeoLocation location){Log.w(TAG, "getLista:onKeyMoved"+key+", "+location);}
 				@Override public void onGeoQueryError(DatabaseError error){Log.e(TAG, "getLista:onGeoQueryError:"+error);}
 			};
 		}
@@ -266,6 +271,8 @@ public class Lugar extends Objeto
 		//
 		setLatitud(in.readDouble());
 		setLongitud(in.readDouble());
+		//
+		setImgUrl(in.readString());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -278,6 +285,8 @@ public class Lugar extends Objeto
 		//
 		dest.writeDouble(getLatitud());
 		dest.writeDouble(getLongitud());
+		//
+		dest.writeString(getImgUrl());
 	}
 
 	//@Override
@@ -395,7 +404,8 @@ public class Lugar extends Objeto
 					StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
 				}*/
 				@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
-				Log.e(TAG, "uploadImagen:onSuccess:"+img+"::::"+taskSnapshot.toString());
+				if(img != null)Lugar.this.setImgUrl(img.toString());
+				Log.e(TAG, "uploadImagen:onSuccess:-----------"+Lugar.this.getImgUrl());
 			}
 		});
 	}
@@ -412,27 +422,38 @@ public class Lugar extends Objeto
 			_datos = newFirebase().child(getId());
 		}
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
+Log.e(TAG, "BBB: "+getImgUrl());
 
-		storageRef.getDownloadUrl()
-			.addOnSuccessListener(new OnSuccessListener<Uri>()
+		OnSuccessListener<Uri> lisOk = new OnSuccessListener<Uri>()
+		{
+			@Override
+			public void onSuccess(Uri uri)
 			{
-				@Override
-				public void onSuccess(Uri uri)
-				{
-					Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
-					loadFromCache(uri, iv, act);
-					listener.onData(new String[]{uri.toString()});
-				}
-			})
-			.addOnFailureListener(new OnFailureListener()
+				Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
+				loadFromCache(uri, iv, act);
+				listener.onData(new String[]{uri.toString()});
+			}
+		};
+		OnFailureListener lisKo = new OnFailureListener()
+		{
+			@Override
+			public void onFailure(@NonNull Exception exception)
 			{
-				@Override
-				public void onFailure(@NonNull Exception exception)
-				{
-					Log.e(TAG, "downloadImagen:onFailure:e: ----------------------------------------"+exception);
-					listener.onError(exception.toString());
-				}
-			});
+				Log.e(TAG, "downloadImagen:onFailure:e: ----------------------------------------"+exception);
+				listener.onError(exception.toString());
+			}
+		};
+//String img = "https://firebasestorage.googleapis.com/v0/b/sonic-totem-131614.appspot.com/o/fO47HYtdhMYhvD61wUjOygRNMYz1%2Flugar%2F-Ki4cj5oRDm6pCtnt_0D?alt=media&token=183000c4-9f06-4119-aea3-783db9435d22";
+		String img = getImgUrl();
+		if(img != null)
+			FirebaseStorage.getInstance().getReferenceFromUrl(img).getDownloadUrl()
+				.addOnSuccessListener(lisOk)
+				.addOnFailureListener(lisKo);
+		else
+			storageRef.getDownloadUrl()
+				.addOnSuccessListener(lisOk)
+				.addOnFailureListener(lisKo);
 
 		//StorageReference storageRef = FirebaseStorage.getInstance().reference().child("folderName/file.jpg");
 //storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener() {

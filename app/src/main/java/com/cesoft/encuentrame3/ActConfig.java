@@ -18,8 +18,9 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
+
+import com.cesoft.encuentrame3.util.Log;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActConfig extends ActConfigBase
 {
-	private static final String TAG = "CESoft:ActConfig:";
+	private static final String TAG = ActConfig.class.getSimpleName();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)

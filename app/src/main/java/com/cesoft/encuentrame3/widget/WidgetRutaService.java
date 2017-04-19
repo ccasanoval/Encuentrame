@@ -6,12 +6,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.app.Service;
 import android.content.Intent;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.google.firebase.database.DataSnapshot;
@@ -27,7 +27,7 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class WidgetRutaService extends Service
 {
-	private static final String TAG = "CESoft:";
+	private static final String TAG = WidgetRutaService.class.getSimpleName();
 	private static Handler _h = null;
 	private static Runnable _r = null;
 	private static final int _DELAY_SHORT = 60*1000;

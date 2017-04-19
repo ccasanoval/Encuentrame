@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3;
 
+import java.util.Locale;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -12,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +21,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,8 +42,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import java.util.Locale;
+
 import com.cesoft.encuentrame3.models.Lugar;
+import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Util;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,9 +137,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		//_util = DaggerGlobalComponent.create();
 		//((App)getApplication()).getGlobalComponent().inject(this);
 
-		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
-
 		//------------------------------------------------------------------------------------------
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -190,10 +189,6 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		else
 			setTitle(getString(R.string.editar_lugar));
 		//------------------------------------------------------------------------------------------
-
-		//------------------------------------------------------------------------------------------
-		//_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		//_GoogleApiClient.connect();
 	}
 
 	//______________________________________________________________________________________________
@@ -201,6 +196,8 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	public void onStart()
 	{
 		super.onStart();
+		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+		mapFragment.getMapAsync(this);
 		if(checkPlayServices())buildGoogleApiClient();
 		if(_GoogleApiClient != null)
 		{
@@ -210,6 +207,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		_LocationRequest = new LocationRequest();
 		_LocationRequest.setInterval(DELAY_LOCATION);
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		Log.e(TAG, "-------------------- ON START");
 	}
 	@Override
 	public void onStop()
@@ -228,6 +226,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			_GoogleApiClient = null;
 		}
 		_LocationRequest = null;
+		Log.e(TAG, "-------------------- ON STOP");
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -250,7 +249,8 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			try
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
-			}catch(SecurityException ignored){}
+			}
+			catch(SecurityException ignored){}
 		}
 	}
 	private void stopTracking()
@@ -373,7 +373,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				if(err == null)
 				{
-					Log.e(TAG, "guardar----------------------"+ _imgURLnew);
+Log.e(TAG, "guardar--------------------------------"+ _imgURLnew);
 					if(_imgURLnew != null)_l.uploadImg(_imgURLnew);
 
 					_util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
@@ -446,6 +446,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
+		Log.e(TAG, "-------------------- ON MAP READY");
 		_Map = googleMap;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
 		//TODO:

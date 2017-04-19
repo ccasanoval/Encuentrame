@@ -21,6 +21,7 @@ import com.cesoft.encuentrame3.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
+import com.cesoft.encuentrame3.models.Fire;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -344,7 +345,22 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 	//______________________________________________________________________________________________
 	public void showAvisoGeo(String sId)
 	{
-		Aviso.getById(sId, new ValueEventListener()
+		Aviso.getById(sId, new Fire.SimpleListener<Aviso>()
+		{
+			@Override
+			public void onData(Aviso[] aData)
+			{
+				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
+				i.putExtra(Aviso.NOMBRE, aData[0]);
+				showAviso(_app.getString(R.string.en_zona_aviso), aData[0], i);//CesServiceAvisoGeo.this
+			}
+			@Override
+			public void onError(String err)
+			{
+				Log.e(TAG, String.format("Util:showAvisoGeo:e:--------------------------------------%s",err));
+			}
+		});
+		/*new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot aviso)
@@ -359,7 +375,7 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 			{
 				Log.e("CESoft", String.format("CesServiceAvisoGeo:showAviso:e:%s",err));
 			}
-		});
+		});*/
 	}
 
 	//----------------------------------------------------------------------------------------------

@@ -45,7 +45,7 @@ import javax.inject.Inject;
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
 public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
-	private static final String TAG = "CESoft:CesService:";
+	private static final String TAG = CesService.class.getSimpleName();
 	private static final int GEOFEN_DWELL_TIME = 60*1000;
 	private static final long DELAY_TRACK_MIN = 30*1000;
 	private static final long DELAY_TRACK_MAX = 7*60*1000;

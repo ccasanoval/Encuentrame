@@ -14,7 +14,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -24,6 +23,7 @@ import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
 
@@ -31,6 +31,7 @@ import com.cesoft.encuentrame3.util.Util;
 //https://developer.android.com/training/permissions/requesting.html
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 
+//TODO: cuando matas X solo queda fragment con patalla lugares, tanto para rutas como para avisos...?
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
@@ -50,7 +51,7 @@ import com.cesoft.encuentrame3.util.Util;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 {
-	private static final String TAG = "CESoft:ActMain:";
+	private static final String TAG = ActMain.class.getSimpleName();
 	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 
 	private FrgMain[] _aFrg = new FrgMain[3];
@@ -70,14 +71,35 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		toolbar.setSubtitle(Login.getCurrentUserName());
+	}
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		_viewPager = null;
+	}
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		pideGPS();
+		createViews();
+	}
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+	}
+
+	private void createViews()
+	{
+		Log.e(TAG, "-------------------- CREATE VIEWS -------------------");
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
 		// Set up the ViewPager with the sections adapter.
 		_viewPager = (ViewPager)findViewById(R.id.container);
-		if(_viewPager != null)
-		_viewPager.setAdapter(sectionsPagerAdapter);
+		if(_viewPager != null)_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		if(tabLayout != null)
 		{
@@ -97,18 +119,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				Toast.makeText(ActMain.this, sMensaje, Toast.LENGTH_LONG).show();
 		}
 		catch(Exception e){Log.e(TAG, String.format("onCreate:e:%s",e), e);}
-	}
-	@Override
-	public void onDestroy()
-	{
-		super.onDestroy();
-		_viewPager = null;
-	}
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		pideGPS();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -138,6 +148,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			case R.id.action_buscar:
 			//	FrgMain._apf[_viewPager.getCurrentItem()].buscar();
 				FrgMain f = _aFrg[_viewPager.getCurrentItem()];
+		for(int j=0; j < _aFrg.length; j++)Log.e(TAG, "********************** "+j+" : "+_aFrg[j]);
 				if(f == null)
 				{
 					Log.e(TAG, "---------------------------------------------------- F = NULL  "+_viewPager.getCurrentItem() + "  :: "+_aFrg.length);
@@ -285,7 +296,7 @@ Log.e(TAG, "--------------SectionsPagerAdapter:getItem---------"+position+"-----
 
 
 	//----------------------------------------------------------------------------------------------
-	public void pideGPS()
+	public void pideGPS()//TODO: a Util.pideGPS(Activity a)
 	{
 		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
 		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);

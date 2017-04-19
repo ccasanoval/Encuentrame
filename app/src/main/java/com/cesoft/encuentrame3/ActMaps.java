@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.CoordinatorLayout;
@@ -16,8 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cesoft.encuentrame3.models.Fire;
-import com.cesoft.encuentrame3.util.Util;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,24 +32,22 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 
+import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Ruta;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 //TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
-	private static final String TAG = "CESoft:ActMaps:";
+	private static final String TAG = ActMaps.class.getSimpleName();
 
 	private Util _util;
 	private GoogleMap _Map;
@@ -162,7 +161,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	@Override
 	protected void onStop()
 	{
-		super.onStop();
 		super.onStop();
 		if(_Map != null)
 		{
@@ -365,6 +363,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				//.fillColor(0x55AA0000));//Color.BLUE
 		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
 	}
+
+	//----------------------------------------------------------------------------------------------
 	private synchronized void showRuta(final Ruta r)
 	{
 		if(r == null)
@@ -372,26 +372,20 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			Log.e(TAG, "showRuta:e:----------------------------------------------------------------- r == NULL");
 			return;
 		}
-		//r.getPuntos(new ValueEventListener()
-		Ruta.RutaPunto.getListaSync(_r.getId(), new ValueEventListener()
+		Ruta.RutaPunto.getLista(r.getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot ds)
+			public void onData(Ruta.RutaPunto[] aData)
 			{
-				int i = 0;
-				Ruta.RutaPunto[] aPts = new Ruta.RutaPunto[(int)ds.getChildrenCount()];
-				for(DataSnapshot o : ds.getChildren())
-					aPts[i++] = o.getValue(Ruta.RutaPunto.class);
-				showRutaHelper(r, aPts);
+				showRutaHelper(r, aData);
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onError(String err)
 			{
-				Log.e(TAG, String.format("showRuta:e:%s",err));
+				Log.e(TAG, String.format("showRuta:e:-----------------------------------------------%s",err));
 			}
 		});
 	}
-
 	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
 		try{

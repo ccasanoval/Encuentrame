@@ -7,11 +7,11 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import java.util.Locale;
 
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +25,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.models.Aviso;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -48,11 +51,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import com.cesoft.encuentrame3.models.Aviso;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
-import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
@@ -80,8 +81,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	private Marker _marker;
 	private Circle _circle;
 
-
-	//private CoordinatorLayout _coordinatorLayout;TODO: eliminar de layout
 
 	//______________________________________________________________________________________________
 	@Override
@@ -165,14 +164,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			setTitle(getString(R.string.nuevo_aviso));
 		else
 			setTitle(getString(R.string.editar_aviso));
-
-		//------------------------------------------------------------------------------------------
-		/*_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);*/
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 	}
 
 	//______________________________________________________________________________________________
@@ -246,7 +237,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				LocationServices.FusedLocationApi.requestLocationUpdates(_GoogleApiClient, _LocationRequest, this);
 			}
-			catch(SecurityException se){Log.e(TAG, "startTracking:e:"+se);}
+			catch(SecurityException se){Log.e(TAG, "startTracking:e:--------------------------------"+se);}
 		}
 	}
 	private void stopTracking()
@@ -512,7 +503,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
-	private void pideGPS()
+	private void pideGPS()//TODO:?
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()

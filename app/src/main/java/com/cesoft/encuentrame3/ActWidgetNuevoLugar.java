@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -12,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Lugar;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,7 +21,7 @@ import javax.inject.Inject;
 
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
-	private static final String TAG = "CESoft:";
+	private static final String TAG = ActWidgetNuevoLugar.class.getSimpleName();
 	@Inject
 	Util _util;
 	@Inject	Login _login;
