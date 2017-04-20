@@ -45,7 +45,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 	@Inject	Util _util;
 
-	private int _sectionNumber = Util.LUGARES;//Util.NADA;
+	public int _sectionNumber = Util.LUGARES;//Util.NADA;
 	private View _rootView;
 	private ListView _listView;
 
@@ -58,15 +58,12 @@ public class FrgMain extends Fragment implements IListaItemClick
 	}
 	public static FrgMain newInstance(int sectionNumber)
 	{
-Log.e(TAG, "newInstance -------------------------------------- "+sectionNumber);
 		FrgMain fragment = new FrgMain();
 		Bundle args = new Bundle();
 		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 		fragment.setArguments(args);
 		fragment.setRetainInstance(true);
-		fragment._sectionNumber = sectionNumber;
-		fragment._filtro = new Filtro(sectionNumber);//TODO: constructor?
-		App.getInstance().getGlobalComponent().inject(fragment);
+		//fragment._filtro = new Filtro(sectionNumber);
 		return fragment;
 	}
 
@@ -81,10 +78,15 @@ Log.e(TAG, "newInstance -------------------------------------- "+sectionNumber);
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		//Bundle args = getArguments();
-		//final int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
+		App.getInstance().getGlobalComponent().inject(this);
+
+		Bundle args = getArguments();
+		_sectionNumber = args.getInt(ARG_SECTION_NUMBER);
+		_filtro = new Filtro(_sectionNumber);
+
 		_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 		_listView = (ListView)_rootView.findViewById(R.id.listView);
+Log.e(TAG, "on CREATE view ---------------------------------------------------------------"+_sectionNumber);
 
 		if(_sectionNumber < 0)
 		{
@@ -107,7 +109,6 @@ Log.e(TAG, "newInstance -------------------------------------- "+sectionNumber);
 				}
 			}
 		});
-Log.e(TAG, "on CREATE view ---------------------------------------------------------------"+_sectionNumber);
 
 		TextView textView = new TextView(_rootView.getContext());
 		switch(_sectionNumber)
@@ -211,7 +212,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 		void goAvisoMap(Objeto obj);
 		void goRutaMap(Objeto obj);
 
-		void buscar(Fragment f, Filtro filtro);
+		void buscar(FrgMain f);
 		int getCurrentItem();
 	}
 	@Override
@@ -233,7 +234,6 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 		super.onDetach();
 		_main = null;
 	}
-
 
 
 	//// implements IListaItemClick
@@ -260,7 +260,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	}
 	public void buscar()
 	{
-		_main.buscar(this, _filtro);
+		_main.buscar(this);
 	}
 
 		// 4 IListaItemClick

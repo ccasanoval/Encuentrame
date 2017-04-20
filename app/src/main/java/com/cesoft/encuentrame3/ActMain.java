@@ -4,6 +4,7 @@ package com.cesoft.encuentrame3;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -56,6 +57,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 
 	private FrgMain[] _aFrg = new FrgMain[3];
 	private ViewPager _viewPager;
+
 	private Login _login;
 
 
@@ -71,43 +73,59 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		toolbar.setSubtitle(Login.getCurrentUserName());
+//Log.e(TAG, "----------- MAIN CREATE");
+
+		createViews();
 	}
 	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
 		_viewPager = null;
+//Log.e(TAG, "----------- MAIN DESTROY");
 	}
 	@Override
 	public void onStart()
 	{
+//Log.e(TAG, "----------- MAIN START");
 		super.onStart();
 		pideGPS();
-		createViews();
+		//createViews();
 	}
 	@Override
 	public void onStop()
 	{
+//Log.e(TAG, "----------- MAIN STOP");
 		super.onStop();
 	}
 
 	private void createViews()
 	{
-		Log.e(TAG, "-------------------- CREATE VIEWS -------------------");
+//Log.e(TAG, "-------------------- CREATE VIEWS -------------------");
 
-		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-		// Set up the ViewPager with the sections adapter.
 		_viewPager = (ViewPager)findViewById(R.id.container);
-		if(_viewPager != null)_viewPager.setAdapter(sectionsPagerAdapter);
+		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
-		if(tabLayout != null)
-		{
-			tabLayout.setupWithViewPager(_viewPager);
-			tabLayout.setSelectedTabIndicatorHeight(10);
-		}
+		tabLayout.setupWithViewPager(_viewPager);
+		tabLayout.setSelectedTabIndicatorHeight(10);
+		/*tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+			@Override	public void onTabSelected(TabLayout.Tab tab)
+			{
+				_viewPager.setCurrentItem(tab.getPosition());
+				Log.e(TAG, "onTabSelected ****************"+_aFrg[tab.getPosition()]._sectionNumber+"********************** "+tab.getPosition()+" : "+tab.getText());
+			}
+			@Override	public void onTabUnselected(TabLayout.Tab tab) {}
+			@Override	public void onTabReselected(TabLayout.Tab tab) {}
+		});*/
 		//tabLayout.setSelectedTabIndicatorColor();
 		//tabLayout.setTabTextColors();
+		/*for(int i=0; i < sectionsPagerAdapter.getCount(); i++)
+		{
+			if(_aFrg[i] == null)
+				sectionsPagerAdapter.getItem(i);
+		}*/
+
 
 		try
 		{
@@ -118,7 +136,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			if(sMensaje != null && !sMensaje.isEmpty())
 				Toast.makeText(ActMain.this, sMensaje, Toast.LENGTH_LONG).show();
 		}
-		catch(Exception e){Log.e(TAG, String.format("onCreate:e:%s",e), e);}
+		catch(Exception e){Log.e(TAG, "onCreate:e:--------------------------------------------------", e);}
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -146,15 +164,9 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				startActivity(i);
 				return true;
 			case R.id.action_buscar:
-			//	FrgMain._apf[_viewPager.getCurrentItem()].buscar();
-				FrgMain f = _aFrg[_viewPager.getCurrentItem()];
-		for(int j=0; j < _aFrg.length; j++)Log.e(TAG, "********************** "+j+" : "+_aFrg[j]);
-				if(f == null)
-				{
-					Log.e(TAG, "---------------------------------------------------- F = NULL  "+_viewPager.getCurrentItem() + "  :: "+_aFrg.length);
-					return false;
-				}
-				buscar(f, f.getFiltro());
+				FrgMain frg = _aFrg[_viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
+				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager()).getItem(_viewPager.getCurrentItem());
+				buscar(_aFrg[_viewPager.getCurrentItem()]);
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -162,7 +174,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-Log.e(TAG, "onActivityResult------------------------------requestCode="+requestCode+" :: resultCode="+resultCode);
 		if(resultCode != RESULT_OK)return;
 		if(requestCode == Util.CONFIG)gotoLogin();
 		else super.onActivityResult(requestCode, resultCode, data);
@@ -238,13 +249,30 @@ Log.e(TAG, "onActivityResult------------------------------requestCode="+requestC
 		catch(Exception e){Log.e(TAG, "goRutaMap:RUTAS:e:-------------------------------------------", e);}
 	}
 	//---
-	public void buscar(Fragment f, Filtro filtro)
+	public void buscar(final FrgMain frg)
 	{
 		try
 		{
-			Intent i = new Intent(f.getContext(), ActBuscar.class);//_main.getApplicationContext
-			i.putExtra(Filtro.FILTRO, filtro);
-			f.startActivityForResult(i, Util.BUSCAR);
+			if( ! frg.isAdded())
+			{
+				Log.e(TAG, "buscar: *************** frg is not ADDED *****************");
+				getSupportFragmentManager().beginTransaction().add(frg, String.valueOf(frg._sectionNumber)).commit();
+				final Handler handler = new Handler();
+				handler.postDelayed(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						buscar(frg);
+					}
+				}, 100);
+				return;
+			}
+
+			Filtro fil = frg.getFiltro();
+			Intent i = new Intent(/*frg.getContext()*/this, ActBuscar.class);//_main.getApplicationContext
+			i.putExtra(Filtro.FILTRO, fil);
+			frg.startActivityForResult(i, Util.BUSCAR);
 		}
 		catch(Exception e){Log.e(TAG, "buscar:e:----------------------------------------------------", e);}
 	}
@@ -273,8 +301,8 @@ Log.e(TAG, "onActivityResult------------------------------requestCode="+requestC
 		public Fragment getItem(int position)
 		{
 			_aFrg[position] = FrgMain.newInstance(position);
-Log.e(TAG, "--------------SectionsPagerAdapter:getItem---------"+position+"-------------------------"+_aFrg[position]);
-			return _aFrg[position];//TODO : enhance
+Log.e(TAG, "getItem--------------------["+position+"]="+_aFrg[position]+" : "+_aFrg[position]._sectionNumber);
+			return _aFrg[position];
 		}
 		@Override
 		public int getCount()

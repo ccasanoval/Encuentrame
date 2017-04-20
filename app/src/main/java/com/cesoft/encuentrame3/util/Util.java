@@ -22,9 +22,6 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -300,14 +297,12 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	private static final String ID_TRACKING = "id_tracking_route";
 	public void setTrackingRoute(String sIdRoute)
 	{
-		//SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = _sp.edit();
 		editor.putString(ID_TRACKING, sIdRoute);
 		editor.apply();//editor.commit(); Apply does it in background
 	}
 	public String getTrackingRoute()
 	{
-		//SharedPreferences sp = c.getSharedPreferences(PREF_TRACKING, Activity.MODE_PRIVATE);
  		return _sp.getString(ID_TRACKING, "");
 	}
 

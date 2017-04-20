@@ -137,10 +137,23 @@ public class Ruta extends Objeto implements Parcelable
 			_datos.setValue(this, listener);
 		}
 	}
-	public static void getById(String sId, ValueEventListener listener)
+	public static void getById(String sId, final Fire.SimpleListener<Ruta> listener)
 	{
 		Query queryRef = newFirebase().orderByKey().equalTo(sId);//.limitToFirst(1);
-		queryRef.addListenerForSingleValueEvent(listener);//queryRef.addChildEventListener(listener);
+		queryRef.addListenerForSingleValueEvent(new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+				Ruta ruta = ds.getChildren().iterator().next().getValue(Ruta.class);
+				listener.onData(new Ruta[]{ruta});
+			}
+			@Override
+			public void onCancelled(DatabaseError err)
+			{
+				listener.onError(err.toString());
+			}
+		});//queryRef.addChildEventListener(listener);
 	}
 
 	public static void getLista(final Fire.ObjetoListener<Ruta> listener)

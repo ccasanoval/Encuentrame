@@ -54,14 +54,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
+import javax.inject.Inject;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
 	private static final String TAG = ActAviso.class.getSimpleName();
 	private static final int DELAY_LOCATION = 60000;
-
-	private Util _util;
 
 	private boolean _bDesdeNotificacion = false;
 	private boolean _bNuevo = false;
@@ -81,6 +81,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	private Marker _marker;
 	private Circle _circle;
 
+	@Inject CesService _servicio;
+	@Inject Util _util;
 
 	//______________________________________________________________________________________________
 	@Override
@@ -89,7 +91,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_aviso);
 
-		_util = App.getInstance().getGlobalComponent().util();
+		App.getInstance().getGlobalComponent().inject(this);
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
@@ -361,7 +363,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			{
 				if(err == null)
 				{
-					CesService._cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
+					_servicio.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
 					openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
 					_bGuardar = true;
 					finEspera();
@@ -381,7 +383,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 							_bGuardar = true;
 							if(err == null)
 							{
-								CesService._cargarListaGeoAvisos();
+								_servicio.cargarListaGeoAvisos();
 								openMain(true, getString(R.string.ok_guardar_aviso));
 							}
 							else

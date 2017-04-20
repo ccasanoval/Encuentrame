@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,18 +38,22 @@ import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo
+//TODO
+//TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO
+@Singleton
 public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
 	private static final String TAG = CesService.class.getSimpleName();
 	private static final int GEOFEN_DWELL_TIME = 60*1000;
-	private static final long DELAY_TRACK_MIN = 30*1000;
-	private static final long DELAY_TRACK_MAX = 7*60*1000;
+	private static final long DELAY_TRACK_MIN = 5*1000;//30*1000;
+	private static final long DELAY_TRACK_MAX = 2*60*1000;//7*60*1000;
 	private static long DELAY_TRACK = DELAY_TRACK_MIN;
 	private static final long ACCURACY_MAX = 24;//m
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;
@@ -57,24 +62,22 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	@Inject	Util _util;
 	@Inject	Login _login;
 
-	private static CesService _this;
 	private CesGeofenceStore _GeofenceStoreAvisos;
 	private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
 	//TODO: probar a crear una ruta cuando no tienes conexion... no sale de NuevaRutaAct y no muestra amarilla la ruta...
 
 	//______________________________________________________________________________________________
-	public CesService()
+	@Inject public CesService()
 	{
 		super("EncuentrameSvc");
-		_this = this;
 	}
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
 		//_util = ((App)getApplication()).getGlobalComponent().util();
-		((App)getApplication()).getGlobalComponent().inject(this);
+		App.getInstance().getGlobalComponent().inject(this);
 		_login.login(new Login.AuthListener()
 		{
 			@Override
@@ -85,7 +88,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 			@Override
 			public void onFallo(Exception e)
 			{
-				Log.e(TAG, String.format("onCreate:login:fallo:--------------------------------------------------%s",e), e);
+				Log.e(TAG, "onCreate:login:e:-------------------------------------------------------", e);
 				CesService.this.stopSelf();
 			}
 		});
@@ -106,7 +109,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
 			{
-//Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
+Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
 				if( ! _login.isLogged())
 				{
 					//Log.w(TAG, "loop---sin usuario");
@@ -115,12 +118,12 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 						@Override
 						public void onExito(FirebaseUser usr)
 						{
-							//Log.w(TAG, String.format("loop---------Login OK:%s",usr));
+							//Log.w(TAG, String.format("loop----------------------------------------Login OK:%s",usr));
 						}
 						@Override
 						public void onFallo(Exception e)
 						{
-							Log.e(TAG, String.format("loop---------Login kk:%s",e), e);
+							Log.e(TAG, String.format("loop------------------------------------------Login kk:%s",e), e);
 						}
 					});
 					try{Thread.sleep(DELAY_TRACK_MIN);}catch(InterruptedException ignored){}
@@ -144,24 +147,20 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 				}catch(InterruptedException e){Log.e(TAG, "---------------- LOOP SLEEP INTERRUPTED---------------");}
 			}
 		}
-		catch(Exception e){Log.e(TAG, String.format("onHandleIntent:e:%s", e), e);}
+		catch(Exception e){Log.e(TAG, "onHandleIntent:e:--------------------------------------------", e);}
 	}
 
 	//______________________________________________________________________________________________
-	public static void _restartDelayRuta()
+	public void _restartDelayRuta()
 	{
 		DELAY_TRACK = DELAY_TRACK_MIN;
-//Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TRACK));
-		_this.saveGeoTracking();
-		_this._tmTrack = System.currentTimeMillis();
+Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TRACK));
+		saveGeoTracking();
+		_tmTrack = System.currentTimeMillis();
 		//if(_hiloLoop!=null)_hiloLoop.interrupt();Doesnt work
 	}
 	//______________________________________________________________________________________________
-	public static void _cargarListaGeoAvisos()
-	{
-		_this.cargarListaGeoAvisos();///TODO: Mejorar
-	}
-	private void cargarListaGeoAvisos()
+	public void cargarListaGeoAvisos()
 	{
 		try
 		{
@@ -227,6 +226,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 	public void saveGeoTracking()
 	{
 		final String sId = _util.getTrackingRoute();
+Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 		if(sId.isEmpty())
 		{
 			stopTracking();
@@ -234,45 +234,39 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 		}
 		startTracking();
 
-		Ruta.getById(sId, new ValueEventListener()
+		Ruta.getById(sId, new Fire.SimpleListener<Ruta>()
 		{
 			@Override
-			public void onDataChange(DataSnapshot rutas)
+			public void onData(Ruta[] aData)
 			{
-				try{
-				rutas.getValue(Ruta.class);
-				}catch(Exception e){Log.e(TAG, String.format("saveGeoTracking:Ruta.getById:%s",rutas), e);}
-
-				Ruta r = null;
-				for(DataSnapshot ruta : rutas.getChildren())
+				if(aData[0] == null)
 				{
-					r = ruta.getValue(Ruta.class);
-					if(r != null)break;
-				}
-				if(r == null)
-				{
-					Log.e(TAG, "saveGeoTracking:Ruta.getById:NULL---------------"+sId);
+					Log.e(TAG, "saveGeoTracking:Ruta.getById:-------------------------------------------"+sId);
 					_util.setTrackingRoute("");
 					stopTracking();
-					return;
 				}
-				handleResponse(r, sId);
+				else
+				{
+					final Location loc = _util.getLocation();
+					guardarPunto(loc, aData[0], sId);
+				}
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onError(String err)
 			{
-				Log.e(TAG, "saveGeoTracking:findById:f:----------------------:" + err);
+				Log.e(TAG, "saveGeoTracking:findById:e:---------------------------------------------:" + err);
 			}
 		});
 	}
 
-	public void handleResponse(Ruta r, String sId)
+	/*public void handleResponse(Ruta r, String sId)
 	{
 		if(r == null)return;
 		final Location loc = _util.getLocation();
 		guardarPunto(loc, r, sId);
-	}
+	}*/
 
+	//----------------------------------------------------------------------------------------------
 	private void guardarPunto(Location loc, Ruta r, String sId)
 	{
 		if(loc == null)
@@ -295,10 +289,11 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 			_sId = sId;
 			_locLastSaved = null;
 			DELAY_TRACK = DELAY_TRACK_MIN;
-			Log.w(TAG, String.format("guardarPunto:Nueva ruta: %s", sId));
+			Log.w(TAG, "guardarPunto:Nueva ruta: ----------------------------------------------- "+sId);
 		}
 		else if(_locLastSaved != null)
 		{
+			//TODO: puntos mas cercanos dependiendo de si tienes wifi? opcion de no guardar hasta tener wifi?
 			float distLastSaved = loc.distanceTo(_locLastSaved);
 			if(distLastSaved < 30)//Puntos muy cercanos
 			{
@@ -322,7 +317,9 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 		_locLastSaved = loc;
 	}
 
-	class GuardarListener implements DatabaseReference.CompletionListener
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	private class GuardarListener implements DatabaseReference.CompletionListener
 	{
 		private Location _loc = null;
 		GuardarListener(Location loc){_loc = loc;}
@@ -380,27 +377,6 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 		{
 			Log.e(TAG, String.format("checkPlayServices: No tiene Google Services? result = %s !!!!!!!!!!!!!!!",result));
 	        return false;
-	/*
-	public static final int SUCCESS = 0;
-    public static final int SERVICE_MISSING = 1;
-    public static final int SERVICE_VERSION_UPDATE_REQUIRED = 2;
-    public static final int SERVICE_DISABLED = 3;
-    public static final int SIGN_IN_REQUIRED = 4;
-    public static final int INVALID_ACCOUNT = 5;
-    public static final int RESOLUTION_REQUIRED = 6;
-    public static final int NETWORK_ERROR = 7;
-    public static final int INTERNAL_ERROR = 8;
-    public static final int SERVICE_INVALID = 9;
-    public static final int DEVELOPER_ERROR = 10;
-    public static final int LICENSE_CHECK_FAILED = 11;
-    public static final int CANCELED = 13;
-    public static final int TIMEOUT = 14;
-    public static final int INTERRUPTED = 15;
-    public static final int API_UNAVAILABLE = 16;
-    public static final int SIGN_IN_FAILED = 17;
-    public static final int SERVICE_UPDATING = 18;
-    public static final int SERVICE_MISSING_PERMISSION = 19;
-    public static final int RESTRICTED_PROFILE = 20;*/
 	    }
 	    return true;
 	}

@@ -8,6 +8,10 @@ import android.location.LocationManager;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
+import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Util;
+
 import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
@@ -62,5 +66,18 @@ public class GlobalModule
 	ConnectivityManager provideConnectivityManager() {
 	return (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
 	}*/
+
+	@Singleton
+	@Provides
+	Util provideUtil(Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm)
+	{
+		return new Util(app, sp, lm, nm, pm);
+	}
+	@Singleton
+	@Provides
+	Login provideLogin(SharedPreferences sp)
+	{
+		return new Login(sp);
+	}
 
 }

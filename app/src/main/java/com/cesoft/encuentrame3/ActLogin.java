@@ -47,6 +47,7 @@ public class ActLogin extends AppCompatActivity
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
+	private Intent _serviceIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -72,13 +73,14 @@ public class ActLogin extends AppCompatActivity
 		//Crea servicio si no está ya creado, dentro del servicio se llama a login
 		startService(new Intent(this, CesService.class));
 		// Rute Widget Svc
-		WidgetRutaService.startServ(this);
+		_serviceIntent = WidgetRutaService.startServ(this);
 	}
 
 	public void onDestroy()
 	{
 		super.onDestroy();
 		_tabLayout = null;
+		WidgetRutaService.stopServ(this, _serviceIntent);
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
@@ -131,7 +133,8 @@ public class ActLogin extends AppCompatActivity
 
 	//----------------------------------------------------------------------------------------------
 	//
-	//----------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	//TODO!!! FrgLogin... !!!!!!!!!
 	public static class PlaceholderFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener
 	{
 		private static final String ARG_SECTION_NUMBER = "section_number";
@@ -206,12 +209,19 @@ public class ActLogin extends AppCompatActivity
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
 			fragment._main = main;
-			fragment._login = App.getInstance().getGlobalComponent().login();
+
 			return fragment;
 		}
 
 		public PlaceholderFragment(){}
 
+		@Override
+		public void onCreate(Bundle b)
+		{
+			super.onCreate(b);
+			//App.getInstance().getGlobalComponent().inject(this);
+			_login = App.getInstance().getGlobalComponent().login();
+		}
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -311,8 +321,8 @@ public class ActLogin extends AppCompatActivity
 									public void onExito(FirebaseUser usr)
 									{
 										_main.finEsperaLogin();
-										if(usr != null)//TODO: string value
-										Toast.makeText(_main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
+										if(usr != null)
+											Toast.makeText(_main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
 									}
 									@Override
 									public void onFallo(Exception e)
@@ -349,7 +359,7 @@ public class ActLogin extends AppCompatActivity
 								@Override
 								public void onFallo(Exception e)
 								{
-									Log.e(TAG, String.format("RECOVER:e:%s",e), e);//TODO: formatear y tradiucir mensaje?
+									Log.e(TAG, String.format("RECOVER:e:%s",e), e);
 									Toast.makeText(rootView.getContext(), R.string.recover_ko +"  "+ e.toString(), Toast.LENGTH_LONG).show();
 								}
 							});

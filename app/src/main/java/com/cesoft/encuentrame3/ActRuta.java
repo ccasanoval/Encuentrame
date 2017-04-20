@@ -59,6 +59,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
+import javax.inject.Inject;
+
 
 //TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +69,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private static final String TAG = ActRuta.class.getSimpleName();
 	private static final int DELAY_LOCATION = 60000;
 
-	private Util _util;
+	@Inject CesService _servicio;
+	@Inject Util _util;
 
 	private boolean _bNuevo = false;
 	private Ruta _r;
@@ -78,7 +81,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
 
-
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -86,7 +88,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_ruta);
 
-		_util = ((App)getApplication()).getGlobalComponent().util();
+		App.getInstance().getGlobalComponent().inject(this);
 
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
@@ -129,6 +131,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		//-----------
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		//
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
 		{
@@ -202,6 +205,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 	public void onStop()
 	{
 		super.onStop();
+		finEspera();
 		delListeners();
 		stopTracking();
 		clean();
@@ -531,7 +535,7 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 				if(err == null)
 				{
 					_util.setTrackingRoute(_r.getId());
-					CesService._restartDelayRuta();
+					_servicio._restartDelayRuta();
 					_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 //Log.e(TAG, "startTrackingRecord-----------------------------------ID:"+_r.getId()+" data="+data);
 				}

@@ -38,12 +38,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
 	private static final String TAG = ActBuscar.class.getSimpleName();
 
-	private Util _util;
+	@Inject	Util _util;
 
 	private Filtro _filtro;
 	private EditText _txtNombre;
@@ -65,7 +67,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_buscar);
 
-		_util = App.getInstance().getGlobalComponent().util();
+		App.getInstance().getGlobalComponent().inject(this);
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
