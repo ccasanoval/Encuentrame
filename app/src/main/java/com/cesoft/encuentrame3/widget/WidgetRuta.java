@@ -16,6 +16,7 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO : despues de matar app con TaskKiller el widget deja de responder...! QUIZA PORQUE SE MATO EL CONTEXTO ORIGINAL
 public class WidgetRuta extends AppWidgetProvider
 {
 	private static final String ACTION_WIDGET_RUTA_ADD = "ACTION_WIDGET_RUTA_ADD";

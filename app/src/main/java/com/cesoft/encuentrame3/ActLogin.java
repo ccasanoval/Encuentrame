@@ -47,7 +47,7 @@ public class ActLogin extends AppCompatActivity
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
 	public TabLayout _tabLayout;
-	private Intent _serviceIntent;
+	//private Intent _serviceIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -73,14 +73,15 @@ public class ActLogin extends AppCompatActivity
 		//Crea servicio si no está ya creado, dentro del servicio se llama a login
 		startService(new Intent(this, CesService.class));
 		// Rute Widget Svc
-		_serviceIntent = WidgetRutaService.startServ(this);
+		//_serviceIntent =
+		WidgetRutaService.startServ(this);
 	}
 
 	public void onDestroy()
 	{
 		super.onDestroy();
 		_tabLayout = null;
-		WidgetRutaService.stopServ(this, _serviceIntent);
+		//WidgetRutaService.stopServ(this, _serviceIntent);
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.

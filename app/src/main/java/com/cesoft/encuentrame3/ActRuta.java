@@ -560,12 +560,12 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 	private Fire.ObjetoListener<Ruta.RutaPunto> _lisRuta;
 	private void delListeners()
 	{
-		if(_lisRuta != null)_lisRuta.delListener();
+		if(_lisRuta != null)_lisRuta.setListener(null);
 		_lisRuta = null;
 	}
 	private void newListeners()
 	{
-		if(_lisRuta != null)_lisRuta.delListener();
+		delListeners();
 		_lisRuta = new Fire.ObjetoListener<Ruta.RutaPunto>()
 		{
 			@Override
@@ -687,22 +687,25 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 				if(fDistancia < 2000)   sDistancia = String.format(loc, "%.0f m", fDistancia);
 				else					sDistancia = String.format(loc, "%.1f Km", fDistancia/1000);
 
-				long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
-				String sTiempo = formatTiempo(t);
-
-				String sVelMed;
-				if(t > 0)
+				String sTiempo = "", sVelMed = "";
+				if(aData.length > 0)
 				{
-					double d = fDistancia*1000/t;
-					if(d > 3)
+					long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
+					sTiempo = formatTiempo(t);
+
+					if(t > 0)
 					{
-						d = d*3600/1000;
-						sVelMed = String.format(loc, "%.1f Km/h", d);
+						double d = fDistancia*1000/t;
+						if(d > 3)
+						{
+							d = d*3600/1000;
+							sVelMed = String.format(loc, "%.1f Km/h", d);
+						}
+						else
+							sVelMed = String.format(loc, "%.1f m/s", d);
 					}
-					else
-						sVelMed = String.format(loc, "%.1f m/s", d);
+					else sVelMed = "-";
 				}
-				else sVelMed = "-";
 
 				String sAltMin;
 				if(fMinAlt==99999)sAltMin = "-";

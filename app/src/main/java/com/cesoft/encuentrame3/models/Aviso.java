@@ -16,6 +16,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Date;
+
 import com.cesoft.encuentrame3.Login;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,18 +197,39 @@ public class Aviso extends Objeto
 			}
 		});
 	}
-	public static void getActivos(ValueEventListener listener)
+	public static void getActivos(final Fire.ObjetoListener<Aviso> listener) //ValueEventListener listener)
 	{
 		Query queryRef = newFirebase().orderByChild(ACTIVO).equalTo(true);	//Query queryRef = ref.equalTo(true, ACTIVO);//NO PIRULA
 		//queryRef.addListenerForSingleValueEvent(listener);
-    	queryRef.addValueEventListener(listener);//AJAX
+		ValueEventListener vel = new ValueEventListener()
+		{
+			@Override
+			public void onDataChange(DataSnapshot ds)
+			{
+				int i = 0;
+				Aviso[] aAvisos = new Aviso[(int)ds.getChildrenCount()];
+				for(DataSnapshot l : ds.getChildren())
+				{
+					aAvisos[i++] = l.getValue(Aviso.class);
+				}
+				listener.onData(aAvisos);
+			}
+			@Override
+			public void onCancelled(DatabaseError err)
+			{
+				listener.onError(err.toString());
+			}
+		};
+		listener.setRef(queryRef.getRef());//TODO: comprobar que se libera bien, porque queryRef.getRef() != queryRef
+		//listener.delListener();
+		listener.setListener(vel);
+    	queryRef.addValueEventListener(vel);
 	}
 	public static void getLista(final Fire.ObjetoListener<Aviso> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
-		listener.setRef(ddbb);
-		ValueEventListener vel = listener.getListener();
-		if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;//= listener.getListener();
+		//if(vel != null)ddbb.removeEventListener(vel);
 		vel = new ValueEventListener()
 		{
 			@Override
@@ -226,6 +248,8 @@ public class Aviso extends Objeto
 				listener.onError("Aviso:getLista:onCancelled:"+err);
 			}
 		};
+		listener.setRef(ddbb);
+		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);//.addListenerForSingleValueEvent
 	}
@@ -247,9 +271,8 @@ public class Aviso extends Objeto
 	private static void buscarPorFiltro(final Fire.ObjetoListener<Aviso> listener, final Filtro filtro)
 	{
 		DatabaseReference ddbb = newFirebase();
-		listener.setRef(ddbb);
-		ValueEventListener vel = listener.getListener();
-		if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;// = listener.getListener();
+		//if(vel != null)ddbb.removeEventListener(vel);
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
@@ -272,6 +295,8 @@ public class Aviso extends Objeto
 				listener.onError(err.toString());
 			}
 		};
+		listener.setRef(ddbb);
+		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);//.addListenerForSingleValueEvent
 	}

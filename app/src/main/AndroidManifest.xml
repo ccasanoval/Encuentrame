@@ -87,6 +87,15 @@
 			android:label="@string/title_act_imagen"
 			android:theme="@style/FullscreenTheme"/>
 
+		<!-- ************************* SERVICES ******************************** -->
+		<receiver android:name=".svc.CesWakefulReceiver"/>
+
+		<service
+			android:name=".svc.CesService"
+			android:exported="false"/>
+		<service
+			android:name=".svc.CesServiceAvisoGeo"
+			android:exported="false"/>
 		<receiver
 			android:name=".svc.CesGeofenceReceiver"
 			android:exported="false">
@@ -107,13 +116,6 @@
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
 			</intent-filter>
 		</receiver>
-
-		<service
-			android:name=".svc.CesService"
-			android:exported="false"/>
-		<service
-			android:name=".svc.CesServiceAvisoGeo"
-			android:exported="false"/>
 
 		<!-- ************************* META DATA ************************* -->
 		<!--

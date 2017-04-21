@@ -1,12 +1,17 @@
 package com.cesoft.encuentrame3.svc;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
@@ -26,16 +31,16 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseUser;			//TODO: todo la logica BBDD a clase Fire
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
-import com.google.firebase.database.ValueEventListener;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
+import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -48,14 +53,16 @@ import javax.inject.Singleton;
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //TODO
 @Singleton
-public class CesService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
+public class CesService extends IntentService
+		implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
 	private static final String TAG = CesService.class.getSimpleName();
 	private static final int GEOFEN_DWELL_TIME = 60*1000;
-	private static final long DELAY_TRACK_MIN = 5*1000;//30*1000;
+	private static final long DELAY_TRACK_MIN = 20*1000;//30*1000;
 	private static final long DELAY_TRACK_MAX = 2*60*1000;//7*60*1000;
 	private static long DELAY_TRACK = DELAY_TRACK_MIN;
 	private static final long ACCURACY_MAX = 24;//m
+	private static final long DISTANCE_MIN = 10;//m
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
 
@@ -94,10 +101,30 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 		});
 		iniGeoTracking();
 	}
+	//----------------------------------------------------------------------------------------------
+	// Restaura el servicio cuando se le mata el proceso
+	@Override
+	public void onTaskRemoved(Intent rootIntent)
+	{
+		Log.e(TAG, "-------------------onTaskRemoved---------------------");
+		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+		restartServiceIntent.setPackage(getPackageName());
+
+		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+		alarmService.set(
+				AlarmManager.ELAPSED_REALTIME,
+				SystemClock.elapsedRealtime() + 1000,
+				restartServicePendingIntent);
+
+		Log.e(TAG, "-------------------Reiniciando...---------------------");
+		super.onTaskRemoved(rootIntent);
+	}
 
 	//______________________________________________________________________________________________
 	//private Thread _hiloLoop = null;
 	long _tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
+	//______________________________________________________________________________________________
 	@Override
 	protected void onHandleIntent(Intent workIntent)
 	{
@@ -109,7 +136,7 @@ public class CesService extends IntentService implements GoogleApiClient.Connect
 			//noinspection InfiniteLoopStatement
 			while(true)//No hay un sistema para listen y not polling??????
 			{
-Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
+Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
 				if( ! _login.isLogged())
 				{
 					//Log.w(TAG, "loop---sin usuario");
@@ -148,23 +175,74 @@ Log.w(TAG, String.format("CesService:loop---------------------DELAY_TRACK=%d----
 			}
 		}
 		catch(Exception e){Log.e(TAG, "onHandleIntent:e:--------------------------------------------", e);}
+		CesWakefulReceiver.completeWakefulIntent(workIntent);
 	}
 
 	//______________________________________________________________________________________________
 	public void _restartDelayRuta()
 	{
 		DELAY_TRACK = DELAY_TRACK_MIN;
-Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TRACK));
+Log.e(TAG, "_startRuta:------------------------------"+DELAY_TRACK);
 		saveGeoTracking();
 		_tmTrack = System.currentTimeMillis();
 		//if(_hiloLoop!=null)_hiloLoop.interrupt();Doesnt work
 	}
+
+	//______________________________________________________________________________________________
+	Fire.ObjetoListener<Aviso> _lisAviso = new Fire.ObjetoListener<Aviso>()
+	{
+		@Override
+		public void onData(Aviso[] aData)
+		{
+			//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
+			boolean bDirty = false;
+			long n = aData.length;
+			if(n != CesService.this._listaGeoAvisos.size())
+			{
+				if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
+				_listaGeoAvisos.clear();
+				bDirty = true;
+			}
+			ArrayList<Geofence> aGeofences = new ArrayList<>();
+			ArrayList<Aviso> aAvisos = new ArrayList<>();
+			for(int i=0; i < aData.length; i++)
+			{
+				Aviso a = aData[i];
+				aAvisos.add(a);
+				Geofence gf = new Geofence.Builder().setRequestId(a.getId())
+						.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
+						.setExpirationDuration(Geofence.NEVER_EXPIRE)
+						.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+						.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
+				aGeofences.add(gf);
+				if( ! bDirty)
+				{
+					if(_listaGeoAvisos.size() < i)
+						bDirty = true;
+					else if( ! _listaGeoAvisos.contains(a))//else if(_listaGeoAvisos.get(i))
+						bDirty = true;
+					i++;
+				}
+			}
+			if(bDirty)
+			{
+				_listaGeoAvisos = aAvisos;
+				_GeofenceStoreAvisos = new CesGeofenceStore(aGeofences);//Se puede añadir en lugar de crear desde cero?
+			}
+		}
+		@Override
+		public void onError(String err)
+		{
+			Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------"+err);
+		}
+	};
 	//______________________________________________________________________________________________
 	public void cargarListaGeoAvisos()
 	{
 		try
 		{
-			Aviso.getActivos(new ValueEventListener()
+			Aviso.getActivos(_lisAviso);
+			/*Aviso.getActivos(new ValueEventListener()
 			{
 				@Override
 				public void onDataChange(DataSnapshot avisos)
@@ -211,11 +289,11 @@ Log.e(TAG, String.format("_startRuta:------------------------------:%d",DELAY_TR
 				{
 					Log.e(TAG, String.format("cargarListaGeoAvisos:e:%s",err));
 				}
-			});
+			});*/
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, String.format("cargarListaGeoAvisos:e:%s", e), e);
+			Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------", e);
 			//_lista.clear();
 		}
 	}
@@ -241,7 +319,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			{
 				if(aData[0] == null)
 				{
-					Log.e(TAG, "saveGeoTracking:Ruta.getById:-------------------------------------------"+sId);
+					Log.e(TAG, "saveGeoTracking:Ruta.getById: RUTA == NULL -------------------------------------------"+sId);
 					_util.setTrackingRoute("");
 					stopTracking();
 				}
@@ -271,18 +349,19 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 	{
 		if(loc == null)
 		{
-			Log.w(TAG, "guardarPunto:loc==NULL------------------------");
+			Log.w(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
 			return;
 		}
-		if(!loc.hasAccuracy())
+		if( ! loc.hasAccuracy())
 		{
-			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------");
+			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
 			return;
 		}
-
-//Log.w(TAG, "guardarPunto:-------------------------------------------"+loc.getAccuracy()+" "+loc.toString());
-		//Si el nuevo punto no tiene sentido, no se guarda...
-		if(loc.getAccuracy() > ACCURACY_MAX)return;
+		if(r.getPuntosCount() > 1 && loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 5+DISTANCE_MIN)
+		{
+			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+ACCURACY_MAX+" / "+DISTANCE_MIN);
+			return;
+		}
 
 		if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
 		{
@@ -295,9 +374,9 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 		{
 			//TODO: puntos mas cercanos dependiendo de si tienes wifi? opcion de no guardar hasta tener wifi?
 			float distLastSaved = loc.distanceTo(_locLastSaved);
-			if(distLastSaved < 30)//Puntos muy cercanos
+			if(distLastSaved < DISTANCE_MIN)//Puntos muy cercanos
 			{
-				Log.w(TAG, String.format("guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
+				Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
 				DELAY_TRACK += 10*1000;
 				if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
 				return;
@@ -334,8 +413,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 						new Transaction.Handler()
 					{
 						@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
-						@Override
-						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
+						@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
 							if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
 							//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
@@ -398,7 +476,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			}
 			catch(SecurityException e)
 			{
-				Log.e(TAG, String.format("startTracking:e:%s",e), e);
+				Log.e(TAG, "startTracking:e:--------------------------------------------------------", e);
 			}
 		}
 	}
@@ -410,6 +488,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 	}
 
 
+	///------------------------ CALLBACKS ----------------------------------------------------------
 	@Override
 	public void onConnected(@Nullable Bundle bundle)
 	{
@@ -426,7 +505,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 	public void onLocationChanged(Location location)
 	{
 		_util.setLocation(location);
-		//Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
+		Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
 	}
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
@@ -434,6 +513,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 		Log.w(TAG, String.format("onConnectionFailed:e:%s", connectionResult.getErrorCode()));
 	}
 
+	//----------------------------------------------------------------------------------------------
 	private void pideGPS()
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
@@ -443,7 +523,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 				;
 		if(_GoogleApiClient == null)
 		{
-			Log.e(TAG, "pideGPS: ERROR _GoogleApiClient == null");
+			Log.e(TAG, "pideGPS:e:------------------------------------------------------------------ GoogleApiClient == null");
 			return;
 		}
 		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(_GoogleApiClient, builder.build());
@@ -470,6 +550,9 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 	}
 
 }
+
+
+
 
 //Si el nuevo punto no tiene sentido, no se guarda...
 			/*

@@ -32,7 +32,6 @@ import com.cesoft.encuentrame3.util.Util;
 //https://developer.android.com/training/permissions/requesting.html
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 
-//TODO: cuando matas X solo queda fragment con patalla lugares, tanto para rutas como para avisos...?
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
@@ -41,9 +40,7 @@ import com.cesoft.encuentrame3.util.Util;
 //TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
-//TODO: Google auth?
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
-//TODO: Develop a web app for points management : connect to backendless by REST API...
 //TODO: Preparar para tablet
 //TODO: Opcion que diga no preguntar por activar GPS (en tablet que no tiene gps... es un coñazo)
 //http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html

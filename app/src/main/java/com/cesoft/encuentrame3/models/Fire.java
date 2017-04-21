@@ -49,9 +49,9 @@ public class Fire
 			public void setGeoFire(GeoFire geoFire){_geoFire = geoFire;}*/
 
 		private ValueEventListener _vel = null;
-			void setListener(ValueEventListener vel){_vel = vel;}
-			ValueEventListener getListener(){return _vel;}
-			public void delListener()
+			public void setListener(ValueEventListener vel){delListener();_vel = vel;}
+			//ValueEventListener getListener(){return _vel;}
+			private void delListener()
 			{
 				//Log.e(TAG, "ObjetoListener:delListener: ref="+_ref+", vel="+_vel);
 				if(_ref!=null && _vel!=null)_ref.removeEventListener(_vel);

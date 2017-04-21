@@ -3,11 +3,11 @@ package com.cesoft.encuentrame3.svc;
 import java.util.ArrayList;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,22 +31,33 @@ import com.google.android.gms.location.LocationServices;
 // http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823
 
 //https://www.raywenderlich.com/103540/geofences-googleapiclient
+////////////////////////////////////////////////////////////////////////////////////////////////////
 class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status>
 {
 	private static final String TAG = CesGeofenceStore.class.getSimpleName();
 
-	private Context _context;
 	private GoogleApiClient _GoogleApiClient;
 	private PendingIntent _PendingIntent;
 	private ArrayList<Geofence> _aGeofences;
-		//public int size(){return _aGeofences==null?0:_aGeofences.size();}
 
-	CesGeofenceStore(Context context, ArrayList<Geofence> geofences)
+	//----------------------------------------------------------------------------------------------
+	CesGeofenceStore(ArrayList<Geofence> geofences)
 	{
-		_context = context;
+		try
+		{
 		_aGeofences = new ArrayList<>(geofences);
-		_GoogleApiClient = new GoogleApiClient.Builder(context).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+		_GoogleApiClient = new GoogleApiClient
+				.Builder(App.getContexto())
+				.addApi(LocationServices.API)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.build();
 		_GoogleApiClient.connect();
+		}
+		catch(Exception e)
+		{
+			Log.e(TAG, "CONSTRUCTOR:e:--------------------------------------------------------------", e);
+		}
 	}
 
 	//// 4 ResultCallback<Status>
@@ -75,13 +86,17 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 		// We're connected, now we need to create a GeofencingRequest with the geofences we have stored.
 		if(_aGeofences.size() > 0)
 		{
-			GeofencingRequest GeofencingRequest = new GeofencingRequest.Builder().addGeofences(_aGeofences).build();
-			_PendingIntent = createRequestPendingIntent();
 			try
-			{	// Submitting the request to monitor geofences.
+			{
+				GeofencingRequest GeofencingRequest = new GeofencingRequest.Builder().addGeofences(_aGeofences).build();
+				_PendingIntent = createRequestPendingIntent();
+				if(_PendingIntent == null)return;
+
+				// Submitting the request to monitor geofences.
 				PendingResult<Status> pendingResult = LocationServices.GeofencingApi.addGeofences(_GoogleApiClient, GeofencingRequest, _PendingIntent);
 				pendingResult.setResultCallback(this);// Set the result callbacks listener to this class.
-			}catch(SecurityException ignored){}
+			}
+			catch(SecurityException ignored){}
 		}
 	}
 	@Override
@@ -100,17 +115,25 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 	// This creates a PendingIntent that is to be fired when geofence transitions take place. In this instance, we are using an IntentService to handle the transitions.
 	private PendingIntent createRequestPendingIntent()
 	{
-		/*if(_PendingIntent == null)
+		try
 		{
-			Intent intent = new Intent(_Context, CesServiceAvisoGeo.class);
-			_PendingIntent = PendingIntent.getService(_Context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		}
-		return _PendingIntent;*/
+			/*if(_PendingIntent == null)
+			{
+				Intent intent = new Intent(_Context, CesServiceAvisoGeo.class);
+				_PendingIntent = PendingIntent.getService(_Context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			}
+			return _PendingIntent;*/
 
-		if(null != _PendingIntent)return _PendingIntent;
-		Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
-		// Return a PendingIntent to start the IntentService. Always create a PendingIntent sent to Location Services with FLAG_UPDATE_CURRENT,
-		// so that sending the PendingIntent again updates the original. Otherwise, Location Services can't match the PendingIntent to requests made with it.
-		return PendingIntent.getBroadcast(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			if(null != _PendingIntent)return _PendingIntent;
+			Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
+			// Return a PendingIntent to start the IntentService. Always create a PendingIntent sent to Location Services with FLAG_UPDATE_CURRENT,
+			// so that sending the PendingIntent again updates the original. Otherwise, Location Services can't match the PendingIntent to requests made with it.
+			return PendingIntent.getBroadcast(App.getContexto(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		}
+		catch(Exception e)
+		{
+			Log.e(TAG, "createRequestPendingIntent:e:-----------------------------------------------",e);
+			return null;
+		}
 	}
 }

@@ -136,9 +136,8 @@ public class Lugar extends Objeto
 	public static void getLista(@NotNull final Fire.ObjetoListener<Lugar> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
-		listener.setRef(ddbb);
-		ValueEventListener vel = listener.getListener();
-		if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;// = listener.getListener();
+		//if(vel != null)ddbb.removeEventListener(vel);
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
@@ -159,6 +158,8 @@ public class Lugar extends Objeto
 				//ddbb.removeEventListener(this);
 			}
 		};
+		listener.setRef(ddbb);
+		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);
 	}
@@ -175,9 +176,8 @@ public class Lugar extends Objeto
 	{
 		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		DatabaseReference ddbb = newFirebase();
-		listener.setRef(ddbb);
-		ValueEventListener vel = listener.getListener();
-		if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;// = listener.getListener();
+		//if(vel != null)ddbb.removeEventListener(vel);
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
@@ -201,6 +201,7 @@ public class Lugar extends Objeto
 				listener.onError(s);
 			}
 		};
+		listener.setRef(ddbb);
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);
 	}

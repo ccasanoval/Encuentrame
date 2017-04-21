@@ -2,8 +2,11 @@ package com.cesoft.encuentrame3;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -106,12 +109,13 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 					{
 						if(err == null)
 						{
+							//WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
+							refreshWidget();
+
 							_util.setTrackingRoute(data.getKey());
 							_progressDialog.dismiss();
 							Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 							ActWidgetNuevaRuta.this.finish();
-
-							WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
 						}
 						else
 						{
@@ -125,12 +129,46 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 							_progressDialog.hide();//if(_progressDialog.isShowing())
 							Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 
-							Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
-							ActWidgetNuevaRuta.this.startService(i);
+							//Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
+							//ActWidgetNuevaRuta.this.startService(i);
+							refreshWidget();
 						}
 					}
 				});
 		  	}
 		});
 	}
+
+	//----------------------------------------------------------------------------------------------
+	// Defines callbacks for service binding, passed to bindService()
+	WidgetRutaService _svcWidget;
+	boolean _bBound = false;
+	//
+	private ServiceConnection _sc = new ServiceConnection()
+	{
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service)
+		{
+			Log.e(TAG, "---------------------------- onServiceConnected --------------------------------------------");
+			// We've bound to LocalService, cast the IBinder and get LocalService instance
+			WidgetRutaService.LocalBinder binder = (WidgetRutaService.LocalBinder)service;
+			_svcWidget = binder.getService();
+			_bBound = true;
+
+			if(_svcWidget != null)_svcWidget.refresh();
+			WidgetRutaService.unbindSvc(_sc, App.getContexto());
+		}
+		@Override
+		public void onServiceDisconnected(ComponentName arg0)
+		{
+			_bBound = false;
+		}
+	};
+	//
+	private void refreshWidget()
+	{
+		WidgetRutaService.bindSvc(_sc, App.getContexto());
+
+	}
+
 }

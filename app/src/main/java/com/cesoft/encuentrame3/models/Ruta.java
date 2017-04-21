@@ -159,9 +159,8 @@ public class Ruta extends Objeto implements Parcelable
 	public static void getLista(final Fire.ObjetoListener<Ruta> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
-		listener.setRef(ddbb);
-		ValueEventListener vel = listener.getListener();
-		if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;// = listener.getListener();
+		//if(vel != null)ddbb.removeEventListener(vel);
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
@@ -187,6 +186,8 @@ public class Ruta extends Objeto implements Parcelable
 				listener.onError("Ruta:getLista:onCancelled:"+err);
 			}
 		};
+		listener.setRef(ddbb);
+		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);	//.addListenerForSingleValueEvent(new ValueEventListener()
 	}
@@ -211,9 +212,8 @@ public class Ruta extends Objeto implements Parcelable
 	private static void buscarPorFiltro(final Fire.ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
 		DatabaseReference ddbb = newFirebase();
-		listener.setRef(ddbb);
-		ValueEventListener vel = listener.getListener();
-		if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;// = listener.getListener();
+		//if(vel != null)ddbb.removeEventListener(vel);
 		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		vel = new ValueEventListener()//AJAX
 		{
@@ -237,6 +237,8 @@ public class Ruta extends Objeto implements Parcelable
 				listener.onError(err.toString());
 			}
 		};
+		listener.setRef(ddbb);
+		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);
 	}
@@ -571,9 +573,9 @@ public class Ruta extends Objeto implements Parcelable
 		public static void getListaRep(String sIdRuta, final Fire.ObjetoListener<Ruta.RutaPunto> listener) //final ValueEventListener listener)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
-			listener.setRef(queryRef.getRef());
-			ValueEventListener vel = listener.getListener();
-			if(vel != null)queryRef.getRef().removeEventListener(vel);
+			//listener.setRef(queryRef.getRef());
+			ValueEventListener vel;// = listener.getListener();
+			//if(vel != null)queryRef.getRef().removeEventListener(vel);
 			vel = new ValueEventListener()//AJAX
 			{
 				@Override
@@ -593,6 +595,8 @@ public class Ruta extends Objeto implements Parcelable
 					//ddbb.removeEventListener(this);
 				}
 			};
+			listener.setRef(queryRef.getRef());
+			//listener.delListener();
 			listener.setListener(vel);
 			queryRef.addValueEventListener(vel);//AJAX
 		}

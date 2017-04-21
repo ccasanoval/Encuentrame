@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.app.Service;
@@ -17,13 +18,9 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 //TODO: si no hay ruta, parar sin fecha de activacion: ACTIVAR solo cuando se cree una nueva ruta...
@@ -31,17 +28,31 @@ import javax.inject.Singleton;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@Singleton
+//@Singleton
+//TODO: hacer en thread... para no ralentizar MainThread
 public class WidgetRutaService extends Service
 {
 	private static final String TAG = WidgetRutaService.class.getSimpleName();
 	private static Handler _h = null;
 	private static Runnable _r = null;
-	private static final int _DELAY_SHORT = 30*1000;
+	private static final int _DELAY_SHORT = 30*1000;//TODO: Constantes globales para que tenga sentido junto con CesService.GPS.DELAY
 	private static final int _DELAY_LONG = 3*60*1000;
 
 	private Util _util;
 
+	//----
+	public static Intent bindSvc(ServiceConnection sc, Context c)
+	{
+		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
+		c.bindService(serviceIntent, sc, Context.BIND_AUTO_CREATE);
+		return serviceIntent;
+	}
+	public static void unbindSvc(ServiceConnection sc, Context c)//, Intent serviceIntent)
+	{
+		c.unbindService(sc);
+		//c.stopService(serviceIntent);
+	}
+	//----
 	public static Intent startServ(Context c)
 	{
 		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
@@ -76,12 +87,25 @@ Log.e(TAG, "onStartCommand------------------------------------------------------
 			//_h.postDelayed(_r, _DELAY_SHORT);
 			payLoad();
 		}
-		return super.onStartCommand(intent, flags, startId);
+		//return
+		super.onStartCommand(intent, flags, startId);
+		return START_STICKY;//START_REDELIVER_INTENT
 	}
+	@Override public void onDestroy() { Log.e(TAG, "onDestroy:--------------------------------------"); }
+
 
 	//______________________________________________________________________________________________
-	@Override public IBinder onBind(Intent intent){return null;}
-
+	//@Override public IBinder onBind(Intent intent){return null;}
+	/**
+	 * Class used for the client Binder.  Because we know this service always
+	 * runs in the same process as its clients, we don't need to deal with IPC.
+	 */
+	private final IBinder _Binder = new LocalBinder();
+	public class LocalBinder extends android.os.Binder
+	{
+		public WidgetRutaService getService() { return WidgetRutaService.this; }
+	}
+	@Override public IBinder onBind(Intent intent) { return _Binder; }
 	//______________________________________________________________________________________________
 	public void refresh()//TODO: cuando se crea ruta => pero necesito   https://developer.android.com/reference/android/app/Service.html#LocalServiceSample
 	{

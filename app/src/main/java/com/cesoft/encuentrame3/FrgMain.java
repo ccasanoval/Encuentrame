@@ -281,12 +281,13 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	//----------------------------------------------------------------------------------------------
 	private void delListeners()
 	{
-		_lisLugar.delListener();
-		_lisAviso.delListener();
-		_lisRuta.delListener();
+		if(_lisLugar!=null)_lisLugar.setListener(null);
+		if(_lisAviso!=null)_lisAviso.setListener(null);
+		if(_lisRuta!=null)_lisRuta.setListener(null);
 	}
 	private void newListeners()
 	{
+		delListeners();
 		//---
 		_lisLugar = new Fire.ObjetoListener<Lugar>()
 		{
