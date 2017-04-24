@@ -199,6 +199,11 @@ public class Aviso extends Objeto
 	}
 	public static void getActivos(final Fire.ObjetoListener<Aviso> listener) //ValueEventListener listener)
 	{
+		if(listener == null)
+		{
+			Log.e(TAG, "getActivos:e:-------------------------------------------------------------- LISTENER == NULL");
+			return;
+		}
 		Query queryRef = newFirebase().orderByChild(ACTIVO).equalTo(true);	//Query queryRef = ref.equalTo(true, ACTIVO);//NO PIRULA
 		//queryRef.addListenerForSingleValueEvent(listener);
 		ValueEventListener vel = new ValueEventListener()

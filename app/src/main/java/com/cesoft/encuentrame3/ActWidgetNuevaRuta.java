@@ -3,7 +3,6 @@ package com.cesoft.encuentrame3;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -156,7 +155,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 			_bBound = true;
 
 			if(_svcWidget != null)_svcWidget.refresh();
-			WidgetRutaService.unbindSvc(_sc, App.getContexto());
+			WidgetRutaService.unbindSvc(_sc, getApplicationContext());
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName arg0)
@@ -167,7 +166,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 	//
 	private void refreshWidget()
 	{
-		WidgetRutaService.bindSvc(_sc, App.getContexto());
+		WidgetRutaService.bindSvc(_sc, getApplicationContext());
 
 	}
 

@@ -24,7 +24,7 @@ public class CesOnSysBoot extends BroadcastReceiver
 			Intent serviceIntent = new Intent(context, CesService.class);
 			context.startService(serviceIntent);
 			// Rute Widget Svc
-			WidgetRutaService.startServ(context);
+			WidgetRutaService.startSvc(context);
 		}
 	}
 }

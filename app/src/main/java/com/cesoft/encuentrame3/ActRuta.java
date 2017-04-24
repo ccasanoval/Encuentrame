@@ -88,7 +88,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_ruta);
 
-		App.getInstance().getGlobalComponent().inject(this);
+		App.getComponent(getApplicationContext()).inject(this);
 
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);

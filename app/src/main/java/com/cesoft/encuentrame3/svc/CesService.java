@@ -40,7 +40,6 @@ import com.google.firebase.database.Transaction;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -72,19 +71,43 @@ public class CesService extends IntentService
 	private CesGeofenceStore _GeofenceStoreAvisos;
 	private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 
-	//TODO: probar a crear una ruta cuando no tienes conexion... no sale de NuevaRutaAct y no muestra amarilla la ruta...
+	//----------------------------------------------------------------------------------------------
+	private static CesService INSTANCE = null;
+		private boolean _bRun = true;
+		public static void stop()
+		{
+			if(INSTANCE != null)
+			{
+				INSTANCE._bRun=false;
+				INSTANCE.stopSelf();
+				if(INSTANCE._GeofenceStoreAvisos != null)
+					INSTANCE._GeofenceStoreAvisos.clear();
+				INSTANCE._GeofenceStoreAvisos = null;
+				INSTANCE = null;
+			}
+		}
+		public static void start(Context c)
+		{
+			if(INSTANCE == null)
+				c.startService(new Intent(c, CesService.class));
+		}
+
+	//TODO: probar a crear una ruta cuando no tienes conexion...
 
 	//______________________________________________________________________________________________
 	@Inject public CesService()
 	{
 		super("EncuentrameSvc");
+		INSTANCE = this;
 	}
 	@Override
 	public void onCreate()
 	{
+		Log.e(TAG, "******************************** on create *************************************");
 		super.onCreate();
+		createListAviso();
 		//_util = ((App)getApplication()).getGlobalComponent().util();
-		App.getInstance().getGlobalComponent().inject(this);
+		App.getComponent(getApplicationContext()).inject(this);
 		_login.login(new Login.AuthListener()
 		{
 			@Override
@@ -114,7 +137,7 @@ public class CesService extends IntentService
 		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 		alarmService.set(
 				AlarmManager.ELAPSED_REALTIME,
-				SystemClock.elapsedRealtime() + 1000,
+				SystemClock.elapsedRealtime() + 500,
 				restartServicePendingIntent);
 
 		Log.e(TAG, "-------------------Reiniciando...---------------------");
@@ -134,7 +157,7 @@ public class CesService extends IntentService
 			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
 			//long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
 			//noinspection InfiniteLoopStatement
-			while(true)//No hay un sistema para listen y not polling??????
+			while(_bRun)//No hay un sistema para listen y not polling??????
 			{
 Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DELAY_TRACK=%d------------------------%s", DELAY_TRACK/1000, java.text.DateFormat.getDateTimeInstance().format(new java.util.Date())));
 				if( ! _login.isLogged())
@@ -182,114 +205,72 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 	public void _restartDelayRuta()
 	{
 		DELAY_TRACK = DELAY_TRACK_MIN;
-Log.e(TAG, "_startRuta:------------------------------"+DELAY_TRACK);
+Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 		saveGeoTracking();
 		_tmTrack = System.currentTimeMillis();
 		//if(_hiloLoop!=null)_hiloLoop.interrupt();Doesnt work
 	}
 
 	//______________________________________________________________________________________________
-	Fire.ObjetoListener<Aviso> _lisAviso = new Fire.ObjetoListener<Aviso>()
+	private Fire.ObjetoListener<Aviso> _lisAviso;
+	private Fire.ObjetoListener<Aviso> createListAviso()
 	{
-		@Override
-		public void onData(Aviso[] aData)
+		final Context context = getApplicationContext();
+		_lisAviso = new Fire.ObjetoListener<Aviso>()
 		{
-			//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
-			boolean bDirty = false;
-			long n = aData.length;
-			if(n != CesService.this._listaGeoAvisos.size())
+			@Override
+			public void onData(Aviso[] aData)
 			{
-				if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
-				_listaGeoAvisos.clear();
-				bDirty = true;
-			}
-			ArrayList<Geofence> aGeofences = new ArrayList<>();
-			ArrayList<Aviso> aAvisos = new ArrayList<>();
-			for(int i=0; i < aData.length; i++)
-			{
-				Aviso a = aData[i];
-				aAvisos.add(a);
-				Geofence gf = new Geofence.Builder().setRequestId(a.getId())
-						.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
-						.setExpirationDuration(Geofence.NEVER_EXPIRE)
-						.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-						.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
-				aGeofences.add(gf);
-				if( ! bDirty)
+				//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
+				boolean bDirty = false;
+				long n = aData.length;
+				if(n != CesService.this._listaGeoAvisos.size())
 				{
-					if(_listaGeoAvisos.size() < i)
-						bDirty = true;
-					else if( ! _listaGeoAvisos.contains(a))//else if(_listaGeoAvisos.get(i))
-						bDirty = true;
-					i++;
+					if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
+					_listaGeoAvisos.clear();
+					bDirty = true;
+				}
+				ArrayList<Geofence> aGeofences = new ArrayList<>();
+				ArrayList<Aviso> aAvisos = new ArrayList<>();
+				for(int i=0; i < aData.length; i++)
+				{
+					Aviso a = aData[i];
+					aAvisos.add(a);
+					Geofence gf = new Geofence.Builder().setRequestId(a.getId())
+							.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
+							.setExpirationDuration(Geofence.NEVER_EXPIRE)
+							.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
+					aGeofences.add(gf);
+					if( ! bDirty)
+					{
+						if(_listaGeoAvisos.size() < i)
+							bDirty = true;
+						else if( ! _listaGeoAvisos.contains(a))//else if(_listaGeoAvisos.get(i))
+							bDirty = true;
+						i++;
+					}
+				}
+				if(bDirty)
+				{
+					_listaGeoAvisos = aAvisos;
+					_GeofenceStoreAvisos = new CesGeofenceStore(aGeofences, context);//Se puede añadir en lugar de crear desde cero?
 				}
 			}
-			if(bDirty)
+			@Override
+			public void onError(String err)
 			{
-				_listaGeoAvisos = aAvisos;
-				_GeofenceStoreAvisos = new CesGeofenceStore(aGeofences);//Se puede añadir en lugar de crear desde cero?
+				Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------"+err);
 			}
-		}
-		@Override
-		public void onError(String err)
-		{
-			Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------"+err);
-		}
-	};
+		};
+		return _lisAviso;
+	}
 	//______________________________________________________________________________________________
 	public void cargarListaGeoAvisos()
 	{
 		try
 		{
 			Aviso.getActivos(_lisAviso);
-			/*Aviso.getActivos(new ValueEventListener()
-			{
-				@Override
-				public void onDataChange(DataSnapshot avisos)
-				{
-					//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
-					boolean bDirty = false;
-					long n = avisos.getChildrenCount();
-					if(n != CesService.this._listaGeoAvisos.size())
-					{
-						if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
-						_listaGeoAvisos.clear();
-						bDirty = true;
-					}
-					ArrayList<Geofence> aGeofences = new ArrayList<>();
-					ArrayList<Aviso> aAvisos = new ArrayList<>();
-					int i=0;
-					for(DataSnapshot l : avisos.getChildren())
-					{
-						Aviso a = l.getValue(Aviso.class);
-						aAvisos.add(a);
-						Geofence gf = new Geofence.Builder().setRequestId(a.getId())
-								.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
-								.setExpirationDuration(Geofence.NEVER_EXPIRE)
-								.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-								.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
-						aGeofences.add(gf);
-						if( ! bDirty)
-						{
-							if(_listaGeoAvisos.size() < i)
-								bDirty = true;
-							else if( ! _listaGeoAvisos.contains(a))//else if(_listaGeoAvisos.get(i))
-								bDirty = true;
-							i++;
-						}
-					}
-					if(bDirty)
-					{
-						_listaGeoAvisos = aAvisos;
-						_GeofenceStoreAvisos = new CesGeofenceStore(CesService.this, aGeofences);//Se puede añadir en lugar de crear desde cero?
-					}
-				}
-				@Override
-				public void onCancelled(DatabaseError err)
-				{
-					Log.e(TAG, String.format("cargarListaGeoAvisos:e:%s",err));
-				}
-			});*/
 		}
 		catch(Exception e)
 		{
@@ -357,9 +338,9 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
 			return;
 		}
-		if(r.getPuntosCount() > 1 && loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 5+DISTANCE_MIN)
+		if(r.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 5+DISTANCE_MIN))
 		{
-			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+ACCURACY_MAX+" / "+DISTANCE_MIN);
+			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+ACCURACY_MAX+" / "+DISTANCE_MIN+" :::: "+r.getPuntosCount());
 			return;
 		}
 

@@ -17,17 +17,17 @@ import com.squareup.leakcanary.LeakCanary;
 // Created by CESoft on 15/09/2016
 public class App extends Application
 {
-	private static App _app = new App();
+	/*private static App _app;
 	public static App getInstance(){return _app;}
 	private static Context _c = null;
-	public static Context getContexto(){return _c;}
+	public static Context getContexto(){return _c;}*/
 
 	private static GlobalComponent _globalComponent;
 
 	@Override public void onCreate()
 	{
 		super.onCreate();
-		_c = getApplicationContext();
+		//_c = getApplicationContext();
 
 		if(LeakCanary.isInAnalyzerProcess(this))
 		{
@@ -48,6 +48,10 @@ Log.e("App", "--------------onCreate--------------------------------------------
 		Picasso.setSingletonInstance(built);*/
 	}
 
+	public static GlobalComponent getComponent(Context context)
+	{
+		return ((App)context.getApplicationContext()).getGlobalComponent();
+	}
 	 public GlobalComponent getGlobalComponent()
 	 {
 		 if(_globalComponent == null)

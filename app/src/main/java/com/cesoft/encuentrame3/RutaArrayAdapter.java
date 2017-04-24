@@ -34,7 +34,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		super(context, -1, rutas);
 		_rutas = rutas;
 		_inter = inter;
-		_util = App.getInstance().getGlobalComponent().util();
+		_util = App.getComponent(getContext()).util();
 	}
 
 

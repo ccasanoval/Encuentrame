@@ -91,7 +91,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_aviso);
 
-		App.getInstance().getGlobalComponent().inject(this);
+		App.getComponent(getApplicationContext()).inject(this);
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);

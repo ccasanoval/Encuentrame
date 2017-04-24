@@ -74,7 +74,7 @@ public class ActLogin extends AppCompatActivity
 		startService(new Intent(this, CesService.class));
 		// Rute Widget Svc
 		//_serviceIntent =
-		WidgetRutaService.startServ(this);
+		WidgetRutaService.startSvc(this);
 	}
 
 	public void onDestroy()
@@ -221,7 +221,7 @@ public class ActLogin extends AppCompatActivity
 		{
 			super.onCreate(b);
 			//App.getInstance().getGlobalComponent().inject(this);
-			_login = App.getInstance().getGlobalComponent().login();
+			_login = App.getComponent(getContext()).login();
 		}
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

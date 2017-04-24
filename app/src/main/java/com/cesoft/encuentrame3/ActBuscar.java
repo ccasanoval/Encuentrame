@@ -67,7 +67,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_buscar);
 
-		App.getInstance().getGlobalComponent().inject(this);
+		App.getComponent(getApplicationContext()).inject(this);
 
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);

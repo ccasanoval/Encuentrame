@@ -13,6 +13,7 @@ import com.cesoft.encuentrame3.ActLogin;
 import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,8 +27,9 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onReceive(Context context, Intent intent)//http://stackoverflow.com/questions/2471875/processing-more-than-one-button-click-at-android-widget
 	{
-		Intent iSvc = new Intent(context, WidgetRutaService.class);
-		context.startService(iSvc);
+Log.e("WidgetRuta", "onReceive-----------------------------------------------------");
+		//Intent iSvc = new Intent(context, WidgetRutaService.class);context.startService(iSvc);
+		WidgetRutaService.startSvc(context);
 
 		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 
@@ -57,6 +59,7 @@ public class WidgetRuta extends AppWidgetProvider
 		Intent intent;
 		PendingIntent actionPendingIntent;
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
+Log.e("WidgetRuta", "onUpdate-----------------------------------------------------");
 
 		// ADD RUTA
 		intent = new Intent(context, getClass());//WidgetRuta.class

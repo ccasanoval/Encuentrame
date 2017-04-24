@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3.svc;
 import java.util.ArrayList;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,23 +37,25 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 {
 	private static final String TAG = CesGeofenceStore.class.getSimpleName();
 
+	private Context _context = null;
 	private GoogleApiClient _GoogleApiClient;
 	private PendingIntent _PendingIntent;
 	private ArrayList<Geofence> _aGeofences;
 
 	//----------------------------------------------------------------------------------------------
-	CesGeofenceStore(ArrayList<Geofence> geofences)
+	CesGeofenceStore(ArrayList<Geofence> geofences, Context context)
 	{
 		try
 		{
-		_aGeofences = new ArrayList<>(geofences);
-		_GoogleApiClient = new GoogleApiClient
-				.Builder(App.getContexto())
-				.addApi(LocationServices.API)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.build();
-		_GoogleApiClient.connect();
+			_context = context;
+			_aGeofences = new ArrayList<>(geofences);
+			_GoogleApiClient = new GoogleApiClient
+					.Builder(context)
+					.addApi(LocationServices.API)
+					.addConnectionCallbacks(this)
+					.addOnConnectionFailedListener(this)
+					.build();
+			_GoogleApiClient.connect();
 		}
 		catch(Exception e)
 		{
@@ -128,7 +131,7 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 			Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
 			// Return a PendingIntent to start the IntentService. Always create a PendingIntent sent to Location Services with FLAG_UPDATE_CURRENT,
 			// so that sending the PendingIntent again updates the original. Otherwise, Location Services can't match the PendingIntent to requests made with it.
-			return PendingIntent.getBroadcast(App.getContexto(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			return PendingIntent.getBroadcast(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		}
 		catch(Exception e)
 		{

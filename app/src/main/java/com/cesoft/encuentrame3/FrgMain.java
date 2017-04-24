@@ -78,7 +78,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		App.getInstance().getGlobalComponent().inject(this);
+		App.getComponent(getContext()).inject(this);
 
 		Bundle args = getArguments();
 		_sectionNumber = args.getInt(ARG_SECTION_NUMBER);

@@ -1,6 +1,8 @@
 package com.cesoft.encuentrame3.widget;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.app.Service;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -53,13 +56,13 @@ public class WidgetRutaService extends Service
 		//c.stopService(serviceIntent);
 	}
 	//----
-	public static Intent startServ(Context c)
+	public static Intent startSvc(Context c)
 	{
 		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
 		c.startService(serviceIntent);
 		return serviceIntent;
 	}
-	public static void stopServ(Activity act, Intent serviceIntent)
+	public static void stopSvc(Activity act, Intent serviceIntent)
 	{
 		if(act != null && serviceIntent != null)
 		act.stopService(serviceIntent);
@@ -70,7 +73,7 @@ public class WidgetRutaService extends Service
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
-		_util = App.getInstance().getGlobalComponent().util();
+		_util = App.getComponent(getApplicationContext()).util();
 Log.e(TAG, "onStartCommand--------------------------------------------------------------------"+_util);
 
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
@@ -173,5 +176,25 @@ Log.e(TAG, "setRuta:--------*****---------------"+sRuta);
 		{
 			Log.e(TAG, "WidgetRutaService:onStartCommand:e:-----------------------------------------", e);
 		}
+	}
+
+	//----------------------------------------------------------------------------------------------
+	// Restaura el servicio cuando se le mata el proceso
+	@Override
+	public void onTaskRemoved(Intent rootIntent)
+	{
+		Log.e(TAG, "-------------------onTaskRemoved---------------------");
+		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+		restartServiceIntent.setPackage(getPackageName());
+
+		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+		alarmService.set(
+				AlarmManager.ELAPSED_REALTIME,
+				SystemClock.elapsedRealtime() + 500,
+				restartServicePendingIntent);
+
+		Log.e(TAG, "-------------------Reiniciando...---------------------");
+		super.onTaskRemoved(rootIntent);
 	}
 }
