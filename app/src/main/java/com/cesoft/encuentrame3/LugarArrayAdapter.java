@@ -10,7 +10,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.models.Lugar;
-import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Constantes;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016
@@ -61,7 +61,7 @@ class LugarArrayAdapter extends ArrayAdapter<Lugar>
 			@Override
 			public void onClick(View v)
 			{
-				_inter.onItemEdit(Util.LUGARES, _lugares[position]);
+				_inter.onItemEdit(Constantes.LUGARES, _lugares[position]);
 			}
 		});
 		holder.btnMapa.setOnClickListener(new View.OnClickListener()
@@ -69,7 +69,7 @@ class LugarArrayAdapter extends ArrayAdapter<Lugar>
 			@Override
 			public void onClick(View v)
 			{
-				_inter.onItemMap(Util.LUGARES, _lugares[position]);
+				_inter.onItemMap(Constantes.LUGARES, _lugares[position]);
 			}
 		});
 

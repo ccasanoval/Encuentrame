@@ -40,7 +40,7 @@ public class Util
 		private Tipo(int value){this.value = value;}
 		public int getValue(){return value;}
 	}*/
-	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
+
 	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
@@ -312,8 +312,8 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	public void return2Main(Activity act, boolean bDirty, String sMensaje)
 	{
 		Intent intent = new Intent();
-		intent.putExtra(ActMain.DIRTY, bDirty);
-		intent.putExtra(ActMain.MENSAJE, sMensaje);
+		intent.putExtra(Constantes.DIRTY, bDirty);
+		intent.putExtra(Constantes.MENSAJE, sMensaje);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
 	}
@@ -321,7 +321,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	{
 android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 		Intent intent = new Intent();
-		intent.putExtra(ActMain.DIRTY, true);
+		intent.putExtra(Constantes.DIRTY, true);
 		intent.putExtra(Filtro.FILTRO, filtro);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
@@ -330,9 +330,9 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 	{
 		Intent intent = new Intent(act, ActMain.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra(ActMain.PAGINA, pagina);//Go to specific section (ActMain.AVISOS...)
-		intent.putExtra(ActMain.DIRTY, bDirty);
-		intent.putExtra(ActMain.MENSAJE, sMensaje);
+		intent.putExtra(Constantes.WIN_TAB, pagina);//Go to specific section (ActMain.AVISOS...)
+		intent.putExtra(Constantes.DIRTY, bDirty);
+		intent.putExtra(Constantes.MENSAJE, sMensaje);
 		act.startActivity(intent);//Para cuando abres la pantalla desde una notificacion...
 		act.finish();
 	}

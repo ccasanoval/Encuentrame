@@ -24,6 +24,7 @@ import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
@@ -32,7 +33,11 @@ import com.cesoft.encuentrame3.util.Util;
 //https://developer.android.com/training/permissions/requesting.html
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 
+//http://www.vogella.com/tutorials/Dagger/article.html
+
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
+//TODO: CESoft:getLista:onCancelled:DatabaseError: Permission denied  -----> Mostrar ventana de login...
+
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
 //TODO: Cambiar ListView por recyclerview
@@ -50,13 +55,10 @@ import com.cesoft.encuentrame3.util.Util;
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 {
 	private static final String TAG = ActMain.class.getSimpleName();
-	public static final String PAGINA = "pagina", MENSAJE = "mensaje", DIRTY = "dirty";
 
 	private FrgMain[] _aFrg = new FrgMain[3];
 	private ViewPager _viewPager;
-
 	private Login _login;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -66,11 +68,12 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);
 
 		_login = ((App)getApplication()).getGlobalComponent().login();
+		//if(!_login.isLogged())gotoLogin();
 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		toolbar.setSubtitle(Login.getCurrentUserName());
-//Log.e(TAG, "----------- MAIN CREATE");
+Log.e(TAG, "----------- MAIN CREATE");
 
 		createViews();
 	}
@@ -87,6 +90,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 //Log.e(TAG, "----------- MAIN START");
 		super.onStart();
 		pideGPS();
+		if(!_login.isLogged())gotoLogin();
 		//createViews();
 	}
 	@Override
@@ -106,30 +110,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
 		tabLayout.setSelectedTabIndicatorHeight(10);
-		/*tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-			@Override	public void onTabSelected(TabLayout.Tab tab)
-			{
-				_viewPager.setCurrentItem(tab.getPosition());
-				Log.e(TAG, "onTabSelected ****************"+_aFrg[tab.getPosition()]._sectionNumber+"********************** "+tab.getPosition()+" : "+tab.getText());
-			}
-			@Override	public void onTabUnselected(TabLayout.Tab tab) {}
-			@Override	public void onTabReselected(TabLayout.Tab tab) {}
-		});*/
-		//tabLayout.setSelectedTabIndicatorColor();
-		//tabLayout.setTabTextColors();
-		/*for(int i=0; i < sectionsPagerAdapter.getCount(); i++)
-		{
-			if(_aFrg[i] == null)
-				sectionsPagerAdapter.getItem(i);
-		}*/
-
 
 		try
 		{
-			Integer nPagina = getIntent().getIntExtra(PAGINA, -1);
-			if(nPagina >= Util.LUGARES && nPagina <= Util.AVISOS)
+			Integer nPagina = getIntent().getIntExtra(Constantes.WIN_TAB, -1);
+			if(nPagina >= Constantes.LUGARES && nPagina <= Constantes.AVISOS)
 				_viewPager.setCurrentItem(nPagina);
-			String sMensaje = getIntent().getStringExtra(MENSAJE);
+			String sMensaje = getIntent().getStringExtra(Constantes.MENSAJE);
 			if(sMensaje != null && !sMensaje.isEmpty())
 				Toast.makeText(ActMain.this, sMensaje, Toast.LENGTH_LONG).show();
 		}
@@ -153,7 +140,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		switch(id)
 		{
 			case R.id.action_config:
-				startActivityForResult(new Intent(this, ActConfig.class), Util.CONFIG);
+				startActivityForResult(new Intent(this, ActConfig.class), Constantes.CONFIG);
 				return true;
 			case R.id.action_mapa:
 				i = new Intent(this, ActMaps.class);
@@ -172,7 +159,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		if(resultCode != RESULT_OK)return;
-		if(requestCode == Util.CONFIG)gotoLogin();
+		if(requestCode == Constantes.CONFIG)gotoLogin();
 		else super.onActivityResult(requestCode, resultCode, data);
 	}
 
@@ -189,28 +176,28 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	//---
 	public void onLugar()
 	{
-		startActivityForResult(new Intent(this, ActLugar.class), Util.LUGARES);
+		startActivityForResult(new Intent(this, ActLugar.class), Constantes.LUGARES);
 	}
 	public void onAviso()
 	{
-		startActivityForResult(new Intent(this, ActAviso.class), Util.AVISOS);
+		startActivityForResult(new Intent(this, ActAviso.class), Constantes.AVISOS);
 	}
 	public void onRuta()
 	{
-		startActivityForResult(new Intent(this, ActRuta.class), Util.RUTAS);
+		startActivityForResult(new Intent(this, ActRuta.class), Constantes.RUTAS);
 	}
 	//---
 	public void goLugar(Objeto obj)
 	{
 		Intent i = new Intent(this, ActLugar.class);
 		i.putExtra(Lugar.NOMBRE, obj);
-		startActivityForResult(i, Util.LUGARES);
+		startActivityForResult(i, Constantes.LUGARES);
 	}
 	public void goAviso(Objeto obj)
 	{
 		Intent i = new Intent(this, ActAviso.class);
 		i.putExtra(Aviso.NOMBRE, obj);
-		startActivityForResult(i, Util.AVISOS);
+		startActivityForResult(i, Constantes.AVISOS);
 	}
 	public void goRuta(Objeto obj)
 	{
@@ -218,7 +205,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		{
 			Intent i = new Intent(this, ActRuta.class);
 			i.putExtra(Ruta.NOMBRE, obj);
-			startActivityForResult(i, Util.RUTAS);
+			startActivityForResult(i, Constantes.RUTAS);
 		}
 		catch(Exception e){Log.e(TAG, "------------------goRuta:onItemEdit:e:-----------------------", e);}
 	}
@@ -227,13 +214,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	{
 		Intent i = new Intent(this, ActMaps.class);
 		i.putExtra(Lugar.NOMBRE, obj);
-		startActivityForResult(i, Util.LUGARES);
+		startActivityForResult(i, Constantes.LUGARES);
 	}
 	public void goAvisoMap(Objeto obj)
 	{
 		Intent i = new Intent(this, ActMaps.class);
 		i.putExtra(Aviso.NOMBRE, obj);
-		startActivityForResult(i, Util.AVISOS);
+		startActivityForResult(i, Constantes.AVISOS);
 	}
 	public void goRutaMap(Objeto obj)
 	{
@@ -241,7 +228,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		{
 			Intent i = new Intent(this, ActMaps.class);
 			i.putExtra(Ruta.NOMBRE, obj);
-			startActivityForResult(i, Util.RUTAS);
+			startActivityForResult(i, Constantes.RUTAS);
 		}
 		catch(Exception e){Log.e(TAG, "goRutaMap:RUTAS:e:-------------------------------------------", e);}
 	}
@@ -269,14 +256,14 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			Filtro fil = frg.getFiltro();
 			Intent i = new Intent(/*frg.getContext()*/this, ActBuscar.class);//_main.getApplicationContext
 			i.putExtra(Filtro.FILTRO, fil);
-			frg.startActivityForResult(i, Util.BUSCAR);
+			frg.startActivityForResult(i, Constantes.BUSCAR);
 		}
 		catch(Exception e){Log.e(TAG, "buscar:e:----------------------------------------------------", e);}
 	}
 	//---
 	public int getCurrentItem()
 	{
-		if(_viewPager == null)return Util.NADA;
+		if(_viewPager == null)return Constantes.NADA;
 		return _viewPager.getCurrentItem();
 	}
 
@@ -311,9 +298,9 @@ Log.e(TAG, "getItem--------------------["+position+"]="+_aFrg[position]+" : "+_a
 		{
 			switch(position)
 			{
-			case Util.LUGARES:	return getString(R.string.lugares);
-			case Util.RUTAS:	return getString(R.string.rutas);
-			case Util.AVISOS:	return getString(R.string.avisos);
+			case Constantes.LUGARES:	return getString(R.string.lugares);
+			case Constantes.RUTAS:	return getString(R.string.rutas);
+			case Constantes.AVISOS:	return getString(R.string.avisos);
 			}
 			return null;
 		}

@@ -55,7 +55,7 @@ public class Ruta extends Objeto implements Parcelable
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
-	protected Date fecha;
+	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
 	///______________________________________________________________
@@ -116,6 +116,17 @@ public class Ruta extends Objeto implements Parcelable
 		}
 		_datos.removeValue();
 		puntosCount = 0;
+	}
+	public static abstract class CompletionListener implements DatabaseReference.CompletionListener
+	{
+		protected abstract void onDatos(String id);
+		protected abstract void onError(String err, int code);
+		@Override
+		public void onComplete(DatabaseError err, DatabaseReference data)
+		{
+			if(err == null)	onDatos(data.getKey());
+			else			onError(err.getMessage(), err.getCode());
+		}
 	}
 	public void guardar(DatabaseReference.CompletionListener listener)
 	{
@@ -425,18 +436,18 @@ public class Ruta extends Objeto implements Parcelable
 			public void setId(String v){id = v;}
 
 		String idRuta = null;
-			public String getIdRuta(){return idRuta;}
-			public void setIdRuta(String v){idRuta = v;}
+			String getIdRuta(){return idRuta;}
+			void setIdRuta(String v){idRuta = v;}
 
 		private double latitud, longitud;
 			public double getLatitud(){return latitud;}
 			public double getLongitud(){return longitud;}
-			public void setLat(double v){latitud=v;}
-			public void setLon(double v){longitud=v;}
+			void setLat(double v){latitud=v;}
+			void setLon(double v){longitud=v;}
 
 		private Date fecha;
 			public Date getFecha(){return fecha;}
-			public void setFecha(Date v){fecha=v;}
+			void setFecha(Date v){fecha=v;}
 
 		private float precision;
 			public float getPrecision(){return precision;}
@@ -459,7 +470,7 @@ public class Ruta extends Objeto implements Parcelable
 					getId(), DATE_FORMAT.format(fecha), latitud, longitud, idRuta);
 		}
 		//__________________________________________________________________________________________
-		public RutaPunto(){}//Required for Firebase
+		@SuppressWarnings("unused") public RutaPunto(){}//Required for Firebase !!!!!!!!!!!!!!!!!!!!
 		RutaPunto(String idRuta, double lat, double lon, float precision, double altura, float velocidad, float direccion)
 		{
 			this.idRuta = idRuta;

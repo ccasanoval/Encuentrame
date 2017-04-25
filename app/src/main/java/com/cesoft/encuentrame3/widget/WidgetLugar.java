@@ -25,8 +25,9 @@ public class WidgetLugar extends AppWidgetProvider
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
-		// Open the app
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_lugar);
+
+		// Open the app
 		Intent intent = new Intent(context.getApplicationContext(), ActLogin.class);
 		PendingIntent actionPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.btnApp, actionPendingIntent);

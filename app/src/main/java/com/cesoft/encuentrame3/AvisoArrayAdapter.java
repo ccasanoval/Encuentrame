@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.models.Aviso;
-import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Constantes;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016
@@ -75,7 +75,7 @@ class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 			@Override
 			public void onClick(View v)
 			{
-				_inter.onItemEdit(Util.AVISOS, _avisos[position]);
+				_inter.onItemEdit(Constantes.AVISOS, _avisos[position]);
 			}
 		});
 		holder.btnMapa.setOnClickListener(new View.OnClickListener()
@@ -83,7 +83,7 @@ class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 			@Override
 			public void onClick(View v)
 			{
-				_inter.onItemMap(Util.AVISOS, _avisos[position]);
+				_inter.onItemMap(Constantes.AVISOS, _avisos[position]);
 			}
 		});
 

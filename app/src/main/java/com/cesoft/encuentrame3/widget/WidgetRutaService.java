@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3.widget;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -73,6 +72,7 @@ public class WidgetRutaService extends Service
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
+		Log.e(TAG, "--------------onStartCommand----------------------------------------------------");
 		_util = App.getComponent(getApplicationContext()).util();
 
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
@@ -147,26 +147,28 @@ public class WidgetRutaService extends Service
 	//______________________________________________________________________________________________
 	private void setRuta()
 	{
-		try//TODO: activar desactivar botones de widget
+		try
 		{
 			String idRuta = _util.getTrackingRoute();
-			Ruta.getById(idRuta, new Fire.SimpleListener<Ruta>()//Todo: ObjetoListener para actualizar widget? si no, como actualiza?
+			Ruta.getById(idRuta, new Fire.SimpleListener<Ruta>()
 			{
 				@Override
 				public void onData(Ruta[] aData)
 				{
 					String sRuta = String.format(Locale.ENGLISH, "%s (%d)", aData[0].getNombre(), aData[0].getPuntosCount());
-					RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.widget_ruta);
+					/*RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.widget_ruta);
 					remoteViews.setTextViewText(R.id.txtRuta, sRuta);
 					remoteViews.setViewVisibility(R.id.btnStop, View.VISIBLE);
 					ComponentName componentName = new ComponentName(WidgetRutaService.this, WidgetRuta.class);
-					AppWidgetManager.getInstance(WidgetRutaService.this).updateAppWidget(componentName, remoteViews);
+					AppWidgetManager.getInstance(WidgetRutaService.this).updateAppWidget(componentName, remoteViews);*/
+					setWidget(sRuta);
 Log.e(TAG, "setRuta:--------*****---------------"+sRuta);
 				}
 				@Override
 				public void onError(String err)
 				{
 					Log.e(TAG, String.format("WidgetRutaService:cambiarTextoWidget:onError:e:-------------%s", err));
+					setWidget("Error");
 				}
 			});
 			stopSelf();
@@ -175,6 +177,32 @@ Log.e(TAG, "setRuta:--------*****---------------"+sRuta);
 		{
 			Log.e(TAG, "WidgetRutaService:onStartCommand:e:-----------------------------------------", e);
 		}
+	}
+
+	//----------------------------------------------------------------------------------------------
+	private void setWidget(String sRuta)
+	{
+		//Log.e(TAG, "setWidget:--------------------------------- sTarea = "+sTarea);
+		Context context = getApplicationContext();
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(getApplication(), WidgetRuta.class));
+		/*for(int widgetId : allWidgetIds)
+		{
+			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
+
+			// Actualiza tarea actual
+			remoteViews.setTextViewText(R.id.txtRuta, sRuta);
+
+			//  onClick  ->  Actualiza tarea actual
+			Intent clickIntent = new Intent(context, WidgetRuta.class);
+			clickIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+			clickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			remoteViews.setOnClickPendingIntent(R.id.txtRuta, pendingIntent);
+
+			appWidgetManager.updateAppWidget(widgetId, remoteViews);
+		}*/
+		WidgetRuta.setWidget(context, appWidgetManager, allWidgetIds, sRuta);
 	}
 
 	//----------------------------------------------------------------------------------------------

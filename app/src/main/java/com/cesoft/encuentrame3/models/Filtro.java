@@ -3,7 +3,7 @@ package com.cesoft.encuentrame3.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
@@ -16,7 +16,7 @@ import java.util.Locale;
 public class Filtro implements Parcelable
 {
 	public static final String FILTRO = "filtro";
-	public static final int TODOS = -1;
+	private static final int TODOS = -1;
 	public static final int INACTIVO = 0;
 	public static final int ACTIVO = 1;
 
@@ -29,12 +29,12 @@ public class Filtro implements Parcelable
 			return !(_activo == TODOS && _nombre.isEmpty() && _fechaIni == null && _fechaFin == null && _punto.latitude == 0 && _punto.longitude == 0);
 		}
 
-	private int		_tipo = Util.NADA;
+	private int		_tipo = Constantes.NADA;
 	private int 	_activo = Filtro.TODOS;
 	private String	_nombre = "";
 	private Date	_fechaIni, _fechaFin;
 	private LatLng	_punto = new LatLng(0,0);
-	private int		_radio = Util.NADA;
+	private int		_radio = Constantes.NADA;
 
 	public int getTipo(){return _tipo;}
 	public int getActivo(){return _activo;}
@@ -48,13 +48,13 @@ public class Filtro implements Parcelable
 	{
 		switch(v)
 		{
-		case Util.LUGARES:
-		case Util.RUTAS:
-		case Util.AVISOS:
+		case Constantes.LUGARES:
+		case Constantes.RUTAS:
+		case Constantes.AVISOS:
 			_tipo = v;
 			break;
 		default:
-			_tipo = Util.NADA;
+			_tipo = Constantes.NADA;
 			break;
 		}
 	}
@@ -89,7 +89,7 @@ public class Filtro implements Parcelable
 	}
 	public void setRadio(int v)
 	{
-		_radio = v>0 ? v : Util.NADA;
+		_radio = v>0 ? v : Constantes.NADA;
 	}
 
 	//______________________________________________________________________________________________

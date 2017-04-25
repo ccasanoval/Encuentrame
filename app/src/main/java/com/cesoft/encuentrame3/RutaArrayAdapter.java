@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.models.Ruta;
-import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Util;
 
 import java.util.Locale;
@@ -70,7 +70,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			@Override
 			public void onClick(View v)
 			{
-				_inter.onItemEdit(Util.RUTAS, _rutas[position]);
+				_inter.onItemEdit(Constantes.RUTAS, _rutas[position]);
 			}
 		});
 		holder.btnMapa.setOnClickListener(new View.OnClickListener()
@@ -78,7 +78,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			@Override
 			public void onClick(View v)
 			{
-				_inter.onItemMap(Util.RUTAS, _rutas[position]);
+				_inter.onItemMap(Constantes.RUTAS, _rutas[position]);
 			}
 		});
 		// Si la ruta se está grabando, resaltar

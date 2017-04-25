@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Aviso;
@@ -294,7 +295,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	public void openMain(boolean bDirty, String sMensaje)
 	{
 		if(_bDesdeNotificacion)
-			_util.openMain(ActAviso.this, bDirty, sMensaje, Util.AVISOS);
+			_util.openMain(ActAviso.this, bDirty, sMensaje, Constantes.AVISOS);
 		else
 			_util.return2Main(ActAviso.this, bDirty, sMensaje);
 	}

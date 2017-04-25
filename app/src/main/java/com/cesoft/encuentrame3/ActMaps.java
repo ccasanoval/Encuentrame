@@ -19,6 +19,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import com.cesoft.encuentrame3.util.Constantes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -59,7 +60,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	private Aviso _a;
 	private Ruta _r;
 
-	private int _iTipo = Util.NADA;
+	private int _iTipo = Constantes.NADA;
 
 	CoordinatorLayout _coordinatorLayout;
 
@@ -75,7 +76,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		try{_l = getIntent().getParcelableExtra(Lugar.NOMBRE);}catch(Exception e){_l=null;}
 		try{_r = getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
 		try{_a = getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
-		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);}catch(Exception e){_iTipo=Util.NADA;}
+		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Constantes.NADA);}catch(Exception e){_iTipo=Constantes.NADA;}
 		//------------------------------------------------------------------------------------------
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -93,7 +94,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 					_util.return2Main(ActMaps.this, false, "");
 				}
 			});
-		if(_iTipo != Util.NADA || _r != null)fab.setVisibility(View.GONE);
+		if(_iTipo != Constantes.NADA || _r != null)fab.setVisibility(View.GONE);
 
 		fab.setOnClickListener(new View.OnClickListener()
 		{
@@ -230,9 +231,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		else
 		switch(_iTipo)
 		{
-		case Util.LUGARES:	showLugares();break;
-		case Util.AVISOS:	showAvisos();break;
-		case Util.RUTAS:	showRutas();break;
+		case Constantes.LUGARES:	showLugares();break;
+		case Constantes.AVISOS:	showAvisos();break;
+		case Constantes.RUTAS:	showRutas();break;
 		}
 
 		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()

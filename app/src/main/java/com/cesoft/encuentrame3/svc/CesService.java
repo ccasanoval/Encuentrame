@@ -66,7 +66,7 @@ public class CesService extends IntentService
 	private static final long DISTANCE_MIN = 10;//m
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;*/
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
-	public static long DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
+	public long DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 
 	@Inject	Util _util;
 	@Inject	Login _login;
@@ -109,6 +109,8 @@ public class CesService extends IntentService
 	{
 		Log.e(TAG, "******************************** on create *************************************");
 		super.onCreate();
+
+		DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 		createListAviso();
 		//_util = ((App)getApplication()).getGlobalComponent().util();
 		App.getComponent(getApplicationContext()).inject(this);
@@ -171,6 +173,7 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 				}
 				if(_tmTrack + DELAY_TRACK < System.currentTimeMillis())
 				{
+					WidgetRutaService.startSvc(getApplicationContext());
 					saveGeoTracking();
 					_tmTrack = System.currentTimeMillis();
 				}
@@ -326,7 +329,6 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+Constantes.ACCURACY_MAX+" / "+Constantes.DISTANCE_MIN+" :::: n pts "+r.getPuntosCount());
 			return;
 		}
-		WidgetRutaService.startSvc(getApplicationContext());
 
 		if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
 		{
@@ -363,7 +365,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	private class GuardarListener implements DatabaseReference.CompletionListener
+	/*private class GuardarListener implements DatabaseReference.CompletionListener
 	{
 		private Location _loc = null;
 		GuardarListener(Location loc){_loc = loc;}
@@ -391,6 +393,59 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 				Log.e(TAG, String.format("saveGeoTracking:guardar:err:-------------------------:%s",err));
 			}
 		}
+	}*/
+	private class GuardarListener extends Ruta.CompletionListener
+	{
+		private Location _loc = null;
+		GuardarListener(Location loc){_loc = loc;}
+
+		@Override
+		protected void onDatos(String id)
+		{
+			//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
+			Ruta.addPunto(id, _loc.getLatitude(), _loc.getLongitude(),
+			_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
+			new Transaction.Handler()
+			{
+				@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
+				@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
+				{
+					if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
+					//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
+					Util.refreshListaRutas();//Refrescar lista rutas en main..
+				}
+			});
+		}
+		@Override
+		protected void onError(String err, int code)
+		{
+			Log.e(TAG, String.format(Locale.ENGLISH, "saveGeoTracking:guardar:err:-------------------------:%s : %d",err, code));
+		}
+/*
+		@Override
+		public void onComplete(DatabaseError err, DatabaseReference data)
+		{
+			if(err == null)
+			{
+				//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
+				Ruta.addPunto(data.getKey(), _loc.getLatitude(), _loc.getLongitude(),
+						_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
+						new Transaction.Handler()
+						{
+							@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
+							@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
+							{
+								if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
+								//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
+								Util.refreshListaRutas();//Refrescar lista rutas en main..
+							}
+						});
+			}
+			else
+			{
+				Log.e(TAG, String.format("saveGeoTracking:guardar:err:-------------------------:%s",err));
+			}
+		}*/
 	}
 
 

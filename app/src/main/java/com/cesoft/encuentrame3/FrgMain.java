@@ -21,6 +21,7 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
@@ -45,7 +46,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 	@Inject	Util _util;
 
-	public int _sectionNumber = Util.LUGARES;//Util.NADA;
+	public int _sectionNumber = Constantes.LUGARES;//Util.NADA;
 	private View _rootView;
 	private ListView _listView;
 
@@ -103,9 +104,9 @@ Log.e(TAG, "on CREATE view -----------------------------------------------------
 			{
 				switch(_sectionNumber)//switch(_viewPager.getCurrentItem())
 				{
-					case Util.LUGARES:	_main.onLugar();	break;
-					case Util.RUTAS:	_main.onRuta();		break;
-					case Util.AVISOS:	_main.onAviso();	break;
+					case Constantes.LUGARES:	_main.onLugar();	break;
+					case Constantes.RUTAS:	_main.onRuta();		break;
+					case Constantes.AVISOS:	_main.onAviso();	break;
 				}
 			}
 		});
@@ -113,13 +114,13 @@ Log.e(TAG, "on CREATE view -----------------------------------------------------
 		TextView textView = new TextView(_rootView.getContext());
 		switch(_sectionNumber)
 		{
-			case Util.LUGARES://-------------------------------------------------------------------------
+			case Constantes.LUGARES://-------------------------------------------------------------------------
 				textView.setText(getString(R.string.lugares));
 				break;
-			case Util.RUTAS://---------------------------------------------------------------------------
+			case Constantes.RUTAS://---------------------------------------------------------------------------
 				textView.setText(getString(R.string.rutas));
 				break;
-			case Util.AVISOS://--------------------------------------------------------------------------
+			case Constantes.AVISOS://--------------------------------------------------------------------------
 				textView.setText(getString(R.string.avisos));
 				break;
 		}
@@ -146,13 +147,13 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 
 		switch(_sectionNumber)
 		{
-			case Util.LUGARES:	refreshLugares();	break;
-			case Util.RUTAS:	refreshRutas();		break;
-			case Util.AVISOS:	refreshAvisos();	break;
+			case Constantes.LUGARES:	refreshLugares();	break;
+			case Constantes.RUTAS:	refreshRutas();		break;
+			case Constantes.AVISOS:	refreshAvisos();	break;
 		}
 
 		/// Actualizar lista de rutas
-		if(_sectionNumber == Util.RUTAS)
+		if(_sectionNumber == Constantes.RUTAS)
 		{
 			Util.setRefreshCallback(this);// CesService(on new track point) -> Util(refres ruta) -> this fragment(broadcast -> refresh lista rutas)
 			_MessageReceiver = new BroadcastReceiver()
@@ -171,7 +172,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	{
 		super.onStop();
 		_MessageReceiver = null;
-		if(_sectionNumber == Util.RUTAS)
+		if(_sectionNumber == Constantes.RUTAS)
 			Util.setRefreshCallback(null);
 		delListeners();
 	}
@@ -180,7 +181,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	public void onResume()
 	{
 		super.onResume();
-		if(_sectionNumber == Util.RUTAS)
+		if(_sectionNumber == Constantes.RUTAS)
 		{
 			LocalBroadcastManager.getInstance(getContext()).registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
 			refreshRutas();
@@ -190,7 +191,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	public void onPause()
 	{
 		super.onPause();
-		if(_sectionNumber == Util.RUTAS)
+		if(_sectionNumber == Constantes.RUTAS)
 			LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(_MessageReceiver);
 	}
 
@@ -243,9 +244,9 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	{
 		switch(tipo)
 		{
-			case Util.LUGARES:	_main.goLugar(obj);	break;
-			case Util.AVISOS:	_main.goAviso(obj);	break;
-			case Util.RUTAS:	_main.goRuta(obj);	break;
+			case Constantes.LUGARES:	_main.goLugar(obj);	break;
+			case Constantes.AVISOS:	_main.goAviso(obj);	break;
+			case Constantes.RUTAS:	_main.goRuta(obj);	break;
 		}
 	}
 	@Override
@@ -253,9 +254,9 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 	{
 		switch(tipo)
 		{
-			case Util.LUGARES:	_main.goLugarMap(obj);	break;
-			case Util.AVISOS:	_main.goAvisoMap(obj);	break;
-			case Util.RUTAS:	_main.goRutaMap(obj);	break;
+			case Constantes.LUGARES:	_main.goLugarMap(obj);	break;
+			case Constantes.AVISOS:	_main.goAvisoMap(obj);	break;
+			case Constantes.RUTAS:	_main.goRutaMap(obj);	break;
 		}
 	}
 	public void buscar()
@@ -299,7 +300,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 				{
 					try
 					{
-						if(_main.getCurrentItem() == Util.LUGARES)
+						if(_main.getCurrentItem() == Constantes.LUGARES)
 							try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 							catch(Exception e){Log.e(TAG, String.format("LUGARES:handleResponse:e:%s",e),e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
 					}
@@ -325,7 +326,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 				{
 					try
 					{
-						if(_main.getCurrentItem() == Util.RUTAS)
+						if(_main.getCurrentItem() == Constantes.RUTAS)
 							try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 							catch(Exception e){Log.e(TAG, "RUTAS:handleResponse:e:----------------------", e);}
 					}catch(Exception e){Log.e(TAG, "_acRuta:e:------------------------------------------", e);}
@@ -354,7 +355,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 				long n = aAvisos.length;
 				if(n < 1)
 				{
-					if(_main.getCurrentItem() == Util.AVISOS)//if(_sectionNumber == Util.AVISOS)
+					if(_main.getCurrentItem() == Constantes.AVISOS)//if(_sectionNumber == Util.AVISOS)
 						try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 						catch(Exception e){Log.e(TAG, String.format("AVISOS:handleResponse:e:%s",e), e);}
 				}
@@ -450,7 +451,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 			if( ! data.getBooleanExtra(DIRTY, true))return;
 			Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
 Log.e(TAG, "--------------------------onActivityResult: A::"+filtro);
-			if(filtro != null && filtro.getTipo() != Util.NADA)
+			if(filtro != null && filtro.getTipo() != Constantes.NADA)
 			{
 				_filtro = filtro;
 				if( ! filtro.isOn())
@@ -458,12 +459,12 @@ Log.e(TAG, "--------------------------onActivityResult: A::"+filtro);
 			}
 		}
 
-		if(requestCode == Util.BUSCAR)requestCode = _filtro.getTipo();
+		if(requestCode == Constantes.BUSCAR)requestCode = _filtro.getTipo();
 		switch(requestCode)
 		{
-			case Util.LUGARES:	refreshLugares(); break;
-			case Util.RUTAS:	refreshRutas(); break;
-			case Util.AVISOS:	refreshAvisos(); break;
+			case Constantes.LUGARES:	refreshLugares(); break;
+			case Constantes.RUTAS:	refreshRutas(); break;
+			case Constantes.AVISOS:	refreshAvisos(); break;
 		}
 	}
 

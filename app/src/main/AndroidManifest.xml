@@ -153,7 +153,6 @@
 		</receiver>
 
 		<service android:name=".widget.WidgetRutaService"/>
-
 		<receiver
 			android:name=".widget.WidgetRuta"
 			android:label="@string/widget_ruta">

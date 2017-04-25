@@ -6,7 +6,9 @@ import android.content.Context;
 import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent;
 import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
+import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.squareup.leakcanary.LeakCanary;
 //import com.cesoft.encuentrame3.di.modules.UtilModule;
 
@@ -40,6 +42,8 @@ public class App extends Application
 		getGlobalComponent();
 
 Log.e("App", "--------------onCreate-------------------------------------------------------");
+		WidgetRutaService.startSvc(this);
+		CesService.start(this);
 		/*Picasso.Builder builder = new Picasso.Builder(this);
 		builder.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
 		Picasso built = builder.build();

@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.cesoft.encuentrame3.models.Filtro;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.location.LocationListener;
@@ -54,8 +55,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private DatePickerDialog _datePickerDialogIni, _datePickerDialogFin;
 
 
-	private String[] _asRadio = {"-",		 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private int[]    _adRadio = { Util.NADA,  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private String[] _asRadio = {"-",				 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private int[]    _adRadio = { Constantes.NADA,	  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 
 	private GoogleMap _Map;
 	private Marker _marker;
@@ -106,13 +107,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 					{
 					case 1:		_filtro.setActivo(Filtro.ACTIVO);	break;
 					case 2:		_filtro.setActivo(Filtro.INACTIVO);	break;
-					default:	_filtro.setActivo(Util.NADA);		break;
+					default:	_filtro.setActivo(Constantes.NADA);		break;
 					}
 				}
 				@Override
 				public void onNothingSelected(AdapterView<?> parent)
 				{
-					_filtro.setRadio(Util.NADA);
+					_filtro.setRadio(Constantes.NADA);
 				}
 			});
 		}
@@ -134,7 +135,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				@Override
 				public void onNothingSelected(AdapterView<?> parent)
 				{
-					_filtro.setRadio(Util.NADA);
+					_filtro.setRadio(Constantes.NADA);
 				}
 			});
 			_spnRadio.setSelection(3);
@@ -265,15 +266,15 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		View viewActivo = findViewById(R.id.layActivo);
 		switch(_filtro.getTipo())
 		{
-		case Util.LUGARES:
+		case Constantes.LUGARES:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
 			viewActivo.setVisibility(View.GONE);
 			break;
-		case Util.RUTAS:
+		case Constantes.RUTAS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
 			viewActivo.setVisibility(View.VISIBLE);
 			break;
-		case Util.AVISOS:
+		case Constantes.AVISOS:
 			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.avisos)));
 			viewActivo.setVisibility(View.VISIBLE);
 			break;
