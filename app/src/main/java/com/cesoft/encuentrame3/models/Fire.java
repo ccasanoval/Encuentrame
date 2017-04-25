@@ -1,21 +1,19 @@
 package com.cesoft.encuentrame3.models;
 
 
-import com.cesoft.encuentrame3.util.Log;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Created by booster-bikes on 18/04/2017.
+// Created by Cesar Casanova on 18/04/2017.
 // FIREBASE
 @Singleton
 public class Fire
 {
-	private static final String TAG = Fire.class.getSimpleName();
+	//private static final String TAG = Fire.class.getSimpleName();
 
 	@Inject public Fire(){}
 

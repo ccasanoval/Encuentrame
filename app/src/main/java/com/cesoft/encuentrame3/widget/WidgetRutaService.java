@@ -18,13 +18,13 @@ import android.widget.RemoteViews;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Ruta;
 
 import java.util.Locale;
 
-import javax.inject.Singleton;
 
 //TODO: si no hay ruta, parar sin fecha de activacion: ACTIVAR solo cuando se cree una nueva ruta...
 // listener new punto ruta... o cambiar delay segun situacion...
@@ -38,8 +38,8 @@ public class WidgetRutaService extends Service
 	private static final String TAG = WidgetRutaService.class.getSimpleName();
 	private static Handler _h = null;
 	private static Runnable _r = null;
-	private static final int _DELAY_SHORT = 30*1000;//TODO: Constantes globales para que tenga sentido junto con CesService.GPS.DELAY
-	private static final int _DELAY_LONG = 3*60*1000;
+	//private static final int _DELAY_SHORT = 30*1000;//TODO: Constantes globales para que tenga sentido junto con CesService.GPS.DELAY
+	//private static final int _DELAY_LONG = 3*60*1000;
 
 	private Util _util;
 
@@ -62,11 +62,11 @@ public class WidgetRutaService extends Service
 		c.startService(serviceIntent);
 		return serviceIntent;
 	}
-	public static void stopSvc(Activity act, Intent serviceIntent)
+	/*public static void stopSvc(Activity act, Intent serviceIntent)
 	{
 		if(act != null && serviceIntent != null)
 		act.stopService(serviceIntent);
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	@Override
@@ -74,7 +74,6 @@ public class WidgetRutaService extends Service
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
 		_util = App.getComponent(getApplicationContext()).util();
-Log.e(TAG, "onStartCommand--------------------------------------------------------------------"+_util);
 
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
 		{
@@ -110,7 +109,7 @@ Log.e(TAG, "onStartCommand------------------------------------------------------
 	}
 	@Override public IBinder onBind(Intent intent) { return _Binder; }
 	//______________________________________________________________________________________________
-	public void refresh()//TODO: cuando se crea ruta => pero necesito   https://developer.android.com/reference/android/app/Service.html#LocalServiceSample
+	public void refresh()
 	{
 		try
 		{
@@ -129,12 +128,12 @@ Log.e(TAG, "onStartCommand------------------------------------------------------
 		if(idRuta.isEmpty())
 		{
 			borrarRuta();
-			_h.postDelayed(_r, _DELAY_LONG);
+			_h.postDelayed(_r, Constantes.WIDGET_DELAY_LONG);
 		}
 		else
 		{
 			setRuta();
-			_h.postDelayed(_r, _DELAY_SHORT);
+			_h.postDelayed(_r, Constantes.WIDGET_DELAY_SHORT);
 		}
 	}
 	private void borrarRuta()

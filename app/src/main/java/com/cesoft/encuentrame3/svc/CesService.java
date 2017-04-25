@@ -16,8 +16,10 @@ import java.util.Locale;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -56,14 +58,15 @@ public class CesService extends IntentService
 		implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
 {
 	private static final String TAG = CesService.class.getSimpleName();
-	private static final int GEOFEN_DWELL_TIME = 60*1000;
+	/*private static final int GEOFEN_DWELL_TIME = 60*1000;
 	private static final long DELAY_TRACK_MIN = 20*1000;//30*1000;
-	private static final long DELAY_TRACK_MAX = 2*60*1000;//7*60*1000;
+	private static final long DELAY_TRACK_MAX = 4*60*1000;//7*60*1000;
 	private static long DELAY_TRACK = DELAY_TRACK_MIN;
 	private static final long ACCURACY_MAX = 24;//m
 	private static final long DISTANCE_MIN = 10;//m
-	private static final long DELAY_LOAD = DELAY_TRACK_MAX;
+	private static final long DELAY_LOAD = DELAY_TRACK_MAX;*/
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
+	public static long DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 
 	@Inject	Util _util;
 	@Inject	Login _login;
@@ -76,6 +79,7 @@ public class CesService extends IntentService
 		private boolean _bRun = true;
 		public static void stop()
 		{
+			Log.e(TAG, "*********** STOP ***********"+INSTANCE);
 			if(INSTANCE != null)
 			{
 				INSTANCE._bRun=false;
@@ -119,29 +123,10 @@ public class CesService extends IntentService
 			public void onFallo(Exception e)
 			{
 				Log.e(TAG, "onCreate:login:e:-------------------------------------------------------", e);
-				CesService.this.stopSelf();
+				CesService.stop();
 			}
 		});
 		iniGeoTracking();
-	}
-	//----------------------------------------------------------------------------------------------
-	// Restaura el servicio cuando se le mata el proceso
-	@Override
-	public void onTaskRemoved(Intent rootIntent)
-	{
-		Log.e(TAG, "-------------------onTaskRemoved---------------------");
-		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
-		restartServiceIntent.setPackage(getPackageName());
-
-		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		alarmService.set(
-				AlarmManager.ELAPSED_REALTIME,
-				SystemClock.elapsedRealtime() + 500,
-				restartServicePendingIntent);
-
-		Log.e(TAG, "-------------------Reiniciando...---------------------");
-		super.onTaskRemoved(rootIntent);
 	}
 
 	//______________________________________________________________________________________________
@@ -154,7 +139,7 @@ public class CesService extends IntentService
 		//_hiloLoop = Thread.currentThread();
 		try
 		{
-			long tmLoad = System.currentTimeMillis() - 2*DELAY_LOAD;
+			long tmLoad = System.currentTimeMillis() - 2*Constantes.DELAY_LOAD;
 			//long tmTrack = System.currentTimeMillis() - 2*DELAY_TRACK;
 			//noinspection InfiniteLoopStatement
 			while(_bRun)//No hay un sistema para listen y not polling??????
@@ -176,10 +161,10 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 							Log.e(TAG, String.format("loop------------------------------------------Login kk:%s",e), e);
 						}
 					});
-					try{Thread.sleep(DELAY_TRACK_MIN);}catch(InterruptedException ignored){}
+					try{Thread.sleep(Constantes.DELAY_TRACK_MIN);}catch(InterruptedException ignored){}
 					continue;
 				}
-				if(tmLoad + DELAY_LOAD < System.currentTimeMillis())
+				if(tmLoad + Constantes.DELAY_LOAD < System.currentTimeMillis())
 				{
 					cargarListaGeoAvisos();
 					tmLoad = System.currentTimeMillis();
@@ -190,21 +175,19 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 					_tmTrack = System.currentTimeMillis();
 				}
 //Log.w(TAG, "LOOP before sleeping------------------------"+(DELAY_TRACK/4000));
-				try{
-					//if(DELAY_TRACK > DELAY_TRACK_MIN+20*1000)
-						Thread.sleep(DELAY_TRACK/4);
-					//else Thread.sleep(DELAY_TRACK/3);
-				}catch(InterruptedException e){Log.e(TAG, "---------------- LOOP SLEEP INTERRUPTED---------------");}
+				try{Thread.sleep(DELAY_TRACK/4);}
+				catch(InterruptedException e){Log.e(TAG, "---------------- LOOP SLEEP INTERRUPTED ---------------");}
 			}
 		}
 		catch(Exception e){Log.e(TAG, "onHandleIntent:e:--------------------------------------------", e);}
 		CesWakefulReceiver.completeWakefulIntent(workIntent);
+		Log.e(TAG, "---------------- LOOP END ---------------");
 	}
 
 	//______________________________________________________________________________________________
 	public void _restartDelayRuta()
 	{
-		DELAY_TRACK = DELAY_TRACK_MIN;
+		DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 		saveGeoTracking();
 		_tmTrack = System.currentTimeMillis();
@@ -239,7 +222,7 @@ Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 					Geofence gf = new Geofence.Builder().setRequestId(a.getId())
 							.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
 							.setExpirationDuration(Geofence.NEVER_EXPIRE)
-							.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+							.setLoiteringDelay(Constantes.GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
 							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
 					aGeofences.add(gf);
 					if( ! bDirty)
@@ -338,32 +321,33 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
 			return;
 		}
-		if(r.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 5+DISTANCE_MIN))
+		if(r.getPuntosCount() > 0 && (loc.getAccuracy() > Constantes.ACCURACY_MAX || loc.getAccuracy() > 5+Constantes.DISTANCE_MIN))
 		{
-			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+ACCURACY_MAX+" / "+DISTANCE_MIN+" :::: "+r.getPuntosCount());
+			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+Constantes.ACCURACY_MAX+" / "+Constantes.DISTANCE_MIN+" :::: n pts "+r.getPuntosCount());
 			return;
 		}
+		WidgetRutaService.startSvc(getApplicationContext());
 
 		if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
 		{
 			_sId = sId;
 			_locLastSaved = null;
-			DELAY_TRACK = DELAY_TRACK_MIN;
+			DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 			Log.w(TAG, "guardarPunto:Nueva ruta: ----------------------------------------------- "+sId);
 		}
 		else if(_locLastSaved != null)
 		{
 			//TODO: puntos mas cercanos dependiendo de si tienes wifi? opcion de no guardar hasta tener wifi?
 			float distLastSaved = loc.distanceTo(_locLastSaved);
-			if(distLastSaved < DISTANCE_MIN)//Puntos muy cercanos
+			if(distLastSaved < Constantes.DISTANCE_MIN)//Puntos muy cercanos
 			{
 				Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
 				DELAY_TRACK += 10*1000;
-				if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
+				if(DELAY_TRACK > Constantes.DELAY_TRACK_MAX) DELAY_TRACK = Constantes.DELAY_TRACK_MAX;
 				return;
 			}
 			else if(distLastSaved > 200)
-				DELAY_TRACK = DELAY_TRACK_MIN;
+				DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 			else if(distLastSaved > 150)
 				DELAY_TRACK -= 3*60*1000;
 			else if(distLastSaved > 100)
@@ -371,7 +355,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			else if(distLastSaved > 75)
 				DELAY_TRACK -= 60*1000;
 			//else if(distLastSaved > 50)
-			if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
+			if(DELAY_TRACK < Constantes.DELAY_TRACK_MIN) DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
 		}
 		r.guardar(new GuardarListener(loc));
 		_locLastSaved = loc;
@@ -418,8 +402,8 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 		if(checkPlayServices())buildGoogleApiClient();
 		if(_GoogleApiClient != null)_GoogleApiClient.connect();
 	    _LocationRequest = new LocationRequest();
-	    _LocationRequest.setInterval(DELAY_TRACK_MIN);//TODO: ajustar por usuario...
-	    _LocationRequest.setFastestInterval(DELAY_TRACK_MIN);
+	    _LocationRequest.setInterval(Constantes.DELAY_TRACK_MIN);//TODO: ajustar por usuario...
+	    _LocationRequest.setFastestInterval(Constantes.DELAY_TRACK_MIN);
 	    _LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		pideGPS();
 	}
@@ -465,7 +449,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 			LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
-		DELAY_TRACK = DELAY_TRACK_MAX;
+		DELAY_TRACK = Constantes.DELAY_TRACK_MAX;
 	}
 
 
@@ -528,6 +512,26 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 				}
 			}
 		});
+	}
+
+	//----------------------------------------------------------------------------------------------
+	// Restaura el servicio cuando se le mata el proceso
+	@Override
+	public void onTaskRemoved(Intent rootIntent)
+	{
+		Log.e(TAG, "-------------------onTaskRemoved---------------------");
+		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+		restartServiceIntent.setPackage(getPackageName());
+
+		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+		alarmService.set(
+				AlarmManager.ELAPSED_REALTIME,
+				SystemClock.elapsedRealtime() + 500,
+				restartServicePendingIntent);
+
+		Log.e(TAG, "-------------------Reiniciando...---------------------");
+		super.onTaskRemoved(rootIntent);
 	}
 
 }

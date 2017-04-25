@@ -8,6 +8,7 @@ import java.util.TimeZone;
 
 import android.app.ProgressDialog;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -359,7 +360,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 				finEspera();
 				if(err == null)
 				{
-Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
+//Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
 					_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
 				}
 				else
@@ -385,7 +386,7 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 
 	//______________________________________________________________________________________________
 	private boolean _bEliminar = true;
-	private synchronized void eliminar()
+	private void eliminar()
 	{
 		if(!_bEliminar)return;
 		_bEliminar=false;
@@ -393,33 +394,43 @@ Log.w(TAG, "guardar:---(synchronized)-------------------------------------------
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_r.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+		{
+			dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
+			{
+				@Override
+				public void onDismiss(DialogInterface dialog){_bEliminar = true;}
+			});
+		}
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
 				iniEspera();
-				if(_r.getId().equals(_util.getTrackingRoute()))
-					_util.setTrackingRoute("");
-				_r.eliminar(new DatabaseReference.CompletionListener()
+				synchronized(_r)
 				{
-					@Override
-					public void onComplete(DatabaseError err, DatabaseReference data)
+					if(_r.getId().equals(_util.getTrackingRoute()))
+						_util.setTrackingRoute("");
+					_r.eliminar(new DatabaseReference.CompletionListener()
 					{
-						_bEliminar = true;
-						finEspera();
-						if(err == null)
+						@Override
+						public void onComplete(DatabaseError err, DatabaseReference data)
 						{
-							//Log.w(TAG, "eliminar:handleResponse:"+data);
-							_util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
+							_bEliminar = true;
+							finEspera();
+							if(err == null)
+							{
+								//Log.w(TAG, "eliminar:handleResponse:"+data);
+								_util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
+							} else
+							{
+								Log.e(TAG, "eliminar:handleFault:f:" + err);
+								Toast.makeText(ActRuta.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
+							}
 						}
-						else
-						{
-							Log.e(TAG, "eliminar:handleFault:f:" + err);
-							Toast.makeText(ActRuta.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-						}
-					}
-				});
+					});
+				}
 			}
 		});
 		dialog.create().show();

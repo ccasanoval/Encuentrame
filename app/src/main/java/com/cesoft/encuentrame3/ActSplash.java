@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Created by booster-bikes on 09/02/2017.
+// Created by Cesar Casanova on 09/02/2017.
 // http://stackoverflow.com/questions/42017161/android-progress-bar-on-splash-screen
 public class ActSplash extends AppCompatActivity
 {

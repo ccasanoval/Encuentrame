@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Created by booster-bikes on 21/04/2017.
+// Created by Cesar Casanova on 21/04/2017.
 //
 public class CesWakefulReceiver extends WakefulBroadcastReceiver
 {
