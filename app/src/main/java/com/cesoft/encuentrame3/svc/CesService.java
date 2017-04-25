@@ -36,7 +36,6 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.firebase.auth.FirebaseUser;			//TODO: todo la logica BBDD a clase Fire
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
@@ -324,9 +323,9 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
 			return;
 		}
-		if(r.getPuntosCount() > 0 && (loc.getAccuracy() > Constantes.ACCURACY_MAX || loc.getAccuracy() > 5+Constantes.DISTANCE_MIN))
+		if(r.getPuntosCount() > 0 && (loc.getAccuracy() > Constantes.ACCURACY_MAX || loc.getAccuracy() > 15+Constantes.DISTANCE_MIN))
 		{
-			Log.w(TAG, "guardarPunto:loc.getAccuracy() > MAX  or  loc.getAccuracy() > DISTANCE_MIN ---------"+loc.getAccuracy()+" > "+Constantes.ACCURACY_MAX+" / "+Constantes.DISTANCE_MIN+" :::: n pts "+r.getPuntosCount());
+			Log.w(TAG, "guardarPunto:loc.getAccuracy() ("+loc.getAccuracy()+")   > MAX_ACCURACY ("+Constantes.ACCURACY_MAX+")  or  > DISTANCE_MIN+15 ("+Constantes.DISTANCE_MIN+")    :::: n pts "+r.getPuntosCount());
 			return;
 		}
 
@@ -335,12 +334,13 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 			_sId = sId;
 			_locLastSaved = null;
 			DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
-			Log.w(TAG, "guardarPunto:Nueva ruta: ----------------------------------------------- "+sId);
+			Log.w(TAG, "guardarPunto: NUEVA RUTA: -------------------------------------------------- "+sId);
 		}
 		else if(_locLastSaved != null)
 		{
 			//TODO: puntos mas cercanos dependiendo de si tienes wifi? opcion de no guardar hasta tener wifi?
 			float distLastSaved = loc.distanceTo(_locLastSaved);
+Log.e(TAG, "guardarPunto:----------------************************---------------------distLastSaved: "+distLastSaved);
 			if(distLastSaved < Constantes.DISTANCE_MIN)//Puntos muy cercanos
 			{
 				Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
@@ -365,36 +365,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	/*private class GuardarListener implements DatabaseReference.CompletionListener
-	{
-		private Location _loc = null;
-		GuardarListener(Location loc){_loc = loc;}
-		@Override
-		public void onComplete(DatabaseError err, DatabaseReference data)
-		{
-			if(err == null)
-			{
-				//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
-				Ruta.addPunto(data.getKey(), _loc.getLatitude(), _loc.getLongitude(),
-						_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
-						new Transaction.Handler()
-					{
-						@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
-						@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
-						{
-							if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
-							//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
-							Util.refreshListaRutas();//Refrescar lista rutas en main..
-						}
-					});
-			}
-			else
-			{
-				Log.e(TAG, String.format("saveGeoTracking:guardar:err:-------------------------:%s",err));
-			}
-		}
-	}*/
-	private class GuardarListener extends Ruta.CompletionListener
+	private class GuardarListener extends Fire.CompletionListener
 	{
 		private Location _loc = null;
 		GuardarListener(Location loc){_loc = loc;}
@@ -404,49 +375,37 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 		{
 			//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
 			Ruta.addPunto(id, _loc.getLatitude(), _loc.getLongitude(),
-			_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
-			new Transaction.Handler()
+				_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
+				new Fire.Transaccion()
+				{
+					@Override
+					protected void onDatos(DataSnapshot data)
+					{
+						Util.refreshListaRutas();//Refrescar lista rutas en main..
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
+					}
+				}
+			/*new Transaction.Handler()
 			{
 				@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
 				@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 				{
 					if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
-					//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
 					Util.refreshListaRutas();//Refrescar lista rutas en main..
 				}
-			});
+			}*/);
 		}
 		@Override
 		protected void onError(String err, int code)
 		{
 			Log.e(TAG, String.format(Locale.ENGLISH, "saveGeoTracking:guardar:err:-------------------------:%s : %d",err, code));
 		}
-/*
-		@Override
-		public void onComplete(DatabaseError err, DatabaseReference data)
-		{
-			if(err == null)
-			{
-				//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
-				Ruta.addPunto(data.getKey(), _loc.getLatitude(), _loc.getLongitude(),
-						_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
-						new Transaction.Handler()
-						{
-							@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
-							@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
-							{
-								if(err != null)	Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
-								//else        	Log.w(TAG, "saveGeoTracking:guardar:pto:----------------------:" + data);
-								Util.refreshListaRutas();//Refrescar lista rutas en main..
-							}
-						});
-			}
-			else
-			{
-				Log.e(TAG, String.format("saveGeoTracking:guardar:err:-------------------------:%s",err));
-			}
-		}*/
 	}
+	////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	//https://developer.android.com/training/location/change-location-settings.html

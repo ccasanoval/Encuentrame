@@ -117,17 +117,7 @@ public class Ruta extends Objeto implements Parcelable
 		_datos.removeValue();
 		puntosCount = 0;
 	}
-	public static abstract class CompletionListener implements DatabaseReference.CompletionListener
-	{
-		protected abstract void onDatos(String id);
-		protected abstract void onError(String err, int code);
-		@Override
-		public void onComplete(DatabaseError err, DatabaseReference data)
-		{
-			if(err == null)	onDatos(data.getKey());
-			else			onError(err.getMessage(), err.getCode());
-		}
-	}
+
 	public void guardar(DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
@@ -347,7 +337,7 @@ public class Ruta extends Objeto implements Parcelable
 	private long puntosCount = 0;
 	public long getPuntosCount(){return puntosCount;}
 	//______________________________________________________________________________________________
-	public void getPuntos(final Fire.SimpleListener<Ruta.RutaPunto> listener)//final ValueEventListener listener)
+	public void getPuntos(final Fire.SimpleListener<Ruta.RutaPunto> listener)
 	{
 		RutaPunto.getLista(getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
@@ -364,21 +354,6 @@ public class Ruta extends Objeto implements Parcelable
 				listener.onError(err);
 			}
 		});
-				/*new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot ds)
-			{
-				puntosCount = ds.getChildrenCount();
-				listener.onDataChange(ds);
-			}
-			@Override
-			public void onCancelled(DatabaseError err)
-			{
-				puntosCount = 0;
-				listener.onCancelled(err);
-			}
-		});*/
 	}
 	//______________________________________________________________________________________________
 	public static void addPunto(final String idRuta, double lat, double lon,

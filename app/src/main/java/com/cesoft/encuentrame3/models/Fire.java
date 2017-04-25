@@ -1,7 +1,11 @@
 package com.cesoft.encuentrame3.models;
 
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
@@ -62,9 +66,35 @@ public class Fire
 		//public abstract void onData(T[] aData);
 		//public abstract void onError(String err);
 	}
+	//----------------------------------------------------------------------------------------------
 	public interface SimpleListener<T>
 	{
 		void onData(T[] aData);
 		void onError(String err);
+	}
+
+	//----------------------------------------------------------------------------------------------
+	public static abstract class CompletionListener implements DatabaseReference.CompletionListener
+	{
+		protected abstract void onDatos(String id);
+		protected abstract void onError(String err, int code);
+		@Override
+		public void onComplete(DatabaseError err, DatabaseReference data)
+		{
+			if(err == null)	onDatos(data.getKey());
+			else			onError(err.getMessage(), err.getCode());
+		}
+	}
+
+	public static abstract class Transaccion implements Transaction.Handler
+	{
+		protected abstract void onDatos(DataSnapshot data);
+		protected abstract void onError(String err, int code);
+		@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
+		@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
+		{
+			if(err == null)	onDatos(data);
+			else			onError(err.getMessage(), err.getCode());
+		}
 	}
 }
