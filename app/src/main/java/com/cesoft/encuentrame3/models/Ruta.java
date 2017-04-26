@@ -147,7 +147,7 @@ public class Ruta extends Objeto implements Parcelable
 			public void onDataChange(DataSnapshot ds)
 			{
 				Ruta ruta = ds.getChildren().iterator().next().getValue(Ruta.class);
-				listener.onData(new Ruta[]{ruta});
+				listener.onDatos(new Ruta[]{ruta});
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -173,11 +173,11 @@ public class Ruta extends Objeto implements Parcelable
 					ArrayList<Ruta> aRutas = new ArrayList<>(n);
 					for(DataSnapshot o : data.getChildren())
 						aRutas.add(o.getValue(Ruta.class));
-					listener.onData(aRutas.toArray(new Ruta[n]));
+					listener.onDatos(aRutas.toArray(new Ruta[n]));
 				}
 				else
 				{
-					listener.onData(new Ruta[0]);
+					listener.onDatos(new Ruta[0]);
 				}
 			}
 			@Override
@@ -229,7 +229,7 @@ public class Ruta extends Objeto implements Parcelable
 					if( ! r.pasaFiltro(filtro, r.getId(), idRutaAct))continue;
 					aRutas.add(r);
 				}
-				listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+				listener.onDatos(aRutas.toArray(new Ruta[aRutas.size()]));
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -251,11 +251,11 @@ public class Ruta extends Objeto implements Parcelable
 		final Fire.SimpleListener<String> lis = new Fire.SimpleListener<String>()
 		{
 			@Override
-			public void onData(final String[] aData)
+			public void onDatos(final String[] aData)
 			{
 				final ArrayList<Ruta> aRutas = new ArrayList<>();
 				final ArrayList<Ruta> aIgnorados = new ArrayList<>();
-				if(aData.length < 1)listener.onData(new Ruta[0]);
+				if(aData.length < 1)listener.onDatos(new Ruta[0]);
 				else
 				for(String idRuta : aData)
 				{
@@ -268,13 +268,13 @@ public class Ruta extends Objeto implements Parcelable
 							Ruta r = data.getValue(Ruta.class);
 							if(r.pasaFiltro(filtro, r.getId(), idRutaAct))aRutas.add(r);
 							else aIgnorados.add(r);
-							if(aRutas.size()+aIgnorados.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+							if(aRutas.size()+aIgnorados.size() == aData.length)listener.onDatos(aRutas.toArray(new Ruta[aRutas.size()]));
 						}
 						@Override
 						public void onCancelled(DatabaseError err)
 						{
 							Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:%s",err));
-							if(aRutas.size() == aData.length)listener.onData(aRutas.toArray(new Ruta[aRutas.size()]));
+							if(aRutas.size() == aData.length)listener.onDatos(aRutas.toArray(new Ruta[aRutas.size()]));
 						}
 					});
 				}
@@ -305,21 +305,21 @@ public class Ruta extends Objeto implements Parcelable
 						nCount--;
 						RutaPunto rp = data.getValue(RutaPunto.class);
 						asRutas.add(rp.getIdRuta());
-						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
+						if(nCount < 1)lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
 					}
 					@Override
 					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:e:%s",err));
-						if(nCount < 1)lis.onData(asRutas.toArray(new String[asRutas.size()]));
+						if(nCount < 1)lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
 					}
 				});
 			}
 			@Override
 			public void onGeoQueryReady()
 			{
-				if(nCount == 0)lis.onData(new String[0]);
+				if(nCount == 0)lis.onDatos(new String[0]);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
 
@@ -342,10 +342,10 @@ public class Ruta extends Objeto implements Parcelable
 		RutaPunto.getLista(getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onData(RutaPunto[] aData)
+			public void onDatos(RutaPunto[] aData)
 			{
 				puntosCount = aData.length;
-				listener.onData(aData);
+				listener.onDatos(aData);
 			}
 			@Override
 			public void onError(String err)
@@ -358,7 +358,8 @@ public class Ruta extends Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public static void addPunto(final String idRuta, double lat, double lon,
 	                            float precision, double altura, float velocidad, float direccion,
-	                            final Transaction.Handler listener)
+								final Fire.SimpleListener<Long> listener)
+	                            //final Fire.Transaccion listener)
 	{
 		RutaPunto pto = new RutaPunto(idRuta, lat, lon, precision, altura, velocidad, direccion);
 		pto.guardar(new DatabaseReference.CompletionListener()
@@ -369,11 +370,13 @@ public class Ruta extends Objeto implements Parcelable
 				if(err == null)
 				{
 					DatabaseReference ref = newFirebase().child(idRuta).child("puntosCount");
+	Log.e(TAG, "****************** onComplete *********** "+ref);
 					ref.runTransaction(new Transaction.Handler()
 					{
 						@Override
 						public Transaction.Result doTransaction(MutableData mutableData)
 						{
+	Log.e(TAG, "****************** onComplete : doTransaction *********** "+mutableData.getValue());
 							if(mutableData.getValue() == null)
 								mutableData.setValue(1);
         					else
@@ -383,11 +386,18 @@ public class Ruta extends Objeto implements Parcelable
 						@Override
 						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
+	Log.e(TAG, "****************** onComplete : onComplete *********** "+data);
 							//Log.w(TAG, "addPunto:inc count:"+err+" "+b+" "+data);
-							listener.onComplete(err, b, data);
+							//listener.onComplete(err, b, data);
+							if(err == null)
+								listener.onDatos(new Long[]{(Long)data.getValue()});
+							else
+								listener.onError(err.getMessage()+", "+err.getCode());
 						}
 					});
 				}
+				else
+					listener.onError(err.getMessage()+", "+err.getCode());
 			}
 		});
 	}
@@ -410,7 +420,8 @@ public class Ruta extends Objeto implements Parcelable
 			public String getId(){return id;}
 			public void setId(String v){id = v;}
 
-		String idRuta = null;
+		@SuppressWarnings("WeakerAccess")
+		public String idRuta = null;			// Very fkng important, it mustn't be package-private...
 			String getIdRuta(){return idRuta;}
 			void setIdRuta(String v){idRuta = v;}
 
@@ -488,6 +499,7 @@ public class Ruta extends Objeto implements Parcelable
 
 		//----------------------------------------------------------------------------------------------
 		// FIREBASE
+		//Ruta.RutaPunto.eliminar(null);//Limpiar puntos sin id ruta
 		public static void eliminar(final String idRuta)
 		{
 			//RutaPunto.getLista(idRuta, new ValueEventListener()
@@ -497,6 +509,7 @@ public class Ruta extends Objeto implements Parcelable
 				@Override
 				public void onDataChange(DataSnapshot ds)
 				{
+Log.w(TAG, "RutaPunto:eliminar:**************** ELIMINANDO PTOS DE RUTA "+idRuta+" *************** N pts:"+ds.getChildrenCount());
 					for(DataSnapshot o : ds.getChildren())
 					{
 						RutaPunto rp = o.getValue(RutaPunto.class);
@@ -547,7 +560,7 @@ public class Ruta extends Objeto implements Parcelable
 						Ruta.RutaPunto pto = o.getValue(Ruta.RutaPunto.class);
 						aPts[i++] = pto;
 					}
-					listener.onData(aPts);
+					listener.onDatos(aPts);
 				}
 				@Override
 				public void onCancelled(DatabaseError err)
@@ -571,7 +584,7 @@ public class Ruta extends Objeto implements Parcelable
 					ArrayList<Ruta.RutaPunto> a = new ArrayList<>((int)n);
 					for(DataSnapshot o : data.getChildren())
 						a.add(o.getValue(Ruta.RutaPunto.class));
-					listener.onData(a.toArray(new Ruta.RutaPunto[a.size()]));
+					listener.onDatos(a.toArray(new Ruta.RutaPunto[a.size()]));
 				}
 				@Override
 				public void onCancelled(DatabaseError err)

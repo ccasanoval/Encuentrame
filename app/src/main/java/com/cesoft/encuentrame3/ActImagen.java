@@ -191,7 +191,7 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 					_l.downloadImg(_iv, this, new Fire.SimpleListener<String>()
 					{
 						@Override
-						public void onData(String[] aData)
+						public void onDatos(String[] aData)
 						{
 							Log.e(TAG, "onCreate: tiene imagen y se establecio----------------------- OK: ");
 							refreshMenu(ESTADO.OLD_IMG);

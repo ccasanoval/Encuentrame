@@ -75,7 +75,7 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 		Aviso.getById(sId, new Fire.SimpleListener<Aviso>()
 		{
 			@Override
-			public void onData(Aviso[] aData)
+			public void onDatos(Aviso[] aData)
 			{
 				Intent i = new Intent(context, ActAviso.class);
 				i.putExtra(Aviso.NOMBRE, aData[0]);

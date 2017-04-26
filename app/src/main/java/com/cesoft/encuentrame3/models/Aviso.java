@@ -89,7 +89,7 @@ public class Aviso extends Objeto
 		}*/
 
 	//______________________________________________________________________________________________
-	public Aviso(){fecha = new Date();}
+	public Aviso(){fecha = new Date();}//Firebase necesita un constructor sin argumentos
 	@Override
 	public String toString()
 	{
@@ -188,7 +188,7 @@ public class Aviso extends Objeto
 			public void onDataChange(DataSnapshot ds)
 			{
 				Aviso a = ds.getValue(Aviso.class);
-				listener.onData(new Aviso[]{a});
+				listener.onDatos(new Aviso[]{a});
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -217,7 +217,7 @@ public class Aviso extends Objeto
 				{
 					aAvisos[i++] = l.getValue(Aviso.class);
 				}
-				listener.onData(aAvisos);
+				listener.onDatos(aAvisos);
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -244,7 +244,7 @@ public class Aviso extends Objeto
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 					aAvisos.add(o.getValue(Aviso.class));
-				listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
+				listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -291,7 +291,7 @@ public class Aviso extends Objeto
 					if( ! a.pasaFiltro(filtro))continue;
 					aAvisos.add(o.getValue(Aviso.class));
 				}
-				listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
+				listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -329,14 +329,14 @@ public class Aviso extends Objeto
 						nCount--;
 						Aviso a = data.getValue(Aviso.class);
 						if(a.pasaFiltro(filtro))aAvisos.add(a);
-						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
+						if(nCount < 1)listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 					@Override
 					public void onCancelled(DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, "buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onData(aAvisos.toArray(new Aviso[aAvisos.size()]));
+						if(nCount < 1)listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 				});
 			}

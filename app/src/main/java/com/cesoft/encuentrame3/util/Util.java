@@ -343,7 +343,7 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 		Aviso.getById(sId, new Fire.SimpleListener<Aviso>()
 		{
 			@Override
-			public void onData(Aviso[] aData)
+			public void onDatos(Aviso[] aData)
 			{
 				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
 				i.putExtra(Aviso.NOMBRE, aData[0]);

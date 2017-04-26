@@ -70,9 +70,9 @@ public class Lugar extends Objeto
 	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
-	private String imgUrl;
-		public String getImgUrl(){return imgUrl;}
-		public void setImgUrl(String v){imgUrl = v;}
+	private String imgUrl;	//TODO: remove...
+		private String getImgUrl(){return imgUrl;}
+		private void setImgUrl(String v){imgUrl = v;}
 	///______________________________________________________________
 
 	//______________________________________________________________________________________________
@@ -83,10 +83,7 @@ public class Lugar extends Objeto
 		public void setLongitud(double v){longitud=v;}
 
 	//______________________________________________________________________________________________
-	public Lugar()
-	{
-		this.fecha = new Date();
-	}
+	public Lugar() { this.fecha = new Date(); }	//Firebase necesita un constructor sin argumentos
 	@Override
 	public String toString()
 	{
@@ -147,7 +144,7 @@ public class Lugar extends Objeto
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 					aLugares.add(o.getValue(Lugar.class));
-				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 				//ddbb.removeEventListener(this);
 			}
 			@Override
@@ -191,7 +188,7 @@ public class Lugar extends Objeto
 					if( ! l.pasaFiltro(filtro))continue;
 					aLugares.add(l);
 				}
-				listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -234,21 +231,21 @@ public class Lugar extends Objeto
 							nCount--;
 							Lugar l = data.getValue(Lugar.class);
 							if(l.pasaFiltro(filtro))aLugares.add(l);
-							if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+							if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 						}
 						@Override
 						public void onCancelled(DatabaseError err)
 						{
 							nCount--;
 							Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
-							if(nCount < 1)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+							if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 						}
 					});
 				}
 				@Override
 				public void onGeoQueryReady()
 				{
-					if(nCount==0)listener.onData(aLugares.toArray(new Lugar[aLugares.size()]));
+					if(nCount==0)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 					geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 				}
 				@Override public void onKeyExited(String key){Log.w(TAG, "getLista:onKeyExited");}
@@ -433,7 +430,7 @@ Log.e(TAG, "BBB: "+getImgUrl());
 			{
 				Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
 				loadFromCache(uri, iv, act);
-				listener.onData(new String[]{uri.toString()});
+				listener.onDatos(new String[]{uri.toString()});
 			}
 		};
 		OnFailureListener lisKo = new OnFailureListener()

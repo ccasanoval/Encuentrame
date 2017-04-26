@@ -376,8 +376,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		Ruta.RutaPunto.getLista(r.getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onData(Ruta.RutaPunto[] aData)
+			public void onDatos(Ruta.RutaPunto[] aData)
 			{
+//if(r.getPuntosCount() != aData.length)Log.e(TAG, "showRuta:--------------------------------------------------------"+r.getPuntosCount()+"---<>--- "+aData.length);
 				showRutaHelper(r, aData);
 			}
 			@Override
@@ -389,6 +390,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	}
 	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
+//Log.e(TAG, "---------------------------------------------------------------------showRutaHelper:::"+r.getId()+" ::: "+aPts.length);
 		try{
 		if(aPts.length < 1)return;
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
@@ -481,7 +483,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		_lisLugar = new Fire.ObjetoListener<Lugar>()
 		{
 			@Override
-			public void onData(Lugar[] aData)
+			public void onDatos(Lugar[] aData)
 			{
 				for(Lugar o : aData)showLugar(o);
 			}
@@ -494,7 +496,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		_lisAviso = new Fire.ObjetoListener<Aviso>()
 		{
 			@Override
-			public void onData(Aviso[] aData)
+			public void onDatos(Aviso[] aData)
 			{
 				for(Aviso o : aData)showAviso(o);
 			}
@@ -507,9 +509,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		_lisRuta = new Fire.ObjetoListener<Ruta>()
 		{
 			@Override
-			public void onData(Ruta[] aData)
+			public void onDatos(Ruta[] aData)
 			{
-				Log.e(TAG, "--------------------getLista : "+aData.length);
+				Log.e(TAG, "------------------------------------------------------------------------getLista : "+aData.length);
 				for(Ruta o : aData)
 					showRuta(o);
 			}

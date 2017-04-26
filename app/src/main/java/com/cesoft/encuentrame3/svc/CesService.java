@@ -34,10 +34,6 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import com.google.firebase.auth.FirebaseUser;			//TODO: todo la logica BBDD a clase Fire
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
@@ -51,7 +47,7 @@ import javax.inject.Singleton;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//TODO
+//TODO: si no hay tarea, por que delay = min ????
 @Singleton
 public class CesService extends IntentService
 		implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener
@@ -65,7 +61,9 @@ public class CesService extends IntentService
 	private static final long DISTANCE_MIN = 10;//m
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;*/
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
-	public long DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
+	private static long DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
+		public static void setMinTrackingDelay(){DELAY_TRACK = Constantes.DELAY_TRACK_MIN;}
+		public static void setMaxTrackingDelay(){DELAY_TRACK = Constantes.DELAY_TRACK_MAX;}
 
 	@Inject	Util _util;
 	@Inject	Login _login;
@@ -128,6 +126,7 @@ public class CesService extends IntentService
 			}
 		});
 		iniGeoTracking();
+		//Ruta.RutaPunto.eliminar(null);
 	}
 
 	//______________________________________________________________________________________________
@@ -204,7 +203,7 @@ Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 		_lisAviso = new Fire.ObjetoListener<Aviso>()
 		{
 			@Override
-			public void onData(Aviso[] aData)
+			public void onDatos(Aviso[] aData)
 			{
 				//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 				boolean bDirty = false;
@@ -281,7 +280,7 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 		Ruta.getById(sId, new Fire.SimpleListener<Ruta>()
 		{
 			@Override
-			public void onData(Ruta[] aData)
+			public void onDatos(Ruta[] aData)
 			{
 				if(aData[0] == null)
 				{
@@ -373,20 +372,21 @@ Log.e(TAG, "guardarPunto:----------------************************---------------
 		@Override
 		protected void onDatos(String id)
 		{
-			//Log.w(TAG, "GuardarListener:onComplete:----------------------:" + data);
+Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
 			Ruta.addPunto(id, _loc.getLatitude(), _loc.getLongitude(),
 				_loc.getAccuracy(), _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(),
-				new Fire.Transaccion()
+				new Fire.SimpleListener<Long>()
 				{
 					@Override
-					protected void onDatos(DataSnapshot data)
+					public void onDatos(Long[] puntos)
 					{
+						Log.w(TAG, String.format(Locale.ENGLISH, "GuardarListener:addPunto: n ptos: %d", puntos[0]));
 						Util.refreshListaRutas();//Refrescar lista rutas en main..
 					}
 					@Override
-					protected void onError(String err, int code)
+					public void onError(String err)
 					{
-						Log.e(TAG, String.format("saveGeoTracking:guardar:pto:err:----------------------:%s",err));
+						Log.e(TAG, String.format("GuardarListener:addPunto:e:--------------------------------------:%s",err));
 					}
 				}
 			/*new Transaction.Handler()

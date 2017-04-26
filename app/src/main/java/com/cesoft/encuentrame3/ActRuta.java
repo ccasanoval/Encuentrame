@@ -382,6 +382,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_r.setNombre(_txtNombre.getText().toString());
 		_r.setDescripcion(_txtDescripcion.getText().toString());
 		_r.guardar(res);
+		//Solo si es nuevo?
+		CesService.setMinTrackingDelay();
 	}
 
 	//______________________________________________________________________________________________
@@ -408,7 +410,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 			public void onClick(DialogInterface dialog, int which)
 			{
 				iniEspera();
-				synchronized(_r)
+				synchronized(this)
 				{
 					if(_r.getId().equals(_util.getTrackingRoute()))
 						_util.setTrackingRoute("");
@@ -580,7 +582,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_lisRuta = new Fire.ObjetoListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onData(Ruta.RutaPunto[] aData)
+			public void onDatos(Ruta.RutaPunto[] aData)
 			{
 				showRutaHelper(aData);
 			}
@@ -678,7 +680,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_r.getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
-			public void onData(Ruta.RutaPunto[] aData)
+			public void onDatos(Ruta.RutaPunto[] aData)
 			{
 				double fMaxAlt = 0, fMinAlt = 99999;
 				double fMaxVel = 0, fMinVel = 99999;

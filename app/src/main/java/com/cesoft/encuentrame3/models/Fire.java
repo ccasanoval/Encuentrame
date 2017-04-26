@@ -69,7 +69,8 @@ public class Fire
 	//----------------------------------------------------------------------------------------------
 	public interface SimpleListener<T>
 	{
-		void onData(T[] aData);
+		//void onDatos(T data);TODO
+		void onDatos(T[] aData);
 		void onError(String err);
 	}
 
@@ -86,7 +87,7 @@ public class Fire
 		}
 	}
 
-	public static abstract class Transaccion implements Transaction.Handler
+	/*public static abstract class Transaccion implements Transaction.Handler
 	{
 		protected abstract void onDatos(DataSnapshot data);
 		protected abstract void onError(String err, int code);
@@ -96,5 +97,5 @@ public class Fire
 			if(err == null)	onDatos(data);
 			else			onError(err.getMessage(), err.getCode());
 		}
-	}
+	}*/
 }

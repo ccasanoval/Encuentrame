@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
@@ -25,9 +26,10 @@ import javax.inject.Inject;
 public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = ActWidgetNuevaRuta.class.getSimpleName();
-	@Inject
-	Util _util;
+
+	@Inject	Util _util;
 	@Inject Login _login;
+
 	private ProgressDialog _progressDialog;
 	private EditText _txtNombre;
 
@@ -110,6 +112,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 						{
 							//WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
 							refreshWidget();
+							CesService.setMinTrackingDelay();//TODO: start Service? ...
 
 							_util.setTrackingRoute(data.getKey());
 							_progressDialog.dismiss();
@@ -167,7 +170,13 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 	private void refreshWidget()
 	{
 		WidgetRutaService.bindSvc(_sc, getApplicationContext());
-
 	}
+	//----------------------------------------------------------------------------------------------
+	/*@Override
+	public void onStop()
+	{
+		super.onStop();
+		try{ WidgetRutaService.unbindSvc(_sc, getApplicationContext()); }catch(Exception e){}
+	}*/
 
 }

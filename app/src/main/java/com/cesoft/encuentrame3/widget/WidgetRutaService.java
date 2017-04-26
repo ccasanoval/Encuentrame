@@ -37,8 +37,6 @@ public class WidgetRutaService extends Service
 	private static final String TAG = WidgetRutaService.class.getSimpleName();
 	private static Handler _h = null;
 	private static Runnable _r = null;
-	//private static final int _DELAY_SHORT = 30*1000;//TODO: Constantes globales para que tenga sentido junto con CesService.GPS.DELAY
-	//private static final int _DELAY_LONG = 3*60*1000;
 
 	private Util _util;
 
@@ -133,7 +131,7 @@ public class WidgetRutaService extends Service
 		else
 		{
 			setRuta();
-			_h.postDelayed(_r, Constantes.WIDGET_DELAY_SHORT);
+			_h.postDelayed(_r, Constantes.WIDGET_DELAY_SHORT);//TODO: cambiante, acorde con CesService.DELAY_TRACK
 		}
 	}
 	private void borrarRuta()
@@ -153,7 +151,7 @@ public class WidgetRutaService extends Service
 			Ruta.getById(idRuta, new Fire.SimpleListener<Ruta>()
 			{
 				@Override
-				public void onData(Ruta[] aData)
+				public void onDatos(Ruta[] aData)
 				{
 					String sRuta = String.format(Locale.ENGLISH, "%s (%d)", aData[0].getNombre(), aData[0].getPuntosCount());
 					/*RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.widget_ruta);

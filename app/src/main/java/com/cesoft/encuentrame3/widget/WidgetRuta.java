@@ -9,11 +9,11 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.cesoft.encuentrame3.ActLogin;
 import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -29,7 +29,7 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onReceive(Context context, Intent intent)//http://stackoverflow.com/questions/2471875/processing-more-than-one-button-click-at-android-widget
 	{
-Log.e("WidgetRuta", "onReceive-----------------------------------------------------************************");
+Log.e("WidgetRuta", "onReceive-----------------------------------------------------************************"+intent.getAction());
 		//Intent iSvc = new Intent(context, WidgetRutaService.class);context.startService(iSvc);
 		WidgetRutaService.startSvc(context);
 
@@ -44,6 +44,8 @@ Log.e("WidgetRuta", "onReceive--------------------------------------------------
 		else if(ACTION_WIDGET_RUTA_STOP.equals(intent.getAction()))
 		{
 			_util.setTrackingRoute("");
+			CesService.setMaxTrackingDelay();
+			//
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 			remoteViews.setTextViewText(R.id.txtRuta, "");
 			remoteViews.setViewVisibility(R.id.btnStop, View.INVISIBLE);
@@ -58,6 +60,7 @@ Log.e("WidgetRuta", "onReceive--------------------------------------------------
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
+		/*
 		Intent intent;
 		PendingIntent actionPendingIntent;
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
@@ -87,7 +90,8 @@ Log.e("WidgetRuta", "onUpdate---------------------------------------------------
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
 		context.startService(intent);
 
-		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
+		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);*/
+		setWidget(context, appWidgetManager, appWidgetIds, null);
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -99,6 +103,7 @@ Log.e("WidgetRuta", "onUpdate---------------------------------------------------
 		Log.e("WidgetRuta", "setWidget-----------------------------------------------------**************************** = "+sRuta);
 
 		// NOMBRE RUTA
+		if(sRuta != null)
 		remoteViews.setTextViewText(R.id.txtRuta, sRuta);
 		//TODO: al pulsar en la ruta abrir la app en la ruta especificada...
 

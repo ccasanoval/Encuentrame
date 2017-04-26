@@ -293,7 +293,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 		_lisLugar = new Fire.ObjetoListener<Lugar>()
 		{
 			@Override
-			public void onData(Lugar[] aLugares)
+			public void onDatos(Lugar[] aLugares)
 			{
 				long n = aLugares.length;
 				if(n < 1)
@@ -319,7 +319,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 		_lisRuta = new Fire.ObjetoListener<Ruta>()
 		{
 			@Override
-			public void onData(Ruta[] aRutas)
+			public void onDatos(Ruta[] aRutas)
 			{
 				long n = aRutas.length;
 				if(n < 1)
@@ -350,7 +350,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 		_lisAviso = new Fire.ObjetoListener<Aviso>()
 		{
 			@Override
-			public void onData(Aviso[] aAvisos)
+			public void onDatos(Aviso[] aAvisos)
 			{
 				long n = aAvisos.length;
 				if(n < 1)
@@ -450,7 +450,7 @@ Log.e(TAG, "on DESTROY view ----------------------------------------------------
 			catch(Exception e){Log.e(TAG, "onActivityResult:e:--------------------------------------",e);}
 			if( ! data.getBooleanExtra(DIRTY, true))return;
 			Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
-Log.e(TAG, "--------------------------onActivityResult: A::"+filtro);
+//Log.e(TAG, "--------------------------onActivityResult: A::"+filtro);
 			if(filtro != null && filtro.getTipo() != Constantes.NADA)
 			{
 				_filtro = filtro;

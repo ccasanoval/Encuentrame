@@ -7,7 +7,7 @@ public class Constantes
 	// GPS TRACKING SERVICE
 	public static final int GEOFEN_DWELL_TIME = 2*60*1000;
 	public static final long DELAY_TRACK_MIN = 20*1000;//30*1000;
-	public static final long DELAY_TRACK_MAX = 1*60*1000;//7*60*1000;
+	public static final long DELAY_TRACK_MAX = 2*60*1000;//7*60*1000;
 	public static final long ACCURACY_MAX = 40;//24;//m
 	public static final long DISTANCE_MIN = 15;//m
 	public static final long DELAY_LOAD = DELAY_TRACK_MAX;
