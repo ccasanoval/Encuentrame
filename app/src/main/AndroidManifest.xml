@@ -43,9 +43,11 @@
 			android:label="@string/app_name"
 			android:theme="@style/AppTheme.NoActionBar">
 		</activity>
+		<!-- android:launchMode="singleInstance" singleTask -->
 		<activity
 			android:name=".ActMain"
 			android:label="@string/title_activity_act_main"
+			android:launchMode="singleInstance"
 			android:theme="@style/AppTheme.NoActionBar">
 		</activity>
 		<activity

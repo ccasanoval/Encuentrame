@@ -62,8 +62,8 @@ public class CesService extends IntentService
 	private static final long DELAY_LOAD = DELAY_TRACK_MAX;*/
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
 	private static long DELAY_TRACK = Constantes.DELAY_TRACK_MIN;
-		public static void setMinTrackingDelay(){DELAY_TRACK = Constantes.DELAY_TRACK_MIN;}
-		public static void setMaxTrackingDelay(){DELAY_TRACK = Constantes.DELAY_TRACK_MAX;}
+		public static void setMinTrackingDelay(){DELAY_TRACK = Constantes.DELAY_TRACK_MIN;Log.e(TAG, "****** "+DELAY_TRACK);}
+		public static void setMaxTrackingDelay(){DELAY_TRACK = Constantes.DELAY_TRACK_MAX;Log.e(TAG, "****** "+DELAY_TRACK);}
 
 	@Inject	Util _util;
 	@Inject	Login _login;
@@ -176,7 +176,7 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 					_tmTrack = System.currentTimeMillis();
 				}
 //Log.w(TAG, "LOOP before sleeping------------------------"+(DELAY_TRACK/4000));
-				try{Thread.sleep(DELAY_TRACK/4);}
+				try{Thread.sleep(DELAY_TRACK/3);}
 				catch(InterruptedException e){Log.e(TAG, "---------------- LOOP SLEEP INTERRUPTED ---------------");}
 			}
 		}

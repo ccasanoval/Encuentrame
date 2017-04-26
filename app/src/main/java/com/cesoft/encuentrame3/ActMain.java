@@ -36,7 +36,7 @@ import com.cesoft.encuentrame3.util.Util;
 //http://www.vogella.com/tutorials/Dagger/article.html
 
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
-//TODO: CESoft:getLista:onCancelled:DatabaseError: Permission denied  -----> Mostrar ventana de login...
+//TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
 
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
@@ -60,23 +60,33 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	private ViewPager _viewPager;
 	private Login _login;
 
+	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);
-
+Log.e(TAG, "----------- MAIN CREATE");
 		_login = ((App)getApplication()).getGlobalComponent().login();
-		//if(!_login.isLogged())gotoLogin();
+		if(!_login.isLogged())gotoLogin();
 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		toolbar.setSubtitle(Login.getCurrentUserName());
-Log.e(TAG, "----------- MAIN CREATE");
 
 		createViews();
+		gotoPage(getIntent());
+		showMensaje(getIntent());
 	}
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+Log.e(TAG, "----------- MAIN RE CREATE");
+		gotoPage(intent);
+		showMensaje(intent);
+	}
+	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onDestroy()
 	{
@@ -84,15 +94,17 @@ Log.e(TAG, "----------- MAIN CREATE");
 		_viewPager = null;
 //Log.e(TAG, "----------- MAIN DESTROY");
 	}
+	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onStart()
 	{
-//Log.e(TAG, "----------- MAIN START");
+Log.e(TAG, "----------- MAIN START");
 		super.onStart();
 		pideGPS();
 		if(!_login.isLogged())gotoLogin();
 		//createViews();
 	}
+	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onStop()
 	{
@@ -100,27 +112,29 @@ Log.e(TAG, "----------- MAIN CREATE");
 		super.onStop();
 	}
 
+	//----------------------------------------------------------------------------------------------
 	private void createViews()
 	{
 //Log.e(TAG, "-------------------- CREATE VIEWS -------------------");
-
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		_viewPager = (ViewPager)findViewById(R.id.container);
 		_viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
 		tabLayout.setSelectedTabIndicatorHeight(10);
-
-		try
-		{
-			Integer nPagina = getIntent().getIntExtra(Constantes.WIN_TAB, -1);
-			if(nPagina >= Constantes.LUGARES && nPagina <= Constantes.AVISOS)
-				_viewPager.setCurrentItem(nPagina);
-			String sMensaje = getIntent().getStringExtra(Constantes.MENSAJE);
-			if(sMensaje != null && !sMensaje.isEmpty())
-				Toast.makeText(ActMain.this, sMensaje, Toast.LENGTH_LONG).show();
-		}
-		catch(Exception e){Log.e(TAG, "onCreate:e:--------------------------------------------------", e);}
+	}
+	private void gotoPage(Intent intent)
+	{
+		int nPagina = intent.getIntExtra(Constantes.WIN_TAB, Constantes.NADA);
+		Log.e(TAG, "gotoPage:  -----  ---------  -------  -----  ----**"+Constantes.WIN_TAB+" : "+nPagina);
+		if(nPagina == Constantes.LUGARES || nPagina == Constantes.RUTAS || nPagina == Constantes.AVISOS)
+			_viewPager.setCurrentItem(nPagina);
+	}
+	private void showMensaje(Intent intent)
+	{
+		String sMensaje = intent.getStringExtra(Constantes.MENSAJE);
+		if(sMensaje != null && !sMensaje.isEmpty())
+			Toast.makeText(this, sMensaje, Toast.LENGTH_LONG).show();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -298,7 +312,7 @@ Log.e(TAG, "getItem--------------------["+position+"]="+_aFrg[position]+" : "+_a
 		{
 			switch(position)
 			{
-			case Constantes.LUGARES:	return getString(R.string.lugares);
+			case Constantes.LUGARES:return getString(R.string.lugares);
 			case Constantes.RUTAS:	return getString(R.string.rutas);
 			case Constantes.AVISOS:	return getString(R.string.avisos);
 			}

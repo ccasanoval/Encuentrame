@@ -87,7 +87,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 		_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 		_listView = (ListView)_rootView.findViewById(R.id.listView);
-Log.e(TAG, "on CREATE view ---------------------------------------------------------------"+_sectionNumber);
+//Log.e(TAG, "on CREATE view ---------------------------------------------------------------"+_sectionNumber);
 
 		if(_sectionNumber < 0)
 		{
@@ -131,7 +131,7 @@ Log.e(TAG, "on CREATE view -----------------------------------------------------
 	@Override
 	public void onDestroyView()
 	{
-Log.e(TAG, "on DESTROY view ---------------------------------------------------------------"+_sectionNumber);
+//Log.e(TAG, "on DESTROY view ---------------------------------------------------------------"+_sectionNumber);
 		super.onDestroyView();
 		((ViewGroup)_rootView.getParent()).removeView(_rootView);
 		_rootView = null;

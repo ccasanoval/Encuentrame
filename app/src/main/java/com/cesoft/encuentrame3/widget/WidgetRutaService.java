@@ -154,19 +154,13 @@ public class WidgetRutaService extends Service
 				public void onDatos(Ruta[] aData)
 				{
 					String sRuta = String.format(Locale.ENGLISH, "%s (%d)", aData[0].getNombre(), aData[0].getPuntosCount());
-					/*RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.widget_ruta);
-					remoteViews.setTextViewText(R.id.txtRuta, sRuta);
-					remoteViews.setViewVisibility(R.id.btnStop, View.VISIBLE);
-					ComponentName componentName = new ComponentName(WidgetRutaService.this, WidgetRuta.class);
-					AppWidgetManager.getInstance(WidgetRutaService.this).updateAppWidget(componentName, remoteViews);*/
-					setWidget(sRuta);
-Log.e(TAG, "setRuta:--------*****---------------"+sRuta);
+					setWidget(sRuta, true);
 				}
 				@Override
 				public void onError(String err)
 				{
 					Log.e(TAG, String.format("WidgetRutaService:cambiarTextoWidget:onError:e:-------------%s", err));
-					setWidget("Error");
+					setWidget("Error", false);
 				}
 			});
 			stopSelf();
@@ -178,7 +172,7 @@ Log.e(TAG, "setRuta:--------*****---------------"+sRuta);
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private void setWidget(String sRuta)
+	private void setWidget(String sRuta, boolean bRuta)
 	{
 		//Log.e(TAG, "setWidget:--------------------------------- sTarea = "+sTarea);
 		Context context = getApplicationContext();
@@ -200,7 +194,7 @@ Log.e(TAG, "setRuta:--------*****---------------"+sRuta);
 
 			appWidgetManager.updateAppWidget(widgetId, remoteViews);
 		}*/
-		WidgetRuta.setWidget(context, appWidgetManager, allWidgetIds, sRuta);
+		WidgetRuta.setWidget(context, appWidgetManager, allWidgetIds, sRuta, bRuta);
 	}
 
 	//----------------------------------------------------------------------------------------------

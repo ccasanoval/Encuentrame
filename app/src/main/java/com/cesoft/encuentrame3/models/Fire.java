@@ -1,11 +1,7 @@
 package com.cesoft.encuentrame3.models;
 
-
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
@@ -47,8 +43,6 @@ public class Fire
 	{
 		private DatabaseReference _ref;
 			void setRef(DatabaseReference ref){_ref=ref;}
-		/*private GeoFire _geoFire;
-			public void setGeoFire(GeoFire geoFire){_geoFire = geoFire;}*/
 
 		private ValueEventListener _vel = null;
 			public void setListener(ValueEventListener vel){delListener();_vel = vel;}
@@ -58,21 +52,20 @@ public class Fire
 				//Log.e(TAG, "ObjetoListener:delListener: ref="+_ref+", vel="+_vel);
 				if(_ref!=null && _vel!=null)_ref.removeEventListener(_vel);
 			}
-
-		//private GeoQueryEventListener _gel = null;
-			//public void setListenerGeo(GeoQueryEventListener gel){_gel = gel;}
-			//public GeoQueryEventListener getListenerGeo(){return _gel;}
-
-		//public abstract void onData(T[] aData);
-		//public abstract void onError(String err);
 	}
 	//----------------------------------------------------------------------------------------------
 	public interface SimpleListener<T>
 	{
-		//void onDatos(T data);TODO
 		void onDatos(T[] aData);
 		void onError(String err);
 	}
+	//----------------------------------------------------------------------------------------------
+	/*public interface SimpleSingleListener<T> //TODO
+	{
+		void onDatos(T data);
+		void onError(String err);
+	}*/
+
 
 	//----------------------------------------------------------------------------------------------
 	public static abstract class CompletionListener implements DatabaseReference.CompletionListener
@@ -87,15 +80,4 @@ public class Fire
 		}
 	}
 
-	/*public static abstract class Transaccion implements Transaction.Handler
-	{
-		protected abstract void onDatos(DataSnapshot data);
-		protected abstract void onError(String err, int code);
-		@Override public Transaction.Result doTransaction(MutableData mutableData){return null;}
-		@Override public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
-		{
-			if(err == null)	onDatos(data);
-			else			onError(err.getMessage(), err.getCode());
-		}
-	}*/
 }

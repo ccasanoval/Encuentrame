@@ -65,7 +65,8 @@ import javax.inject.Inject;
 
 //TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
+public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, LocationListener,
+		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
 	private static final String TAG = ActRuta.class.getSimpleName();
 	private static final int DELAY_LOCATION = 60000;
@@ -383,7 +384,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Go
 		_r.setDescripcion(_txtDescripcion.getText().toString());
 		_r.guardar(res);
 		//Solo si es nuevo?
-		CesService.setMinTrackingDelay();
 	}
 
 	//______________________________________________________________________________________________

@@ -82,7 +82,6 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 			}
 		});
 		// Si la ruta se está grabando, resaltar
-//Log.e("RutaArrayAdapter", "----------------------------_util.getTrackingRoute() == "+_util.getTrackingRoute());//TODO: por que se llama tanto?
 		if(_rutas[position].getId().equals(_util.getTrackingRoute()))
 		{
 			holder.txtNombre.setTextColor(Color.RED);

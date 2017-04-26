@@ -41,7 +41,7 @@ public class App extends Application
 
 		getGlobalComponent();
 
-Log.e("App", "--------------onCreate-------------------------------------------------------");
+//Log.e("App", "--------------onCreate-------------------------------------------------------");
 		WidgetRutaService.startSvc(this);
 		CesService.start(this);
 		/*Picasso.Builder builder = new Picasso.Builder(this);

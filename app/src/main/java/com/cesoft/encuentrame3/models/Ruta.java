@@ -370,13 +370,12 @@ public class Ruta extends Objeto implements Parcelable
 				if(err == null)
 				{
 					DatabaseReference ref = newFirebase().child(idRuta).child("puntosCount");
-	Log.e(TAG, "****************** onComplete *********** "+ref);
+	//Log.e(TAG, "****************** onComplete *********** "+ref);
 					ref.runTransaction(new Transaction.Handler()
 					{
 						@Override
 						public Transaction.Result doTransaction(MutableData mutableData)
 						{
-	Log.e(TAG, "****************** onComplete : doTransaction *********** "+mutableData.getValue());
 							if(mutableData.getValue() == null)
 								mutableData.setValue(1);
         					else
@@ -386,7 +385,7 @@ public class Ruta extends Objeto implements Parcelable
 						@Override
 						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
 						{
-	Log.e(TAG, "****************** onComplete : onComplete *********** "+data);
+	//Log.e(TAG, "****************** onComplete : onComplete *********** "+data);
 							//Log.w(TAG, "addPunto:inc count:"+err+" "+b+" "+data);
 							//listener.onComplete(err, b, data);
 							if(err == null)

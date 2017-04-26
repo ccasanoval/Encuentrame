@@ -60,42 +60,12 @@ Log.e("WidgetRuta", "onReceive--------------------------------------------------
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
-		/*
-		Intent intent;
-		PendingIntent actionPendingIntent;
-		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
-Log.e("WidgetRuta", "onUpdate-----------------------------------------------------****************************");
-
-		// ADD RUTA
-		intent = new Intent(context, getClass());//WidgetRuta.class
-		intent.setAction(ACTION_WIDGET_RUTA_ADD);
-		actionPendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-		remoteViews.setOnClickPendingIntent(R.id.btnAdd, actionPendingIntent);
-
-		// STOP RUTA
-		intent = new Intent(context, WidgetRuta.class);
-		intent.setAction(ACTION_WIDGET_RUTA_STOP);
-		actionPendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-		remoteViews.setOnClickPendingIntent(R.id.btnStop, actionPendingIntent);
-
-		// OPEN APP
-		intent = new Intent(context.getApplicationContext(), ActMain.class);//intent.putExtra("someKey", true);
-		actionPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-		remoteViews.setOnClickPendingIntent(R.id.btnApp, actionPendingIntent);
-
-		// REFRESH WIDGET SVC
-		ComponentName thisWidget = new ComponentName(context, WidgetRuta.class);
-		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-		intent = new Intent(context.getApplicationContext(), WidgetRutaService.class);
-		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
-		context.startService(intent);
-
-		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);*/
-		setWidget(context, appWidgetManager, appWidgetIds, null);
+		Log.e("WidgetRuta", "onUpdate-----------------------------------------------------**************************** ");
+		setWidget(context, appWidgetManager, appWidgetIds, null, false);
 	}
 
 	//----------------------------------------------------------------------------------------------
-	static public void setWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, String sRuta)
+	static public void setWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, String sRuta, boolean bRuta)
 	{
 		Intent intent;
 		PendingIntent actionPendingIntent;
@@ -105,6 +75,11 @@ Log.e("WidgetRuta", "onUpdate---------------------------------------------------
 		// NOMBRE RUTA
 		if(sRuta != null)
 		remoteViews.setTextViewText(R.id.txtRuta, sRuta);
+		if(bRuta)
+			remoteViews.setViewVisibility(R.id.btnStop, View.VISIBLE);
+		else
+			remoteViews.setViewVisibility(R.id.btnStop, View.INVISIBLE);
+		//
 		//TODO: al pulsar en la ruta abrir la app en la ruta especificada...
 
 		// ADD RUTA
@@ -120,9 +95,13 @@ Log.e("WidgetRuta", "onUpdate---------------------------------------------------
 		remoteViews.setOnClickPendingIntent(R.id.btnStop, actionPendingIntent);
 
 		// OPEN APP
-		intent = new Intent(context.getApplicationContext(), ActMain.class);//intent.putExtra("someKey", true);
+		intent = new Intent(context.getApplicationContext(), ActMain.class);
 		intent.putExtra(Constantes.WIN_TAB, Constantes.RUTAS);
-		actionPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+		actionPendingIntent = PendingIntent.getActivity(
+				context,
+				Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK,
+				intent,
+				PendingIntent.FLAG_CANCEL_CURRENT);
 		remoteViews.setOnClickPendingIntent(R.id.btnApp, actionPendingIntent);
 
 		// REFRESH WIDGET SVC

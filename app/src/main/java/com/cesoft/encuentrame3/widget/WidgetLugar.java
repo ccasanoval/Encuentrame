@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
-import com.cesoft.encuentrame3.ActLogin;
+import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.ActWidgetNuevoLugar;
 import com.cesoft.encuentrame3.R;
 
@@ -28,7 +28,7 @@ public class WidgetLugar extends AppWidgetProvider
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_lugar);
 
 		// Open the app
-		Intent intent = new Intent(context.getApplicationContext(), ActLogin.class);
+		Intent intent = new Intent(context.getApplicationContext(), ActMain.class);
 		PendingIntent actionPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.btnApp, actionPendingIntent);
 		appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
