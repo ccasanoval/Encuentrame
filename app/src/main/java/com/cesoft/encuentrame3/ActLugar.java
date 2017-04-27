@@ -78,25 +78,17 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		if(_bSucio)
 		{
-			AlertDialog.Builder dialog = new AlertDialog.Builder(ActLugar.this);
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 			dialog.setTitle(_l.getNombre());
 			dialog.setMessage(getString(R.string.seguro_salir));
 			dialog.setPositiveButton(getString(R.string.guardar), new DialogInterface.OnClickListener()
 			{
-				@Override
-				public void onClick(DialogInterface dialog, int which)
-				{
-					guardar();
-				}
+				@Override public void onClick(DialogInterface dialog, int which) { guardar(); }
 			});
 			dialog.setCancelable(true);
 			dialog.setNegativeButton(getString(R.string.salir), new DialogInterface.OnClickListener()
 			{
-				@Override
-				public void onClick(DialogInterface dialog, int which)
-				{
-					ActLugar.this.finish();
-				}
+				@Override public void onClick(DialogInterface dialog, int which) { ActLugar.this.finish(); }
 			});
 			dialog.create().show();
 		}
@@ -111,13 +103,12 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 	private class CesTextWatcher implements TextWatcher
 	{
+		//TODO: private boolean _bSucio;...
 		private TextView _tv;
 		private String _str;
 		CesTextWatcher(TextView tv, String str){_tv = tv; _str = str;}
-		@Override
-		public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
-		@Override
-		public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
 		@Override
 		public void afterTextChanged(Editable editable)
 		{
@@ -143,11 +134,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		if(fab != null)
 		fab.setOnClickListener(new View.OnClickListener()
 		{
-			@Override
-			public void onClick(View view)
-			{
-				onSalir();
-			}
+			@Override public void onClick(View view) { onSalir(); }
 		});
 
 		//------------------------------------------------------------------------------------------
@@ -561,13 +548,10 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 	private void imagen()
 	{
 		Intent i = new Intent(this, ActImagen.class);
-		//todo si hay imagen en disco, mostrarla en vista con boton de borrar...
-		//todo modificar adecuadamente el flag sucio
 Log.e(TAG, "onActivityResult-----------------LUGAR---2-------- "+ _imgURLnew);
 		i.putExtra(ActImagen.PARAM_IMG_PATH, _imgURLnew);
 		i.putExtra(ActImagen.PARAM_LUGAR, _l);
 		startActivityForResult(i, ActImagen.IMAGE_CAPTURE);
-
 	}
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)

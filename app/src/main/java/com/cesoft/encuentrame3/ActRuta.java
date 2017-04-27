@@ -19,6 +19,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,7 +59,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-
 import javax.inject.Inject;
 
 
@@ -72,6 +73,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 	@Inject CesService _servicio;
 	@Inject Util _util;
 
+	private boolean _bSucio = false;
 	private boolean _bNuevo = false;
 	private Ruta _r;
 	private EditText _txtNombre;
@@ -81,6 +83,48 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 	private LocationRequest _LocationRequest;
 	private GoogleApiClient _GoogleApiClient;
 
+	//______________________________________________________________________________________________
+	private void onSalir()
+	{
+		if(_bSucio)
+		{
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			dialog.setTitle(_r.getNombre());
+			dialog.setMessage(getString(R.string.seguro_salir));
+			dialog.setPositiveButton(getString(R.string.guardar), new DialogInterface.OnClickListener()
+			{
+				@Override public void onClick(DialogInterface dialog, int which) { guardar(); }
+			});
+			dialog.setCancelable(true);
+			dialog.setNegativeButton(getString(R.string.salir), new DialogInterface.OnClickListener()
+			{
+				@Override public void onClick(DialogInterface dialog, int which) { ActRuta.this.finish(); }
+			});
+			dialog.create().show();
+		}
+		else
+			ActRuta.this.finish();
+	}
+	@Override
+	public void onBackPressed()
+	{
+		onSalir();
+		//super.onBackPressed();
+	}
+	private class CesTextWatcher implements TextWatcher
+	{
+		private TextView _tv;
+		private String _str;
+		CesTextWatcher(TextView tv, String str){_tv = tv; _str = str;}
+		@Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override
+		public void afterTextChanged(Editable editable)
+		{
+			if(_str == null && _tv.getText().length() > 0)_bSucio=true;
+			if(_str != null && _tv.getText().toString().compareTo(_str) != 0)_bSucio=true;
+		}
+	}
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -135,11 +179,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
 		{
-			@Override
-			public void onClick(View view)
-			{
-				ActRuta.this.finish();
-			}
+			//@Override public void onClick(View view) { ActRuta.this.finish(); }
+			@Override public void onClick(View view) { onSalir(); }
 		});
 
 		//------------------------------------------------------------------------------------------
@@ -147,12 +188,16 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		{
 			_r = this.getIntent().getParcelableExtra(Ruta.NOMBRE);
 			setValores();
+			_txtNombre.addTextChangedListener(new ActRuta.CesTextWatcher(_txtNombre, _r.getNombre()));
+			_txtDescripcion.addTextChangedListener(new ActRuta.CesTextWatcher(_txtDescripcion, _r.getDescripcion()));
 		}
 		catch(Exception e)
 		{
 			Log.e(TAG, "onCreate:Nueva ruta o error al desempaquetar:"+e);
 			_bNuevo = true;
 			_r = new Ruta();
+			_txtNombre.addTextChangedListener(new ActRuta.CesTextWatcher(_txtNombre, _r.getNombre()));
+			_txtDescripcion.addTextChangedListener(new ActRuta.CesTextWatcher(_txtDescripcion, _r.getDescripcion()));
 		}
 		//------------------------------------------------------------------------------------------
 		if(_bNuevo)

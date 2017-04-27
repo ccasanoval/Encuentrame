@@ -13,11 +13,14 @@ import java.util.Locale;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -64,6 +67,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	private static final int DELAY_LOCATION = 60000;
 
 	private boolean _bDesdeNotificacion = false;
+	private boolean _bSucio = false;
 	private boolean _bNuevo = false;
 	private Aviso _a;
 	private TextView _lblPosicion;
@@ -84,6 +88,48 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	@Inject CesService _servicio;
 	@Inject Util _util;
 
+	//______________________________________________________________________________________________
+	private void onSalir()
+	{
+		if(_bSucio)
+		{
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			dialog.setTitle(_a.getNombre());
+			dialog.setMessage(getString(R.string.seguro_salir));
+			dialog.setPositiveButton(getString(R.string.guardar), new DialogInterface.OnClickListener()
+			{
+				@Override public void onClick(DialogInterface dialog, int which) { guardar(); }
+			});
+			dialog.setCancelable(true);
+			dialog.setNegativeButton(getString(R.string.salir), new DialogInterface.OnClickListener()
+			{
+				@Override public void onClick(DialogInterface dialog, int which) { ActAviso.this.finish(); }
+			});
+			dialog.create().show();
+		}
+		else
+			ActAviso.this.finish();
+	}
+	@Override
+	public void onBackPressed()
+	{
+		onSalir();
+		//super.onBackPressed();
+	}
+	private class CesTextWatcher implements TextWatcher
+	{
+		private TextView _tv;
+		private String _str;
+		CesTextWatcher(TextView tv, String str){_tv = tv; _str = str;}
+		@Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+		@Override
+		public void afterTextChanged(Editable editable)
+		{
+			if(_str == null && _tv.getText().length() > 0)_bSucio=true;
+			if(_str != null && _tv.getText().toString().compareTo(_str) != 0)_bSucio=true;
+		}
+	}
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -116,11 +162,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		if(fab != null)
 		fab.setOnClickListener(new View.OnClickListener()
 		{
-			@Override
-			public void onClick(View view)
-			{
-				openMain(false, "");
-			}
+			//@Override public void onClick(View view) { openMain(false, ""); }
+			@Override public void onClick(View view) { onSalir(); }
 		});
 
 		//-----------
@@ -137,6 +180,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 			{
+				_bSucio = _a.getRadio() != _adRadio[position];
+				//Log.e(TAG, "********************* ------- ---- ---- _spnRadio : "+position+"     :   "+_bSucio);
 				_a.setRadio(_adRadio[position]);
 				setMarker();
 			}
@@ -153,6 +198,17 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			_a = getIntent().getParcelableExtra(Aviso.NOMBRE);
 			_bDesdeNotificacion = getIntent().getBooleanExtra("notificacion", false);
 			setValores();
+			_txtNombre.addTextChangedListener(new ActAviso.CesTextWatcher(_txtNombre, _a.getNombre()));
+			_txtDescripcion.addTextChangedListener(new ActAviso.CesTextWatcher(_txtDescripcion, _a.getDescripcion()));
+			_swtActivo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+			{
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+				{
+					_bSucio = isChecked != _a.isActivo();
+					//Log.e(TAG, "************************------------------- _swtActivo "+isChecked+" / "+_a.isActivo()+"  :  "+_bSucio);
+				}
+			});
 		}
 		catch(Exception e)
 		{
@@ -160,6 +216,8 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			_a = new Aviso();
 			Location loc = _util.getLocation();
 			if(loc != null)setPosLugar(loc);
+			_txtNombre.addTextChangedListener(new ActAviso.CesTextWatcher(_txtNombre, _a.getNombre()));
+			_txtDescripcion.addTextChangedListener(new ActAviso.CesTextWatcher(_txtDescripcion, _a.getDescripcion()));
 		}
 		//------------------------------------------------------------------------------------------
 		if(_bNuevo)
@@ -467,6 +525,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			@Override
 			public void onMapClick(LatLng latLng)
 			{
+				_bSucio = true;
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
