@@ -88,23 +88,6 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 				Log.e(TAG, "showAviso:e:------------------------------------------------------------" + err);
 			}
 		});
-				/*new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(com.google.firebase.database.DataSnapshot data)
-			{
-				Aviso a = data.getValue(Aviso.class);
-				Intent i = new Intent(context, ActAviso.class);
-				i.putExtra(Aviso.NOMBRE, a);
-				i.putExtra("notificacion", true);
-				_util.showAviso(sTitle, a, i);
-			}
-			@Override
-			public void onCancelled(DatabaseError err)
-			{
-				Log.e(TAG, "CesGeofenceReceiver:showAviso:e:" + err);
-			}
-		});*/
 	}
 
 	/*
@@ -193,37 +176,6 @@ System.err.println("---------------------CesGeofenceReceiver:handleEnterExit");
 			//context.getString(R.string.geofence_transition_invalid_type,transition));
 		}
 	}
+*/
 
-
-//	* Posts a notification in the notification bar when a transition is
-//	* detected. If the user clicks the notification, control goes to the main
-//	* Activity.
-//	*
-//	* @param transitionType
-//	*            The type of transition that occurred.
-//
-	private void sendNotification(String transitionType, String locationName)
-	{
-		// Create an explicit content Intent that starts the main Activity
-		Intent notificationIntent = new Intent(context, MainActivity.class);
-		// Construct a task stack
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		// Adds the main Activity to the task stack as the parent
-		stackBuilder.addParentStack(MainActivity.class);
-		// Push the content Intent onto the stack
-		stackBuilder.addNextIntent(notificationIntent);
-		// Get a PendingIntent containing the entire back stack
-		PendingIntent notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		// Get a notification builder that's compatible with platform versions >= 4
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-		// Set the notification contents
-		builder.setSmallIcon(R.drawable.ic_notification)
-				.setContentTitle(transitionType + ": " + locationName)
-				.setContentText("blablabla")//context.getString(R.string.geofence_transition_notification_text))
-				.setContentIntent(notificationPendingIntent);
-		// Get an instance of the Notification manager
-		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		// Issue the notification
-		mNotificationManager.notify(0, builder.build());
-	}*/
 }

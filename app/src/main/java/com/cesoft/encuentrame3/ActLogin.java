@@ -19,9 +19,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cesoft.encuentrame3.svc.CesService;
-import com.cesoft.encuentrame3.util.Log;
-import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -37,6 +34,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 //https://www.firebase.com/docs/web/guide/user-auth.html
+
+import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Log;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
@@ -251,7 +252,7 @@ public class ActLogin extends AppCompatActivity
 					{
 						_main.iniEsperaLogin();
 						_login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
-								new Login.AuthListener()
+								new Fire.AuthListener()
 								{
 									@Override
 									public void onExito(FirebaseUser usr)
@@ -316,7 +317,7 @@ public class ActLogin extends AppCompatActivity
 						}
 						_main.iniEsperaLogin();
 						Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
-								new Login.AuthListener()
+								new Fire.AuthListener()
 								{
 									@Override
 									public void onExito(FirebaseUser usr)
@@ -347,7 +348,7 @@ public class ActLogin extends AppCompatActivity
 					public void onClick(View v)
 					{
 						Login.restoreUser(txtEmail.getText().toString(),
-							new Login.AuthListener()
+							new Fire.AuthListener()
 							{
 								@Override
 								public void onExito(FirebaseUser usr)

@@ -144,7 +144,7 @@ public class Aviso extends Objeto
 
 	//// FIREBASE
 	//
-	public void eliminar(DatabaseReference.CompletionListener listener)
+	public void eliminar(Fire.CompletadoListener listener)//DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -157,7 +157,7 @@ public class Aviso extends Objeto
 		}
 		delGeo();
 	}
-	public void guardar(DatabaseReference.CompletionListener listener)
+	public void guardar(Fire.CompletadoListener listener)//DatabaseReference.CompletionListener listener)
 	{
 		if(_datos != null)
 		{
@@ -180,7 +180,7 @@ public class Aviso extends Objeto
 	}
 
 	//______________________________________________________________________________________________
-	public static void getById(String sId, final Fire.SimpleListener<Aviso> listener) //ValueEventListener listener)
+	public static void getById(String sId, final Fire.SimpleListener<Aviso> listener)
 	{
 		newFirebase().child(sId).addListenerForSingleValueEvent(new ValueEventListener()
 		{
@@ -197,7 +197,7 @@ public class Aviso extends Objeto
 			}
 		});
 	}
-	public static void getActivos(final Fire.ObjetoListener<Aviso> listener) //ValueEventListener listener)
+	public static void getActivos(final Fire.DatosListener<Aviso> listener)
 	{
 		if(listener == null)
 		{
@@ -230,7 +230,7 @@ public class Aviso extends Objeto
 		listener.setListener(vel);
     	queryRef.addValueEventListener(vel);
 	}
-	public static void getLista(final Fire.ObjetoListener<Aviso> listener)
+	public static void getLista(final Fire.DatosListener<Aviso> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;//= listener.getListener();
@@ -265,7 +265,7 @@ public class Aviso extends Objeto
 	{
 		return super.pasaFiltro(filtro) && !(filtro.getActivo() == Filtro.ACTIVO && !isActivo() || filtro.getActivo() == Filtro.INACTIVO && isActivo());
 	}
-	public static void getLista(Fire.ObjetoListener<Aviso> listener, Filtro filtro)
+	public static void getLista(Fire.DatosListener<Aviso> listener, Filtro filtro)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro);
@@ -273,7 +273,7 @@ public class Aviso extends Objeto
 			buscarPorGeoFiltro(listener, filtro);
 	}
 	//----
-	private static void buscarPorFiltro(final Fire.ObjetoListener<Aviso> listener, final Filtro filtro)
+	private static void buscarPorFiltro(final Fire.DatosListener<Aviso> listener, final Filtro filtro)
 	{
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;// = listener.getListener();

@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -10,7 +11,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import javax.inject.Inject;
@@ -63,15 +63,10 @@ public class Login
 		return _fbdb;
 	}
 
-	//-----
-	public interface AuthListener
-	{
-		void onExito(FirebaseUser usr);
-		void onFallo(Exception e);
-	}
+
 	//-----
 
-	static void addUser(String email, String password, final AuthListener listener)
+	static void addUser(String email, String password, final Fire.AuthListener listener)
 	{
 		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
 		getAuth().createUserWithEmailAndPassword(email, password)
@@ -101,7 +96,7 @@ public class Login
             });
 	}
 
-	private static void login2(String email, String password, final AuthListener listener)
+	private static void login2(String email, String password, final Fire.AuthListener listener)
 	{
 		getAuth().signInWithEmailAndPassword(email, password)
 			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
@@ -163,7 +158,7 @@ public class Login
 	}
 
 	//-------
-	public boolean login(AuthListener listener)
+	public boolean login(Fire.AuthListener listener)
 	{
 		try
 		{
@@ -179,7 +174,7 @@ public class Login
 		login2(email, password, listener);
 		return true;
 	}
-	public void login(String email, String password, final AuthListener listener)
+	public void login(String email, String password, final Fire.AuthListener listener)
 	{
 		login2(email, password, listener);
 		if(_sp.getBoolean(PREF_SAVE_LOGIN, true))
@@ -205,7 +200,7 @@ public class Login
 	}
 
 	//-------
-	static void restoreUser(final String email, final AuthListener listener)//AuthListener listener
+	static void restoreUser(final String email, final Fire.AuthListener listener)//AuthListener listener
 	{
 		getAuth().sendPasswordResetEmail(email)
 			.addOnCompleteListener(new OnCompleteListener<Void>()

@@ -57,8 +57,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 
 import javax.inject.Inject;
 
@@ -352,27 +350,27 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		if(!_bGuardar)return;
 		_bGuardar = false;
 
-		guardar(new DatabaseReference.CompletionListener()
+		guardar(new Fire.CompletadoListener()
 		{
 			@Override
-			public void onComplete(DatabaseError err, DatabaseReference data)
+			public void onDatos(String id)
 			{
 				_bGuardar = true;
 				finEspera();
-				if(err == null)
-				{
-//Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
-					_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
-				}
-				else
-				{
-					Log.e(TAG, "guardar:handleFault:f:" + err);
-					Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-				}
+				//Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
+				_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+			}
+			@Override
+			public void onError(String err, int code)
+			{
+				_bGuardar = true;
+				finEspera();
+				Log.e(TAG, "guardar:handleFault:f:--------------------------------------------------"+err);
+				Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 			}
 		});
 	}
-	private void guardar(DatabaseReference.CompletionListener res)
+	private void guardar(Fire.CompletadoListener res)
 	{
 		if(_txtNombre.getText().toString().isEmpty())
 		{
@@ -400,10 +398,13 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		{
 			dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
 			{
-				@Override
-				public void onDismiss(DialogInterface dialog){_bEliminar = true;}
+				@Override public void onDismiss(DialogInterface dialog){_bEliminar = true;}
 			});
 		}
+		dialog.setNegativeButton(getString(R.string.cancelar), new DialogInterface.OnClickListener()
+		{
+			@Override public void onClick(DialogInterface dialog, int which){_bEliminar = true;}
+		});
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
@@ -414,22 +415,22 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 				{
 					if(_r.getId().equals(_util.getTrackingRoute()))
 						_util.setTrackingRoute("");
-					_r.eliminar(new DatabaseReference.CompletionListener()
+					_r.eliminar(new Fire.CompletadoListener()
 					{
 						@Override
-						public void onComplete(DatabaseError err, DatabaseReference data)
+						protected void onDatos(String id)
 						{
 							_bEliminar = true;
 							finEspera();
-							if(err == null)
-							{
-								//Log.w(TAG, "eliminar:handleResponse:"+data);
-								_util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
-							} else
-							{
-								Log.e(TAG, "eliminar:handleFault:f:" + err);
-								Toast.makeText(ActRuta.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-							}
+							_util.return2Main(ActRuta.this, true, getString(R.string.ok_eliminar_ruta));
+						}
+						@Override
+						protected void onError(String err, int code)
+						{
+							_bEliminar = true;
+							finEspera();
+							Log.e(TAG, "eliminar:handleFault:f:" + err);
+							Toast.makeText(ActRuta.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
 						}
 					});
 				}
@@ -540,25 +541,25 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 	private void startTrackingRecord()
 	{
 		iniEspera();
-		guardar(new DatabaseReference.CompletionListener()
+		guardar(new Fire.CompletadoListener()
 		{
 			@Override
-			public void onComplete(DatabaseError err, DatabaseReference data)
+			public void onDatos(String id)
 			{
-				if(err == null)
-				{
-					_util.setTrackingRoute(_r.getId());
-					_servicio._restartDelayRuta();
-					_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
-//Log.e(TAG, "startTrackingRecord-----------------------------------ID:"+_r.getId()+" data="+data);
-				}
-				else
-				{
-					finEspera();
-					_util.setTrackingRoute("");
-					Log.e(TAG, String.format("startTrackingRecord:handleFault:%s", err));
-					Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
-				}
+				finEspera();
+				_util.setTrackingRoute(_r.getId());
+				//
+				_servicio._restartDelayRuta();
+				_util.return2Main(ActRuta.this, true, getString(R.string.ok_guardar_ruta));
+			}
+			@Override
+			public void onError(String err, int code)
+			{
+				finEspera();
+				_util.setTrackingRoute("");
+				//
+				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------------"+err);
+				Toast.makeText(ActRuta.this, String.format(getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -570,7 +571,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private Fire.ObjetoListener<Ruta.RutaPunto> _lisRuta;
+	private Fire.DatosListener<Ruta.RutaPunto> _lisRuta;
 	private void delListeners()
 	{
 		if(_lisRuta != null)_lisRuta.setListener(null);
@@ -579,7 +580,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 	private void newListeners()
 	{
 		delListeners();
-		_lisRuta = new Fire.ObjetoListener<Ruta.RutaPunto>()
+		_lisRuta = new Fire.DatosListener<Ruta.RutaPunto>()
 		{
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)

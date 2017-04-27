@@ -33,9 +33,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -103,47 +100,43 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			{
 				if(_l != null)
 				{
-					_l.guardar(new DatabaseReference.CompletionListener()
+					_l.guardar(new Fire.CompletadoListener()
 					{
 						@Override
-						public void onComplete(DatabaseError err, DatabaseReference databaseReference)
+						protected void onDatos(String id)
 						{
-							if(err == null)
-							{
-								Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_LONG).show();
-								Intent data = new Intent();
-								data.putExtra(Lugar.NOMBRE, _l);
-								setResult(Activity.RESULT_OK, data);
-								finish();
-							}
-							else
-							{
-								Log.e(TAG, "guardar:handleFault:f:" + err);
-								Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-							}
+							Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_LONG).show();
+							Intent data = new Intent();
+							data.putExtra(Lugar.NOMBRE, _l);
+							setResult(Activity.RESULT_OK, data);
+							finish();
+						}
+						@Override
+						protected void onError(String err, int code)
+						{
+							Log.e(TAG, "guardar:handleFault:f:" + err);
+							Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 						}
 					});
 				}
 				if(_a != null)
 				{
-					_a.guardar(new DatabaseReference.CompletionListener()
+					_a.guardar(new Fire.CompletadoListener()
 					{
 						@Override
-						public void onComplete(DatabaseError err, DatabaseReference databaseReference)
+						protected void onDatos(String id)
 						{
-							if(err == null)
-							{
-								Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_aviso), Toast.LENGTH_LONG).show();
-								Intent data = new Intent();
-								data.putExtra(Aviso.NOMBRE, _a);
-								setResult(Activity.RESULT_OK, data);
-								finish();
-							}
-							else
-							{
-								Log.e(TAG, "guardar:handleFault:f:" + err);
-								Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-							}
+							Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_aviso), Toast.LENGTH_LONG).show();
+							Intent data = new Intent();
+							data.putExtra(Aviso.NOMBRE, _a);
+							setResult(Activity.RESULT_OK, data);
+							finish();
+						}
+						@Override
+						protected void onError(String err, int code)
+						{
+							Log.e(TAG, "guardar:handleFault:f:" + err);
+							Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 						}
 					});
 				}
@@ -452,9 +445,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 
 
 	//______________________________________________________________________________________________
-	private Fire.ObjetoListener<Lugar> _lisLugar;
-	private Fire.ObjetoListener<Aviso> _lisAviso;
-	private Fire.ObjetoListener<Ruta> _lisRuta;
+	private Fire.DatosListener<Lugar> _lisLugar;
+	private Fire.DatosListener<Aviso> _lisAviso;
+	private Fire.DatosListener<Ruta> _lisRuta;
 	//----------------------------------------------------------------------------------------------
 	private void showLugares()
 	{
@@ -480,7 +473,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	private void newListeners()
 	{
 		delListeners();
-		_lisLugar = new Fire.ObjetoListener<Lugar>()
+		_lisLugar = new Fire.DatosListener<Lugar>()
 		{
 			@Override
 			public void onDatos(Lugar[] aData)
@@ -493,7 +486,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				Log.e(TAG, String.format("showLugares:e:--------------------------------------------LUGARES:GET:ERROR:%s",err));
 			}
 		};
-		_lisAviso = new Fire.ObjetoListener<Aviso>()
+		_lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override
 			public void onDatos(Aviso[] aData)
@@ -506,7 +499,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				Log.e(TAG, String.format("showAvisos:e:---------------------------------------------AVISOS:GET:ERROR:%s",err));
 			}
 		};
-		_lisRuta = new Fire.ObjetoListener<Ruta>()
+		_lisRuta = new Fire.DatosListener<Ruta>()
 		{
 			@Override
 			public void onDatos(Ruta[] aData)

@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.models;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
@@ -39,7 +40,14 @@ public class Fire
 
 
 	//----------------------------------------------------------------------------------------------
-	public static abstract class ObjetoListener<T> implements SimpleListener<T>
+	//-----
+	public interface AuthListener
+	{
+		void onExito(FirebaseUser usr);
+		void onFallo(Exception e);
+	}
+	//----------------------------------------------------------------------------------------------
+	public static abstract class DatosListener<T> implements SimpleListener<T>
 	{
 		private DatabaseReference _ref;
 			void setRef(DatabaseReference ref){_ref=ref;}
@@ -60,15 +68,13 @@ public class Fire
 		void onError(String err);
 	}
 	//----------------------------------------------------------------------------------------------
-	/*public interface SimpleSingleListener<T> //TODO
+	/*public interface SingleListener<T> //TODO
 	{
 		void onDatos(T data);
 		void onError(String err);
 	}*/
-
-
 	//----------------------------------------------------------------------------------------------
-	public static abstract class CompletionListener implements DatabaseReference.CompletionListener
+	public static abstract class CompletadoListener implements DatabaseReference.CompletionListener
 	{
 		protected abstract void onDatos(String id);
 		protected abstract void onError(String err, int code);

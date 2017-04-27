@@ -102,7 +102,7 @@ public class Ruta extends Objeto implements Parcelable
 
 	//// FIREBASE
 	//
-	public void eliminar(DatabaseReference.CompletionListener listener)
+	public void eliminar(Fire.CompletadoListener listener)
 	{
 		RutaPunto.eliminar(getId());
 		if(_datos != null)
@@ -118,7 +118,7 @@ public class Ruta extends Objeto implements Parcelable
 		puntosCount = 0;
 	}
 
-	public void guardar(DatabaseReference.CompletionListener listener)
+	public void guardar(final Fire.CompletadoListener listener)
 	{
 		if(_datos != null)
 		{
@@ -157,7 +157,7 @@ public class Ruta extends Objeto implements Parcelable
 		});//queryRef.addChildEventListener(listener);
 	}
 
-	public static void getLista(final Fire.ObjetoListener<Ruta> listener)
+	public static void getLista(final Fire.DatosListener<Ruta> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;// = listener.getListener();
@@ -202,7 +202,7 @@ public class Ruta extends Objeto implements Parcelable
 		boolean bActivo = idRuta!=null && idRuta.equals(idRutaAct);//Ruta activa
 		return !(filtro.getActivo() == Filtro.ACTIVO && !bActivo || filtro.getActivo() == Filtro.INACTIVO && bActivo);
 	}
-	public static void getLista(Fire.ObjetoListener<Ruta> listener, Filtro filtro, String idRutaAct)
+	public static void getLista(Fire.DatosListener<Ruta> listener, Filtro filtro, String idRutaAct)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro, idRutaAct);
@@ -210,7 +210,7 @@ public class Ruta extends Objeto implements Parcelable
 			buscarPorGeoFiltro(listener, filtro, idRutaAct);
 	}
 	//----
-	private static void buscarPorFiltro(final Fire.ObjetoListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
+	private static void buscarPorFiltro(final Fire.DatosListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;// = listener.getListener();
@@ -259,8 +259,8 @@ public class Ruta extends Objeto implements Parcelable
 				else
 				for(String idRuta : aData)
 				{
-					//Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
-					Ruta.newFirebase().child(idRuta).addValueEventListener(new ValueEventListener()//AJAX
+					Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
+					//Ruta.newFirebase().child(idRuta).addValueEventListener(new ValueEventListener()//AJAX
 					{
 						@Override
 						public void onDataChange(DataSnapshot data)
@@ -568,7 +568,7 @@ Log.w(TAG, "RutaPunto:eliminar:**************** ELIMINANDO PTOS DE RUTA "+idRuta
 				}
 			});
 		}
-		public static void getListaRep(String sIdRuta, final Fire.ObjetoListener<Ruta.RutaPunto> listener) //final ValueEventListener listener)
+		public static void getListaRep(String sIdRuta, final Fire.DatosListener<Ruta.RutaPunto> listener) //final ValueEventListener listener)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
 			//listener.setRef(queryRef.getRef());

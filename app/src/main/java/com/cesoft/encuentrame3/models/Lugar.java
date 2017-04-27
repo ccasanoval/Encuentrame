@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
-import android.support.annotation.NonNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,7 +33,8 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 
-import org.jetbrains.annotations.NotNull;
+//import org.jetbrains.annotations.NotNull;
+import android.support.annotation.NonNull;
 
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Log;
@@ -93,7 +93,7 @@ public class Lugar extends Objeto
 
 	//// FIREBASE
 	//______________________________________________________________________________________________
-	public void eliminar(DatabaseReference.CompletionListener listener)
+	public void eliminar(Fire.CompletadoListener listener)
 	{
 		if(_datos != null)
 		{
@@ -107,7 +107,7 @@ public class Lugar extends Objeto
 		delGeo();
 		delImg();
 	}
-	public void guardar(DatabaseReference.CompletionListener listener)
+	public void guardar(Fire.CompletadoListener listener)
 	{
 		if(_datos != null)
 		{
@@ -130,7 +130,7 @@ public class Lugar extends Objeto
 	}
 
 	//______________________________________________________________________________________________
-	public static void getLista(@NotNull final Fire.ObjetoListener<Lugar> listener)
+	public static void getLista(@NonNull final Fire.DatosListener<Lugar> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;// = listener.getListener();
@@ -162,14 +162,14 @@ public class Lugar extends Objeto
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public static void getLista(Fire.ObjetoListener<Lugar> listener, Filtro filtro)
+	public static void getLista(Fire.DatosListener<Lugar> listener, Filtro filtro)
 	{
 		if(filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0)
 			buscarPorFiltro(listener, filtro);
 		else
 			buscarPorGeoFiltro(listener, filtro);
 	}
-	private static void buscarPorFiltro(final Fire.ObjetoListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
+	private static void buscarPorFiltro(final Fire.DatosListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
 		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		DatabaseReference ddbb = newFirebase();

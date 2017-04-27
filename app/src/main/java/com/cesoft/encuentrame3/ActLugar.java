@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3;
 import java.util.Locale;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -21,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Fire;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,17 +42,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: flag de sucio, si has modificado algo que te pregunte si no quieres guardar
+//
 public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>
 {
 	private static final String TAG = ActLugar.class.getSimpleName();
@@ -366,27 +365,24 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		_l.setNombre(_txtNombre.getText().toString());
 		_l.setDescripcion(_txtDescripcion.getText().toString());
 		//if(_imgURLnew != null)_l.setImagen(_imgURLnew);
-		_l.guardar(new DatabaseReference.CompletionListener()
-		{
+		_l.guardar(new Fire.CompletadoListener() {
 			@Override
-			public void onComplete(DatabaseError err, DatabaseReference data)
+			protected void onDatos(String id)
 			{
-				if(err == null)
-				{
-Log.e(TAG, "guardar--------------------------------"+ _imgURLnew);
-					if(_imgURLnew != null)_l.uploadImg(_imgURLnew);
+				Log.e(TAG, "guardar--------------------------------"+ _imgURLnew);
+				if(_imgURLnew != null)_l.uploadImg(_imgURLnew);
 
-					_util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
-					_bGuardar = true;
-					finEspera();
-				}
-				else
-				{
-					finEspera();
-					_bGuardar = true;
-					Log.e(TAG, String.format("guardar:handleFault:f:%s",err));
-					Toast.makeText(ActLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-				}
+				_util.return2Main(ActLugar.this, true, getString(R.string.ok_guardar_lugar));
+				_bGuardar = true;
+				finEspera();
+			}
+			@Override
+			protected void onError(String err, int code)
+			{
+				finEspera();
+				_bGuardar = true;
+				Log.e(TAG, String.format("guardar:handleFault:f:%s",err));
+				Toast.makeText(ActLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 			}
 		});
 	}
@@ -397,32 +393,42 @@ Log.e(TAG, "guardar--------------------------------"+ _imgURLnew);
 	{
 		if(!_bEliminar)return;
 		_bEliminar=false;
-
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_l.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+		{
+			dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
+			{
+				@Override public void onDismiss(DialogInterface dialog){_bEliminar = true;}
+			});
+		}
+		dialog.setNegativeButton(getString(R.string.cancelar), new DialogInterface.OnClickListener()
+		{
+			@Override public void onClick(DialogInterface dialog, int which){_bEliminar = true;}
+		});
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
 				iniEspera();
-				_l.eliminar(new DatabaseReference.CompletionListener()
+				_l.eliminar(new Fire.CompletadoListener()
 				{
 					@Override
-					public void onComplete(DatabaseError err, DatabaseReference data)
+					protected void onDatos(String id)
 					{
 						finEspera();
 						_bEliminar = true;
-						if(err == null)
-						{
-							_util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
-						}
-						else
-						{
-							Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
-							Toast.makeText(ActLugar.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-						}
+						_util.return2Main(ActLugar.this, true, getString(R.string.ok_eliminar_lugar));
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						finEspera();
+						_bEliminar = true;
+						Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
+						Toast.makeText(ActLugar.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
 					}
 				});
 			}
@@ -481,7 +487,6 @@ Log.e(TAG, "guardar--------------------------------"+ _imgURLnew);
 	{
 		Log.w(TAG, "----------:onResult:"+status);
 	}
-
 
 	//______________________________________________________________________________________________
 	private void setPosLugar(Location loc)
@@ -571,7 +576,7 @@ Log.e(TAG, "onActivityResult-----------------LUGAR---2-------- "+ _imgURLnew);
 		if(requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK)
 		{
 			_imgURLnew = data.getStringExtra(ActImagen.PARAM_IMG_PATH);
-			_bSucio = true;//TODO: boton borrar en actImagen
+			_bSucio = true;
 			Log.e(TAG, "onActivityResult-----------------LUGAR----------- "+ _imgURLnew);
 		}
 		else

@@ -37,6 +37,7 @@
 	<string name="guardar">Guardar</string>
 	<string name="editar">Editar</string>
 	<string name="eliminar">Eliminar</string>
+	<string name="cancelar">Cancelar</string>
 	<string name="imagen">Imagen</string>
 	<string name="nuevo">Nuevo</string>
 	<string name="actualizar_posicion">Actualizar posición</string>

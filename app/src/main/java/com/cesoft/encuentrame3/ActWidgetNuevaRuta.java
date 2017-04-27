@@ -12,17 +12,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
+
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 
 import javax.inject.Inject;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = ActWidgetNuevaRuta.class.getSimpleName();
@@ -60,7 +62,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		//Login _login = ((App)getApplication()).getGlobalComponent().login();
 		if( ! _login.isLogged())
 		{
-			_login.login(new Login.AuthListener()
+			_login.login(new Fire.AuthListener()
 			{
 				@Override
 				public void onExito(FirebaseUser usr)
@@ -70,7 +72,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 				@Override
 				public void onFallo(Exception e)
 				{
-					Log.e(TAG, "ActWidgetNuevRuta:Login:KO:e="+e, e);
+					Log.e(TAG, "ActWidgetNuevRuta:Login:KO:e:---------------------------------------", e);
 					Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
 					finish();
 				}
@@ -103,38 +105,36 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 				final Ruta r = new Ruta();
 				r.setNombre(_txtNombre.getText().toString());
 				r.setDescripcion("Widget");
-				r.guardar(new DatabaseReference.CompletionListener()
+				r.guardar(new Fire.CompletadoListener()
 				{
 					@Override
-					public void onComplete(DatabaseError err, DatabaseReference data)
+					protected void onDatos(String id)
 					{
-						if(err == null)
+						_util.setTrackingRoute(id);
+						_progressDialog.dismiss();
+						Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
+						ActWidgetNuevaRuta.this.finish();
+						//
+						//WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
+						refreshWidget();
+						CesService.setMinTrackingDelay();//TODO: start Service? ...
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						if(flag[0] == 0)
 						{
-							//WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
-							refreshWidget();
-							CesService.setMinTrackingDelay();//TODO: start Service? ...
-
-							_util.setTrackingRoute(data.getKey());
-							_progressDialog.dismiss();
-							Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
-							ActWidgetNuevaRuta.this.finish();
+							flag[0]++;
+							r.guardar(this);
+							return;
 						}
-						else
-						{
-							if(flag[0] == 0)
-							{
-								flag[0]++;
-								r.guardar(this);
-								return;
-							}
-							Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:backendlessFault: "+err);
-							_progressDialog.hide();//if(_progressDialog.isShowing())
-							Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-
-							//Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
-							//ActWidgetNuevaRuta.this.startService(i);
-							refreshWidget();
-						}
+						Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:e:----------------------------------"+err);
+						_progressDialog.hide();//if(_progressDialog.isShowing())
+						Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
+						//Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
+						//ActWidgetNuevaRuta.this.startService(i);
+						//
+						refreshWidget();
 					}
 				});
 		  	}

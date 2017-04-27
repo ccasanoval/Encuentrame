@@ -37,6 +37,7 @@ import com.cesoft.encuentrame3.util.Util;
 
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
 //TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
+//TODO: https://github.com/nmoskalenko/rxFirebase
 
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....

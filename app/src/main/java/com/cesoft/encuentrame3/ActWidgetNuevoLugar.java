@@ -10,15 +10,15 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 
 import javax.inject.Inject;
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = ActWidgetNuevoLugar.class.getSimpleName();
@@ -82,33 +82,29 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 				l.setLatitud(pos.getLatitude());l.setLongitud(pos.getLongitude());
 				l.setNombre(txtNombre.getText().toString());
 				l.setDescripcion("Widget");
-				l.guardar(new DatabaseReference.CompletionListener()
-				{
+				l.guardar(new Fire.CompletadoListener() {
 					@Override
-					public void onComplete(DatabaseError err, DatabaseReference data)
+					protected void onDatos(String id)
 					{
-						if(err == null)
+						_progressDialog.dismiss();
+						Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_SHORT).show();
+						ActWidgetNuevoLugar.this.finish();
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						if(flag[0] == 0)
 						{
-							_progressDialog.dismiss();
-							Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_SHORT).show();
-							//TODO: send mesage to ActMain para que refresque lista? Tampoco importa, el widget tiene sentido si no tienes app avierta...
-							ActWidgetNuevoLugar.this.finish();
+							flag[0]++;
+							l.guardar(this);
+							return;
 						}
-						else
-						{
-							if(flag[0] == 0)
-							{
-								flag[0]++;
-								l.guardar(this);
-								return;
-							}
-							Log.e(TAG, "ActWidgetNuevoLugar:addNuevo:backendlessFault: "+err);
-							_progressDialog.hide();//if(_progressDialog.isShowing())
-							Toast.makeText(ActWidgetNuevoLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-						}
+						Log.e(TAG, "ActWidgetNuevoLugar:addNuevo:backendlessFault: "+err);
+						_progressDialog.hide();//if(_progressDialog.isShowing())
+						Toast.makeText(ActWidgetNuevoLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 					}
 				});
-    		}
+  		  	}
 		});
 	}
 }

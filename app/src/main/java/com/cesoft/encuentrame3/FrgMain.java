@@ -276,9 +276,9 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 
 	//______________________________________________________________________________________________
-	private Fire.ObjetoListener<Lugar> _lisLugar;
-	private Fire.ObjetoListener<Aviso> _lisAviso;
-	private Fire.ObjetoListener<Ruta> _lisRuta;
+	private Fire.DatosListener<Lugar> _lisLugar;
+	private Fire.DatosListener<Aviso> _lisAviso;
+	private Fire.DatosListener<Ruta> _lisRuta;
 	//----------------------------------------------------------------------------------------------
 	private void delListeners()
 	{
@@ -290,7 +290,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		delListeners();
 		//---
-		_lisLugar = new Fire.ObjetoListener<Lugar>()
+		_lisLugar = new Fire.DatosListener<Lugar>()
 		{
 			@Override
 			public void onDatos(Lugar[] aLugares)
@@ -316,7 +316,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			}
 		};
 		//---
-		_lisRuta = new Fire.ObjetoListener<Ruta>()
+		_lisRuta = new Fire.DatosListener<Ruta>()
 		{
 			@Override
 			public void onDatos(Ruta[] aRutas)
@@ -347,7 +347,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			}
 		};
 		//---
-		_lisAviso = new Fire.ObjetoListener<Aviso>()
+		_lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override
 			public void onDatos(Aviso[] aAvisos)

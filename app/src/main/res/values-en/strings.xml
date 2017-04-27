@@ -23,6 +23,7 @@
 	<string name="editar_lugar">Edit Point</string>
 	<string name="editar_ruta">Edit Route</string>
 	<string name="eliminar">Remove</string>
+	<string name="cancelar">Cancel</string>
 	<string name="imagen">Picture</string>
 	<string name="en_zona_aviso">Inside warning zone</string>
 	<string name="enter">Enter</string>

@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame3;
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,6 +25,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
@@ -51,9 +53,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 
 import javax.inject.Inject;
 
@@ -357,44 +356,42 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		_a.setActivo(_swtActivo.isChecked());
 		//_a.reactivarPorHoy();
 		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
-		_a.guardar(new DatabaseReference.CompletionListener()
+		_a.guardar(new Fire.CompletadoListener()
 		{
 			@Override
-			public void onComplete(DatabaseError err, DatabaseReference data)
+			protected void onDatos(String id)
 			{
-				if(err == null)
-				{
-					_servicio.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
-					openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
-					_bGuardar = true;
-					finEspera();
-				}
-				else
-				{
-					Log.e(TAG, "guardar:handleFault:f:" + err);
+				_servicio.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
+				openMain(true, getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
+				_bGuardar = true;
+				finEspera();
+			}
+			@Override
+			protected void onError(String err, int code)
+			{
+				Log.e(TAG, "guardar:handleFault:f:" + err);
 
-					//*****************************************************************************
-					try{Thread.sleep(500);}catch(InterruptedException ignored){}
-					_a.guardar(new DatabaseReference.CompletionListener()
+				//*****************************************************************************
+				try{Thread.sleep(500);}catch(InterruptedException ignored){}
+				_a.guardar(new Fire.CompletadoListener()
+				{
+					@Override
+					protected void onDatos(String id)
 					{
-						@Override
-						public void onComplete(DatabaseError err, DatabaseReference data)
-						{
-							finEspera();
-							_bGuardar = true;
-							if(err == null)
-							{
-								_servicio.cargarListaGeoAvisos();
-								openMain(true, getString(R.string.ok_guardar_aviso));
-							}
-							else
-							{
-								Log.e(TAG, "guardar:handleFault2:f:" + err);
-								Toast.makeText(ActAviso.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-							}
-						}
-					});
-				}
+						finEspera();
+						_bGuardar = true;
+						_servicio.cargarListaGeoAvisos();
+						openMain(true, getString(R.string.ok_guardar_aviso));
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						finEspera();
+						_bGuardar = true;
+						Log.e(TAG, "guardar:handleFault2:f:" + err);
+						Toast.makeText(ActAviso.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
+					}
+				});
 			}
 		});
 	}
@@ -408,28 +405,38 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setTitle(_a.getNombre());//getString(R.string.eliminar));
 		dialog.setMessage(getString(R.string.seguro_eliminar));
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+		{
+			dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
+			{
+				@Override public void onDismiss(DialogInterface dialog){_bEliminar = true;}
+			});
+		}
+		dialog.setNegativeButton(getString(R.string.cancelar), new DialogInterface.OnClickListener()
+		{
+			@Override public void onClick(DialogInterface dialog, int which){_bEliminar = true;}
+		});
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
 				iniEspera();
-				_a.eliminar(new DatabaseReference.CompletionListener()
-				{
+				_a.eliminar(new Fire.CompletadoListener() {
 					@Override
-					public void onComplete(DatabaseError err, DatabaseReference data)
+					protected void onDatos(String id)
 					{
 						finEspera();
 						_bEliminar=true;
-						if(err == null)
-						{
-							openMain(true, getString(R.string.ok_eliminar_aviso));
-						}
-						else
-						{
-							Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
-							Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-						}
+						openMain(true, getString(R.string.ok_eliminar_aviso));
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						finEspera();
+						_bEliminar=true;
+						Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
+						Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
 					}
 				});
 			}
@@ -506,7 +513,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	}
 
 	//______________________________________________________________________________________________
-	private void pideGPS()//TODO:?
+	private void pideGPS()//TODO: standarizar?
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
