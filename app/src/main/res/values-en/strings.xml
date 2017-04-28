@@ -22,6 +22,7 @@
 	<string name="editar_aviso">Edit Warning</string>
 	<string name="editar_lugar">Edit Point</string>
 	<string name="editar_ruta">Edit Route</string>
+	<string name="direccion">Address…</string>
 	<string name="eliminar">Remove</string>
 	<string name="cancelar">Cancel</string>
 	<string name="imagen">Picture</string>

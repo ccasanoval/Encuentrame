@@ -388,12 +388,22 @@ Log.e(TAG, "-------------------------------- CREATE");
 	}
 
 	//______________________________________________________________________________________________
+	private boolean checkCampos()
+	{
+		if(_txtNombre.getText().toString().isEmpty())
+		{
+			Toast.makeText(ActRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
+			_txtNombre.requestFocus();
+			return false;
+		}
+		return true;
+	}
 	private boolean _bGuardar = true;
 	private synchronized void guardar()
 	{
-		if(!_bGuardar)return;
+		if( ! checkCampos())return;
+		if( ! _bGuardar)return;
 		_bGuardar = false;
-
 		guardar(new Fire.CompletadoListener()
 		{
 			@Override
@@ -416,16 +426,11 @@ Log.e(TAG, "-------------------------------- CREATE");
 	}
 	private void guardar(Fire.CompletadoListener res)
 	{
-		if(_txtNombre.getText().toString().isEmpty())
-		{
-			Toast.makeText(ActRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
-			_txtNombre.requestFocus();
-			return;
-		}
 		_r.setNombre(_txtNombre.getText().toString());
 		_r.setDescripcion(_txtDescripcion.getText().toString());
 		_r.guardar(res);
 		//Solo si es nuevo?
+		CesService.setMinTrackingDelay();
 	}
 
 	//______________________________________________________________________________________________
@@ -588,6 +593,7 @@ Log.e(TAG, "-------------------------------- CREATE");
 	//______________________________________________________________________________________________
 	private void startTrackingRecord()
 	{
+		if( ! checkCampos())return;
 		iniEspera();
 		guardar(new Fire.CompletadoListener()
 		{
@@ -633,7 +639,7 @@ Log.e(TAG, "-------------------------------- CREATE");
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
-				Log.e(TAG, "------------------------------DatosListener --------------------------------------"+aData.length);
+				//Log.e(TAG, "------------------------------DatosListener --------------------------------------"+aData.length);
 				showRutaHelper(aData);
 			}
 			@Override
@@ -648,7 +654,6 @@ Log.e(TAG, "-------------------------------- CREATE");
 	//----------------------------------------------------------------------------------------------
 	private void showRuta()
 	{
-Log.e(TAG, "------------------------------ SHOW RUTA ---------------------------------------------------");
 		Ruta.RutaPunto.getListaRep(_r.getId(), _lisRuta);
 	}
 
@@ -666,7 +671,6 @@ Log.e(TAG, "------------------------------ SHOW RUTA ---------------------------
 			return;
 		}
 		_Map.clear();
-Log.e(TAG, "------------------------------ SHOW RUTA HELPER ---------------------------------------------------");
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);

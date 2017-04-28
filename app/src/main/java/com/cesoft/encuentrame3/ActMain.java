@@ -39,11 +39,15 @@ import com.cesoft.encuentrame3.util.Util;
 
 // *** Rx
 //https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
+//https://github.com/nmoskalenko/rxFirebase
+//
+//http://sglora.com/android-tutorial-sobre-retrolambda/
+
+// *** Charles, Fiddle
+//https://jaanus.com/debugging-http-on-an-android-phone-or-tablet-with-charles-proxy-for-fun-and-profit/
 
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
 //TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
-//TODO: https://github.com/nmoskalenko/rxFirebase
-
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
 //TODO: Cambiar ListView por recyclerview

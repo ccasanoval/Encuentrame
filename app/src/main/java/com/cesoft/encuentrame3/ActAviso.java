@@ -161,6 +161,11 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			//@Override public void onClick(View view) { openMain(false, ""); }
 			@Override public void onClick(View view) { onSalir(); }
 		});
+		fab = (FloatingActionButton)findViewById(R.id.fabBuscar);
+		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
+		{
+			@Override public void onClick(View view) { _util.onBuscar(ActAviso.this, _Map, _fMapZoom); }
+		});
 
 		//-----------
 		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);

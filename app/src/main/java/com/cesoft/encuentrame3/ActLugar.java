@@ -131,10 +131,14 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
-		if(fab != null)
-		fab.setOnClickListener(new View.OnClickListener()
+		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override public void onClick(View view) { onSalir(); }
+		});
+		fab = (FloatingActionButton)findViewById(R.id.fabBuscar);
+		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
+		{
+			@Override public void onClick(View view) { _util.onBuscar(ActLugar.this, _Map, _fMapZoom); }
 		});
 
 		//------------------------------------------------------------------------------------------

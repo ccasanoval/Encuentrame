@@ -1,30 +1,41 @@
 package com.cesoft.encuentrame3.util;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
+import android.view.View;
+import android.widget.EditText;
 
 import com.cesoft.encuentrame3.ActAviso;
+import com.cesoft.encuentrame3.ActLugar;
 import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -380,6 +391,42 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 	{
 		if(date == null)return "";
 		return dateTimeFormatter.format(date);
+	}
+
+	//----------------------------------------------------------------------------------------------
+	public void onBuscar(final Context c, final GoogleMap map, final float zoom)
+	{
+		View viewBuscarCalle = View.inflate(c, R.layout.dialog_buscar_calle, null);
+		final EditText direccion = (EditText)viewBuscarCalle.findViewById(R.id.direccion);
+		AlertDialog dlg = new AlertDialog.Builder(c).create();
+		dlg.setView(viewBuscarCalle);
+		dlg.setCancelable(true);
+		dlg.setButton(AlertDialog.BUTTON_NEGATIVE, c.getString(R.string.cancelar), new DialogInterface.OnClickListener()
+		{
+			@Override public void onClick(DialogInterface dialog, int which) { }
+		});
+		dlg.setButton(AlertDialog.BUTTON_POSITIVE, c.getString(R.string.buscar), new DialogInterface.OnClickListener()
+		{
+			@Override public void onClick(DialogInterface dialog, int which)
+			{
+				//TODO: async task?
+				Geocoder geocoder = new Geocoder(c);
+				List<Address> addresses;
+				try
+				{
+					addresses = geocoder.getFromLocationName(direccion.getText().toString(), 1);
+					if(addresses.size() > 0)
+					{
+						double lat = addresses.get(0).getLatitude();
+						double lng = addresses.get(0).getLongitude();
+						// Callback(new LatLng(lat, lng)) en lugar de:
+						map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
+					}
+				}
+				catch(Exception e){Log.e(TAG, "onBucar:e:-------------------------------------------", e);}
+			}
+		});
+		dlg.show();
 	}
 
 	//----------------------------------------------------------------------------------------------

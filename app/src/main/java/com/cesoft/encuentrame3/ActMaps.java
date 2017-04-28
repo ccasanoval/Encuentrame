@@ -90,7 +90,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				}
 			});
 		if(_iTipo != Constantes.NADA || _r != null)fab.setVisibility(View.GONE);
-
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -140,6 +139,25 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				}
 			}
 		});
+		fab = (FloatingActionButton)findViewById(R.id.fabBuscar);
+		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
+		{
+			@Override public void onClick(View view) { _util.onBuscar(ActMaps.this, _Map, _fMapZoom); }
+		});
+
+		if(savedInstanceState != null)
+		{
+			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
+		}
+	}
+	//----------------------------------------------------------------------------------------------
+	private static final String MAP_ZOOM = "mapzoom";
+	private float _fMapZoom = 15;
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putFloat(MAP_ZOOM, _fMapZoom);
 	}
 	//______________________________________________________________________________________________
 	@Override
@@ -178,6 +196,10 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	{
 		_Map = googleMap;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("ActAviso:onMapReady:e:%s",se));}
+		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
+		{
+			@Override public void onCameraMove() { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; }
+		});
 		//MARCADOR MULTILINEA --------------------------------------------
 		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
 		{
@@ -254,7 +276,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		}
 		else if(_r != null)
 		{
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
+			_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		}
 	}
 	private void setMarker(String sTitulo, String sDescripcion)
@@ -270,7 +292,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 					.snippet(sDescripcion);
 			_marker = _Map.addMarker(mo);
 			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
+			_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		}
 		catch(Exception e){Log.e(TAG, "setMarker:e:"+e, e);}
 	}
@@ -334,7 +356,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				.title(l.getNombre())
 				.snippet(l.getDescripcion());
 		_marker = _Map.addMarker(mo);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 	}
 	private void showAviso(Aviso a)
 	{
@@ -346,7 +368,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				.title(a.getNombre())
 				.snippet(a.getDescripcion());
 		_marker = _Map.addMarker(mo);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 		_circle = _Map.addCircle(new CircleOptions()
 				.center(pos)
 				.radius(a.getRadio())
@@ -436,8 +458,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		}
 		po.width(5).color(_iColor);
 		_Map.addPolyline(po);//Polyline line =
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), 15));
-		}catch(Exception e){Log.e(TAG, String.format("showRutaHelper:e:%s",e), e);}
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), _fMapZoom));
+		}catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
 	}
 
 
