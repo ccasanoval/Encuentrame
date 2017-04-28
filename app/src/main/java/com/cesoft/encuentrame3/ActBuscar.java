@@ -34,10 +34,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -149,7 +147,6 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			locale = getResources().getConfiguration().getLocales().get(0);
 		else
 			locale = getResources().getConfiguration().locale;*/
-		final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 		_datePickerDialogIni = new DatePickerDialog(this,
 			new DatePickerDialog.OnDateSetListener()
 			{
@@ -158,7 +155,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 					Calendar newDate = Calendar.getInstance();
 					newDate.set(year, monthOfYear, dayOfMonth, 0, 0);
 					_filtro.setFechaIni(newDate.getTime());
-					_txtFechaIni.setText(dateFormatter.format(newDate.getTime()));
+					_txtFechaIni.setText(_util.formatFecha(newDate.getTime()));
 				}
 			},
 			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
@@ -171,7 +168,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 					Calendar newDate = Calendar.getInstance();
 					newDate.set(year, monthOfYear, dayOfMonth, 23, 59);
 					_filtro.setFechaFin(newDate.getTime());
-					_txtFechaFin.setText(dateFormatter.format(newDate.getTime()));
+					_txtFechaFin.setText(_util.formatFecha(newDate.getTime()));
 				}
 			},
 			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
@@ -235,7 +232,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			if(dt != null)
 			{
 				cal.setTime(dt);
-				_txtFechaIni.setText(dateFormatter.format(dt));
+				_txtFechaIni.setText(_util.formatFecha(dt));
 				_datePickerDialogIni.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 			}
 			//
@@ -243,7 +240,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			if(dt != null)
 			{
 				cal.setTime(dt);
-				_txtFechaFin.setText(dateFormatter.format(dt));
+				_txtFechaFin.setText(_util.formatFecha(dt));
 				_datePickerDialogFin.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 			}
 			//-----

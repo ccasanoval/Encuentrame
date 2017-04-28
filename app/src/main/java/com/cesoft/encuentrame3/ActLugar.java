@@ -175,6 +175,20 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 		else
 			setTitle(getString(R.string.editar_lugar));
 		//------------------------------------------------------------------------------------------
+
+		if(savedInstanceState != null)
+		{
+			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
+		}
+	}
+	//----------------------------------------------------------------------------------------------
+	private static final String MAP_ZOOM = "mapzoom";
+	private float _fMapZoom = 15;
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putFloat(MAP_ZOOM, _fMapZoom);
 	}
 
 	//______________________________________________________________________________________________
@@ -454,7 +468,11 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
-		_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
+		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
+		{
+			 @Override public void onCameraMove() { _fMapZoom = _Map.getCameraPosition().zoom; }
+		});
+		_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		if(_l.getLatitud() == 0 && _l.getLongitud() == 0)
 		{
 			Location loc = _util.getLocation();
@@ -500,7 +518,7 @@ public class ActLugar extends AppCompatActivity implements OnMapReadyCallback, G
 			_marker = _Map.addMarker(mo);
 			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
 			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 		}
 		catch(Exception e){Log.e(TAG, String.format("setMarker:e:%s",e), e);}
 	}

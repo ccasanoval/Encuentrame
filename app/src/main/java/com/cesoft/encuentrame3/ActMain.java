@@ -33,7 +33,12 @@ import com.cesoft.encuentrame3.util.Util;
 //https://developer.android.com/training/permissions/requesting.html
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 
+// *** Dagger
 //http://www.vogella.com/tutorials/Dagger/article.html
+//https://www.future-processing.pl/blog/dependency-injection-with-dagger-2/
+
+// *** Rx
+//https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
 
 //TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
 //TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
@@ -42,7 +47,7 @@ import com.cesoft.encuentrame3.util.Util;
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
 //TODO: Cambiar ListView por recyclerview
-//TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras's
+//TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras'
 //TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
@@ -127,7 +132,7 @@ Log.e(TAG, "----------- MAIN START");
 	private void gotoPage(Intent intent)
 	{
 		int nPagina = intent.getIntExtra(Constantes.WIN_TAB, Constantes.NADA);
-		Log.e(TAG, "gotoPage:  -----  ---------  -------  -----  ----**"+Constantes.WIN_TAB+" : "+nPagina);
+		//Log.e(TAG, "gotoPage:  -----  ---------  -------  -----  ----**"+Constantes.WIN_TAB+" : "+nPagina);
 		if(nPagina == Constantes.LUGARES || nPagina == Constantes.RUTAS || nPagina == Constantes.AVISOS)
 			_viewPager.setCurrentItem(nPagina);
 	}
@@ -300,7 +305,7 @@ Log.e(TAG, "----------- MAIN START");
 		public Fragment getItem(int position)
 		{
 			_aFrg[position] = FrgMain.newInstance(position);
-Log.e(TAG, "getItem--------------------["+position+"]="+_aFrg[position]+" : "+_aFrg[position]._sectionNumber);
+			//Log.e(TAG, "getItem--------------------["+position+"]="+_aFrg[position]+" : "+_aFrg[position]._sectionNumber);
 			return _aFrg[position];
 		}
 		@Override

@@ -139,10 +139,6 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 
 		App.getComponent(getApplicationContext()).inject(this);
 
-		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
-
 		//------------------------------------------------------------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		if(btnActPos != null)
@@ -224,6 +220,20 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			setTitle(getString(R.string.nuevo_aviso));
 		else
 			setTitle(getString(R.string.editar_aviso));
+
+		if(savedInstanceState != null)
+		{
+			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
+		}
+	}
+	//----------------------------------------------------------------------------------------------
+	private static final String MAP_ZOOM = "mapzoom";
+	private float _fMapZoom = 15;
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putFloat(MAP_ZOOM, _fMapZoom);
 	}
 
 	//______________________________________________________________________________________________
@@ -240,6 +250,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		_LocationRequest = new LocationRequest();
 		_LocationRequest.setInterval(DELAY_LOCATION);
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 	}
 	@Override
 	public void onStop()
@@ -529,6 +540,11 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 				setPosLugar(latLng.latitude, latLng.longitude);
 			}
 		});
+		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
+		{
+			@Override public void onCameraMove() { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; }
+		});
+		//_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		setPosLugar(_a.getLatitud(), _a.getLongitud());
 	}
 
@@ -559,7 +575,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 					.position(pos)
 					.title(_a.getNombre()).snippet(_a.getDescripcion());
 			_marker = _Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 
 			if(_circle != null)_circle.remove();
 			_circle = _Map.addCircle(new CircleOptions()

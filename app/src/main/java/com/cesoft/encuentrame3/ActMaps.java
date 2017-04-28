@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -41,7 +40,6 @@ import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Ruta;
 
 
-//TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 {
@@ -386,7 +384,6 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 //Log.e(TAG, "---------------------------------------------------------------------showRutaHelper:::"+r.getId()+" ::: "+aPts.length);
 		try{
 		if(aPts.length < 1)return;
-		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 		float distancia = 0;
 		Ruta.RutaPunto ptoAnt = null;
 
@@ -414,21 +411,21 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 			if(pto == gpIni)
 			{
-				mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, df.format(date)));
+				mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, _util.formatFechaTiempo(date)));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.rotation(45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else if(pto == gpFin)
 			{
-				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, df.format(date), sDist));
+				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, _util.formatFechaTiempo(date), sDist));
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mo.rotation(-45);
 				_Map.addMarker(mo.position(pos));
 			}
 			else
 			{
-				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), df.format(date), sDist));
+				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), _util.formatFechaTiempo(date), sDist));
 				//if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)
 				{
 					mo.icon(bm);

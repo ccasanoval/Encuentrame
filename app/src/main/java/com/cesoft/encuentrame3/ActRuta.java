@@ -1,10 +1,7 @@
 package com.cesoft.encuentrame3;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import android.app.ProgressDialog;
 import android.graphics.Typeface;
@@ -62,7 +59,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import javax.inject.Inject;
 
 
-//TODO: cuando actualice recordar el zoom y la posición actual....
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, LocationListener,
 		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -134,9 +130,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 
 		App.getComponent(getApplicationContext()).inject(this);
 
-		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
-
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
@@ -205,7 +198,8 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			setTitle(getString(R.string.nueva_ruta));
 			if(btnStop!=null)btnStop.setVisibility(View.GONE);
 			try
-			{
+			{	//Oculta el mapa, no hay puntos que enseñar en el
+				SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 				FragmentTransaction ft = mapFragment.getFragmentManager().beginTransaction();
 				ft.hide(mapFragment);
 				ft.commit();
@@ -227,12 +221,21 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			else
 				_txtNombre.setTextColor(Color.RED);
 		}
+
+		if(savedInstanceState != null)
+		{
+			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
+		}
+Log.e(TAG, "-------------------------------- CREATE");
 	}
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
+	private static final String MAP_ZOOM = "mapzoom";
+	private float _fMapZoom = 15;
 	@Override
-	protected void onDestroy()
+	protected void onSaveInstanceState(Bundle outState)
 	{
-		super.onDestroy();
+		super.onSaveInstanceState(outState);
+		outState.putFloat(MAP_ZOOM, _fMapZoom);
 	}
 
 	//______________________________________________________________________________________________
@@ -245,6 +248,10 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		buildLocationRequest();
 		pideGPS();
 		newListeners();
+		//startTracking();
+		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+		mapFragment.getMapAsync(this);
+		//showRuta();//Show route again
 	}
 	@Override
 	public void onStop()
@@ -252,7 +259,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		super.onStop();
 		finEspera();
 		delListeners();
-		stopTracking();
+		//stopTracking();
 		clean();
 	}
 
@@ -324,10 +331,9 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		_txtNombre.setText(_r.getNombre());
 		_txtDescripcion.setText(_r.getDescripcion());
 		//
-		TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
-		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-		Date date = _r.getFecha();//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
-		if(date != null && lblFecha!= null)lblFecha.setText(dateFormat.format(date));
+		//TextView lblFecha = (TextView)findViewById(R.id.lblFecha);
+		//_r.getUpdated()!=null ? _r.getUpdated() : _r.getCreated();
+		//if(lblFecha!= null)lblFecha.setText(_util.formatFecha( _r.getFecha()));
 	}
 
 	//______________________________________________________________________________________________
@@ -342,7 +348,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
     	int result = googleAPI.isGooglePlayServicesAvailable(this);
     	if(result != ConnectionResult.SUCCESS)
 		{
-			Log.e(TAG, String.format(Locale.getDefault(), "checkPlayServices:e:------------------------------------------%d",result));
+			Log.e(TAG, "checkPlayServices:e:--------------------------------------------------------"+result);
 	        return false;
 	    }
 	    return true;
@@ -360,9 +366,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		_GoogleApiClient.unregisterConnectionFailedListener(this);
 		_GoogleApiClient.disconnect();
 		_GoogleApiClient = null;
-
 		_LocationRequest = null;
-
 		if(_Map != null)
 		{
 			_Map.clear();
@@ -372,17 +376,12 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 
 	//______________________________________________________________________________________________
 	//// 4 OnConnectionFailedListener
-	@Override
-	public void onConnectionFailed(@NonNull ConnectionResult result)
+	@Override public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
 		Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
 	}
-	@Override
-	public void onConnected(Bundle arg0)
-	{
-	}
-	@Override
-	public void onConnectionSuspended(int arg0)
+	@Override public void onConnected(Bundle arg0){}
+	@Override public void onConnectionSuspended(int arg0)
 	{
 		if(_GoogleApiClient != null)
 			_GoogleApiClient.connect();
@@ -487,27 +486,31 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 
 	//______________________________________________________________________________________________
 	//// 4 LocationListener
-	@Override public void onLocationChanged(Location location)
-	{
-		_util.setLocation(location);
-	}
+	@Override public void onLocationChanged(Location location) { _util.setLocation(location); }
 
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
+		Log.e(TAG, "----------------------------------------------------------------- MAP READY");
 		_Map = googleMap;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
 
 		if(_bNuevo)
 		{
-			_Map.moveCamera(CameraUpdateFactory.zoomTo(15));
+			_Map.moveCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		}
 		else// if(_r.getPuntos().size() > 0)
 		{
 			showRuta();
 		}
+
+		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
+		{
+			@Override public void onCameraMove() { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; }
+		});
+		//_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 
 		//MARCADOR MULTILINEA --------------------------------------------
 		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
@@ -630,12 +633,13 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
+				Log.e(TAG, "------------------------------DatosListener --------------------------------------"+aData.length);
 				showRutaHelper(aData);
 			}
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("showRuta:onCancelled:-----------:%s",err));
+				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------------"+err);
 				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
 			}
 		};
@@ -644,17 +648,25 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 	//----------------------------------------------------------------------------------------------
 	private void showRuta()
 	{
+Log.e(TAG, "------------------------------ SHOW RUTA ---------------------------------------------------");
 		Ruta.RutaPunto.getListaRep(_r.getId(), _lisRuta);
 	}
 
 	//----------------------------------------------------------------------------------------------
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
-		if(aPts.length < 1)return;
-		if(_Map==null)return;
+		if(aPts.length < 1)
+		{
+			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- n pts = "+aPts.length);
+			return;
+		}
+		if(_Map==null)
+		{
+			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- MAP = NULL");
+			return;
+		}
 		_Map.clear();
-
-		DateFormat df = java.text.DateFormat.getDateTimeInstance();//TODO: set 24h
+Log.e(TAG, "------------------------------ SHOW RUTA HELPER ---------------------------------------------------");
 
 		String INI = getString(R.string.ini);
 		String FIN = getString(R.string.fin);
@@ -675,7 +687,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			else snippet = getString(R.string.info_time);
 
 			Date date = pto.getFecha();
-			if(date != null)snippet += df.format(date);
+			if(date != null)snippet += _util.formatFechaTiempo(date);
 			snippet += String.format(Locale.ENGLISH, getString(R.string.info_prec), pto.getPrecision());
 			if(gpAnt != null)
 			{
@@ -717,7 +729,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		}
 		po.width(5).color(Color.BLUE);
 		_Map.addPolyline(po);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), 15));
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), _fMapZoom));
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -750,7 +762,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 				if(aData.length > 0)
 				{
 					long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
-					sTiempo = formatTiempo(t);
+					sTiempo = _util.formatTiempo(t);
 
 					if(t > 0)
 					{
@@ -817,12 +829,5 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		alertDialog.show();
 	}
 
-	private static String formatTiempo(long t)//TODO: meter en util
-	{
-		Date d = new Date(t);
-		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
-		df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		return df.format(d);
-	}
 }
 

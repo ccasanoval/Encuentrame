@@ -51,17 +51,17 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/descripcion"
 			android:ems="10"
-			android:inputType="textMultiLine|textCapWords"
+			android:inputType="textMultiLine"
 			android:maxLines="3"/>
 	</android.support.design.widget.TextInputLayout>
 
-	<TextView
+	<!-- TextView
 		android:id="@+id/lblFecha"
 		android:layout_below="@+id/txtDescripcion_"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textAppearance="?android:attr/textAppearanceSmall"
-		/>
+		/ -->
 
 	<!--LinearLayout
 		android:id="@+id/layPeriodo"
@@ -86,7 +86,7 @@
 
 	<LinearLayout
 		android:id="@+id/layStartStop"
-		android:layout_below="@+id/lblFecha"
+		android:layout_below="@+id/txtDescripcion_"
 		android:orientation="horizontal"
 		android:layout_centerHorizontal="true"
 		android:layout_width="wrap_content"

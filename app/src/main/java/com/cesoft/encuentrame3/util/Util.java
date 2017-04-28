@@ -23,6 +23,10 @@ import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -63,10 +67,7 @@ public class Util
 	//______________________________________________________________________________________________
 	private static IListaItemClick _refresh;
 		public static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
-		public static void refreshListaRutas()
-		{
-			if(_refresh!=null)_refresh.onRefreshListaRutas();
-		}
+		public static void refreshListaRutas() { if(_refresh!=null)_refresh.onRefreshListaRutas(); }
 
 	//______________________________________________________________________________________________
 	// LOCATION
@@ -355,22 +356,30 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 				Log.e(TAG, String.format("Util:showAvisoGeo:e:--------------------------------------%s",err));
 			}
 		});
-		/*new ValueEventListener()
-		{
-			@Override
-			public void onDataChange(DataSnapshot aviso)
-			{
-				Aviso a = aviso.getValue(Aviso.class);
-				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
-				i.putExtra(Aviso.NOMBRE, a);
-				showAviso(_app.getString(R.string.en_zona_aviso), a, i);//CesServiceAvisoGeo.this
-			}
-			@Override
-			public void onCancelled(DatabaseError err)
-			{
-				Log.e("CESoft", String.format("CesServiceAvisoGeo:showAviso:e:%s",err));
-			}
-		});*/
+	}
+
+	//----------------------------------------------------------------------------------------------
+	//private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
+	private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
+	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+	private final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+	public String formatTiempo(long t)
+	{
+		Date d = new Date(t);
+		//timeFormatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		return timeFormatter.format(d);
+	}
+	public String formatFecha(Date date)
+	{
+		if(date == null)return "";
+		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(_app);
+		//return dateFormat.format(date);
+		return dateFormatter.format(date);
+	}
+	public String formatFechaTiempo(Date date)
+	{
+		if(date == null)return "";
+		return dateTimeFormatter.format(date);
 	}
 
 	//----------------------------------------------------------------------------------------------
