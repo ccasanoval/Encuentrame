@@ -7,7 +7,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
@@ -15,6 +14,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
@@ -22,13 +22,20 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.cesoft.encuentrame3.ActAviso;
-import com.cesoft.encuentrame3.ActLugar;
 import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -401,32 +408,63 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 		AlertDialog dlg = new AlertDialog.Builder(c).create();
 		dlg.setView(viewBuscarCalle);
 		dlg.setCancelable(true);
-		dlg.setButton(AlertDialog.BUTTON_NEGATIVE, c.getString(R.string.cancelar), new DialogInterface.OnClickListener()
+		dlg.setButton(AlertDialog.BUTTON_NEGATIVE, c.getString(R.string.cancelar), (dialog, which) -> { });
+		dlg.setButton(AlertDialog.BUTTON_POSITIVE, c.getString(R.string.buscar), (dialog, which) ->
 		{
-			@Override public void onClick(DialogInterface dialog, int which) { }
-		});
-		dlg.setButton(AlertDialog.BUTTON_POSITIVE, c.getString(R.string.buscar), new DialogInterface.OnClickListener()
-		{
-			@Override public void onClick(DialogInterface dialog, int which)
+			Geocoder geocoder = new Geocoder(c);
+			List<Address> addresses;
+			try
 			{
-				//TODO: async task?
-				Geocoder geocoder = new Geocoder(c);
-				List<Address> addresses;
-				try
+				addresses = geocoder.getFromLocationName(direccion.getText().toString(), 1);
+				if(addresses.size() > 0)
 				{
-					addresses = geocoder.getFromLocationName(direccion.getText().toString(), 1);
-					if(addresses.size() > 0)
-					{
-						double lat = addresses.get(0).getLatitude();
-						double lng = addresses.get(0).getLongitude();
-						// Callback(new LatLng(lat, lng)) en lugar de:
-						map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
-					}
+					double lat = addresses.get(0).getLatitude();
+					double lng = addresses.get(0).getLongitude();
+					// Callback(new LatLng(lat, lng)) en lugar de:
+					map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
 				}
-				catch(Exception e){Log.e(TAG, "onBucar:e:-------------------------------------------", e);}
 			}
+			catch(Exception e){Log.e(TAG, "onBucar:e:-------------------------------------------", e);}
 		});
 		dlg.show();
+	}
+
+	//----------------------------------------------------------------------------------------------
+	//TODO: static vs injected ?!
+	public static void exeDelayed(long delay, Runnable runnable)
+	{
+		new Handler().postDelayed(runnable, delay);
+	}
+
+	//______________________________________________________________________________________________
+	public static void pideGPS(Activity a, GoogleApiClient googleApiClient, LocationRequest locationRequest)
+	{
+		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
+		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+				.addLocationRequest(locationRequest)
+				.setAlwaysShow(true)//so it ask for GPS activation like google maps
+				//.addLocationRequest()
+				;
+		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+		result.setResultCallback(res ->
+		{
+			final Status status = res.getStatus();
+			//final LocationSettingsStates le = result.getLocationSettingsStates();
+			switch(status.getStatusCode())
+			{
+				case LocationSettingsStatusCodes.SUCCESS:
+					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
+					// All location settings are satisfied. The client can initialize location requests here.
+					break;
+				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+					try{status.startResolutionForResult(a, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
+					break;
+				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+					Log.w(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
+					break;
+			}
+		});
 	}
 
 	//----------------------------------------------------------------------------------------------

@@ -7,29 +7,19 @@ import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent;
 import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
 import com.cesoft.encuentrame3.svc.CesService;
-import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.squareup.leakcanary.LeakCanary;
-//import com.cesoft.encuentrame3.di.modules.UtilModule;
 
-
-//import com.squareup.leakcanary.LeakCanary;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 15/09/2016
 public class App extends Application
 {
-	/*private static App _app;
-	public static App getInstance(){return _app;}
-	private static Context _c = null;
-	public static Context getContexto(){return _c;}*/
-
 	private static GlobalComponent _globalComponent;
 
 	@Override public void onCreate()
 	{
 		super.onCreate();
-		//_c = getApplicationContext();
 
 		if(LeakCanary.isInAnalyzerProcess(this))
 		{

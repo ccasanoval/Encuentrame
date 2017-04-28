@@ -65,22 +65,8 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		}
 		holder.txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));
 		holder.txtFecha.setText(Ruta.DATE_FORMAT2.format(_rutas[position].getFecha()));
-		holder.btnEditar.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				_inter.onItemEdit(Constantes.RUTAS, _rutas[position]);
-			}
-		});
-		holder.btnMapa.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				_inter.onItemMap(Constantes.RUTAS, _rutas[position]);
-			}
-		});
+		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.RUTAS, _rutas[position]));
+		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.RUTAS, _rutas[position]));
 		// Si la ruta se está grabando, resaltar
 		if(_rutas[position].getId().equals(_util.getTrackingRoute()))
 		{

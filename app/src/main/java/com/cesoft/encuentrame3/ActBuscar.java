@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -76,14 +75,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		if(fab != null)
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				ActBuscar.this.finish();
-			}
-		});
+		fab.setOnClickListener(view -> finish());
 
 		//------------------------------------------------------------------------------------------
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
@@ -148,59 +140,45 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		else
 			locale = getResources().getConfiguration().locale;*/
 		_datePickerDialogIni = new DatePickerDialog(this,
-			new DatePickerDialog.OnDateSetListener()
-			{
-				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
+				(view, year, monthOfYear, dayOfMonth) ->
 				{
 					Calendar newDate = Calendar.getInstance();
 					newDate.set(year, monthOfYear, dayOfMonth, 0, 0);
 					_filtro.setFechaIni(newDate.getTime());
 					_txtFechaIni.setText(_util.formatFecha(newDate.getTime()));
-				}
-			},
+				},
 			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 
 		_datePickerDialogFin = new DatePickerDialog(this,
-			new DatePickerDialog.OnDateSetListener()
-			{
-				public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
+				(view, year, monthOfYear, dayOfMonth) ->
 				{
 					Calendar newDate = Calendar.getInstance();
 					newDate.set(year, monthOfYear, dayOfMonth, 23, 59);
 					_filtro.setFechaFin(newDate.getTime());
 					_txtFechaFin.setText(_util.formatFecha(newDate.getTime()));
-				}
-			},
+				},
 			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 
 		_txtFechaIni = (EditText)findViewById(R.id.txtFechaIni);
 		_txtFechaFin = (EditText)findViewById(R.id.txtFechaFin);
 		ImageButton ib = (ImageButton)findViewById(R.id.btnFechaIni);
 		if(ib != null)
-		ib.setOnClickListener(new View.OnClickListener()
+		ib.setOnClickListener(v ->
 		{
-			@Override
-			public void onClick(View v)
-			{
-				_datePickerDialogIni.show();
-				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				//noinspection ConstantConditions
-				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-				//_txtFechaIni.clearFocus();_txtFechaFin.clearFocus();
-			}
+			_datePickerDialogIni.show();
+			InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			//noinspection ConstantConditions
+			inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			//_txtFechaIni.clearFocus();_txtFechaFin.clearFocus();
 		});
 		ib = (ImageButton)findViewById(R.id.btnFechaFin);
 		if(ib != null)
-		ib.setOnClickListener(new View.OnClickListener()
+		ib.setOnClickListener(v ->
 		{
-			@Override
-			public void onClick(View v)
-			{
-				_datePickerDialogFin.show();
-				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				//noinspection ConstantConditions
-				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-			}
+			_datePickerDialogFin.show();
+			InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			//noinspection ConstantConditions
+			inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		});
 
 		//------------------------------------------------------------------------------------------
@@ -286,20 +264,12 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		Location loc = _util.getLocation();
 		if(loc == null)return;
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
-		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
-		{
-			@Override
-			public void onMapClick(LatLng pos)
-			{
-				setPosLugar(pos);
-			}
-		});
+		_Map.setOnMapClickListener(this::setPosLugar);
 		setMarker();
 	}
 	//______________________________________________________________________________________________
 	private void setPosLugar(LatLng pos)
 	{
-		//_pos = pos;
 		_filtro.setPunto(pos);
 		setMarker();
 		setRadio();

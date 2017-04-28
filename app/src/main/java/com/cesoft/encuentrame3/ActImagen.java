@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -87,29 +86,15 @@ public class ActImagen extends AppCompatActivity
 		}
 	};
 	private boolean mVisible;
-	private final Runnable mHideRunnable = new Runnable()
-	{
-		@Override
-		public void run()
-		{
-			hide();
-		}
-	};
+	private final Runnable mHideRunnable = this::hide;
 	/**
 	 * Touch listener to use for in-layout UI controls to delay hiding the system UI.
 	 * This is to prevent the jarring behavior of controls going away while interacting with activity UI.
 	 */
-	private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener()
+	private final View.OnTouchListener mDelayHideTouchListener = (view, motionEvent) ->
 	{
-		@Override
-		public boolean onTouch(View view, MotionEvent motionEvent)
-		{
-			if(AUTO_HIDE)
-			{
-				delayedHide(AUTO_HIDE_DELAY_MILLIS);
-			}
-			return false;
-		}
+		if(AUTO_HIDE) delayedHide(AUTO_HIDE_DELAY_MILLIS);
+		return false;
 	};
 
 	//______________________________________________________________________________________________
@@ -126,27 +111,13 @@ public class ActImagen extends AppCompatActivity
 		_iv = (ImageView)mContentView;
 
 		// Set up the user interaction to manually show or hide the system UI.
-		mContentView.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				toggle();
-			}
-		});
+		mContentView.setOnClickListener(v -> toggle());
 
 		// Upon interacting with UI controls, delay any scheduled hide() operations
 		// to prevent the jarring behavior of controls going away while interacting with the UI.
 		findViewById(R.id.tomar_foto).setOnTouchListener(mDelayHideTouchListener);
 		Button b = (Button)findViewById(R.id.tomar_foto);
-		b.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				dispatchTakePictureIntent();
-			}
-		});
+		b.setOnClickListener(view -> dispatchTakePictureIntent());
 		//----
 		int[] maxTextureSize = new int[1];
 		GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);

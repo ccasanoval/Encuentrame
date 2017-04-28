@@ -1,17 +1,12 @@
 package com.cesoft.encuentrame3;
 
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -70,58 +65,22 @@ public class Login
 	{
 		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
 		getAuth().createUserWithEmailAndPassword(email, password)
-			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
+			.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
+			.addOnFailureListener(listener::onFallo)
+			.addOnCompleteListener(task ->
 			{
-				@Override
-				public void onSuccess(AuthResult authResult)
-				{
-					listener.onExito(authResult.getUser());
-				}
-			})
-			.addOnFailureListener(new OnFailureListener()
-			{
-				@Override
-				public void onFailure(@NonNull Exception e)
-				{
-					listener.onFallo(e);
-				}
-			})
-			.addOnCompleteListener(new OnCompleteListener<AuthResult>()
-			{
-				@Override
-				public void onComplete(@NonNull Task<AuthResult> task)
-				{
-					//System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
-                }
-            });
+				//System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
+			});
 	}
 
 	private static void login2(String email, String password, final Fire.AuthListener listener)
 	{
 		getAuth().signInWithEmailAndPassword(email, password)
-			.addOnSuccessListener(new OnSuccessListener<AuthResult>()
+			.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
+			.addOnFailureListener(listener::onFallo)
+			.addOnCompleteListener(task ->
 			{
-				@Override
-				public void onSuccess(AuthResult authResult)
-				{
-					listener.onExito(authResult.getUser());
-				}
-			})
-			.addOnFailureListener(new OnFailureListener()
-			{
-				@Override
-				public void onFailure(@NonNull Exception e)
-				{
-					listener.onFallo(e);
-				}
-			})
-			.addOnCompleteListener(new OnCompleteListener<AuthResult>()
-			{
-				@Override
-				public void onComplete(@NonNull Task<AuthResult> task)
-				{
-					//System.err.println("Login:login2:task:"+task);
-				}
+				//System.err.println("Login:login2:task:"+task);
 			});
 	}
 
@@ -200,34 +159,14 @@ public class Login
 	}
 
 	//-------
-	static void restoreUser(final String email, final Fire.AuthListener listener)//AuthListener listener
+	static void restoreUser(final String email, final Fire.AuthListener listener)
 	{
 		getAuth().sendPasswordResetEmail(email)
-			.addOnCompleteListener(new OnCompleteListener<Void>()
+			.addOnCompleteListener(task ->
 			{
-				@Override
-				public void onComplete(@NonNull Task<Void> task)
-				{
-					//System.err.println("Login:restoreUser:complete: "+task);
-				}
+				//Log.e();
 			})
-			.addOnSuccessListener(new OnSuccessListener<Void>()
-			{
-				@Override
-				public void onSuccess(Void aVoid)
-				{
-					//System.err.println("Login:restoreUser:success: "+getAuth().getCurrentUser());
-					listener.onExito(getAuth().getCurrentUser());
-				}
-			})
-			.addOnFailureListener(new OnFailureListener()
-			{
-				@Override
-				public void onFailure(@NonNull Exception e)
-				{
-					//System.err.println("Login:restoreUser:failure: "+e);
-					listener.onFallo(e);
-				}
-			});
+			.addOnSuccessListener(aVoid -> listener.onExito(getAuth().getCurrentUser()))
+			.addOnFailureListener(listener::onFallo);
 	}
 }

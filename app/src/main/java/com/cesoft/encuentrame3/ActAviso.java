@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -20,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -38,15 +36,11 @@ import com.cesoft.encuentrame3.models.Aviso;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -96,19 +90,13 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 			dialog.setTitle(_a.getNombre());
 			dialog.setMessage(getString(R.string.seguro_salir));
-			dialog.setPositiveButton(getString(R.string.guardar), new DialogInterface.OnClickListener()
-			{
-				@Override public void onClick(DialogInterface dialog, int which) { guardar(); }
-			});
+			dialog.setPositiveButton(getString(R.string.guardar), (dialog1, which) -> guardar());
 			dialog.setCancelable(true);
-			dialog.setNegativeButton(getString(R.string.salir), new DialogInterface.OnClickListener()
-			{
-				@Override public void onClick(DialogInterface dialog, int which) { ActAviso.this.finish(); }
-			});
+			dialog.setNegativeButton(getString(R.string.salir), (dialog2, which) -> finish());
 			dialog.create().show();
 		}
 		else
-			ActAviso.this.finish();
+			finish();
 	}
 	@Override
 	public void onBackPressed()
@@ -142,30 +130,21 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		//------------------------------------------------------------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		if(btnActPos != null)
-		btnActPos.setOnClickListener(new View.OnClickListener()
+		btnActPos.setOnClickListener(v ->
 		{
-			@Override
-			public void onClick(View v)
-			{
-				Location loc = _util.getLocation();
-				if(loc != null)setPosLugar(loc);
-			}
+			Location loc = _util.getLocation();
+			if(loc != null)setPosLugar(loc);
 		});
 
 		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		//
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		if(fab != null)
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			//@Override public void onClick(View view) { openMain(false, ""); }
-			@Override public void onClick(View view) { onSalir(); }
-		});
+		fab.setOnClickListener(view -> onSalir());
+		//
 		fab = (FloatingActionButton)findViewById(R.id.fabBuscar);
-		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override public void onClick(View view) { _util.onBuscar(ActAviso.this, _Map, _fMapZoom); }
-		});
+		if(fab != null)fab.setOnClickListener(view -> _util.onBuscar(ActAviso.this, _Map, _fMapZoom));
 
 		//-----------
 		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
@@ -201,15 +180,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 			setValores();
 			_txtNombre.addTextChangedListener(new ActAviso.CesTextWatcher(_txtNombre, _a.getNombre()));
 			_txtDescripcion.addTextChangedListener(new ActAviso.CesTextWatcher(_txtDescripcion, _a.getDescripcion()));
-			_swtActivo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-			{
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-				{
-					_bSucio = isChecked != _a.isActivo();
-					//Log.e(TAG, "************************------------------- _swtActivo "+isChecked+" / "+_a.isActivo()+"  :  "+_bSucio);
-				}
-			});
+			_swtActivo.setOnCheckedChangeListener((buttonView, isChecked) -> _bSucio = isChecked != _a.isActivo());
 		}
 		catch(Exception e)
 		{
@@ -247,42 +218,25 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		super.onStart();
 		if(checkPlayServices())buildGoogleApiClient();
-		if(_GoogleApiClient != null)
-		{
-			_GoogleApiClient.connect();
-			pideGPS();
-		}
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		buildLocationRequest();
 		((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+		Util.pideGPS(this, _GoogleApiClient, _LocationRequest);
 	}
 	@Override
 	public void onStop()
 	{
 		super.onStop();
-		if(_Map != null)
-		{
-			_Map.clear();
-			_Map = null;
-		}
-		if(_GoogleApiClient != null)
-		{
-			_GoogleApiClient.unregisterConnectionCallbacks(this);
-			_GoogleApiClient.unregisterConnectionFailedListener(this);
-			_GoogleApiClient.disconnect();
-			_GoogleApiClient = null;
-		}
-		_LocationRequest = null;
+		clean();
 	}
 	//______________________________________________________________________________________________
 	protected void buildGoogleApiClient()
 	{
-		_GoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.addApi(LocationServices.API)
-				.build();
+		_GoogleApiClient = new GoogleApiClient.Builder(this)
+			.addConnectionCallbacks(this)
+			.addOnConnectionFailedListener(this)
+			.addApi(LocationServices.API)
+			.build();
+		_GoogleApiClient.connect();
 	}
 	private boolean checkPlayServices()
 	{
@@ -290,6 +244,27 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		int result = googleAPI.isGooglePlayServicesAvailable(this);
 		if(result != ConnectionResult.SUCCESS)Log.e(TAG, "checkPlayServices:e:--------------------------------------------------------"+result);
 		return result == ConnectionResult.SUCCESS;
+	}
+	private void buildLocationRequest()
+	{
+		_LocationRequest = new LocationRequest();
+		_LocationRequest.setInterval(DELAY_LOCATION);
+		_LocationRequest.setFastestInterval(DELAY_LOCATION);
+		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+	}
+	private void clean()
+	{
+		LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
+		_LocationRequest = null;
+		_GoogleApiClient.unregisterConnectionCallbacks(this);
+		_GoogleApiClient.unregisterConnectionFailedListener(this);
+		_GoogleApiClient.disconnect();
+		_GoogleApiClient = null;
+		if(_Map != null)
+		{
+			_Map.clear();
+			_Map = null;
+		}
 	}
 
 	//______________________________________________________________________________________________
@@ -481,39 +456,29 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		dialog.setMessage(getString(R.string.seguro_eliminar));
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
 		{
-			dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
-			{
-				@Override public void onDismiss(DialogInterface dialog){_bEliminar = true;}
-			});
+			dialog.setOnDismissListener(dlg -> _bEliminar = true);
 		}
-		dialog.setNegativeButton(getString(R.string.cancelar), new DialogInterface.OnClickListener()
+		dialog.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> _bEliminar = true);
+		dialog.setPositiveButton(getString(R.string.eliminar), (dlg, which) ->
 		{
-			@Override public void onClick(DialogInterface dialog, int which){_bEliminar = true;}
-		});
-		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				iniEspera();
-				_a.eliminar(new Fire.CompletadoListener() {
-					@Override
-					protected void onDatos(String id)
-					{
-						finEspera();
-						_bEliminar=true;
-						openMain(true, getString(R.string.ok_eliminar_aviso));
-					}
-					@Override
-					protected void onError(String err, int code)
-					{
-						finEspera();
-						_bEliminar=true;
-						Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
-						Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-					}
-				});
-			}
+			iniEspera();
+			_a.eliminar(new Fire.CompletadoListener() {
+				@Override
+				protected void onDatos(String id)
+				{
+					finEspera();
+					_bEliminar=true;
+					openMain(true, getString(R.string.ok_eliminar_aviso));
+				}
+				@Override
+				protected void onError(String err, int code)
+				{
+					finEspera();
+					_bEliminar=true;
+					Log.e(TAG, String.format("eliminar:handleFault:f:%s",err));
+					Toast.makeText(ActAviso.this, String.format(getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
+				}
+			});
 		});
 		dialog.create().show();
 	}
@@ -536,19 +501,12 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 	{
 		_Map = googleMap;
 		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, "onMapReady:e:"+se, se);}
-		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
+		_Map.setOnMapClickListener(latLng ->
 		{
-			@Override
-			public void onMapClick(LatLng latLng)
-			{
-				_bSucio = true;
-				setPosLugar(latLng.latitude, latLng.longitude);
-			}
+			_bSucio = true;
+			setPosLugar(latLng.latitude, latLng.longitude);
 		});
-		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
-		{
-			@Override public void onCameraMove() { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; }
-		});
+		_Map.setOnCameraMoveListener(() ->	{ if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; });
 		//_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		setPosLugar(_a.getLatitud(), _a.getLongitud());
 	}
@@ -592,7 +550,7 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
 
-	//______________________________________________________________________________________________
+	/*//______________________________________________________________________________________________
 	private void pideGPS()//TODO: standarizar?
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
@@ -602,32 +560,28 @@ public class ActAviso extends AppCompatActivity implements OnMapReadyCallback, G
 				//.addLocationRequest()
 				;
 		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(_GoogleApiClient, builder.build());
-		result.setResultCallback(new ResultCallback<LocationSettingsResult>()
+		result.setResultCallback(res ->
 		{
-			@Override
-			public void onResult(@NonNull LocationSettingsResult result)
+			final Status status = res.getStatus();
+			//final LocationSettingsStates le = result.getLocationSettingsStates();
+			switch(status.getStatusCode())
 			{
-				final Status status = result.getStatus();
-				//final LocationSettingsStates le = result.getLocationSettingsStates();
-				switch(status.getStatusCode())
+			case LocationSettingsStatusCodes.SUCCESS:
+				Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
+				// All location settings are satisfied. The client can initialize location requests here.
+				break;
+			case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+				try
 				{
-				case LocationSettingsStatusCodes.SUCCESS:
-					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
-					// All location settings are satisfied. The client can initialize location requests here.
-					break;
-				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try
-					{
-						status.startResolutionForResult(ActAviso.this, 1000);
-					}
-					catch(android.content.IntentSender.SendIntentException e){Log.e(TAG, String.format("LocationSettingsStatusCodes.RESOLUTION_REQUIRED:e:%s",e), e);}
-					break;
-				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					Log.e(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
-					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
-					break;
+					status.startResolutionForResult(ActAviso.this, 1000);
 				}
+				catch(android.content.IntentSender.SendIntentException e){Log.e(TAG, String.format("LocationSettingsStatusCodes.RESOLUTION_REQUIRED:e:%s",e), e);}
+				break;
+			case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+				Log.e(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+				// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
+				break;
 			}
 		});
-	}
+	}*/
 }

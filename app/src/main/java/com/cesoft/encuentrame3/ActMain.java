@@ -4,7 +4,6 @@ package com.cesoft.encuentrame3;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -46,7 +45,9 @@ import com.cesoft.encuentrame3.util.Util;
 // *** Charles, Fiddle
 //https://jaanus.com/debugging-http-on-an-android-phone-or-tablet-with-charles-proxy-for-fun-and-profit/
 
-//TODO: Servicio solo arrancado si hay avisos activos!!!!!!!!!!!!!!!
+//TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!
+
+//TODO: Servicio solo arrancado si hay avisos activos!!! O es mejor que corra, simplemente aumentar delay?
 //TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
@@ -265,15 +266,10 @@ Log.e(TAG, "----------- MAIN START");
 			{
 				Log.e(TAG, "buscar: *************** frg is not ADDED *****************");
 				getSupportFragmentManager().beginTransaction().add(frg, String.valueOf(frg._sectionNumber)).commit();
-				final Handler handler = new Handler();
-				handler.postDelayed(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						buscar(frg);
-					}
-				}, 100);
+				//final Handler handler = new Handler();
+				//handler.postDelayed(() -> buscar(frg), 100);
+				//new Handler().postDelayed(() -> buscar(frg), 100);
+				Util.exeDelayed(100, () -> buscar(frg));
 				return;
 			}
 

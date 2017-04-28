@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.cesoft.encuentrame3.util.Log;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar Casanova on 09/02/2017.
@@ -18,6 +17,6 @@ public class ActSplash extends AppCompatActivity
 		Intent intent = new Intent(this, ActLogin.class);
 		startActivity(intent);
 		finish();
-		//Log.e("SPLASH", "------------------------------SPLASH----------------------------");
+		//com.cesoft.encuentrame3.util.Log.e("SPLASH", "------------------------------SPLASH----------------------------");
 	}
 }

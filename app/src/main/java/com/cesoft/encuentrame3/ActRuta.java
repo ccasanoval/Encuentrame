@@ -37,15 +37,9 @@ import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -87,15 +81,9 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 			dialog.setTitle(_r.getNombre());
 			dialog.setMessage(getString(R.string.seguro_salir));
-			dialog.setPositiveButton(getString(R.string.guardar), new DialogInterface.OnClickListener()
-			{
-				@Override public void onClick(DialogInterface dialog, int which) { guardar(); }
-			});
+			dialog.setPositiveButton(getString(R.string.guardar), (dlg, which) -> guardar());
+			dialog.setNegativeButton(getString(R.string.salir), (dlg, which) -> ActRuta.this.finish());
 			dialog.setCancelable(true);
-			dialog.setNegativeButton(getString(R.string.salir), new DialogInterface.OnClickListener()
-			{
-				@Override public void onClick(DialogInterface dialog, int which) { ActRuta.this.finish(); }
-			});
 			dialog.create().show();
 		}
 		else
@@ -138,31 +126,23 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		if(btnStart != null)
 		{
 			btnStart.setEnabled(true);
-			btnStart.setOnClickListener(new View.OnClickListener()
+			btnStart.setOnClickListener(v ->
 			{
-				@Override
-				public void onClick(View v)
-				{
-					//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
-					btnStart.setEnabled(false);
-					btnStart.setAlpha(0.5f);
-					startTrackingRecord();
-				}
+				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
+				btnStart.setEnabled(false);
+				btnStart.setAlpha(0.5f);
+				startTrackingRecord();
 			});
 		}
 		final ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
 		if(btnStop != null)
 		{
 			btnStop.setEnabled(true);
-			btnStop.setOnClickListener(new View.OnClickListener()
+			btnStop.setOnClickListener(v ->
 			{
-				@Override
-				public void onClick(View v)
-				{
-					btnStop.setEnabled(false);
-					btnStop.setAlpha(0.5f);
-					stopTrackingRecord();
-				}
+				btnStop.setEnabled(false);
+				btnStop.setAlpha(0.5f);
+				stopTrackingRecord();
 			});
 		}
 		//-----------
@@ -170,11 +150,7 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 		setSupportActionBar(toolbar);
 		//
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
-		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
-		{
-			//@Override public void onClick(View view) { ActRuta.this.finish(); }
-			@Override public void onClick(View view) { onSalir(); }
-		});
+		if(fab != null)fab.setOnClickListener(view -> onSalir());
 
 		//------------------------------------------------------------------------------------------
 		try
@@ -243,14 +219,12 @@ Log.e(TAG, "-------------------------------- CREATE");
 	public void onStart()
 	{
 		super.onStart();
-		if(checkPlayServices())
-			buildGoogleApiClient();
+		if(checkPlayServices())buildGoogleApiClient();
 		buildLocationRequest();
-		pideGPS();
 		newListeners();
+		((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+		Util.pideGPS(this, _GoogleApiClient, _LocationRequest);
 		//startTracking();
-		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
 		//showRuta();//Show route again
 	}
 	@Override
@@ -339,7 +313,11 @@ Log.e(TAG, "-------------------------------- CREATE");
 	//______________________________________________________________________________________________
 	protected synchronized void buildGoogleApiClient()
 	{
-		_GoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
+		_GoogleApiClient = new GoogleApiClient.Builder(this)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.addApi(LocationServices.API)
+				.build();
 		_GoogleApiClient.connect();
 	}
 	private boolean checkPlayServices()
@@ -362,11 +340,12 @@ Log.e(TAG, "-------------------------------- CREATE");
 	}
 	private void clean()
 	{
+		LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
+		_LocationRequest = null;
 		_GoogleApiClient.unregisterConnectionCallbacks(this);
 		_GoogleApiClient.unregisterConnectionFailedListener(this);
 		_GoogleApiClient.disconnect();
 		_GoogleApiClient = null;
-		_LocationRequest = null;
 		if(_Map != null)
 		{
 			_Map.clear();
@@ -445,15 +424,9 @@ Log.e(TAG, "-------------------------------- CREATE");
 		dialog.setMessage(getString(R.string.seguro_eliminar));
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
 		{
-			dialog.setOnDismissListener(new DialogInterface.OnDismissListener()
-			{
-				@Override public void onDismiss(DialogInterface dialog){_bEliminar = true;}
-			});
+			dialog.setOnDismissListener(dlg -> _bEliminar = true);
 		}
-		dialog.setNegativeButton(getString(R.string.cancelar), new DialogInterface.OnClickListener()
-		{
-			@Override public void onClick(DialogInterface dialog, int which){_bEliminar = true;}
-		});
+		dialog.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> _bEliminar = true);
 		dialog.setPositiveButton(getString(R.string.eliminar), new DialogInterface.OnClickListener()
 		{
 			@Override
@@ -511,17 +484,14 @@ Log.e(TAG, "-------------------------------- CREATE");
 			showRuta();
 		}
 
-		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
-		{
-			@Override public void onCameraMove() { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; }
-		});
+		_Map.setOnCameraMoveListener(() ->
+		{ if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; });
 		//_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 
 		//MARCADOR MULTILINEA --------------------------------------------
 		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
 		{
-			@Override
-			public View getInfoWindow(Marker arg0){return null;}
+			@Override public View getInfoWindow(Marker arg0){return null;}
 			@Override
 			public View getInfoContents(Marker marker)
 			{
@@ -546,7 +516,7 @@ Log.e(TAG, "-------------------------------- CREATE");
 	}
 
 	//______________________________________________________________________________________________
-	private void pideGPS()//TODO Standarizar...
+	/*private void pideGPS()//TODO Standarizar...
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -578,7 +548,7 @@ Log.e(TAG, "-------------------------------- CREATE");
 				}
 			}
 		});
-	}
+	}*/
 
 
 	private ProgressDialog _progressDialog;

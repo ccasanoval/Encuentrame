@@ -56,22 +56,8 @@ class LugarArrayAdapter extends ArrayAdapter<Lugar>
 
 		holder.txtNombre.setText(_lugares[position].getNombre());
 		holder.txtFecha.setText(Lugar.DATE_FORMAT2.format(_lugares[position].getFecha()));
-		holder.btnEditar.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				_inter.onItemEdit(Constantes.LUGARES, _lugares[position]);
-			}
-		});
-		holder.btnMapa.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				_inter.onItemMap(Constantes.LUGARES, _lugares[position]);
-			}
-		});
+		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.LUGARES, _lugares[position]));
+		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.LUGARES, _lugares[position]));
 
 		return convertView;
 	}

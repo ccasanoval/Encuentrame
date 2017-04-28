@@ -70,22 +70,8 @@ class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 				//noinspection deprecation
 				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
 		}
-		holder.btnEditar.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				_inter.onItemEdit(Constantes.AVISOS, _avisos[position]);
-			}
-		});
-		holder.btnMapa.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				_inter.onItemMap(Constantes.AVISOS, _avisos[position]);
-			}
-		});
+		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.AVISOS, _avisos[position]));
+		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.AVISOS, _avisos[position]));
 
 		return convertView;
 	}
