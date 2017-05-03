@@ -10,12 +10,16 @@ import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.squareup.leakcanary.LeakCanary;
 
+import javax.inject.Inject;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 15/09/2016
 public class App extends Application
 {
 	private static GlobalComponent _globalComponent;
+
+	//@Inject public App(){}
 
 	@Override public void onCreate()
 	{

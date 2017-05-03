@@ -132,4 +132,5 @@
 	<string name="estadisticas">Estadísticas</string>
 	<string name="estadisticas_format" formatted="false">Longitud:\t\t\t\t\t\t%s\nTiempo:\t\t\t\t\t\t\t%s\nVelocidad.Med:\t\t%s\nVelocidad Min:\t\t%s\nVelocidad Max:\t\t%s\nAltitud Min:\t\t\t\t%s\nAltitud Max:\t\t\t\t%s\n</string>
 	<string name="sin_permiso_camara">Sin permiso para usar la cámara</string>
+	<string name="err_get_ruta_pts">Error al obtener los puntos de la ruta</string>
 </resources>

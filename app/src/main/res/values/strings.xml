@@ -138,6 +138,6 @@
 
 	<string name="estadisticas_format" formatted="false">Length:\t\t\t\t\t\t%s\nTime:\t\t\t\t\t\t\t%s\nAvg Speed:\t\t\t\t%s\nMin Speed:\t\t\t\t%s\nMax Speed:\t\t\t%s\nMin Altitude:\t\t%s\nMax Altitude:\t\t%s\n</string>
 
-	<!-- TODO: Remove or change this placeholder text -->
+	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
 
 </resources>

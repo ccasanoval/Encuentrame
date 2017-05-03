@@ -9,7 +9,6 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
 import com.cesoft.encuentrame3.Login;
-import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Util;
 
 import javax.inject.Singleton;
@@ -22,16 +21,11 @@ public class GlobalModule
 {
 	private final Application _app;
 
-	public GlobalModule(Application application)
-	{
-		_app = application;
-	}
+	public GlobalModule(Application application) { _app = application; }
 
+	@Singleton
 	@Provides
-	Application provideApplication()
-	{
-		return _app;
-	}
+	Application provideApplication() { return _app; }
 
 	@Singleton
 	@Provides

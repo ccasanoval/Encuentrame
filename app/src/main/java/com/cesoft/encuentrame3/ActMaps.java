@@ -1,13 +1,10 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Typeface;
-import android.location.Location;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -15,9 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Date;
-import java.util.Locale;
-
+import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,125 +25,62 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Lugar;
-import com.cesoft.encuentrame3.models.Ruta;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.Date;
+import java.util.Locale;
+
+import javax.inject.Inject;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActMaps extends FragmentActivity implements OnMapReadyCallback
+public class ActMaps extends FragmentActivity implements OnMapReadyCallback, PreMaps.MapsView
 {
 	private static final String TAG = ActMaps.class.getSimpleName();
 
-	private Util _util;
 	private GoogleMap _Map;
-	private Location _loc;
 	private Marker _marker;
 	private Circle _circle;
 
-	private Lugar _l;
-	private Aviso _a;
-	private Ruta _r;
+	@Inject Util _util;
+	@Inject PreMaps _presenter;
 
-	private int _iTipo = Constantes.NADA;
-
-	CoordinatorLayout _coordinatorLayout;
-
+	//----------------------------------------------------------------------------------------------
+	@Override public void onBackPressed() { _presenter.onSalir(); }
+	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_maps);
 
-		_util = ((App)getApplication()).getGlobalComponent().util();
-
-		//------------------------------------------------------------------------------------------
-		try{_l = getIntent().getParcelableExtra(Lugar.NOMBRE);}catch(Exception e){_l=null;}
-		try{_r = getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
-		try{_a = getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
-		try{_iTipo = getIntent().getIntExtra(Util.TIPO, Constantes.NADA);}catch(Exception e){_iTipo=Constantes.NADA;}
-		//------------------------------------------------------------------------------------------
+		//_util = ((App)getApplication()).getGlobalComponent().util();
+		((App)getApplication()).getGlobalComponent().inject(this);
+		_presenter.ini(this);
+		_presenter.loadObjeto();
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
-		_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.btnGuardar);
 		FloatingActionButton fabVolver = (FloatingActionButton)findViewById(R.id.btnVolver);
-		fabVolver.setOnClickListener(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View view)
-				{
-					_util.return2Main(ActMaps.this, false, "");
-				}
-			});
-		if(_iTipo != Constantes.NADA || _r != null)fab.setVisibility(View.GONE);
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				if(_l != null)
-				{
-					_l.guardar(new Fire.CompletadoListener()
-					{
-						@Override
-						protected void onDatos(String id)
-						{
-							Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_LONG).show();
-							Intent data = new Intent();
-							data.putExtra(Lugar.NOMBRE, _l);
-							setResult(Activity.RESULT_OK, data);
-							finish();
-						}
-						@Override
-						protected void onError(String err, int code)
-						{
-							Log.e(TAG, "guardar:handleFault:f:" + err);
-							Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-						}
-					});
-				}
-				if(_a != null)
-				{
-					_a.guardar(new Fire.CompletadoListener()
-					{
-						@Override
-						protected void onDatos(String id)
-						{
-							Toast.makeText(ActMaps.this, getString(R.string.ok_guardar_aviso), Toast.LENGTH_LONG).show();
-							Intent data = new Intent();
-							data.putExtra(Aviso.NOMBRE, _a);
-							setResult(Activity.RESULT_OK, data);
-							finish();
-						}
-						@Override
-						protected void onError(String err, int code)
-						{
-							Log.e(TAG, "guardar:handleFault:f:" + err);
-							Toast.makeText(ActMaps.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-						}
-					});
-				}
-			}
-		});
-		fab = (FloatingActionButton)findViewById(R.id.fabBuscar);
-		if(fab != null)fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override public void onClick(View view) { _util.onBuscar(ActMaps.this, _Map, _fMapZoom); }
-		});
+		fabVolver.setOnClickListener(view -> _presenter.onSalir()); //_util.return2Main(ActMaps.this, false, ""));
+
+		FloatingActionButton fabGuardar = (FloatingActionButton)findViewById(R.id.btnGuardar);
+		if(_presenter.isRuta())fabGuardar.setVisibility(View.GONE);
+		fabGuardar.setOnClickListener(view -> _presenter.guardar());
+
+		FloatingActionButton fabBuscar = (FloatingActionButton)findViewById(R.id.fabBuscar);
+		if(fabBuscar != null)fabBuscar.setOnClickListener(view -> _util.onBuscar(this, _Map, _fMapZoom));
 
 		if(savedInstanceState != null)
-		{
 			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
-		}
 	}
 	//----------------------------------------------------------------------------------------------
 	private static final String MAP_ZOOM = "mapzoom";
@@ -164,28 +96,19 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	protected void onStart()
 	{
 		super.onStart();
-		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
-		newListeners();
+		_presenter.subscribe(this);
+		((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 	}
 	@Override
 	protected void onStop()
 	{
 		super.onStop();
+		_presenter.unsubscribe();
 		if(_Map != null)
 		{
 			_Map.clear();
 			_Map = null;
 		}
-		delListeners();
-		/*if(_GoogleApiClient != null)
-		{
-			_GoogleApiClient.unregisterConnectionCallbacks(this);
-			_GoogleApiClient.unregisterConnectionFailedListener(this);
-			_GoogleApiClient.disconnect();
-			_GoogleApiClient = null;
-		}
-		_LocationRequest = null;*/
 	}
 
 	// This callback is triggered when the map is ready to be used. This is where we can add markers or lines, add listeners or move the camera.
@@ -195,11 +118,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 	public void onMapReady(GoogleMap googleMap)
 	{
 		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("ActAviso:onMapReady:e:%s",se));}
-		_Map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener()
-		{
-			@Override public void onCameraMove() { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; }
-		});
+		try{_Map.setMyLocationEnabled(true);}
+		catch(SecurityException se){Log.e(TAG, "ActAviso:onMapReady:e:------------------------------",se);}
+		_Map.setOnCameraMoveListener(() -> { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; });
 		//MARCADOR MULTILINEA --------------------------------------------
 		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
 		{
@@ -227,63 +148,22 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			}
 		});
 
-		if(_l != null)			/// LUGAR
+		if(_presenter.onMapReady())
+		switch(_presenter.getTipo())
 		{
-			setPosLugar(_l.getLatitud(), _l.getLongitud());
-			showLugar(_l);
-		}
-		else if(_a != null)		/// AVISO
-		{
-			setPosLugar(_a.getLatitud(), _a.getLongitud());
-			showAviso(_a);
-		}
-		else if(_r != null)		/// RUTA
-		{
-			showRuta(_r);
-		}
-		else
-		switch(_iTipo)
-		{
-		case Constantes.LUGARES:	showLugares();break;
-		case Constantes.AVISOS:	showAvisos();break;
-		case Constantes.RUTAS:	showRutas();break;
+		case Constantes.LUGARES:_presenter.showLugares();break;
+		case Constantes.AVISOS:	_presenter.showAvisos();break;
+		case Constantes.RUTAS:	_presenter.showRutas();break;
 		}
 
-		_Map.setOnMapClickListener(new GoogleMap.OnMapClickListener()
-		{
-			@Override
-			public void onMapClick(LatLng latLng)
-			{
-				setPosLugar(latLng.latitude, latLng.longitude);
-			}
-		});
+		_Map.setOnMapClickListener(latLng -> _presenter.setPosLugar(latLng.latitude, latLng.longitude));
 	}
 
 	//______________________________________________________________________________________________
-	private void setPosLugar(double lat, double lon)
-	{
-		if(_loc == null)_loc = new Location("dummyprovider");
-		_loc.setLatitude(lat);
-		_loc.setLongitude(lon);
-		if(_l != null)
-		{
-			setMarker(_l.getNombre(), _l.getDescripcion());
-		}
-		else if(_a != null)
-		{
-			setMarker(_a.getNombre(), _a.getDescripcion());
-			setMarkerRadius();
-		}
-		else if(_r != null)
-		{
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
-		}
-	}
-	private void setMarker(String sTitulo, String sDescripcion)
+	@Override public void setMarker(String sTitulo, String sDescripcion, LatLng pos)
 	{
 		try
 		{
-			LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
 			if(_marker != null)_marker.remove();
 			_Map.clear();
 			MarkerOptions mo = new MarkerOptions()
@@ -294,15 +174,14 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
 			_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		}
-		catch(Exception e){Log.e(TAG, "setMarker:e:"+e, e);}
+		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
-	private void setMarkerRadius()
+	@Override public void setMarkerRadius(LatLng pos)
 	{
-		LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
 		if(_circle != null)_circle.remove();
 		_circle = _Map.addCircle(new CircleOptions()
 				.center(pos)
-				.radius(_a.getRadio())
+				.radius(_presenter.getRadioAviso())
 				.strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
@@ -310,7 +189,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 
 	//______________________________________________________________________________________________
 	private int _iColor = Color.LTGRAY;
-	private BitmapDescriptor getNextIcon()
+	public BitmapDescriptor getNextIcon()
 	{
 		BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
 		switch(_iColor)
@@ -347,7 +226,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		return bm;
 	}
 
-	private void showLugar(Lugar l)
+	//----------------------------------------------------------------------------------------------
+	public void showLugar(Lugar l)
 	{
 		LatLng pos = new LatLng(l.getLatitud(), l.getLongitud());
 		MarkerOptions mo = new MarkerOptions()
@@ -358,7 +238,8 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 		_marker = _Map.addMarker(mo);
 		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 	}
-	private void showAviso(Aviso a)
+	//----------------------------------------------------------------------------------------------
+	public void showAviso(Aviso a)
 	{
 		//BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
 		LatLng pos = new LatLng(a.getLatitud(), a.getLongitud());
@@ -377,163 +258,96 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback
 				//.fillColor(0x55AA0000));//Color.BLUE
 		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
 	}
-
-	//----------------------------------------------------------------------------------------------
-	private synchronized void showRuta(final Ruta r)
-	{
-		if(r == null)
-		{
-			Log.e(TAG, "showRuta:e:----------------------------------------------------------------- r == NULL");
-			return;
-		}
-		Ruta.RutaPunto.getLista(r.getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
-		{
-			@Override
-			public void onDatos(Ruta.RutaPunto[] aData)
-			{
-//if(r.getPuntosCount() != aData.length)Log.e(TAG, "showRuta:--------------------------------------------------------"+r.getPuntosCount()+"---<>--- "+aData.length);
-				showRutaHelper(r, aData);
-			}
-			@Override
-			public void onError(String err)
-			{
-				Log.e(TAG, String.format("showRuta:e:-----------------------------------------------%s",err));
-			}
-		});
-	}
-	private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
+	@Override public void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
 //Log.e(TAG, "---------------------------------------------------------------------showRutaHelper:::"+r.getId()+" ::: "+aPts.length);
-		try{
-		if(aPts.length < 1)return;
-		float distancia = 0;
-		Ruta.RutaPunto ptoAnt = null;
-
-		String INI = getString(R.string.ini);
-		String FIN = getString(R.string.fin);
-		PolylineOptions po = new PolylineOptions();
-		BitmapDescriptor bm = getNextIcon();
-
-		Ruta.RutaPunto gpIni = aPts[0];
-		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
-		for(Ruta.RutaPunto pto : aPts)
+		try
 		{
-			if(ptoAnt != null)
-				distancia += pto.distanciaReal(ptoAnt);
-			ptoAnt = pto;
+			if(aPts.length < 1)return;
+			float distancia = 0;
+			Ruta.RutaPunto ptoAnt = null;
+			BitmapDescriptor bm = getNextIcon();
 
-			MarkerOptions mo = new MarkerOptions();
-			mo.title(r.getNombre());
-			Date date = pto.getFecha();
+			String INI = getString(R.string.ini);
+			String FIN = getString(R.string.fin);
+			PolylineOptions po = new PolylineOptions();
 
-			String sDist;
-			if(distancia > 3000)	sDist = String.format(Locale.ENGLISH, getString(R.string.info_dist2), distancia/1000);
-			else					sDist = String.format(getString(R.string.info_dist), distancia);
+			Ruta.RutaPunto gpIni = aPts[0];
+			Ruta.RutaPunto gpFin = aPts[aPts.length -1];
+			for(Ruta.RutaPunto pto : aPts)
+			{
+				if(ptoAnt != null)
+					distancia += pto.distanciaReal(ptoAnt);
+				ptoAnt = pto;
 
-			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
-			if(pto == gpIni)
-			{
-				mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, _util.formatFechaTiempo(date)));
-				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-				mo.rotation(45);
-				_Map.addMarker(mo.position(pos));
-			}
-			else if(pto == gpFin)
-			{
-				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, _util.formatFechaTiempo(date), sDist));
-				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				mo.rotation(-45);
-				_Map.addMarker(mo.position(pos));
-			}
-			else
-			{
-				mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), _util.formatFechaTiempo(date), sDist));
-				//if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)
+				MarkerOptions mo = new MarkerOptions();
+				mo.title(r.getNombre());
+				Date date = pto.getFecha();
+
+				String sDist;
+				if(distancia > 3000)	sDist = String.format(Locale.ENGLISH, getString(R.string.info_dist2), distancia/1000);
+				else					sDist = String.format(getString(R.string.info_dist), distancia);
+
+				LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
+				if(pto == gpIni)
 				{
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, _util.formatFechaTiempo(date)));
+					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+					mo.rotation(45);
+					_Map.addMarker(mo.position(pos));
+				}
+				else if(pto == gpFin)
+				{
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, _util.formatFechaTiempo(date), sDist));
+					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+					mo.rotation(-45);
+					_Map.addMarker(mo.position(pos));
+				}
+				else
+				{
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), _util.formatFechaTiempo(date), sDist));
 					mo.icon(bm);
 					_Map.addMarker(mo.position(pos));
 				}
+				po.add(pos);
 			}
-			po.add(pos);
-		}
-		po.width(5).color(_iColor);
-		_Map.addPolyline(po);//Polyline line =
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), _fMapZoom));
+
+			po.width(5).color(_iColor);
+			_Map.addPolyline(po);//Polyline line =
+			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), _fMapZoom));
+			//addLinea(po);
+			//moveCamera(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
 		}catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
 	}
 
 
-	//______________________________________________________________________________________________
-	private Fire.DatosListener<Lugar> _lisLugar;
-	private Fire.DatosListener<Aviso> _lisAviso;
-	private Fire.DatosListener<Ruta> _lisRuta;
-	//----------------------------------------------------------------------------------------------
-	private void showLugares()
+	@Override public Activity getAct() { return this; }
+	//@Override public void iniEspera() { }
+	//@Override public void finEspera() { }
+	@Override public void toast(int msg)
 	{
-		Lugar.getLista(_lisLugar);
+		Toast.makeText(this, getString(msg), Toast.LENGTH_LONG).show();
 	}
-	//---
-	private void showAvisos()
+	@Override public void toast(int msg, String err)
 	{
-		Aviso.getLista(_lisAviso);
+		Toast.makeText(this, String.format(getString(msg), err), Toast.LENGTH_LONG).show();
 	}
-	//---
-	private void showRutas()
+	@Override public void animateCamera()
 	{
-		Ruta.getLista(_lisRuta);
+		_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 	}
-	//----------------------------------------------------------------------------------------------
-	private void delListeners()
+	/*@Override public void moveCamera(LatLng pos)
 	{
-		if(_lisLugar!=null)_lisLugar.setListener(null);
-		if(_lisAviso!=null)_lisAviso.setListener(null);
-		if(_lisRuta!=null)_lisRuta.setListener(null);
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 	}
-	private void newListeners()
+	@Override public void addLinea(PolylineOptions po)
 	{
-		delListeners();
-		_lisLugar = new Fire.DatosListener<Lugar>()
-		{
-			@Override
-			public void onDatos(Lugar[] aData)
-			{
-				for(Lugar o : aData)showLugar(o);
-			}
-			@Override
-			public void onError(String err)
-			{
-				Log.e(TAG, String.format("showLugares:e:--------------------------------------------LUGARES:GET:ERROR:%s",err));
-			}
-		};
-		_lisAviso = new Fire.DatosListener<Aviso>()
-		{
-			@Override
-			public void onDatos(Aviso[] aData)
-			{
-				for(Aviso o : aData)showAviso(o);
-			}
-			@Override
-			public void onError(String err)
-			{
-				Log.e(TAG, String.format("showAvisos:e:---------------------------------------------AVISOS:GET:ERROR:%s",err));
-			}
-		};
-		_lisRuta = new Fire.DatosListener<Ruta>()
-		{
-			@Override
-			public void onDatos(Ruta[] aData)
-			{
-				Log.e(TAG, "------------------------------------------------------------------------getLista : "+aData.length);
-				for(Ruta o : aData)
-					showRuta(o);
-			}
-			@Override
-			public void onError(String err)
-			{
-				Log.e(TAG, String.format("showRutas:e:----------------------------------------------RUTAS:GET:ERROR:%s",err));
-			}
-		};
-
+		po.width(5).color(_iColor);
+		_Map.addPolyline(po);//Polyline line =
 	}
+	@Override public void addMarcador(MarkerOptions mo)
+	{
+		_Map.addMarker(mo);
+	}*/
 
 }

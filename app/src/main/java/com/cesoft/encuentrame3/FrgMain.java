@@ -97,17 +97,13 @@ public class FrgMain extends Fragment implements IListaItemClick
 		}
 
 		FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
-		fab.setOnClickListener(new View.OnClickListener()
+		fab.setOnClickListener(view ->
 		{
-			@Override
-			public void onClick(View view)
+			switch(_sectionNumber)
 			{
-				switch(_sectionNumber)//switch(_viewPager.getCurrentItem())
-				{
-					case Constantes.LUGARES:	_main.onLugar();	break;
-					case Constantes.RUTAS:	_main.onRuta();		break;
-					case Constantes.AVISOS:	_main.onAviso();	break;
-				}
+				case Constantes.LUGARES:	_main.onLugar();	break;
+				case Constantes.RUTAS:	_main.onRuta();		break;
+				case Constantes.AVISOS:	_main.onAviso();	break;
 			}
 		});
 
@@ -147,7 +143,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 		switch(_sectionNumber)
 		{
-			case Constantes.LUGARES:	refreshLugares();	break;
+			case Constantes.LUGARES:refreshLugares();	break;
 			case Constantes.RUTAS:	refreshRutas();		break;
 			case Constantes.AVISOS:	refreshAvisos();	break;
 		}
@@ -422,7 +418,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 			_filtro.setFechaFin(ini);
 		}
 	}
-
 
 
 	//----------------------------------------------------------------------------------------------
