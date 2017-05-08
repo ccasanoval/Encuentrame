@@ -78,6 +78,9 @@ class PreRuta
 				_bNuevo = true;
 				_r = new Ruta();
 			}
+			else
+				_bNuevo = false;
+			Log.e(TAG, "onCreate:RUTA:-------------------------------"+_r);
 		}
 		catch(Exception e)
 		{

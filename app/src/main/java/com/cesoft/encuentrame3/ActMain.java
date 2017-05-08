@@ -32,6 +32,8 @@ import com.cesoft.encuentrame3.util.Util;
 //https://developer.android.com/training/permissions/requesting.html
 //MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
 
+//https://www.smashingmagazine.com/tag/android/
+
 // *** Dagger
 //http://www.vogella.com/tutorials/Dagger/article.html
 //https://www.future-processing.pl/blog/dependency-injection-with-dagger-2/

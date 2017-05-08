@@ -29,7 +29,7 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onReceive(Context context, Intent intent)//http://stackoverflow.com/questions/2471875/processing-more-than-one-button-click-at-android-widget
 	{
-Log.w("WidgetRuta", "onReceive-----------------------------------------------------************************"+intent.getAction());
+//Log.w("WidgetRuta", "onReceive-----------------------------------------------------************************"+intent.getAction());
 		//Intent iSvc = new Intent(context, WidgetRutaService.class);context.startService(iSvc);
 		WidgetRutaService.startSvc(context);
 
@@ -60,7 +60,7 @@ Log.w("WidgetRuta", "onReceive--------------------------------------------------
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
-		Log.w("WidgetRuta", "onUpdate-----------------------------------------------------**************************** ");
+//		Log.w("WidgetRuta", "onUpdate-----------------------------------------------------**************************** ");
 		setWidget(context, appWidgetManager, appWidgetIds, null, false);
 	}
 
@@ -70,7 +70,7 @@ Log.w("WidgetRuta", "onReceive--------------------------------------------------
 		Intent intent;
 		PendingIntent actionPendingIntent;
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
-		Log.w("WidgetRuta", "setWidget-----------------------------------------------------**************************** = "+sRuta);
+//Log.w("WidgetRuta", "setWidget-----------------------------------------------------**************************** = "+sRuta);
 
 		// NOMBRE RUTA
 		if(sRuta != null)

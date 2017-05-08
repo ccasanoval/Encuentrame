@@ -311,8 +311,9 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 	//TODO: puntos mas cercanos dependiendo de si tienes wifi? opcion de no guardar hasta tener wifi?
 	private Location _locLast = null;
 	private double _velLast = 0;
-	private void guardarPunto(Location loc, Ruta r, String sId)
+	private synchronized void guardarPunto(Location loc, Ruta r, String sId)
 	{
+Log.w(TAG, "guardarPunto:    A    *** ");
 		if(loc == null)
 		{
 			Log.w(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
@@ -331,11 +332,11 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 
 		if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
 		{
+			Log.w(TAG, "guardarPunto: NUEVA RUTA: -----------------"+(_sId.equals(sId))+"-------------------------- "+_sId+" ------- "+sId);//TODO : se llama dos veces?????!!!!!
 			_sId = sId;
 			_locLastSaved = null;
 			_locLast = loc;
 			DELAY_TRACK = DELAY_TRACK_MIN;
-			Log.w(TAG, "guardarPunto: NUEVA RUTA: -------------------------------------------------- "+sId);
 		}
 		else if(_locLastSaved != null)
 		{
@@ -353,11 +354,11 @@ Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
 					double speed = distLast / time;	//60 m/s = 216 Km/h
 					double a = (speed - _velLast)/time;//Aceleración coche muy potente (desde parado!) < 8 m/s2
 
-Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*******----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, _velLast, a));
+Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*************----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, _velLast, a));
 					//if(speed > 40 && _velLastSaved < 20 && time < 2*60)//|| speed > (_velLastSaved+1)*50)//50m/s = 180Km/h
 					if(speed > SPEED_MAX || a > ACCEL_MAX)//imaginamos que es un punto erróneo, salvo que vayas en un cohete
 					{
-						Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.0f *************************", speed, _velLast, time, a));
+						Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.2f *****************************", speed, _velLast, time, a));
 						DELAY_TRACK = DELAY_TRACK_MIN;
 						return;
 					}
@@ -369,7 +370,7 @@ Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*******----TIME(s)
 			//---
 
 			float distLastSaved = loc.distanceTo(_locLastSaved);
-Log.w(TAG, "guardarPunto:----------------************************---------------------distLastSaved: "+distLastSaved);
+Log.w(TAG, "guardarPunto:----------------************************---------------------distLastSaved="+distLastSaved+"  acc="+loc.getAccuracy());
 			if(distLastSaved < DISTANCE_MIN)//Puntos muy cercanos
 			{
 				Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
@@ -385,6 +386,7 @@ Log.w(TAG, "guardarPunto:----------------************************---------------
 		}
 		r.guardar(new GuardarListener(loc));
 		_locLastSaved = loc;
+Log.w(TAG, "guardarPunto:    B    *** ");
 	}
 
 
@@ -480,7 +482,7 @@ Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 			LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
 		DELAY_TRACK = DELAY_TRACK_MAX;
-
+Log.e(TAG, "stopTracking:---------------------------------------------------------------------------");
 		_locLastSaved = null;
 		_locLast = null;
 		_velLast = 0;
