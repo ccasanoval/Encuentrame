@@ -70,20 +70,13 @@ public class WidgetRutaService extends Service
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
-		Log.e(TAG, "--------------onStartCommand----------------------------------------------------");
+		Log.w(TAG, "--------------onStartCommand----------------------------------------------------");
 		_util = App.getComponent(getApplicationContext()).util();
 
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
 		{
 			_h = new Handler();
-			_r = new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					payLoad();
-				}
-			};
+			_r = this::payLoad;
 			//_h.postDelayed(_r, _DELAY_SHORT);
 			payLoad();
 		}
@@ -91,7 +84,7 @@ public class WidgetRutaService extends Service
 		super.onStartCommand(intent, flags, startId);
 		return START_STICKY;//START_REDELIVER_INTENT
 	}
-	@Override public void onDestroy() { Log.e(TAG, "onDestroy:--------------------------------------"); }
+	@Override public void onDestroy() { Log.w(TAG, "onDestroy:--------------------------------------"); }
 
 
 	//______________________________________________________________________________________________

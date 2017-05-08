@@ -48,10 +48,7 @@ class PreMaps
 	private int _iTipo = Constantes.NADA;
 
 	private Application _app;
-	@Inject PreMaps(Application app)
-	{
-		_app = app;
-	}
+	@Inject PreMaps(Application app) { _app = app; }
 
 	void ini(MapsView view)
 	{
