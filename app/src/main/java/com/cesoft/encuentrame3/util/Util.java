@@ -44,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -378,25 +379,44 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 
 	//----------------------------------------------------------------------------------------------
 	//private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
-	private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
-	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-	private final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+	//---
+	private SimpleDateFormat timeFormatter = null;
 	public String formatTiempo(long t)
 	{
-		Date d = new Date(t);
-		//timeFormatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-		return timeFormatter.format(d);
+		//Calendar cal = Calendar.getInstance();
+		//cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+		//cal.setTimeInMillis(t);
+		if(timeFormatter == null)
+		{
+			timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
+			timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+		}
+		return timeFormatter.format(new Date(t));//cal.getTime());
 	}
+	//---
+	private SimpleDateFormat dateFormatter = null;
 	public String formatFecha(Date date)
 	{
 		if(date == null)return "";
 		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(_app);
 		//return dateFormat.format(date);
+		if(dateFormatter == null)
+		{
+			dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+			dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+		}
 		return dateFormatter.format(date);
 	}
+	//---
+	private SimpleDateFormat dateTimeFormatter = null;
 	public String formatFechaTiempo(Date date)
 	{
 		if(date == null)return "";
+		if(dateTimeFormatter == null)
+		{
+			dateTimeFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+			dateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+		}
 		return dateTimeFormatter.format(date);
 	}
 

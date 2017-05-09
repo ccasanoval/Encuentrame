@@ -95,9 +95,6 @@
 		<service
 			android:name=".svc.CesService"
 			android:exported="false"/>
-		<service
-			android:name=".svc.CesServiceAvisoGeo"
-			android:exported="false"/>
 		<receiver
 			android:name=".svc.CesGeofenceReceiver"
 			android:exported="false">

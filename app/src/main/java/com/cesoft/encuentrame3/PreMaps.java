@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Bundle;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Fire;
@@ -18,7 +19,7 @@ import com.google.android.gms.maps.model.LatLng;
 import javax.inject.Inject;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Created by booster-bikes on 03/05/2017.
+// Created by Cesar Casanova on 03/05/2017.
 // PRESENTER MAPS
 class PreMaps
 {
@@ -28,7 +29,7 @@ class PreMaps
 	interface MapsView
 	{
 		Activity getAct();
-		void finish();
+		void finish(Intent i);
 		void toast(int msg);
 		void toast(int msg, String err);
 		void showLugar(Lugar l);
@@ -63,10 +64,24 @@ class PreMaps
 	{
 		_view = null;
 		delListeners();
+		_dlgSalir.dismiss();//Para evitar MemLeak puesto que dlg guarda ref a _view
 	}
 	int getTipo(){return _iTipo;}
 
+	private static final String SUCIO = "sucio";
+	void loadSavedInstanceState(Bundle savedInstanceState)
+	{
+		if(savedInstanceState != null)_bSucio = savedInstanceState.getBoolean(SUCIO);
+		//Log.e(TAG, "++++++++++++++++++++ LOAD "+_bSucio);
+	}
+	void onSaveInstanceState(Bundle outState)
+	{
+		//Log.e(TAG, "++++++++++++++++++++ SAVE "+_bSucio);
+		outState.putBoolean(SUCIO, _bSucio);
+	}
+
 	//______________________________________________________________________________________________
+	private AlertDialog _dlgSalir;
 	void onSalir()
 	{
 		Log.e(TAG, "onSalir----------------------------------------------"+_bSucio);
@@ -77,11 +92,12 @@ class PreMaps
 			dialog.setMessage(_app.getString(R.string.seguro_salir));
 			dialog.setPositiveButton(_app.getString(R.string.guardar), (dialog1, which) -> guardar());
 			dialog.setCancelable(true);
-			dialog.setNegativeButton(_app.getString(R.string.salir), (dialog2, which) -> _view.finish());
-			dialog.create().show();
+			dialog.setNegativeButton(_app.getString(R.string.salir), (dialog2, which) -> _view.finish(null));
+			_dlgSalir = dialog.create();
+			_dlgSalir.show();
 		}
 		else
-			_view.finish();
+			_view.finish(null);
 	}
 
 	//______________________________________________________________________________________________
@@ -111,8 +127,8 @@ class PreMaps
 					_view.toast(R.string.ok_guardar_lugar);
 					Intent data = new Intent();
 					data.putExtra(Lugar.NOMBRE, _l);
-					_view.getAct().setResult(Activity.RESULT_OK, data);//TODO: finish(data)..
-					_view.finish();
+					//_view.getAct().setResult(Activity.RESULT_OK, data);//finish(data)..
+					_view.finish(data);
 				}
 				@Override
 				protected void onError(String err, int code)
@@ -134,8 +150,8 @@ class PreMaps
 					_view.toast(R.string.ok_guardar_aviso);
 					Intent data = new Intent();
 					data.putExtra(Aviso.NOMBRE, _a);
-					_view.getAct().setResult(Activity.RESULT_OK, data);
-					_view.finish();
+					//_view.getAct().setResult(Activity.RESULT_OK, data);
+					_view.finish(data);
 				}
 				@Override
 				protected void onError(String err, int code)
@@ -245,64 +261,6 @@ class PreMaps
 			}
 		});
 	}
-	/*private void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
-	{
-//Log.e(TAG, "---------------------------------------------------------------------showRutaHelper:::"+r.getId()+" ::: "+aPts.length);
-		try
-		{
-			if(aPts.length < 1)return;
-			float distancia = 0;
-			Ruta.RutaPunto ptoAnt = null;
-			BitmapDescriptor bm = _view.getNextIcon();
-
-			String INI = _app.getString(R.string.ini);
-			String FIN = _app.getString(R.string.fin);
-			PolylineOptions po = new PolylineOptions();
-
-			Ruta.RutaPunto gpIni = aPts[0];
-			Ruta.RutaPunto gpFin = aPts[aPts.length -1];
-			for(Ruta.RutaPunto pto : aPts)
-			{
-				if(ptoAnt != null)
-					distancia += pto.distanciaReal(ptoAnt);
-				ptoAnt = pto;
-
-				MarkerOptions mo = new MarkerOptions();
-				mo.title(r.getNombre());
-				Date date = pto.getFecha();
-
-				String sDist;
-				if(distancia > 3000)	sDist = String.format(Locale.ENGLISH, _app.getString(R.string.info_dist2), distancia/1000);
-				else					sDist = String.format(_app.getString(R.string.info_dist), distancia);
-
-				LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
-				if(pto == gpIni)
-				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, _util.formatFechaTiempo(date)));
-					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-					mo.rotation(45);
-					_view.addMarcador(mo.position(pos));
-				}
-				else if(pto == gpFin)
-				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, _util.formatFechaTiempo(date), sDist));
-					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-					mo.rotation(-45);
-					_view.addMarcador(mo.position(pos));
-				}
-				else
-				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", _app.getString(R.string.info_time), _util.formatFechaTiempo(date), sDist));
-					mo.icon(bm);
-					_view.addMarcador(mo.position(pos));
-				}
-				po.add(pos);
-			}
-
-			_view.addLinea(po);
-			_view.moveCamera(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
-		}catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
-	}*/
 
 	double getRadioAviso(){return _a.getRadio();}
 

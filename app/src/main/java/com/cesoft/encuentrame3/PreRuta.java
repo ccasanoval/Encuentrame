@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Created by booster-bikes on 03/05/2017.
+//Created by Cesar Casanova on 03/05/2017.
 // PRESENTER RUTA
 @Singleton
 class PreRuta
@@ -52,11 +52,17 @@ class PreRuta
 	{
 		_view = view;
 		newListeners();
+		if(_bEstadisticas)estadisticas();
+		_bEliminar=false;
 	}
 	void unsubscribe()
 	{
 		_view = null;
 		delListeners();
+		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
+		if(_dlgEstadisticas != null)_dlgEstadisticas.dismiss();
+		if(_dlgEliminar != null)_dlgEliminar.dismiss();
+		if(_dlgSucio != null)_dlgSucio.dismiss();
 	}
 
 	String getNombre(){return _r.getNombre();}
@@ -91,6 +97,7 @@ class PreRuta
 	}
 
 	//______________________________________________________________________________________________
+	private AlertDialog _dlgSucio = null;
 	void onSalir()
 	{
 		if(_bSucio)
@@ -101,7 +108,8 @@ class PreRuta
 			dialog.setPositiveButton(_view.getString(R.string.guardar), (dlg, which) -> guardar());
 			dialog.setNegativeButton(_view.getString(R.string.salir), (dlg, which) -> _view.finish());
 			dialog.setCancelable(true);
-			dialog.create().show();
+			_dlgSucio = dialog.create();
+			_dlgSucio.show();
 		}
 		else
 			_view.finish();
@@ -157,6 +165,7 @@ class PreRuta
 
 	//______________________________________________________________________________________________
 	private boolean _bEliminar = true;
+	private AlertDialog _dlgEliminar = null;
 	public void eliminar()
 	{
 		if(!_bEliminar)return;
@@ -201,7 +210,8 @@ class PreRuta
 				}
 			}
 		});
-		dialog.create().show();
+		_dlgEliminar = dialog.create();
+		_dlgEliminar.show();
 	}
 
 	//______________________________________________________________________________________________
@@ -326,13 +336,16 @@ class PreRuta
 			}
 		});
 	}
+	private AlertDialog _dlgEstadisticas = null;
+	private boolean _bEstadisticas = false;
 	private void estadisticasShow(String s)
 	{
-		//Mostrar
-		AlertDialog alertDialog = new AlertDialog.Builder(_view).create();
-		alertDialog.setTitle(_view.getString(R.string.estadisticas));
-		alertDialog.setMessage(s);
-		alertDialog.show();
+		_bEstadisticas = true;
+		_dlgEstadisticas = new AlertDialog.Builder(_view).create();
+		_dlgEstadisticas.setTitle(_view.getString(R.string.estadisticas));
+		_dlgEstadisticas.setMessage(s);
+		_dlgEstadisticas.setOnDismissListener(dialog ->	_bEstadisticas = false);
+		_dlgEstadisticas.show();
 	}
 
 

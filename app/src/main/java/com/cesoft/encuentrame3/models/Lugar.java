@@ -11,10 +11,8 @@ import java.util.Date;
 
 import com.bumptech.glide.Glide;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DataSnapshot;
@@ -24,7 +22,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.Exclude;
 
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -318,17 +315,13 @@ public class Lugar extends Objeto
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), new GeoFire.CompletionListener()
+		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
 		{
-			@Override
-			public void onComplete(String key, DatabaseError error)
-			{
-        		if(error != null)
-            		Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
-        		//else
-            	//	Log.i(TAG, "Location saved on server successfully!");
-			}
-        });
+			if(error != null)
+				Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+			//else
+			//	Log.i(TAG, "Location saved on server successfully!");
+		});
 	}
 	private void delGeo()
 	{
@@ -359,52 +352,29 @@ public class Lugar extends Objeto
 			_datos = newFirebase().child(getId());
 		}
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
-		storageRef.delete().addOnCompleteListener(new OnCompleteListener<Void>()
-		{
-			@Override
-			public void onComplete(@NonNull Task<Void> task)
-			{
-				Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString());
-			}
-		});
+		storageRef.delete().addOnCompleteListener(task -> Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString()));
 
 		Uri file = Uri.fromFile(new File(path));
 		UploadTask uploadTask = storageRef.putFile(file);
-		uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>()
+		uploadTask.addOnProgressListener(t ->
 		{
-			@Override
-			public void onProgress(UploadTask.TaskSnapshot t)
-			{
-				@SuppressWarnings("VisibleForTests")
-				long n = t.getBytesTransferred();
-				Log.e(TAG, "uploadImagen:onProgress:"+n);
-			}
+			@SuppressWarnings("VisibleForTests")
+			long n = t.getBytesTransferred();
+			Log.e(TAG, "uploadImagen:onProgress:"+n);
 		});
 
-
-		uploadTask.addOnFailureListener(new OnFailureListener()
+		uploadTask.addOnFailureListener(exception -> Log.e(TAG, "uploadImagen:onFailure:"+exception, exception))
+		.addOnSuccessListener(taskSnapshot ->
 		{
-			@Override
-			public void onFailure(@NonNull Exception exception)
+			// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+			//TODO: delete anterior _img ...
+			/*if(_img != null)
 			{
-				Log.e(TAG, "uploadImagen:onFailure:"+exception, exception);
-			}
-		})
-		.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
-		{
-			@Override
-			public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
-			{
-				// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-				//TODO: delete anterior _img ...
-				/*if(_img != null)
-				{
-					StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
-				}*/
-				@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
-				if(img != null)Lugar.this.setImgUrl(img.toString());
-				Log.e(TAG, "uploadImagen:onSuccess:-----------"+Lugar.this.getImgUrl());
-			}
+				StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
+			}*/
+			@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
+			if(img != null)Lugar.this.setImgUrl(img.toString());
+			Log.e(TAG, "uploadImagen:onSuccess:-----------"+Lugar.this.getImgUrl());
 		});
 	}
 	//______________________________________________________________________________________________
@@ -423,24 +393,16 @@ public class Lugar extends Objeto
 Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
 Log.e(TAG, "BBB: "+getImgUrl());
 
-		OnSuccessListener<Uri> lisOk = new OnSuccessListener<Uri>()
+		OnSuccessListener<Uri> lisOk = uri ->
 		{
-			@Override
-			public void onSuccess(Uri uri)
-			{
-				Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
-				loadFromCache(uri, iv, act);
-				listener.onDatos(new String[]{uri.toString()});
-			}
+			Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
+			loadFromCache(uri, iv, act);
+			listener.onDatos(new String[]{uri.toString()});
 		};
-		OnFailureListener lisKo = new OnFailureListener()
+		OnFailureListener lisKo = exception ->
 		{
-			@Override
-			public void onFailure(@NonNull Exception exception)
-			{
-				Log.e(TAG, "downloadImagen:onFailure:e: ----------------------------------------"+exception);
-				listener.onError(exception.toString());
-			}
+			Log.e(TAG, "downloadImagen:onFailure:e: ----------------------------------------"+exception);
+			listener.onError(exception.toString());
 		};
 //String img = "https://firebasestorage.googleapis.com/v0/b/sonic-totem-131614.appspot.com/o/fO47HYtdhMYhvD61wUjOygRNMYz1%2Flugar%2F-Ki4cj5oRDm6pCtnt_0D?alt=media&token=183000c4-9f06-4119-aea3-783db9435d22";
 		String img = getImgUrl();
@@ -500,14 +462,7 @@ Log.e(TAG, "BBB: "+getImgUrl());
 			_datos = newFirebase().child(getId());
 		}
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
-		storageRef.delete().addOnCompleteListener(new OnCompleteListener<Void>()
-		{
-			@Override
-			public void onComplete(@NonNull Task<Void> task)
-			{
-				Log.e(TAG, "delImg:addOnCompleteListener:"+task.toString());
-			}
-		});
+		storageRef.delete().addOnCompleteListener(task -> Log.e(TAG, "delImg:addOnCompleteListener:"+task.toString()));
 	}
 	// IMAGEN
 	//----------------------------------------------------------------------------------------------

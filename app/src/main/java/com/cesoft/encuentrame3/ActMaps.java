@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Gravity;
@@ -80,7 +81,11 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 		if(fabBuscar != null)fabBuscar.setOnClickListener(view -> _util.onBuscar(this, _Map, _fMapZoom));
 
 		if(savedInstanceState != null)
+		{
 			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
+			_presenter.loadSavedInstanceState(savedInstanceState);
+			Log.e(TAG, "............................load........................................"+_fMapZoom);
+		}
 	}
 	//----------------------------------------------------------------------------------------------
 	private static final String MAP_ZOOM = "mapzoom";
@@ -88,8 +93,10 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
+		Log.e(TAG, "...............................save....................................."+_fMapZoom);
 		super.onSaveInstanceState(outState);
 		outState.putFloat(MAP_ZOOM, _fMapZoom);
+		_presenter.onSaveInstanceState(outState);
 	}
 	//______________________________________________________________________________________________
 	@Override
@@ -322,6 +329,12 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 
 
 	@Override public Activity getAct() { return this; }
+	@Override public void finish(Intent data)
+	{
+		if(data != null)setResult(Activity.RESULT_OK, data);
+		finish();
+	}
+
 	//@Override public void iniEspera() { }
 	//@Override public void finEspera() { }
 	@Override public void toast(int msg)

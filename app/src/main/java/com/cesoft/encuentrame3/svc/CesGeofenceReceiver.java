@@ -21,7 +21,7 @@ import java.util.List;
 //http://stackoverflow.com/questions/19505614/android-geofence-eventually-stop-getting-transition-intents/19521823#19521823
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 21/03/2016.
-//TODO: En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable : eliminar CesServiceAvisoGeo
+//En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
 	private static final String TAG = CesGeofenceReceiver.class.getSimpleName();
@@ -89,93 +89,5 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 			}
 		});
 	}
-
-	/*
-	public static final String CATEGORY_LOCATION_SERVICES = "CATEGORY_LOCATION_SERVICES";
-	public static final String ACTION_GEOFENCE_ERROR = "ACTION_GEOFENCE_ERROR";
-	public static final String EXTRA_GEOFENCE_STATUS = "EXTRA_GEOFENCE_STATUS";
-	public static final String ACTION_GEOFENCE_TRANSITION = "ACTION_GEOFENCE_TRANSITION";
-	public static final String EXTRA_GEOFENCE_ID = "EXTRA_GEOFENCE_ID";
-	public static final String EXTRA_GEOFENCE_TRANSITION_TYPE = "EXTRA_GEOFENCE_TRANSITION_TYPE";
-
-	Context context;
-	Intent broadcastIntent = new Intent();
-
-	@Override
-	public void onReceive(Context context, Intent intent)
-	{
-System.err.println("---------------------CesGeofenceReceiver:onReceive");
-		this.context = context;
-		broadcastIntent.addCategory(CATEGORY_LOCATION_SERVICES);//GeofenceUtils.
-
-		//if(LocationClient.hasError(intent))		handleError(intent);		else
-			handleEnterExit(intent);
-	}
-
-	private void handleError(Intent intent)
-	{
-System.err.println("---------------------CesGeofenceReceiver:handleError");
-		// Get the error code
-		//int errorCode = LocationClient.getErrorCode(intent);
-
-		// Get the error message
-		//String errorMessage = LocationServiceErrorMessages.getErrorString(context, errorCode);
-		// Log the error
-		//Log.e(GeofenceUtils.APPTAG,		context.getString(R.string.geofence_transition_error_detail,		errorMessage));
-
-		// Set the action and error message for the broadcast intent
-		broadcastIntent.setAction(ACTION_GEOFENCE_ERROR).putExtra(EXTRA_GEOFENCE_STATUS, 69);
-
-		// Broadcast the error *locally* to other components in this app
-		LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
-	}
-
-
-	private void handleEnterExit(Intent intent)
-	{
-System.err.println("---------------------CesGeofenceReceiver:handleEnterExit");
-		// Get the type of transition (entry or exit)
-		int transition = LocationClient.getGeofenceTransition(intent);
-
-		// Test that a valid transition was reported
-		if((transition == Geofence.GEOFENCE_TRANSITION_ENTER) || (transition == Geofence.GEOFENCE_TRANSITION_EXIT))
-		{
-			// Post a notification
-			List<Geofence> geofences = LocationClient.getTriggeringGeofences(intent);
-			String[] geofenceIds = new String[geofences.size()];
-			String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER, geofenceIds);
-			String transitionType = GeofenceUtils.getTransitionString(transition);
-
-			for (int index = 0; index < geofences.size(); index++)
-			{
-				Geofence geofence = geofences.get(index);
-				//...do something with the geofence entry or exit. I'm saving them to a local sqlite db
-			}
-			// Create an Intent to broadcast to the app
-			broadcastIntent
-				.setAction(ACTION_GEOFENCE_TRANSITION)//GeofenceUtils
-				.addCategory(CATEGORY_LOCATION_SERVICES)
-				.putExtra(EXTRA_GEOFENCE_ID, geofenceIds)
-				.putExtra(EXTRA_GEOFENCE_TRANSITION_TYPE, transitionType);
-
-			LocalBroadcastManager.getInstance(Util.getApplication().getBaseContext()).sendBroadcast(broadcastIntent);
-
-			// Log the transition type and a message
-			//Log.w(GeofenceUtils.APPTAG, transitionType + ": " + ids);
-			//Log.w(GeofenceUtils.APPTAG,
-			//context.getString(R.string.geofence_transition_notification_text));
-			// In debug mode, log the result
-			//Log.w(GeofenceUtils.APPTAG, "transition");
-
-				// An invalid transition was reported
-		}
-		else
-		{
-			// Always log as an error
-			//Log.e(GeofenceUtils.APPTAG,
-			//context.getString(R.string.geofence_transition_invalid_type,transition));
-		}
-	}
-*/
 
 }

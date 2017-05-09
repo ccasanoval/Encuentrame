@@ -23,7 +23,6 @@ import com.google.android.gms.location.LocationServices;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 04/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Por que no saltan geofences trackin y aviso? ======> Parece que funcionan cuando radio es muy grande. Poca precision de google?????
 // http://stackoverflow.com/questions/21414160/how-to-increase-consistency-of-android-geofence-enter-exit-notifications
 //    Make sure you're using a BroadcastReceiver and not a Service to receive the transitions, otherwise you will not/might not get it if your app gets killed/turned off. As discussed here: Android Geofence eventually stop getting transition intents
 //    Make sure you recreate your geofences after the device is rebooted, preferably using a boot-broadcast receiver. As discussed here: Do Geofences remain active in android after a device reboot
@@ -119,13 +118,6 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 	{
 		try
 		{
-			/*if(_PendingIntent == null)
-			{
-				Intent intent = new Intent(_Context, CesServiceAvisoGeo.class);
-				_PendingIntent = PendingIntent.getService(_Context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			}
-			return _PendingIntent;*/
-
 			if(null != _PendingIntent)return _PendingIntent;
 			Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
 			// Return a PendingIntent to start the IntentService. Always create a PendingIntent sent to Location Services with FLAG_UPDATE_CURRENT,

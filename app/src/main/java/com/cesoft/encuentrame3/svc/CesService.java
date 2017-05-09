@@ -53,7 +53,6 @@ import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @Singleton
 public class CesService extends IntentService
@@ -169,10 +168,10 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 				else if(_tmTrack + DELAY_TRACK < System.currentTimeMillis()
 					|| (_locLastSaved != null && _util.getLocation().distanceTo(_locLastSaved) > DISTANCE_MAX))
 				{
-					WidgetRutaService.startSvc(getApplicationContext());
 					saveGeoTracking();
 					_tmTrack = System.currentTimeMillis();
 				}
+				WidgetRutaService.startSvc(getApplicationContext());
 //Log.w(TAG, "LOOP before sleeping------------------------"+(DELAY_TRACK/4000));
 				try{Thread.sleep(DELAY_TRACK/2);}
 				catch(InterruptedException e){Log.e(TAG, "---------------- LOOP SLEEP INTERRUPTED ---------------");}

@@ -366,16 +366,12 @@ public class Aviso extends Objeto
 			return;
 		}
 		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), new GeoFire.CompletionListener()
+		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
 		{
-			@Override
-    		public void onComplete(String key, DatabaseError error)
-			{
-        		if(error != null)
-            		Log.e(TAG, "saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
-        		else
-            		Log.w(TAG, "saveGeo:Location saved on server successfully!");
-			}
+			if(error != null)
+				Log.e(TAG, "saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+			else
+				Log.w(TAG, "saveGeo:Location saved on server successfully!");
 		});
 	}
 	private void delGeo()
