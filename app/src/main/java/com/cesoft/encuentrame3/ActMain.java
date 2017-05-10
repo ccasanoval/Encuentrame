@@ -217,13 +217,15 @@ Log.e(TAG, "----------- MAIN START");
 	public void goLugar(Objeto obj)
 	{
 		Intent i = new Intent(this, ActLugar.class);
-		i.putExtra(Lugar.NOMBRE, obj);
+		//i.putExtra(Lugar.NOMBRE, obj);
+		i.putExtra(Objeto.NOMBRE, obj);
 		startActivityForResult(i, Constantes.LUGARES);
 	}
 	public void goAviso(Objeto obj)
 	{
 		Intent i = new Intent(this, ActAviso.class);
-		i.putExtra(Aviso.NOMBRE, obj);
+		//i.putExtra(Aviso.NOMBRE, obj);
+		i.putExtra(Objeto.NOMBRE, obj);
 		startActivityForResult(i, Constantes.AVISOS);
 	}
 	public void goRuta(Objeto obj)
@@ -231,7 +233,8 @@ Log.e(TAG, "----------- MAIN START");
 		try
 		{
 			Intent i = new Intent(this, ActRuta.class);
-			i.putExtra(Ruta.NOMBRE, obj);
+			//i.putExtra(Ruta.NOMBRE, obj);
+			i.putExtra(Objeto.NOMBRE, obj);
 			startActivityForResult(i, Constantes.RUTAS);
 		}
 		catch(Exception e){Log.e(TAG, "------------------goRuta:onItemEdit:e:-----------------------", e);}

@@ -28,9 +28,15 @@ public class Objeto implements Parcelable
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
 
-	private Date fecha;
+	protected Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
+
+	protected double latitud, longitud;
+		public double getLatitud(){return latitud;}
+		public double getLongitud(){return longitud;}
+		public void setLatitud(double v){latitud=v;}//TODO: validacion
+		public void setLongitud(double v){longitud=v;}
 
 
 	//______________________________________________________________________________________________

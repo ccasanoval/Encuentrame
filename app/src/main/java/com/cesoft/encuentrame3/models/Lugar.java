@@ -64,7 +64,7 @@ public class Lugar extends Objeto
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
-	private Date fecha;
+	protected Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
 	private String imgUrl;	//TODO: remove...
@@ -73,7 +73,7 @@ public class Lugar extends Objeto
 	///______________________________________________________________
 
 	//______________________________________________________________________________________________
-	private double latitud, longitud;
+	protected double latitud, longitud;
 		public double getLatitud(){return latitud;}
 		public double getLongitud(){return longitud;}
 		public void setLatitud(double v){latitud=v;}//TODO: validacion

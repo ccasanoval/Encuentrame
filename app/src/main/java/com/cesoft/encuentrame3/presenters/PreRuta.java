@@ -1,11 +1,10 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.presenters;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.Application;
 import android.graphics.Color;
-import android.os.Build;
-import android.widget.Toast;
 
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.CesService;
@@ -26,24 +25,44 @@ import javax.inject.Singleton;
 //Created by Cesar Casanova on 03/05/2017.
 // PRESENTER RUTA
 @Singleton
-class PreRuta
+public class PreRuta extends PresenterBase
 {
 	private static final String TAG = PreRuta.class.getSimpleName();
 
-	private ActRuta _view;
-	private Ruta _r;
-	private boolean _bSucio = false;
-	private boolean _bNuevo = false;
+	////////////////////////////////////////////////////
+	public interface IVistaRuta extends IVista
+	{
+		//boolean isActivo();
+		void moveCamara(LatLng pos);
+	}
 
+	private Application _app;
 	private Util _util;
 	private CesService _servicio;
-	@Inject PreRuta(Util util, CesService servicio)
+	@Inject PreRuta(Application app, Util util, CesService servicio)
 	{
+		super(app);
+		_app = app;
 		_util = util;
 		_servicio = servicio;
 	}
 
-	void ini(ActRuta view)
+	@Override
+	public void subscribe(IVista view)
+	{
+		super.subscribe(view);
+		newListeners();
+		if(_bEstadisticas)estadisticas();
+	}
+	@Override
+	public void unsubscribe()
+	{
+		_view = null;
+		delListeners();
+		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
+		if(_dlgEstadisticas != null)_dlgEstadisticas.dismiss();
+	}
+	/*void ini(ActRuta view)
 	{
 		_view = view;
 		_bSucio = false;
@@ -66,14 +85,14 @@ class PreRuta
 	}
 
 	String getNombre(){return _r.getNombre();}
-	String getDescripcion(){return _r.getDescripcion();}
-	String getId(){return _r.getId();}
-	boolean isNuevo(){return _bNuevo;}
+	String getDescripcion(){return _r.getDescripcion();}*/
+	public String getId(){return _o.getId();}
+	//boolean isNuevo(){return _bNuevo;}
 	//boolean isSucio(){return _bSucio;}
 	//
-	void setSucio(){_bSucio=true;}
+	//void setSucio(){_bSucio=true;}
 
-	void loadObjeto()
+	/*void loadObjeto()
 	{
 		//------------------------------------------------------------------------------------------
 		try
@@ -94,10 +113,10 @@ class PreRuta
 			_bNuevo = true;
 			_r = new Ruta();
 		}
-	}
+	}*/
 
 	//______________________________________________________________________________________________
-	private AlertDialog _dlgSucio = null;
+	/*private AlertDialog _dlgSucio = null;
 	void onSalir()
 	{
 		if(_bSucio)
@@ -113,27 +132,19 @@ class PreRuta
 		}
 		else
 			_view.finish();
-	}
+	}*/
 
 
-	//______________________________________________________________________________________________
-	private boolean checkCampos()
-	{
-		if(_view.getNombre().isEmpty())
-		{
-			Toast.makeText(_view, _view.getString(R.string.sin_nombre), Toast.LENGTH_LONG).show();
-			_view.requestFocusNombre();
-			return false;
-		}
-		return true;
-	}
 
 	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
 		if( ! checkCampos())return;
-		if( ! _bGuardar)return;
+
+		if(!_bGuardar)return;
 		_bGuardar = false;
+		_view.iniEspera();
+
 		guardar(new Fire.CompletadoListener()
 		{
 			@Override
@@ -142,7 +153,7 @@ class PreRuta
 				_bGuardar = true;
 				_view.finEspera();
 				//Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
-				_util.return2Main(_view, true, _view.getString(R.string.ok_guardar_ruta));
+				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_ruta));
 			}
 			@Override
 			public void onError(String err, int code)
@@ -150,72 +161,59 @@ class PreRuta
 				_bGuardar = true;
 				_view.finEspera();
 				Log.e(TAG, "guardar:handleFault:f:--------------------------------------------------"+err);
-				Toast.makeText(_view, String.format(_view.getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
+				_view.toast(R.string.error_guardar, err);
 			}
 		});
 	}
 	public void guardar(Fire.CompletadoListener res)
 	{
-		_r.setNombre(_view.getNombre());
-		_r.setDescripcion(_view.getDescripcion());
-		_r.guardar(res);
+		_o.setNombre(_view.getTextNombre());
+		_o.setDescripcion(_view.getTextDescripcion());
+		((Ruta)_o).guardar(res);
 		//Solo si es nuevo?
 		CesService.setMinTrackingDelay();
 	}
-
 	//______________________________________________________________________________________________
-	private boolean _bEliminar = true;
-	private AlertDialog _dlgEliminar = null;
-	public void eliminar()
+	private boolean checkCampos()
 	{
-		if(!_bEliminar)return;
-		_bEliminar=false;
-
-		AlertDialog.Builder dialog = new AlertDialog.Builder(_view);
-		dialog.setTitle(_r.getNombre());//getString(R.string.eliminar));
-		dialog.setMessage(_view.getString(R.string.seguro_eliminar));
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+		if(_view.getTextNombre().isEmpty())
 		{
-			dialog.setOnDismissListener(dlg -> _bEliminar = true);
+			_view.toast(R.string.sin_nombre);
+			_view.requestFocusNombre();
+			return false;
 		}
-		dialog.setNegativeButton(_view.getString(R.string.cancelar), (dlg, which) -> _bEliminar = true);
-		dialog.setPositiveButton(_view.getString(R.string.eliminar), new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				_view.iniEspera();
-				synchronized(this)
-				{
-					if(_r.getId().equals(_util.getTrackingRoute()))
-						_util.setTrackingRoute("");
-					_r.eliminar(new Fire.CompletadoListener()
-					{
-						@Override
-						protected void onDatos(String id)
-						{
-							_bEliminar = true;
-							_view.finEspera();
-							_util.return2Main(_view, true, _view.getString(R.string.ok_eliminar_ruta));
-						}
-						@Override
-						protected void onError(String err, int code)
-						{
-							_bEliminar = true;
-							_view.finEspera();
-							Log.e(TAG, "eliminar:handleFault:f:" + err);
-							Toast.makeText(_view, String.format(_view.getString(R.string.error_eliminar), err), Toast.LENGTH_LONG).show();
-						}
-					});
-				}
-			}
-		});
-		_dlgEliminar = dialog.create();
-		_dlgEliminar.show();
+		return true;
 	}
 
 	//______________________________________________________________________________________________
-	void startTrackingRecord()
+	public synchronized void eliminar()
+	{
+		_view.iniEspera();
+
+		if(_o.getId().equals(_util.getTrackingRoute()))
+			_util.setTrackingRoute("");
+		((Ruta)_o).eliminar(new Fire.CompletadoListener()
+		{
+			@Override
+			protected void onDatos(String id)
+			{
+				_bEliminar = true;
+				_view.finEspera();
+				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_eliminar_ruta));
+			}
+			@Override
+			protected void onError(String err, int code)
+			{
+				_bEliminar = true;
+				_view.finEspera();
+				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
+				_view.toast(R.string.error_eliminar, err);
+			}
+		});
+	}
+
+	//______________________________________________________________________________________________
+	public void startTrackingRecord()
 	{
 		if( ! checkCampos())return;
 		_view.iniEspera();
@@ -225,10 +223,10 @@ class PreRuta
 			public void onDatos(String id)
 			{
 				_view.finEspera();
-				_util.setTrackingRoute(_r.getId());
+				_util.setTrackingRoute(_o.getId());
 				//
 				_servicio._restartDelayRuta();
-				_util.return2Main(_view, true, _view.getString(R.string.ok_guardar_ruta));
+				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_ruta));
 			}
 			@Override
 			public void onError(String err, int code)
@@ -237,21 +235,21 @@ class PreRuta
 				_util.setTrackingRoute("");
 				//
 				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------------"+err);
-				Toast.makeText(_view, String.format(_view.getString(R.string.error_guardar),err), Toast.LENGTH_LONG).show();
+				_view.toast(R.string.error_guardar,err);
 			}
 		});
 	}
 	//______________________________________________________________________________________________
-	void stopTrackingRecord()
+	public void stopTrackingRecord()
 	{
 		_util.setTrackingRoute("");
-		_util.return2Main(_view, true, _view.getString(R.string.ok_stop_tracking));
+		_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_stop_tracking));
 	}
 
 	//----------------------------------------------------------------------------------------------
-	void estadisticas()
+	public void estadisticas()
 	{
-		_r.getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
+		((Ruta)_o).getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
@@ -325,7 +323,7 @@ class PreRuta
 				else
 					sVelMax = String.format(loc, "%.1f m/s", fMaxVel);
 
-				estadisticasShow(String.format(_view.getString(R.string.estadisticas_format),
+				estadisticasShow(String.format(_app.getString(R.string.estadisticas_format),
 						sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
 			}
 			@Override
@@ -341,8 +339,8 @@ class PreRuta
 	private void estadisticasShow(String s)
 	{
 		_bEstadisticas = true;
-		_dlgEstadisticas = new AlertDialog.Builder(_view).create();
-		_dlgEstadisticas.setTitle(_view.getString(R.string.estadisticas));
+		_dlgEstadisticas = new AlertDialog.Builder(_view.getAct()).create();
+		_dlgEstadisticas.setTitle(_app.getString(R.string.estadisticas));
 		_dlgEstadisticas.setMessage(s);
 		_dlgEstadisticas.setOnDismissListener(dialog ->	_bEstadisticas = false);
 		_dlgEstadisticas.show();
@@ -371,14 +369,14 @@ class PreRuta
 			public void onError(String err)
 			{
 				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------------"+err);
-				Toast.makeText(_view, _view.getString(R.string.err_get_ruta_pts), Toast.LENGTH_LONG).show();
+				_view.toast(R.string.err_get_ruta_pts);
 			}
 		};
 	}
 	//----------------------------------------------------------------------------------------------
-	void showRuta()
+	public void showRuta()
 	{
-		Ruta.RutaPunto.getListaRep(_r.getId(), _lisRuta);
+		Ruta.RutaPunto.getListaRep(_o.getId(), _lisRuta);
 	}
 	//----------------------------------------------------------------------------------------------
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
@@ -395,8 +393,8 @@ class PreRuta
 		}
 		_view.getMap().clear();
 
-		String INI = _view.getString(R.string.ini);
-		String FIN = _view.getString(R.string.fin);
+		String INI = _app.getString(R.string.ini);
+		String FIN = _app.getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
 
 		Ruta.RutaPunto gpAnt = null;
@@ -406,31 +404,31 @@ class PreRuta
 		{
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 			MarkerOptions mo = new MarkerOptions();
-			mo.title(_r.getNombre());
+			mo.title(_o.getNombre());
 
 			String snippet;
 			if(pto == gpIni)snippet = INI;
 			else if(pto == gpFin)snippet = FIN;
-			else snippet = _view.getString(R.string.info_time);
+			else snippet = _app.getString(R.string.info_time);
 
 			Date date = pto.getFecha();
 			if(date != null)snippet += _util.formatFechaTiempo(date);
-			snippet += String.format(Locale.ENGLISH, _view.getString(R.string.info_prec), pto.getPrecision());
+			snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_prec), pto.getPrecision());
 			if(gpAnt != null)
 			{
 				float d = pto.distanciaReal(gpAnt);
 				String sDist;
-				if(d > 3000)	sDist = String.format(Locale.ENGLISH, _view.getString(R.string.info_dist2), d/1000);
-				else			sDist = String.format(Locale.ENGLISH, _view.getString(R.string.info_dist), d);
+				if(d > 3000)	sDist = String.format(Locale.ENGLISH, _app.getString(R.string.info_dist2), d/1000);
+				else			sDist = String.format(Locale.ENGLISH, _app.getString(R.string.info_dist), d);
 				snippet += sDist;
 				//snippet += String.format(Locale.ENGLISH, getString(R.string.info_dist), pto.distanciaReal(gpAnt));
 			}
 			if(pto.getVelocidad() > 3)
-				snippet += String.format(Locale.ENGLISH, _view.getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
+				snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
 			else if(pto.getVelocidad() > 0)
-				snippet += String.format(Locale.ENGLISH, _view.getString(R.string.info_speed), pto.getVelocidad());
-			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, _view.getString(R.string.info_nor), pto.getDireccion());
-			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, _view.getString(R.string.info_alt), pto.getAltura());
+				snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_speed), pto.getVelocidad());
+			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_nor), pto.getDireccion());
+			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_alt), pto.getAltura());
 			mo.snippet(snippet);
 
 			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
@@ -456,6 +454,6 @@ class PreRuta
 		}
 		po.width(5).color(Color.BLUE);
 		_view.getMap().addPolyline(po);
-		_view.moveCamara(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
+		((IVistaRuta)_view).moveCamara(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
 	}
 }

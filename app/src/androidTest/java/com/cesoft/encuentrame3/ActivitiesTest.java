@@ -18,9 +18,16 @@ import org.junit.runner.RunWith;
 
 import java.util.Date;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 
-
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -89,7 +96,7 @@ public class ActivitiesTest
 	};
 	//----------------------------------------------------------------------------------------------
 	@Test
-	public void ensureIntentDataIsDisplayed() throws Exception
+	public void testActLugar() throws Exception
 	{
 		ActLugar act = ruleActLugar.getActivity();
 		View txtNombre = act.findViewById(R.id.txtNombre);
@@ -103,5 +110,20 @@ public class ActivitiesTest
 
 		TextView lblPos = (TextView) act.findViewById(R.id.lblPosicion);
 		assertThat(lblPos.getText().toString(), is("40.69000/-3.69000"));
+	}
+
+	//TODO: comprobar que cuando se pulsa eliminar aparece el dialogo que pregunta si eliminar
+	//----------------------------------------------------------------------------------------------
+
+	@Test
+	public void testActLugar2() throws Exception
+	{
+		ActLugar act = ruleActLugar.getActivity();
+
+		//openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
+		onView(withId(R.id.menu_eliminar)).perform(click());
+		onView(withText(act.getString(R.string.seguro_eliminar))).check(matches(isDisplayed()));
+		//onView(withId(R.id.myDialogTextId)).check(matches(allOf(withText(myDialogText), isDisplayed()));
+
 	}
 }

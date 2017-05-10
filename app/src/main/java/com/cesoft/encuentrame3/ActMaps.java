@@ -1,23 +1,21 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.presenters.PreMaps;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -40,7 +38,9 @@ import javax.inject.Inject;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActMaps extends FragmentActivity implements OnMapReadyCallback, PreMaps.MapsView
+//TODO: extender de VistaBase
+public class ActMaps //extends FragmentActivity implements OnMapReadyCallback, PreMaps.IMapsView
+	extends VistaBase implements PreMaps.IMapsView
 {
 	private static final String TAG = ActMaps.class.getSimpleName();
 
@@ -63,7 +63,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 		//_util = ((App)getApplication()).getGlobalComponent().util();
 		((App)getApplication()).getGlobalComponent().inject(this);
 		_presenter.ini(this);
-		_presenter.loadObjeto();
+		_presenter.loadObjeto(new Lugar());
 
 		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
@@ -100,14 +100,14 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 	}
 	//______________________________________________________________________________________________
 	@Override
-	protected void onStart()
+	public void onStart()
 	{
 		super.onStart();
 		_presenter.subscribe(this);
 		((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 	}
 	@Override
-	protected void onStop()
+	public void onStop()
 	{
 		super.onStop();
 		_presenter.unsubscribe();
@@ -328,12 +328,15 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 	}
 
 
+	//TODO : extender de VistaBase ?
 	@Override public Activity getAct() { return this; }
-	@Override public void finish(Intent data)
+	@Override public void iniEspera() { }
+	@Override public void finEspera() {	}
+	/*@Override public void finish(Intent data)
 	{
 		if(data != null)setResult(Activity.RESULT_OK, data);
 		finish();
-	}
+	}*/
 
 	//@Override public void iniEspera() { }
 	//@Override public void finEspera() { }
@@ -345,6 +348,12 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Pre
 	{
 		Toast.makeText(this, String.format(getString(msg), err), Toast.LENGTH_LONG).show();
 	}
+
+	@Override public String getTextNombre() { return null; }
+	@Override public String getTextDescripcion() { return null; }
+	@Override public void requestFocusNombre() { }
+	@Override public GoogleMap getMap() { return _Map; }
+
 	@Override public void animateCamera()
 	{
 		_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));

@@ -1,39 +1,25 @@
 package com.cesoft.encuentrame3;
 
-import android.app.ProgressDialog;
 import android.graphics.Typeface;
-import android.support.annotation.NonNull;
+
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.cesoft.encuentrame3.models.Ruta;
+import com.cesoft.encuentrame3.presenters.PreRuta;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -42,61 +28,25 @@ import javax.inject.Inject;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, LocationListener,
-		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 {
 	private static final String TAG = ActRuta.class.getSimpleName();
-	private static final int DELAY_LOCATION = 60000;
 
 	@Inject Util _util;
 	@Inject PreRuta _presenter;
 
-	private EditText _txtNombre;
-		String getNombre(){return _txtNombre.getText().toString();}
-		void requestFocusNombre(){_txtNombre.requestFocus();}
-	private EditText _txtDescripcion;
-		String getDescripcion(){return _txtDescripcion.getText().toString();}
+	@Override public void moveCamara(LatLng pos){_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));}
+	//@Override public boolean isActivo(){return _}
 
-	private LocationRequest _LocationRequest;
-	private GoogleApiClient _GoogleApiClient;
-	private GoogleMap _Map;
-		GoogleMap getMap(){return _Map;}
-		void moveCamara(LatLng pos){_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));}
-
-
-	@Override
-	public void onBackPressed()
-	{
-		_presenter.onSalir();
-	}
-	private class CesTextWatcher implements TextWatcher
-	{
-		private TextView _tv;
-		private String _str;
-		CesTextWatcher(TextView tv, String str){_tv = tv; _str = str;}
-		@Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
-		@Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
-		@Override
-		public void afterTextChanged(Editable editable)
-		{
-			if(_str == null && _tv.getText().length() > 0)_presenter.setSucio();
-			if(_str != null && _tv.getText().toString().compareTo(_str) != 0)_presenter.setSucio();
-		}
-	}
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_ruta);
-
 		App.getComponent(getApplicationContext()).inject(this);
-		_presenter.ini(this);
+		super.ini(_presenter, _util, new Ruta(), R.layout.act_aviso);
+		super.onCreate(savedInstanceState);
 
-		//------------------------------------------------------------------------------------------
-		_txtNombre = (EditText)findViewById(R.id.txtNombre);
-		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
-		//-----------
+		//-----------------
 		final ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
 		if(btnStart != null)
 		{
@@ -121,17 +71,6 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			});
 		}
 		//-----------
-		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		//
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
-		if(fab != null)fab.setOnClickListener(view -> _presenter.onSalir());
-
-		_presenter.loadObjeto();
-		_txtNombre.setText(_presenter.getNombre());
-		_txtDescripcion.setText(_presenter.getDescripcion());
-		_txtNombre.addTextChangedListener(new CesTextWatcher(_txtNombre, _presenter.getNombre()));
-		_txtDescripcion.addTextChangedListener(new CesTextWatcher(_txtDescripcion, _presenter.getDescripcion()));
 
 		//------------------------------------------------------------------------------------------
 		if(_presenter.isNuevo())
@@ -162,23 +101,9 @@ public class ActRuta extends AppCompatActivity implements OnMapReadyCallback, Lo
 			else
 				_txtNombre.setTextColor(Color.RED);
 		}
-
-		if(savedInstanceState != null)
-		{
-			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
-		}
 Log.e(TAG, "-------------------------------- CREATE");
 	}
-	//----------------------------------------------------------------------------------------------
-	private static final String MAP_ZOOM = "mapzoom";
-	private float _fMapZoom = 15;
-	@Override
-	protected void onSaveInstanceState(Bundle outState)
-	{
-		super.onSaveInstanceState(outState);
-		outState.putFloat(MAP_ZOOM, _fMapZoom);
-	}
-
+/*
 	//______________________________________________________________________________________________
 	@Override
 	public void onStart()
@@ -231,7 +156,7 @@ Log.e(TAG, "-------------------------------- CREATE");
 	{
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 			LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
-	}
+	}*/
 
 	//____________________________________________________________________________________________________________________________________________________
 	/// MENU
@@ -259,7 +184,7 @@ Log.e(TAG, "-------------------------------- CREATE");
 			_presenter.estadisticas();
 		return super.onOptionsItemSelected(item);
 	}
-
+/*
 	//______________________________________________________________________________________________
 	protected synchronized void buildGoogleApiClient()
 	{
@@ -320,15 +245,15 @@ Log.e(TAG, "-------------------------------- CREATE");
 	//______________________________________________________________________________________________
 	//// 4 LocationListener
 	@Override public void onLocationChanged(Location location) { _util.setLocation(location); }
-
+*/
 	//______________________________________________________________________________________________
 	// 4 OnMapReadyCallback
 	@Override
-	public void onMapReady(GoogleMap googleMap)
+	public void onMapReady(GoogleMap Map)
 	{
+		super.onMapReady(Map);
+
 		Log.e(TAG, "----------------------------------------------------------------- MAP READY");
-		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignored){}
 
 		if(_presenter.isNuevo())
 		{
@@ -338,10 +263,6 @@ Log.e(TAG, "-------------------------------- CREATE");
 		{
 			_presenter.showRuta();
 		}
-
-		_Map.setOnCameraMoveListener(() ->
-		{ if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; });
-		//_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 
 		//MARCADOR MULTILINEA --------------------------------------------
 		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
@@ -369,18 +290,6 @@ Log.e(TAG, "-------------------------------- CREATE");
 			}
 		});
 	}
-
-	//----------------------------------------------------------------------------------------------
-	private ProgressDialog _progressDialog;
-	public void iniEspera()
-	{
-		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
-	}
-	public void finEspera()
-	{
-		if(_progressDialog!=null)_progressDialog.dismiss();
-	}
-
 
 }
 
