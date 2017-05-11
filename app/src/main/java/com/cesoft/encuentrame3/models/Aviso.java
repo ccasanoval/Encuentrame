@@ -42,7 +42,7 @@ public class Aviso extends Objeto
 	//Yet Another Firebase Bug:
 	//Serialization of inherited properties from the base class, is missing in the current release of the
 	// Firebase Database SDK for Android. It will be added back in an upcoming version.
-	protected String id = null;
+	/*protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
 	protected String nombre;
@@ -51,10 +51,13 @@ public class Aviso extends Objeto
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
-	//protected long fecha;//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
+
+		//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
+		//^(?!.*(No setter|NativeCrypto|IOnlyOwnerSimSupport|Asset path|IInputConnectionWrapper)).*$
+	//protected long fecha;
 	private Date fecha;
 		public Date getFecha(){return fecha;}
-		public void setFecha(Date v){fecha=v;}
+		public void setFecha(Date v){fecha=v;}*/
 	///______________________________________________________________
 
 	//______________________________________________________________________________________________
@@ -63,11 +66,11 @@ public class Aviso extends Objeto
 		public boolean isActivo(){return activo;}
 		public void setActivo(boolean v){activo=v;}
 
-	private double latitud, longitud;
-		public double getLatitud(){return latitud;}//TODO: con GeoFire, quiza esto podrias sobra...pero complicaria igual que quitar id de objeto
+	/*private double latitud, longitud;
+		public double getLatitud(){return latitud;}//TODO: con GeoFire, quiza esto podrias sobrar...pero complicaria igual que quitar id de objeto
 		public double getLongitud(){return longitud;}
 		public void setLatitud(double v){latitud=v;}//TODO: validacion
-		public void setLongitud(double v){longitud=v;}
+		public void setLongitud(double v){longitud=v;}*/
 
 	private double radio;//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
 		public double getRadio(){return radio;}
@@ -89,9 +92,8 @@ public class Aviso extends Objeto
 		}*/
 
 	//______________________________________________________________________________________________
-	public Aviso(){fecha = new Date();}//Firebase necesita un constructor sin argumentos
-	@Override
-	public String toString()
+	public Aviso() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
+	@Override public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s', latitud='%f', longitud='%f', radio='%f', activo='%b'}",
 				getId(), nombre, descripcion, DATE_FORMAT.format(fecha), latitud, longitud, radio, activo);
@@ -115,9 +117,8 @@ public class Aviso extends Objeto
 		super(in);
 		//
 		setActivo(in.readByte() > 0);
-		setId(in.readString());
-		setLatitud(in.readDouble());
-		setLongitud(in.readDouble());
+		//setId(in.readString());
+		//setLatLon(in.readDouble(), in.readDouble());
 		setRadio(in.readDouble());
 	}
 	@Override
@@ -126,19 +127,16 @@ public class Aviso extends Objeto
 		super.writeToParcel(dest, flags);
 		//
 		dest.writeByte(isActivo()?(byte)1:0);
-		dest.writeString(getId());
-		dest.writeDouble(getLatitud());
-		dest.writeDouble(getLongitud());
+		//dest.writeString(getId());
+		//dest.writeDouble(getLatitud());
+		//dest.writeDouble(getLongitud());
 		dest.writeDouble(getRadio());
 	}
-	@Override
-	public int describeContents(){return 0;}
+	//@Override public int describeContents(){return 0;}
 	public static final Creator<Aviso> CREATOR = new Creator<Aviso>()
 	{
-		@Override
-		public Aviso createFromParcel(Parcel in){return new Aviso(in);}
-		@Override
-		public Aviso[] newArray(int size){return new Aviso[size];}
+		@Override public Aviso createFromParcel(Parcel in){return new Aviso(in);}
+		@Override public Aviso[] newArray(int size){return new Aviso[size];}
 	};
 
 
@@ -225,7 +223,7 @@ public class Aviso extends Objeto
 				listener.onError(err.toString());
 			}
 		};
-		listener.setRef(queryRef.getRef());//TODO: comprobar que se libera bien, porque queryRef.getRef() != queryRef
+		listener.setRef(queryRef.getRef());
 		//listener.delListener();
 		listener.setListener(vel);
     	queryRef.addValueEventListener(vel);

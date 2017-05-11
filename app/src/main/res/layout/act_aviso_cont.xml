@@ -59,7 +59,7 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/aviso"
 			android:ems="10"
-			android:inputType="textMultiLine|textCapWords"
+			android:inputType="textMultiLine|textCapSentences"
 			android:maxLines="3"/>
 	</android.support.design.widget.TextInputLayout>
 

@@ -79,7 +79,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 				}
 				final int[] flag = new int[]{0};
 				final Lugar l = new Lugar();
-				l.setLatitud(pos.getLatitude());l.setLongitud(pos.getLongitude());
+				l.setLatLon(pos.getLatitude(), pos.getLongitude());
 				l.setNombre(txtNombre.getText().toString());
 				l.setDescripcion("Widget");
 				l.guardar(new Fire.CompletadoListener() {

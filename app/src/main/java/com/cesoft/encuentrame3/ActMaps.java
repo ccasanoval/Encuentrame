@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3;
 
-import android.app.Activity;
 import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Gravity;
@@ -9,14 +8,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreMaps;
-import com.cesoft.encuentrame3.util.Constantes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
@@ -38,13 +34,12 @@ import javax.inject.Inject;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: extender de VistaBase
-public class ActMaps //extends FragmentActivity implements OnMapReadyCallback, PreMaps.IMapsView
+//
+public class ActMaps
 	extends VistaBase implements PreMaps.IMapsView
 {
 	private static final String TAG = ActMaps.class.getSimpleName();
 
-	private GoogleMap _Map;
 	private Marker _marker;
 	private Circle _circle;
 
@@ -52,89 +47,39 @@ public class ActMaps //extends FragmentActivity implements OnMapReadyCallback, P
 	@Inject PreMaps _presenter;
 
 	//----------------------------------------------------------------------------------------------
-	@Override public void onBackPressed() { _presenter.onSalir(); }
-	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_maps);
-
-		//_util = ((App)getApplication()).getGlobalComponent().util();
 		((App)getApplication()).getGlobalComponent().inject(this);
-		_presenter.ini(this);
-		_presenter.loadObjeto(new Lugar());
-
-		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
-		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
-
-		FloatingActionButton fabVolver = (FloatingActionButton)findViewById(R.id.btnVolver);
-		fabVolver.setOnClickListener(view -> _presenter.onSalir()); //_util.return2Main(ActMaps.this, false, ""));
+		super.ini(_presenter, _util, new Lugar(), R.layout.act_maps);
+		super.onCreate(savedInstanceState);
 
 		FloatingActionButton fabGuardar = (FloatingActionButton)findViewById(R.id.btnGuardar);
-		if(_presenter.isRuta())fabGuardar.setVisibility(View.GONE);
+		if( ! _presenter.isAviso() && ! _presenter.isLugar())
+			fabGuardar.setVisibility(View.GONE);
 		fabGuardar.setOnClickListener(view -> _presenter.guardar());
-
-		FloatingActionButton fabBuscar = (FloatingActionButton)findViewById(R.id.fabBuscar);
-		if(fabBuscar != null)fabBuscar.setOnClickListener(view -> _util.onBuscar(this, _Map, _fMapZoom));
-
-		if(savedInstanceState != null)
-		{
-			_fMapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
-			_presenter.loadSavedInstanceState(savedInstanceState);
-			Log.e(TAG, "............................load........................................"+_fMapZoom);
-		}
 	}
+
 	//----------------------------------------------------------------------------------------------
-	private static final String MAP_ZOOM = "mapzoom";
-	private float _fMapZoom = 15;
-	@Override
-	protected void onSaveInstanceState(Bundle outState)
+	@Override public void animateCamera()
 	{
-		Log.e(TAG, "...............................save....................................."+_fMapZoom);
-		super.onSaveInstanceState(outState);
-		outState.putFloat(MAP_ZOOM, _fMapZoom);
-		_presenter.onSaveInstanceState(outState);
-	}
-	//______________________________________________________________________________________________
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		_presenter.subscribe(this);
-		((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
-	}
-	@Override
-	public void onStop()
-	{
-		super.onStop();
-		_presenter.unsubscribe();
-		if(_Map != null)
-		{
-			_Map.clear();
-			_Map = null;
-		}
+		_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 	}
 
+	//----------------------------------------------------------------------------------------------
 	// This callback is triggered when the map is ready to be used. This is where we can add markers or lines, add listeners or move the camera.
 	// If Google Play services is not installed on the device, the user will be prompted to install it inside the SupportMapFragment.
 	// This method will only be triggered once the user has installed Google Play services and returned to the app.
 	@Override
-	public void onMapReady(GoogleMap googleMap)
+	public void onMapReady(GoogleMap Map)
 	{
-		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}
-		catch(SecurityException se){Log.e(TAG, "ActAviso:onMapReady:e:------------------------------",se);}
-		_Map.setOnCameraMoveListener(() -> { if(_Map!=null)_fMapZoom = _Map.getCameraPosition().zoom; });
+		super.onMapReady(Map);
+
 		//MARCADOR MULTILINEA --------------------------------------------
 		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
 		{
-			@Override
-			public View getInfoWindow(Marker arg0){return null;}
-			@Override
-			public View getInfoContents(Marker marker)
+			@Override public View getInfoWindow(Marker arg0){return null;}
+			@Override public View getInfoContents(Marker marker)
 			{
 				LinearLayout info = new LinearLayout(ActMaps.this);
 				info.setOrientation(LinearLayout.VERTICAL);
@@ -155,18 +100,12 @@ public class ActMaps //extends FragmentActivity implements OnMapReadyCallback, P
 			}
 		});
 
-		if(_presenter.onMapReady())
-		switch(_presenter.getTipo())
-		{
-		case Constantes.LUGARES:_presenter.showLugares();break;
-		case Constantes.AVISOS:	_presenter.showAvisos();break;
-		case Constantes.RUTAS:	_presenter.showRutas();break;
-		}
+		_Map.setOnMapClickListener(latLng -> _presenter.setPosicion(latLng.latitude, latLng.longitude));
 
-		_Map.setOnMapClickListener(latLng -> _presenter.setPosLugar(latLng.latitude, latLng.longitude));
+		_presenter.dibujar();
 	}
 
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	@Override public void setMarker(String sTitulo, String sDescripcion, LatLng pos)
 	{
 		try
@@ -193,8 +132,7 @@ public class ActMaps //extends FragmentActivity implements OnMapReadyCallback, P
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
 
-
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	private int _iColor = Color.LTGRAY;
 	public BitmapDescriptor getNextIcon()
 	{
@@ -326,50 +264,4 @@ public class ActMaps //extends FragmentActivity implements OnMapReadyCallback, P
 			//moveCamera(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
 		}catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
 	}
-
-
-	//TODO : extender de VistaBase ?
-	@Override public Activity getAct() { return this; }
-	@Override public void iniEspera() { }
-	@Override public void finEspera() {	}
-	/*@Override public void finish(Intent data)
-	{
-		if(data != null)setResult(Activity.RESULT_OK, data);
-		finish();
-	}*/
-
-	//@Override public void iniEspera() { }
-	//@Override public void finEspera() { }
-	@Override public void toast(int msg)
-	{
-		Toast.makeText(this, getString(msg), Toast.LENGTH_LONG).show();
-	}
-	@Override public void toast(int msg, String err)
-	{
-		Toast.makeText(this, String.format(getString(msg), err), Toast.LENGTH_LONG).show();
-	}
-
-	@Override public String getTextNombre() { return null; }
-	@Override public String getTextDescripcion() { return null; }
-	@Override public void requestFocusNombre() { }
-	@Override public GoogleMap getMap() { return _Map; }
-
-	@Override public void animateCamera()
-	{
-		_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
-	}
-	/*@Override public void moveCamera(LatLng pos)
-	{
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
-	}
-	@Override public void addLinea(PolylineOptions po)
-	{
-		po.width(5).color(_iColor);
-		_Map.addPolyline(po);//Polyline line =
-	}
-	@Override public void addMarcador(MarkerOptions mo)
-	{
-		_Map.addMarker(mo);
-	}*/
-
 }

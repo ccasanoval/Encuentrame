@@ -266,7 +266,8 @@ Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 	public void saveGeoTracking()
 	{
 		final String sId = _util.getTrackingRoute();
-Log.e(TAG, "saveGeoTracking ******************************************* "+sId);
+Log.e(TAG, "saveGeoTracking ************************************** "+_sId+" ***** "+sId);
+if(_sId.isEmpty())Log.e(TAG, "saveGeoTracking ************************************** _sId  ======= EMPTY ***********************************************************");
 		if(sId.isEmpty())
 		{
 			stopTracking();
@@ -331,7 +332,7 @@ Log.w(TAG, "guardarPunto:    A    *** ");
 
 		if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
 		{
-			Log.w(TAG, "guardarPunto: NUEVA RUTA: -----------------"+(_sId.equals(sId))+"-------------------------- "+_sId+" ------- "+sId);//TODO : se llama dos veces?????!!!!!
+			Log.w(TAG, "guardarPunto: NUEVA RUTA: -----------------"+(_sId.equals(sId))+"-------------------------- "+_sId+" ------- "+sId);//TODO : se llama dos veces, _sID=='' ?????!!!!!
 			_sId = sId;
 			_locLastSaved = null;
 			_locLast = loc;

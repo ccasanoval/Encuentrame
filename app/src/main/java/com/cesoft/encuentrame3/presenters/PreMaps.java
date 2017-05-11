@@ -3,7 +3,6 @@ package com.cesoft.encuentrame3.presenters;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
-import android.location.Location;
 
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
@@ -38,30 +37,13 @@ public class PreMaps extends PresenterBase
 	//private MapsView _view;
 	////////////////////////////////////////////////////
 
-	private Lugar _l;
+	/*private Lugar _l;
 	private Aviso _a;
-	private Ruta _r;
+	private Ruta _r;*/
 	private int _iTipo = Constantes.NADA;
 
 	@Inject PreMaps(Application app) { super(app);}
 
-	@Override protected void eliminar(){}
-
-	/*public void ini(MapsView view)
-	{
-		_bSucio = false; _view = view;
-	}
-	public void subscribe(MapsView view)
-	{
-		_view = view;
-		newListeners();
-	}
-	public void unsubscribe()
-	{
-		_view = null;
-		delListeners();
-		if(_dlgSalir != null)_dlgSalir.dismiss();//Para evitar MemLeak puesto que dlg guarda ref a _view
-	}*/
 	@Override
 	public void subscribe(IVista view)
 	{
@@ -75,68 +57,37 @@ public class PreMaps extends PresenterBase
 		delListeners();
 	}
 
-	public int getTipo(){return _iTipo;}
-
-	/*private static final String SUCIO = "sucio";
-	public void loadSavedInstanceState(Bundle savedInstanceState)
-	{
-		if(savedInstanceState != null)_bSucio = savedInstanceState.getBoolean(SUCIO);
-		//Log.e(TAG, "++++++++++++++++++++ LOAD "+_bSucio);
-	}
-	public void onSaveInstanceState(Bundle outState)
-	{
-		//Log.e(TAG, "++++++++++++++++++++ SAVE "+_bSucio);
-		outState.putBoolean(SUCIO, _bSucio);
-	}
-
-	//______________________________________________________________________________________________
-	private AlertDialog _dlgSalir;
-	public void onSalir()
-	{
-		Log.e(TAG, "onSalir----------------------------------------------"+_bSucio);
-		if(_bSucio)
-		{
-			AlertDialog.Builder dialog = new AlertDialog.Builder(_view.getAct());
-			dialog.setTitle( _l != null ? _l.getNombre() : _a.getNombre());
-			dialog.setMessage(_app.getString(R.string.seguro_salir));
-			dialog.setPositiveButton(_app.getString(R.string.guardar), (dialog1, which) -> guardar());
-			dialog.setCancelable(true);
-			dialog.setNegativeButton(_app.getString(R.string.salir), (dialog2, which) -> _view.finish(null));
-			_dlgSalir = dialog.create();
-			_dlgSalir.show();
-		}
-		else
-			_view.finish(null);
-	}*/
-
 	//______________________________________________________________________________________________
 	@Override
 	public void loadObjeto(Objeto o)
 	{
+		//_o = o;
+		super.loadObjeto(o);
 		//------------------------------------------------------------------------------------------
-		try{_l = _view.getAct().getIntent().getParcelableExtra(Lugar.NOMBRE);}catch(Exception e){_l=null;}
-		try{_r = _view.getAct().getIntent().getParcelableExtra(Ruta.NOMBRE);}catch(Exception e){_r=null;}
-		try{_a = _view.getAct().getIntent().getParcelableExtra(Aviso.NOMBRE);}catch(Exception e){_a=null;}
+		/*try{_l = _view.getAct().getIntent().getParcelableExtra(Lugar.NOMBRE);	_o=_l;}catch(Exception e){_l=null;}
+		try{_r = _view.getAct().getIntent().getParcelableExtra(Ruta.NOMBRE);	_o=_r;}catch(Exception e){_r=null;}
+		try{_a = _view.getAct().getIntent().getParcelableExtra(Aviso.NOMBRE);	_o=_a;}catch(Exception e){_a=null;}*/
 		try{_iTipo = _view.getAct().getIntent().getIntExtra(Util.TIPO, Constantes.NADA);}catch(Exception e){_iTipo=Constantes.NADA;}
 		//------------------------------------------------------------------------------------------
 	}
-	public boolean isRuta(){return _iTipo != Constantes.NADA || _r != null;}
+	public boolean isLugar(){return _iTipo == Constantes.LUGARES && !isNuevo();}
+	public boolean isAviso(){return _iTipo == Constantes.AVISOS && !isNuevo();}
+	public boolean isRuta(){return _iTipo == Constantes.RUTAS && !isNuevo();}
 
-
-	public void guardar()
+	@Override protected void eliminar(){}
+	//______________________________________________________________________________________________
+	@Override public void guardar()
 	{
-		if(_l != null)
+		if(isLugar())
 		{
-			_l.setLatitud(_loc.getLatitude());
-			_l.setLongitud(_loc.getLongitude());
-			_l.guardar(new Fire.CompletadoListener()
+			((Lugar)_o).guardar(new Fire.CompletadoListener()
 			{
 				@Override
 				protected void onDatos(String id)
 				{
 					_view.toast(R.string.ok_guardar_lugar);
 					Intent data = new Intent();
-					data.putExtra(Lugar.NOMBRE, _l);
+					data.putExtra(Lugar.NOMBRE, _o);
 					_view.getAct().setResult(Activity.RESULT_OK, data);
 					_view.finish();
 				}
@@ -148,18 +99,16 @@ public class PreMaps extends PresenterBase
 				}
 			});
 		}
-		if(_a != null)
+		if(isAviso())
 		{
-			_a.setLatitud(_loc.getLatitude());
-			_a.setLongitud(_loc.getLongitude());
-			_a.guardar(new Fire.CompletadoListener()
+			((Aviso)_o).guardar(new Fire.CompletadoListener()
 			{
 				@Override
 				protected void onDatos(String id)
 				{
 					_view.toast(R.string.ok_guardar_aviso);
 					Intent data = new Intent();
-					data.putExtra(Aviso.NOMBRE, _a);
+					data.putExtra(Aviso.NOMBRE, _o);
 					_view.getAct().setResult(Activity.RESULT_OK, data);
 					_view.finish();
 				}
@@ -228,11 +177,11 @@ public class PreMaps extends PresenterBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public void showLugares() { Lugar.getLista(_lisLugar); }
-	public void showAvisos() { Aviso.getLista(_lisAviso); }
-	public void showRutas() { Ruta.getLista(_lisRuta); }
+	private void showLugares() { Lugar.getLista(_lisLugar); }
+	private void showAvisos() { Aviso.getLista(_lisAviso); }
+	private void showRutas() { Ruta.getLista(_lisRuta); }
 	//----------------------------------------------------------------------------------------------
-	private void showRuta() { showRuta(_r); }
+	private void showRuta() { showRuta((Ruta)_o); }
 	private synchronized void showRuta(Ruta r)
 	{
 		if(r == null)
@@ -256,54 +205,62 @@ public class PreMaps extends PresenterBase
 		});
 	}
 
-	public double getRadioAviso(){return _a.getRadio();}
+	public double getRadioAviso(){return ((Aviso)_o).getRadio();}
 
-	private Location _loc;
-	public void setPosLugar(double lat, double lon)
+	public void setPosicion(double lat, double lon)
 	{
-		if(_loc == null)_loc = new Location("dummyprovider");
-		_loc.setLatitude(lat);
-		_loc.setLongitude(lon);
-		if(_l != null)
+		//if(_loc == null)_loc = new Location("dummyprovider");
+		//_loc.setLatitude(lat);_loc.setLongitude(lon);
+		if(isLugar())
 		{
-			if(_l.getLatitud() != _loc.getLatitude() || _l.getLongitud() != _loc.getLongitude())_bSucio = true;
-			//Log.e(TAG, "setPosLugar Lugar != NULL----------------------------------------------"+_bSucio);
-			((IMapsView)_view).setMarker(_l.getNombre(), _l.getDescripcion(), new LatLng(_loc.getLatitude(), _loc.getLongitude()));
+			if(_o.getLatitud() != lat || _o.getLongitud() != lon)
+			{
+				Log.e(TAG, "++++++++++++++++++++++++++++++++++++++++++++++++++ SUCIO ");
+				_bSucio = true;
+				_o.setLatLon(lat, lon);
+			}
+			((IMapsView)_view).setMarker(_o.getNombre(), _o.getDescripcion(), new LatLng(lat, lon));
 		}
-		else if(_a != null)
+		else if(isAviso())
 		{
-			if(_a.getLatitud() != _loc.getLatitude() || _a.getLongitud() != _loc.getLongitude())_bSucio = true;
-			//Log.e(TAG, "setPosLugar Aviso != NULL----------------------------------------------"+_bSucio);
-			LatLng pos = new LatLng(_loc.getLatitude(), _loc.getLongitude());
-			((IMapsView)_view).setMarker(_a.getNombre(), _a.getDescripcion(), pos);
+			if(_o.getLatitud() != lat || _o.getLongitud() != lon)
+			{
+				_bSucio = true;
+				_o.setLatLon(lat, lon);
+			}
+			LatLng pos = new LatLng(lat, lon);
+			((IMapsView)_view).setMarker(_o.getNombre(), _o.getDescripcion(), pos);
 			((IMapsView)_view).setMarkerRadius(pos);
 		}
-		else if(_r != null)
+		else if(isRuta())
 		{
 			((IMapsView)_view).animateCamera();
-			//_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
 		}
 	}
-	public boolean onMapReady()
+	public void dibujar()
 	{
-		if(_l != null)			/// LUGAR
+		if(isLugar())
 		{
-			setPosLugar(_l.getLatitud(), _l.getLongitud());
-			((IMapsView)_view).showLugar(_l);
-			return false;
+			setPosicion(_o.getLatitud(), _o.getLongitud());
+			((IMapsView)_view).showLugar((Lugar)_o);
 		}
-		else if(_a != null)		/// AVISO
+		else if(isAviso())
 		{
-			setPosLugar(_a.getLatitud(), _a.getLongitud());
-			((IMapsView)_view).showAviso(_a);
-			return false;
+			setPosicion(_o.getLatitud(), _o.getLongitud());
+			((IMapsView)_view).showAviso((Aviso)_o);
 		}
-		else if(_r != null)		/// RUTA
+		else if(isRuta())
 		{
 			showRuta();
-			return false;
 		}
 		else
-			return true;
+		{
+			switch(_iTipo)
+			{
+				case Constantes.LUGARES:	showLugares();break;
+				case Constantes.AVISOS:		showAvisos();break;
+				case Constantes.RUTAS:		showRutas();break;
+			}
+		}
 	}
 }

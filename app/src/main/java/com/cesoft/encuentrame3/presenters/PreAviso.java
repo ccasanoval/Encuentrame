@@ -29,8 +29,7 @@ public class PreAviso extends PresenterBase
 	}
 	/*@SuppressWarnings("WeakerAccess")
 	protected IVistaAviso _view;
-	@Override
-	void ini(IVista view)
+	@Override void ini(IVista view)
 	{
 		super.ini(view);
 		_view = (IVistaAviso)view;
@@ -43,6 +42,12 @@ public class PreAviso extends PresenterBase
 		super(app);
 		_util = util;
 		_servicio = servicio;
+	}
+
+	@Override public void setLatLon(double lat, double lon)
+	{
+
+		_o.setLatLon(lat, lon);
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -61,7 +66,7 @@ public class PreAviso extends PresenterBase
 	public void loadObjeto(Objeto objDefault)
 	{
 		super.loadObjeto(objDefault);
-		try { _bDesdeNotificacion = _view.getAct().getIntent().getBooleanExtra("notificacion", false); }
+		try { _bDesdeNotificacion = _view.getAct().getIntent().getBooleanExtra(Constantes.NOTIF, false); }
 		catch(Exception e){ _bDesdeNotificacion=false; }
 	}
 

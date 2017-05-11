@@ -28,6 +28,8 @@ public class Objeto implements Parcelable
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
 
+	//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
+	//^(?!.*(No setter|NativeCrypto|IOnlyOwnerSimSupport|Asset path|IInputConnectionWrapper)).*$
 	protected Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
@@ -35,18 +37,15 @@ public class Objeto implements Parcelable
 	protected double latitud, longitud;
 		public double getLatitud(){return latitud;}
 		public double getLongitud(){return longitud;}
-		public void setLatitud(double v){latitud=v;}//TODO: validacion
-		public void setLongitud(double v){longitud=v;}
+		public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}//TODO: validacion
+		//public void setLatitud(double v){latitud=v;}
+		//public void setLongitud(double v){longitud=v;}
 
 
 	//______________________________________________________________________________________________
-	Objeto()
-	{
-		fecha = new Date();
-	}
+	Objeto() { fecha = new Date(); }
 	//______________________________________________________________________________________________
-	@Override
-	public String toString()
+	@Override public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha));
@@ -63,14 +62,6 @@ public class Objeto implements Parcelable
 		return true;
 	}
 
-	// FIREBASE
-	//______________________________________________________________________________________________
-	/*public interface ObjetoListener<T>
-	{
-		void onData(T[] aData);
-		void onError(String err);
-	}*/
-
 	// PARCELABLE
 	//______________________________________________________________________________________________
 	Objeto(Parcel in)
@@ -78,6 +69,7 @@ public class Objeto implements Parcelable
 		setId(in.readString());
 		setNombre(in.readString());
 		setDescripcion(in.readString());
+		setLatLon(in.readDouble(), in.readDouble());
 		setFecha(new Date(in.readLong()));
 	}
 	@Override
@@ -86,25 +78,15 @@ public class Objeto implements Parcelable
 		dest.writeString(getId());
 		dest.writeString(getNombre());
 		dest.writeString(getDescripcion());
+		dest.writeDouble(getLatitud());
+		dest.writeDouble(getLongitud());
 		dest.writeLong(getFecha().getTime());
 	}
-	@Override
-	public int describeContents()
-	{
-		return 0;
-	}
+	@Override public int describeContents() { return 0; }
 	public static final Parcelable.Creator<Objeto> CREATOR = new Parcelable.Creator<Objeto>()
 	{
-		@Override
-		public Objeto createFromParcel(Parcel in)
-		{
-			return new Objeto(in);
-		}
-		@Override
-		public Objeto[] newArray(int size)
-		{
-			return new Objeto[size];
-		}
+		@Override public Objeto createFromParcel(Parcel in) { return new Objeto(in); }
+		@Override public Objeto[] newArray(int size) { return new Objeto[size]; }
 	};
 
 }

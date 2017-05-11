@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.adapters;
 
 import com.cesoft.encuentrame3.models.Objeto;
 

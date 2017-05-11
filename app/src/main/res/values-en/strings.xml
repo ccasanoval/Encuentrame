@@ -126,4 +126,5 @@
 	<string name="sin_permiso_camara">Camera permission not granted</string>
 
 	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
+	<string name="err_conn_google">Failed to connect to Google services: %s</string>
 </resources>

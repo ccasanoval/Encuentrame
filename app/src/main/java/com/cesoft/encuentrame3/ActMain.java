@@ -18,11 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
-import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -47,14 +44,17 @@ import com.cesoft.encuentrame3.util.Util;
 // *** Charles, Fiddle
 //https://jaanus.com/debugging-http-on-an-android-phone-or-tablet-with-charles-proxy-for-fun-and-profit/
 
-//TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!
+//TODO: READ  -----------------------  https://nullpointer.wtf/  -------------------------
+
+//TODO: https://github.com/patloew/RxLocation
+
+//TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
 //TODO: Servicio solo arrancado si hay avisos activos!!! O es mejor que corra, simplemente aumentar delay?
 //TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
 //TODO: Cambiar ListView por recyclerview
-//TODO: comprobar cuando dos moviles funcionan con la misma clave, hay problema? o solo sandras'
 //TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
@@ -243,13 +243,17 @@ Log.e(TAG, "----------- MAIN START");
 	public void goLugarMap(Objeto obj)
 	{
 		Intent i = new Intent(this, ActMaps.class);
-		i.putExtra(Lugar.NOMBRE, obj);
+		//i.putExtra(Lugar.NOMBRE, obj);
+		i.putExtra(Objeto.NOMBRE, obj);
+		i.putExtra(Util.TIPO, Constantes.LUGARES);
 		startActivityForResult(i, Constantes.LUGARES);
 	}
 	public void goAvisoMap(Objeto obj)
 	{
 		Intent i = new Intent(this, ActMaps.class);
-		i.putExtra(Aviso.NOMBRE, obj);
+		//i.putExtra(Aviso.NOMBRE, obj);
+		i.putExtra(Objeto.NOMBRE, obj);
+		i.putExtra(Util.TIPO, Constantes.AVISOS);
 		startActivityForResult(i, Constantes.AVISOS);
 	}
 	public void goRutaMap(Objeto obj)
@@ -257,7 +261,9 @@ Log.e(TAG, "----------- MAIN START");
 		try
 		{
 			Intent i = new Intent(this, ActMaps.class);
-			i.putExtra(Ruta.NOMBRE, obj);
+			//i.putExtra(Ruta.NOMBRE, obj);
+			i.putExtra(Objeto.NOMBRE, obj);
+			i.putExtra(Util.TIPO, Constantes.RUTAS);
 			startActivityForResult(i, Constantes.RUTAS);
 		}
 		catch(Exception e){Log.e(TAG, "goRutaMap:RUTAS:e:-------------------------------------------", e);}

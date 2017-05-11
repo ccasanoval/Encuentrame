@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.ViewPager;
@@ -11,6 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.models.Lugar;
+import com.cesoft.encuentrame3.models.Objeto;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,15 +21,18 @@ import org.junit.runner.RunWith;
 import java.util.Date;
 
 import static android.support.test.espresso.Espresso.onView;
+
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.pressBack;
+
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
-import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
-
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
+
+import static junit.framework.Assert.assertTrue;
+
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -72,6 +77,7 @@ public class ActivitiesTest
 		//onView(withId(R.id.toolbar)). check(matches(withText("2008-09-23")));
 	}
 
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// LUGAR
 	@Rule
@@ -82,20 +88,20 @@ public class ActivitiesTest
 		{
 			Lugar l = new Lugar();
 			l.setId("id_lugar_69");
-			l.setLatitud(40.69);
-			l.setLongitud(-3.69);
+			l.setLatLon(40.69, -3.69);
 			l.setNombre("nombre lugar 69");
 			l.setDescripcion("desc lugar 69");
 			l.setFecha(new Date());
 			//
 			InstrumentationRegistry.getTargetContext();
 			Intent intent = new Intent(Intent.ACTION_MAIN);
-			intent.putExtra(Lugar.NOMBRE, l);
+			intent.putExtra(Objeto.NOMBRE, l);
 			return intent;
 		}
 	};
 	//----------------------------------------------------------------------------------------------
 	@Test
+	//@UiThreadTest
 	public void testActLugar() throws Exception
 	{
 		ActLugar act = ruleActLugar.getActivity();
@@ -110,20 +116,47 @@ public class ActivitiesTest
 
 		TextView lblPos = (TextView) act.findViewById(R.id.lblPosicion);
 		assertThat(lblPos.getText().toString(), is("40.69000/-3.69000"));
+
+		act.runOnUiThread(act::onBackPressed);
+		//onView(withId()).perform(
+
+		assertTrue(act.isFinishing());
+	}
+	//----------------------------------------------------------------------------------------------
+	@Test
+	//@UiThreadTest
+	public void testActLugar2() throws Exception
+	{
+		ActLugar act = ruleActLugar.getActivity();
+		View txtNombre = act.findViewById(R.id.txtNombre);
+		EditText txtNom = (EditText)txtNombre;
+		EditText txtDes = (EditText)act.findViewById(R.id.txtDescripcion);
+
+		txtNom.setText("Nuevo nombre");
+
+		act.onBackPressed();
+
+		onView(withText(R.string.seguro_salir)).check(matches(isDisplayed()));
+
+		//onView(withText(act.getString(R.string.seguro_salir))).perform(pressBack());
+		//onView(withId(R.id.)).perform(click());
+		onView(withText(R.string.salir)).perform(click());
+
+		assertTrue(act.isFinishing());
 	}
 
 	//TODO: comprobar que cuando se pulsa eliminar aparece el dialogo que pregunta si eliminar
 	//----------------------------------------------------------------------------------------------
 
-	@Test
-	public void testActLugar2() throws Exception
+	/*@Test
+	public void testActLugar3() throws Exception
 	{
 		ActLugar act = ruleActLugar.getActivity();
 
 		//openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
 		onView(withId(R.id.menu_eliminar)).perform(click());
-		onView(withText(act.getString(R.string.seguro_eliminar))).check(matches(isDisplayed()));
+		//onView(withText(act.getString(R.string.seguro_eliminar))).check(matches(isDisplayed()));
 		//onView(withId(R.id.myDialogTextId)).check(matches(allOf(withText(myDialogText), isDisplayed()));
 
-	}
+	}*/
 }

@@ -22,4 +22,5 @@ public class Constantes
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;
 	public static final String WIN_TAB = "wintab", MENSAJE = "mensaje";
 	static final String DIRTY = "dirty";
+	public static final String NOTIF = "notificacion";
 }

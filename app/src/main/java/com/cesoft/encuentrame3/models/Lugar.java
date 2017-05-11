@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import android.widget.ImageView;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 
 import com.bumptech.glide.Glide;
 
@@ -30,7 +29,6 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 
-//import org.jetbrains.annotations.NotNull;
 import android.support.annotation.NonNull;
 
 import com.cesoft.encuentrame3.Login;
@@ -48,14 +46,19 @@ public class Lugar extends Objeto
 	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
 	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
-	@Exclude
-	private DatabaseReference _datos;
+	@Exclude private DatabaseReference _datos;
+
+	//TODO: ADD	Altitud, velocidad, bearing ...
 
 	///---------------------------------------------------------------------------------------------
 	//Yet Another Firebase Bug:
 	//Serialization of inherited properties from the base class, is missing in the current release of the
 	// Firebase Database SDK for Android. It will be added back in an upcoming version.
-	protected String id = null;
+	// ...
+	//Serialization of inherited properties from the base class, is missing in the in releases 9.0 to 9.6 (iirc)
+	// of the Firebase Database SDK for Android. It was added back in versions since then.
+	//
+	/*protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
 	protected String nombre;
@@ -64,28 +67,27 @@ public class Lugar extends Objeto
 		public void setNombre(String v){nombre=v;}
 		public String getDescripcion(){return descripcion;}
 		public void setDescripcion(String v){descripcion=v;}
-	protected Date fecha;
+	private Date fecha;
 		public Date getFecha(){return fecha;}
 		public void setFecha(Date v){fecha=v;}
-	private String imgUrl;	//TODO: remove...
-		private String getImgUrl(){return imgUrl;}
-		private void setImgUrl(String v){imgUrl = v;}
+	//private String imgUrl;
+	//	private String getImgUrl(){return imgUrl;}
+	//	private void setImgUrl(String v){imgUrl = v;}
 	///______________________________________________________________
 
 	//______________________________________________________________________________________________
 	protected double latitud, longitud;
 		public double getLatitud(){return latitud;}
 		public double getLongitud(){return longitud;}
-		public void setLatitud(double v){latitud=v;}//TODO: validacion
-		public void setLongitud(double v){longitud=v;}
+		//public void setLatitud(double v){latitud=v;}
+		//public void setLongitud(double v){longitud=v;}*/
 
 	//______________________________________________________________________________________________
-	public Lugar() { this.fecha = new Date(); }	//Firebase necesita un constructor sin argumentos
-	@Override
-	public String toString()
+	public Lugar() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
+	@Override public String toString()
 	{
-		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s', img='%s'}",
-				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha), getImgUrl());
+		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
 	}
 
 	//// FIREBASE
@@ -130,8 +132,7 @@ public class Lugar extends Objeto
 	public static void getLista(@NonNull final Fire.DatosListener<Lugar> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
-		ValueEventListener vel;// = listener.getListener();
-		//if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
@@ -140,20 +141,19 @@ public class Lugar extends Objeto
 				long n = data.getChildrenCount();
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
+				{
 					aLugares.add(o.getValue(Lugar.class));
+				}
 				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
-				//ddbb.removeEventListener(this);
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
 			{
 				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Lugar:getLista:onCancelled:"+err);
-				//ddbb.removeEventListener(this);
 			}
 		};
 		listener.setRef(ddbb);
-		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);
 	}
@@ -170,8 +170,7 @@ public class Lugar extends Objeto
 	{
 		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		DatabaseReference ddbb = newFirebase();
-		ValueEventListener vel;// = listener.getListener();
-		//if(vel != null)ddbb.removeEventListener(vel);
+		ValueEventListener vel;
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
@@ -208,48 +207,44 @@ public class Lugar extends Objeto
 		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
 
 		GeoQueryEventListener lisGeo;
-		//lisGeo = listener.getListenerGeo();
-		//if(lisGeo == null)
+		final ArrayList<Lugar> aLugares = new ArrayList<>();
+		lisGeo = new GeoQueryEventListener()
 		{
-			final ArrayList<Lugar> aLugares = new ArrayList<>();
-			lisGeo = new GeoQueryEventListener()
+			private int nCount = 0;
+			@Override
+			public void onKeyEntered(String key, GeoLocation location)
 			{
-				private int nCount = 0;
-				@Override
-				public void onKeyEntered(String key, GeoLocation location)
+				nCount++;
+				//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
+				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
-					nCount++;
-					//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
-					newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
+					@Override
+					public void onDataChange(DataSnapshot data)
 					{
-						@Override
-						public void onDataChange(DataSnapshot data)
-						{
-							nCount--;
-							Lugar l = data.getValue(Lugar.class);
-							if(l.pasaFiltro(filtro))aLugares.add(l);
-							if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
-						}
-						@Override
-						public void onCancelled(DatabaseError err)
-						{
-							nCount--;
-							Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
-							if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
-						}
-					});
-				}
-				@Override
-				public void onGeoQueryReady()
-				{
-					if(nCount==0)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
-					geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
-				}
-				@Override public void onKeyExited(String key){Log.w(TAG, "getLista:onKeyExited");}
-				@Override public void onKeyMoved(String key, GeoLocation location){Log.w(TAG, "getLista:onKeyMoved"+key+", "+location);}
-				@Override public void onGeoQueryError(DatabaseError error){Log.e(TAG, "getLista:onGeoQueryError:"+error);}
-			};
-		}
+						nCount--;
+						Lugar l = data.getValue(Lugar.class);
+						if(l.pasaFiltro(filtro))aLugares.add(l);
+						if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+					}
+					@Override
+					public void onCancelled(DatabaseError err)
+					{
+						nCount--;
+						Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
+						if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+					}
+				});
+			}
+			@Override
+			public void onGeoQueryReady()
+			{
+				if(nCount==0)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
+			}
+			@Override public void onKeyExited(String key){Log.w(TAG, "getLista:onKeyExited");}
+			@Override public void onKeyMoved(String key, GeoLocation location){Log.w(TAG, "getLista:onKeyMoved"+key+", "+location);}
+			@Override public void onGeoQueryError(DatabaseError error){Log.e(TAG, "getLista:onGeoQueryError:"+error);}
+		};
 		geoQuery.addGeoQueryEventListener(lisGeo);
 	}
 
@@ -258,49 +253,29 @@ public class Lugar extends Objeto
 	//______________________________________________________________________________________________
 	private Lugar(Parcel in)
 	{
-		//super(in);
-		setId(in.readString());
-		nombre = (in.readString());
-		setDescripcion(in.readString());
-		setFecha(new Date(in.readLong()));
+		super(in);
 		//
-		setLatitud(in.readDouble());
-		setLongitud(in.readDouble());
+		//setLatLon(in.readDouble(), in.readDouble());
 		//
-		setImgUrl(in.readString());
+		//setImgUrl(in.readString());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
-		//super.writeToParcel(dest, flags);
-		dest.writeString(getId());
-		dest.writeString(nombre);
-		dest.writeString(getDescripcion());
-		dest.writeLong(getFecha().getTime());
-		//
+		super.writeToParcel(dest, flags);
+		/*
 		dest.writeDouble(getLatitud());
 		dest.writeDouble(getLongitud());
 		//
-		dest.writeString(getImgUrl());
+		//dest.writeString(getImgUrl());*/
 	}
 
 	//@Override
-	public int describeContents()
-	{
-		return 0;
-	}
+	//public int describeContents() { return 0; }
 	public static final Parcelable.Creator<Lugar> CREATOR = new Parcelable.Creator<Lugar>()
 	{
-		@Override
-		public Lugar createFromParcel(Parcel in)
-		{
-			return new Lugar(in);
-		}
-		@Override
-		public Lugar[] newArray(int size)
-		{
-			return new Lugar[size];
-		}
+		@Override public Lugar createFromParcel(Parcel in) { return new Lugar(in); }
+		@Override public Lugar[] newArray(int size) { return new Lugar[size]; }
 	};
 
 	//----------------------------------------------------------------------------------------------
@@ -367,14 +342,10 @@ public class Lugar extends Objeto
 		.addOnSuccessListener(taskSnapshot ->
 		{
 			// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-			//TODO: delete anterior _img ...
-			/*if(_img != null)
-			{
-				StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
-			}*/
+			//if(_img != null)StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
 			@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
-			if(img != null)Lugar.this.setImgUrl(img.toString());
-			Log.e(TAG, "uploadImagen:onSuccess:-----------"+Lugar.this.getImgUrl());
+			//if(img != null)Lugar.this.setImgUrl(img.toString());
+			Log.e(TAG, "uploadImagen:onSuccess:-----------"+img);
 		});
 	}
 	//______________________________________________________________________________________________
@@ -391,7 +362,7 @@ public class Lugar extends Objeto
 		}
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
 Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
-Log.e(TAG, "BBB: "+getImgUrl());
+//Log.e(TAG, "BBB: "+getImgUrl());
 
 		OnSuccessListener<Uri> lisOk = uri ->
 		{
@@ -405,12 +376,12 @@ Log.e(TAG, "BBB: "+getImgUrl());
 			listener.onError(exception.toString());
 		};
 //String img = "https://firebasestorage.googleapis.com/v0/b/sonic-totem-131614.appspot.com/o/fO47HYtdhMYhvD61wUjOygRNMYz1%2Flugar%2F-Ki4cj5oRDm6pCtnt_0D?alt=media&token=183000c4-9f06-4119-aea3-783db9435d22";
-		String img = getImgUrl();
+		/*String img = getImgUrl();
 		if(img != null)
 			FirebaseStorage.getInstance().getReferenceFromUrl(img).getDownloadUrl()
 				.addOnSuccessListener(lisOk)
 				.addOnFailureListener(lisKo);
-		else
+		else*/
 			storageRef.getDownloadUrl()
 				.addOnSuccessListener(lisOk)
 				.addOnFailureListener(lisKo);

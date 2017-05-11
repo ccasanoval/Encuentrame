@@ -91,7 +91,7 @@ public abstract class VistaBase
 	}
 	protected void clean()
 	{
-		LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
+		try{ LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this); }catch(Exception ignore){}
 		_LocationRequest = null;
 		_GoogleApiClient.unregisterConnectionCallbacks(this);
 		_GoogleApiClient.unregisterConnectionFailedListener(this);
@@ -123,8 +123,8 @@ public abstract class VistaBase
 		setContentView(_id_layout);
 
 		//----------------------------
-		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
+		try{ setSupportActionBar((Toolbar)findViewById(R.id.toolbar)); }
+		catch(Exception ignore){}//ActMaps no tiene toolbar
 		//
 		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
 		if(fab != null)fab.setOnClickListener(view -> _presenter.onSalir());
@@ -133,11 +133,13 @@ public abstract class VistaBase
 		if(fab != null)fab.setOnClickListener(view -> _util.onBuscar(this, _Map, _fMapZoom));
 
 		//----------------------------
+		try{
 		_txtNombre = (EditText)findViewById(R.id.txtNombre);
 		_txtDescripcion = (EditText)findViewById(R.id.txtDescripcion);
 		_txtNombre.setText(_presenter.getNombre());
 		_txtDescripcion.setText(_presenter.getDescripcion());
 		_presenter.setOnTextChange(_txtNombre, _txtDescripcion);//Todo, aqui, no en presenter...?
+		}catch(Exception ignore){}//ActMaps no tiene campos
 
 		//----------------------------
 		if(savedInstanceState != null)
@@ -236,19 +238,18 @@ public abstract class VistaBase
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	// OnConnectionFailedListener
+	// OnConnectionFailedListener  :  https://developers.google.com/android/reference/com/google/android/gms/common/ConnectionResult
 	//----------------------------------------------------------------------------------------------
-	@Override
-	public void onConnectionFailed(@NonNull ConnectionResult result)
+	@Override public void onConnectionFailed(@NonNull ConnectionResult result)
 	{
-		Log.e(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+		Log.e(TAG, "onConnectionFailed:e:***********************************************************"+result.getErrorCode());
+		toast(R.string.err_conn_google, result.getErrorMessage());
 	}
-	@Override
-	public void onConnected(Bundle arg0)
+	@Override public void onConnected(Bundle arg0)
 	{
+		Log.w(TAG, "------------------------------------onConnected---------------------------------");
 	}
-	@Override
-	public void onConnectionSuspended(int arg0)
+	@Override public void onConnectionSuspended(int arg0)
 	{
 		if(_GoogleApiClient != null)
 			_GoogleApiClient.connect();
@@ -256,8 +257,7 @@ public abstract class VistaBase
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// ResultCallback
 	//----------------------------------------------------------------------------------------------
-	@Override
-	public void onResult(@NonNull Status status)
+	@Override public void onResult(@NonNull Status status)
 	{
 		Log.w(TAG, "---------------------------------------onResult---------------------------------"+status);
 	}
@@ -270,18 +270,11 @@ public abstract class VistaBase
 	{
 		_util.setLocation(location);
 		if(_presenter.getLatitud() == 0 && _presenter.getLongitud() == 0)
-			setPosLugar(location);
+			setPosLugar(location.getLatitude(), location.getLongitude());
 	}
 	//______________________________________________________________________________________________
-	protected void setPosLugar(Location loc)
-	{
-		setPosLugar(loc.getLatitude(), loc.getLongitude());
-	}
-	protected void setPosLugar(double lat, double lon)
-	{
-		_presenter.setLatitud(lat);
-		_presenter.setLongitud(lon);
-	}
+	//protected void setPosLugar(Location loc) { setPosLugar(loc.getLatitude(), loc.getLongitude()); }
+	protected void setPosLugar(double lat, double lon) { _presenter.setLatLon(lat, lon); }
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// OnMapReadyCallback
@@ -297,11 +290,7 @@ public abstract class VistaBase
 		if(_presenter.getLatitud() == 0 && _presenter.getLongitud() == 0)
 		{
 			Location loc = _util.getLocation();
-			if(loc != null)
-			{
-				_presenter.setLatitud(loc.getLatitude());
-				_presenter.setLongitud(loc.getLongitude());
-			}
+			if(loc != null)_presenter.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
 		setPosLugar(_presenter.getLatitud(), _presenter.getLongitud());
 	}

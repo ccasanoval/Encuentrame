@@ -71,26 +71,14 @@ public class Filtro implements Parcelable
 			break;
 		}
 	}
-	public void setNombre(String v)
+	public void setNombre(String v)//.replace("'", "\\'");//Wanna stop sql injection : they say there's no need
 	{
-		_nombre = v!=null ? v : "";//.replace("'", "\\'");//Wanna stop sql injection : they say there's no need
+		_nombre = v!=null ? v : "";
 	}
-	public void setFechaIni(Date v)
-	{
-		_fechaIni=v;
-	}
-	public void setFechaFin(Date v)
-	{
-		_fechaFin=v;
-	}
-	public void setPunto(LatLng v)
-	{
-		_punto = v!=null ? v : new LatLng(0,0);
-	}
-	public void setRadio(int v)
-	{
-		_radio = v>0 ? v : Constantes.NADA;
-	}
+	public void setFechaIni(Date v) { _fechaIni=v; }
+	public void setFechaFin(Date v) { _fechaFin=v; }
+	public void setPunto(LatLng v) { _punto = v!=null ? v : new LatLng(0,0); }
+	public void setRadio(int v) { _radio = v>0 ? v : Constantes.NADA; }
 
 	//______________________________________________________________________________________________
 	public Filtro(int tipo)
@@ -101,8 +89,7 @@ public class Filtro implements Parcelable
 	}
 
 	//______________________________________________________________________________________________
-	@Override
-	public String toString()
+	@Override public String toString()
 	{
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 		return String.format(Locale.ENGLISH, "{%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s}",
@@ -140,22 +127,10 @@ public class Filtro implements Parcelable
 		dest.writeLong(_fechaIni == null ? 0 : _fechaIni.getTime());
 		dest.writeLong(_fechaFin == null ? 0 : _fechaFin.getTime());
 	}
-	@Override
-	public int describeContents()
-	{
-		return 0;
-	}
+	@Override public int describeContents() { return 0; }
 	public static final Creator<Filtro> CREATOR = new Creator<Filtro>()
 	{
-		@Override
-		public Filtro createFromParcel(Parcel in)
-		{
-			return new Filtro(in);
-		}
-		@Override
-		public Filtro[] newArray(int size)
-		{
-			return new Filtro[size];
-		}
+		@Override public Filtro createFromParcel(Parcel in) { return new Filtro(in); }
+		@Override public Filtro[] newArray(int size) { return new Filtro[size]; }
 	};
 }

@@ -39,14 +39,13 @@ public class Ruta extends Objeto implements Parcelable
 	private static final String IDRUTA = "idRuta";
 	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
 	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
-	@Exclude
-	private DatabaseReference _datos;
+	@Exclude private DatabaseReference _datos;
 
 	///______________________________________________________________
 	//Yet Another Firebase Bug:
 	//Serialization of inherited properties from the base class, is missing in the current release of the
 	// Firebase Database SDK for Android. It will be added back in an upcoming version.
-	protected String id = null;
+	/*protected String id = null;
 		public String getId(){return id;}
 		public void setId(String v){id = v;}
 	protected String nombre;
@@ -57,19 +56,18 @@ public class Ruta extends Objeto implements Parcelable
 		public void setDescripcion(String v){descripcion=v;}
 	private Date fecha;
 		public Date getFecha(){return fecha;}
-		public void setFecha(Date v){fecha=v;}
+		public void setFecha(Date v){fecha=v;}*/
 	///______________________________________________________________
 
-	//TODO: fecha fin...
+	//
 	//Quitar si se utiliza geofence tracking y cambiar por radio...
 	/*private int periodo=2*60*1000;
 		public int getPeriodo(){return periodo;}
 		public void setPeriodo(int v){periodo=v;}*/
 
 	//______________________________________________________________________________________________
-	public Ruta(){fecha = new Date();}
-	@Override
-	public String toString()
+	public Ruta() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
+	@Override public String toString()
 	{
 		return String.format(Locale.ENGLISH, "Ruta{id='%s', nombre='%s', descripcion='%s', fecha='%s', puntosCount='%d'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha), puntosCount);
@@ -79,24 +77,21 @@ public class Ruta extends Objeto implements Parcelable
 	protected Ruta(Parcel in)
 	{
 		super(in);
-		setId(in.readString());
+		//setId(in.readString());
 		puntosCount = in.readLong();
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
-		dest.writeString(getId());
+		//dest.writeString(getId());
 		dest.writeLong(puntosCount);
 	}
-	@Override
-	public int describeContents(){return 0;}
+	//@Override public int describeContents(){return 0;}
 	public static final Creator<Ruta> CREATOR = new Creator<Ruta>()
 	{
-		@Override
-		public Ruta createFromParcel(Parcel in){return new Ruta(in);}
-		@Override
-		public Ruta[] newArray(int size){return new Ruta[size];}
+		@Override public Ruta createFromParcel(Parcel in){return new Ruta(in);}
+		@Override public Ruta[] newArray(int size){return new Ruta[size];}
 	};
 
 
@@ -362,45 +357,36 @@ public class Ruta extends Objeto implements Parcelable
 	                            //final Fire.Transaccion listener)
 	{
 		RutaPunto pto = new RutaPunto(idRuta, lat, lon, precision, altura, velocidad, direccion);
-		pto.guardar(new DatabaseReference.CompletionListener()
+		pto.guardar((err, databaseReference) ->
 		{
-			@Override
-			public void onComplete(DatabaseError err, DatabaseReference databaseReference)
+			if(err == null)
 			{
-				if(err == null)
+				DatabaseReference ref = newFirebase().child(idRuta).child("puntosCount");
+				ref.runTransaction(new Transaction.Handler()
 				{
-					DatabaseReference ref = newFirebase().child(idRuta).child("puntosCount");
-	//Log.e(TAG, "****************** onComplete *********** "+ref);
-					ref.runTransaction(new Transaction.Handler()
+					@Override
+					public Transaction.Result doTransaction(MutableData mutableData)
 					{
-						@Override
-						public Transaction.Result doTransaction(MutableData mutableData)
-						{
-							if(mutableData.getValue() == null)
-								mutableData.setValue(1);
-        					else
-            					mutableData.setValue((Long)mutableData.getValue() + 1);
-							return Transaction.success(mutableData);//we can also abort by calling Transaction.abort()
-						}
-						@Override
-						public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
-						{
-	//Log.e(TAG, "****************** onComplete : onComplete *********** "+data);
-							//Log.w(TAG, "addPunto:inc count:"+err+" "+b+" "+data);
-							//listener.onComplete(err, b, data);
-							if(err == null)
-								listener.onDatos(new Long[]{(Long)data.getValue()});
-							else
-								listener.onError(err.getMessage()+", "+err.getCode());
-						}
-					});
-				}
-				else
-					listener.onError(err.getMessage()+", "+err.getCode());
+						if(mutableData.getValue() == null)
+							mutableData.setValue(1);
+						else
+							mutableData.setValue((Long)mutableData.getValue() + 1);
+						return Transaction.success(mutableData);//we can also abort by calling Transaction.abort()
+					}
+					@Override
+					public void onComplete(DatabaseError err, boolean b, DataSnapshot data)
+					{
+						if(err == null)
+							listener.onDatos(new Long[]{(Long)data.getValue()});
+						else
+							listener.onError(err.getMessage()+", "+err.getCode());
+					}
+				});
 			}
+			else
+				listener.onError(err.getMessage()+", "+err.getCode());
 		});
 	}
-
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -448,14 +434,13 @@ public class Ruta extends Objeto implements Parcelable
 			//public void setDireccion(float v){direccion = v;}
 
 		//__________________________________________________________________________________________
-		@Override
-		public String toString()
+		@Override public String toString()
 		{
 			return String.format(Locale.ENGLISH, "RutaPunto{id='%s', fecha='%s', latitud='%f', longitud='%f', idRuta='%s'}",
 					getId(), DATE_FORMAT.format(fecha), latitud, longitud, idRuta);
 		}
 		//__________________________________________________________________________________________
-		@SuppressWarnings("unused") public RutaPunto(){}//Required for Firebase !!!!!!!!!!!!!!!!!!!!
+		@SuppressWarnings("unused") public RutaPunto(){}//NOTE: Constructor with no arguments required by Firebase !!!!!!!!!!!!!!!!!!!!
 		RutaPunto(String idRuta, double lat, double lon, float precision, double altura, float velocidad, float direccion)
 		{
 			this.idRuta = idRuta;
@@ -635,16 +620,12 @@ Log.w(TAG, "RutaPunto:eliminar:**************** ELIMINANDO PTOS DE RUTA "+idRuta
 		}
 		private void saveGeo2()
 		{
-			newGeoFire().setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), new GeoFire.CompletionListener()
+			newGeoFire().setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
 			{
-				@Override
-				public void onComplete(String key, DatabaseError error)
-				{
-					if(error != null)
-						Log.e(TAG, "RutaPunto:saveGeo:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
-					//else
-					//	Log.w(TAG, "RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
-				}
+				if(error != null)
+					Log.e(TAG, "RutaPunto:saveGeo2:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
+				//else
+				//	Log.w(TAG, "RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
 			});
 		}
 		private static void delGeo(final String idRutaPunto)//TODO: Aqui estas borrando tambien -> mueve a RutaPunto delete

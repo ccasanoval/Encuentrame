@@ -32,9 +32,9 @@ public class PreRuta extends PresenterBase
 	////////////////////////////////////////////////////
 	public interface IVistaRuta extends IVista
 	{
-		//boolean isActivo();
 		void moveCamara(LatLng pos);
 	}
+	public String getId(){return _o.getId();}
 
 	private Application _app;
 	private Util _util;
@@ -57,84 +57,12 @@ public class PreRuta extends PresenterBase
 	@Override
 	public void unsubscribe()
 	{
-		_view = null;
+		super.unsubscribe();
 		delListeners();
 		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
 		if(_dlgEstadisticas != null)_dlgEstadisticas.dismiss();
+		_dlgEstadisticas = null;
 	}
-	/*void ini(ActRuta view)
-	{
-		_view = view;
-		_bSucio = false;
-	}
-	void subscribe(ActRuta view)
-	{
-		_view = view;
-		newListeners();
-		if(_bEstadisticas)estadisticas();
-		_bEliminar=false;
-	}
-	void unsubscribe()
-	{
-		_view = null;
-		delListeners();
-		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
-		if(_dlgEstadisticas != null)_dlgEstadisticas.dismiss();
-		if(_dlgEliminar != null)_dlgEliminar.dismiss();
-		if(_dlgSucio != null)_dlgSucio.dismiss();
-	}
-
-	String getNombre(){return _r.getNombre();}
-	String getDescripcion(){return _r.getDescripcion();}*/
-	public String getId(){return _o.getId();}
-	//boolean isNuevo(){return _bNuevo;}
-	//boolean isSucio(){return _bSucio;}
-	//
-	//void setSucio(){_bSucio=true;}
-
-	/*void loadObjeto()
-	{
-		//------------------------------------------------------------------------------------------
-		try
-		{
-			_r = _view.getIntent().getParcelableExtra(Ruta.NOMBRE);
-			if(_r == null)
-			{
-				_bNuevo = true;
-				_r = new Ruta();
-			}
-			else
-				_bNuevo = false;
-			Log.e(TAG, "onCreate:RUTA:-------------------------------"+_r);
-		}
-		catch(Exception e)
-		{
-			Log.e(TAG, "onCreate:Nueva ruta o error al desempaquetar:-------------------------------"+e);
-			_bNuevo = true;
-			_r = new Ruta();
-		}
-	}*/
-
-	//______________________________________________________________________________________________
-	/*private AlertDialog _dlgSucio = null;
-	void onSalir()
-	{
-		if(_bSucio)
-		{
-			AlertDialog.Builder dialog = new AlertDialog.Builder(_view);
-			dialog.setTitle(_r.getNombre());
-			dialog.setMessage(_view.getString(R.string.seguro_salir));
-			dialog.setPositiveButton(_view.getString(R.string.guardar), (dlg, which) -> guardar());
-			dialog.setNegativeButton(_view.getString(R.string.salir), (dlg, which) -> _view.finish());
-			dialog.setCancelable(true);
-			_dlgSucio = dialog.create();
-			_dlgSucio.show();
-		}
-		else
-			_view.finish();
-	}*/
-
-
 
 	private boolean _bGuardar = true;
 	public synchronized void guardar()

@@ -15,6 +15,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.adapters.AvisoArrayAdapter;
+import com.cesoft.encuentrame3.adapters.IListaItemClick;
+import com.cesoft.encuentrame3.adapters.LugarArrayAdapter;
+import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;

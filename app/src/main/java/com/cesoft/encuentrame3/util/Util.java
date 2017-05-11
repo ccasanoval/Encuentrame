@@ -23,11 +23,12 @@ import android.widget.EditText;
 
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActMain;
-import com.cesoft.encuentrame3.IListaItemClick;
+import com.cesoft.encuentrame3.adapters.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.models.Objeto;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
@@ -184,7 +185,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
-	public void showAviso(String sTitulo, Aviso a, Intent intent)
+	private void showAviso(String sTitulo, Aviso a, Intent intent)
 	{
 		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 		if(prefs.getBoolean("notifications_new_message_type", true))
@@ -366,7 +367,7 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 			public void onDatos(Aviso[] aData)
 			{
 				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
-				i.putExtra(Aviso.NOMBRE, aData[0]);
+				i.putExtra(Objeto.NOMBRE, aData[0]);
 				showAviso(_app.getString(R.string.en_zona_aviso), aData[0], i);//CesServiceAvisoGeo.this
 			}
 			@Override

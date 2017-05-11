@@ -44,8 +44,9 @@ public abstract class PresenterBase
 		//
 		public double getLatitud(){return _o.getLatitud();}
 		public double getLongitud(){return _o.getLongitud();}
-		public void setLatitud(double v){_o.setLatitud(v);}
-		public void setLongitud(double v){_o.setLongitud(v);}
+		public void setLatLon(double lat, double lon){_o.setLatLon(lat, lon);}
+		//public void setLatitud(double v){_o.setLatitud(v);}
+		//public void setLongitud(double v){_o.setLongitud(v);}
 
 	boolean _bSucio = false;
 		public void setSucio(){_bSucio=true;}
@@ -54,10 +55,7 @@ public abstract class PresenterBase
 	boolean _bDesdeNotificacion = false;
 	////////////////////////////////////////////////////
 	Application _app;
-	PresenterBase(Application app)
-	{
-		_app = app;
-	}
+	PresenterBase(Application app) { _app = app; }
 
 	//----------------------------------------------------------------------------------------------
 	public void ini(IVista view)
@@ -67,7 +65,7 @@ public abstract class PresenterBase
 	}
 	public void subscribe(IVista view)
 	{
-		Log.e(TAG, "-------------------------------subscribe--------------"+_bEliminar+"--------------------------------");
+		//Log.e(TAG, "-------------------------------subscribe--------------"+_bEliminar+"--------------------------------");
 		_view = view;
 		//newListeners();
 		//_bEliminar=true;
@@ -79,7 +77,7 @@ public abstract class PresenterBase
 	}
 	public void unsubscribe()
 	{
-		Log.e(TAG, "-------------------------------unsubscribe------"+_dlgSucio+"------- elim = "+_bEliminar+"---------------------------------");
+		//Log.e(TAG, "-------------------------------unsubscribe------"+_dlgSucio+"------- elim = "+_bEliminar+"---------------------------------");
 		_view = null;
 		//delListeners();
 		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
@@ -93,6 +91,7 @@ public abstract class PresenterBase
 		//
 		if(_dlgSucio != null)_dlgSucio.dismiss();
 		_dlgSucio = null;
+		Log.e(TAG, "-------------------------------unsubscribe--------------------------------------");
 	}
 
 	private static final String SUCIO = "sucio";
@@ -104,11 +103,11 @@ public abstract class PresenterBase
 			_bSucio = savedInstanceState.getBoolean(SUCIO);
 			_bEliminar = savedInstanceState.getBoolean(ELIMINAR);
 		}
-		Log.e(TAG, "++++++++++++++++++++ LOAD  sucio="+_bSucio+"   eliminar="+_bEliminar);
+		//Log.e(TAG, "++++++++++++++++++++ LOAD  sucio="+_bSucio+"   eliminar="+_bEliminar);
 	}
 	public void onSaveInstanceState(Bundle outState)
 	{
-		Log.e(TAG, "++++++++++++++++++++ SAVE  sucio="+_bSucio+"   eliminar="+_bEliminar);
+		//Log.e(TAG, "++++++++++++++++++++ SAVE  sucio="+_bSucio+"   eliminar="+_bEliminar);
 		outState.putBoolean(SUCIO, _bSucio);
 		outState.putBoolean(ELIMINAR, _bEliminar);
 	}
@@ -128,7 +127,6 @@ public abstract class PresenterBase
 			//Location loc = _util.getLocation();
 			//if(loc != null)_view.setPosLugar(loc);
 		}
-		//try{_bDesdeNotificacion = _view.getAct().getIntent().getBooleanExtra("notificacion", false);}catch(Exception e){_bDesdeNotificacion=false;}
 	}
 
 	//______________________________________________________________________________________________
@@ -174,18 +172,7 @@ public abstract class PresenterBase
 	}
 	protected abstract void eliminar();
 
-	//----------------------------------------------------------------------------------------------
-	/*private ProgressDialog _progressDialog;
-	void iniEspera()
-	{
-		_progressDialog = ProgressDialog.show(_view.getAct(), "", _app.getString(R.string.cargando), true, true);
-	}
-	void finEspera()
-	{
-		if(_progressDialog!=null)_progressDialog.dismiss();
-	}*/
-
-
+	// TODO : to vistaBase ?
 	private static class CesTextWatcher implements TextWatcher
 	{
 		private TextView _tv;
@@ -206,18 +193,4 @@ public abstract class PresenterBase
 		nom.addTextChangedListener(new PresenterBase.CesTextWatcher(nom, getNombre(), this));
 		desc.addTextChangedListener(new PresenterBase.CesTextWatcher(desc,  getDescripcion(), this));
 	}
-
-
-	//______________________________________________________________________________________________
-	/*private boolean checkCampos()
-	{
-		if(_view.getTextNombre().isEmpty())
-		{
-			_bGuardar = true;
-			_view.toast(R.string.sin_nombre);
-			_view.requestFocusNombre();
-			return false;
-		}
-		return true;
-	}*/
 }

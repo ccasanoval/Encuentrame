@@ -60,11 +60,11 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 
 		//------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
-		if(btnActPos != null)
+		//if(btnActPos != null)
 		btnActPos.setOnClickListener(v ->
 		{
 			Location loc = _util.getLocation();
-			if(loc != null)setPosLugar(loc);
+			if(loc != null) setPosicion(loc.getLatitude(), loc.getLongitude());
 		});
 
 		//------------------------------------
@@ -93,7 +93,6 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 				_presenter.setRadio(100);//TODO:radio por defecto en settings
 			}
 		});
-
 		for(int i=0; i < _adRadio.length; i++)
 		{
 			if(_presenter.getRadio() == _adRadio[i])
@@ -108,10 +107,9 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 			setTitle(getString(R.string.nuevo_aviso));
 		else
 			setTitle(getString(R.string.editar_aviso));
-
 	}
 
-	//____________________________________________________________________________________________________________________________________________________
+	//______________________________________________________________________________________________
 	/// MENU
 	//______________________________________________________________________________________________
 	@Override
@@ -128,32 +126,29 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		if(item.getItemId() == R.id.menu_guardar)
 			_presenter.guardar();
 		else if(item.getItemId() == R.id.menu_eliminar)
-			_presenter.eliminar();
+			_presenter.onEliminar();
 		return super.onOptionsItemSelected(item);
 	}
 
-
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	// OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap Map)
 	{
 		super.onMapReady(Map);
-		_Map.setOnMapClickListener(latLng ->
-		{
-			_presenter.setSucio();
-			setPosLugar(latLng.latitude, latLng.longitude);
-		});
+		_Map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
 	}
 
-	//______________________________________________________________________________________________
-	@Override
-	protected void setPosLugar(double lat, double lon)
+	//----------------------------------------------------------------------------------------------
+	protected void setPosicion(double lat, double lon)
 	{
-		_presenter.setLatitud(lat);_presenter.setLongitud(lon);
-		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", _presenter.getLatitud(), _presenter.getLongitud()));
+		_presenter.setLatLon(lat, lon);
+		_presenter.setSucio();
+		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
 		setMarker();
 	}
+
+	//----------------------------------------------------------------------------------------------
 	private void setMarker()
 	{
 		if(_Map == null)return;
@@ -176,5 +171,4 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		}
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
-
 }

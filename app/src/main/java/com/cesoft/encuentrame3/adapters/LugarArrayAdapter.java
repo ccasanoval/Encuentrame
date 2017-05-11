@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.util.Constantes;
 
@@ -16,12 +17,12 @@ import com.cesoft.encuentrame3.util.Constantes;
 // Created by Cesar_Casanova on 12/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //http://www.vogella.com/tutorials/AndroidListView/article.html
-class LugarArrayAdapter extends ArrayAdapter<Lugar>
+public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 {
 	private final Lugar[] _lugares;
 	private IListaItemClick _inter;
 
-	LugarArrayAdapter(Context context, Lugar[] lugares, IListaItemClick inter)
+	public LugarArrayAdapter(Context context, Lugar[] lugares, IListaItemClick inter)
 	{
 		super(context, -1, lugares);
 		_lugares = lugares;

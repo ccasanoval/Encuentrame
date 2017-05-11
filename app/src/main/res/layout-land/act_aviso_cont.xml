@@ -48,8 +48,7 @@
 			android:ems="10"
 			android:hint="@string/nombre"
 			android:inputType="text"
-			android:maxLines="1"
-			android:singleLine="true"/>
+			android:maxLines="1" />
 	</android.support.design.widget.TextInputLayout>
 
 
@@ -69,9 +68,8 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/aviso"
 			android:ems="10"
-			android:inputType="textMultiLine"
-			android:maxLines="3"
-			android:singleLine="true"/>
+			android:inputType="textMultiLine|textCapSentences"
+			android:maxLines="3" />
 	</android.support.design.widget.TextInputLayout>
 
 	<!-- DATE CREATED and MODIFIED ? -->

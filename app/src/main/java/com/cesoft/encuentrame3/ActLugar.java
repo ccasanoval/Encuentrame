@@ -37,14 +37,6 @@ public class ActLugar extends VistaBase
 	private TextView _lblPosicion;
 	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
 
-
-	@Override
-	public void onBackPressed()
-	{
-		_presenter.onSalir();
-		//super.onBackPressed();
-	}
-
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -55,11 +47,11 @@ public class ActLugar extends VistaBase
 
 		//------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
-		if(btnActPos != null)
+		//if(btnActPos != null)
 		btnActPos.setOnClickListener(v ->
 		{
 			Location loc = _util.getLocation();
-			if(loc != null)setPosLugar(loc);
+			if(loc != null) setPosicion(loc.getLatitude(), loc.getLongitude());
 		});
 
 		//------------------------------------
@@ -99,26 +91,25 @@ public class ActLugar extends VistaBase
 	//______________________________________________________________________________________________
 
 
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	// OnMapReadyCallback
 	@Override
 	public void onMapReady(GoogleMap Map)
 	{
 		super.onMapReady(Map);
-		_Map.setOnMapClickListener(latLng ->
-		{
-			_presenter.setSucio();
-			setPosLugar(latLng.latitude, latLng.longitude);
-		});
+		_Map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
+		setMarker();
 	}
-
-	@Override
-	protected void setPosLugar(double lat, double lon)
+	//----------------------------------------------------------------------------------------------
+	protected void setPosicion(double lat, double lon)
 	{
-		super.setPosLugar(lat, lon);
+		_presenter.setLatLon(lat, lon);
+		_presenter.setSucio();
 		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
 		setMarker();
 	}
+
+	//----------------------------------------------------------------------------------------------
 	private void setMarker()
 	{
 		try
@@ -127,22 +118,18 @@ public class ActLugar extends VistaBase
 			LatLng pos = new LatLng(_presenter.getLatitud(), _presenter.getLongitud());
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
-					.title(_presenter.getNombre())//getString(R.string.aviso)
+					.title(_presenter.getNombre())
 					.snippet(_presenter.getDescripcion());
 			_marker = _Map.addMarker(mo);
-			//_Map.animateCamera(CameraUpdateFactory.zoomTo(15));
-			//_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
 		}
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
 
-	//TODO: añadir altura, velocidad, etc en punto guardado y en aviso?
 	//______________________________________________________________________________________________
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		Log.e(TAG, "onActivityResult-------------"+requestCode+" --------------- "+resultCode);
 		if(requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK)
 		{
 			_presenter.setImg(data);
