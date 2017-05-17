@@ -24,7 +24,7 @@ public class PreLugar extends PresenterBase
 	private String _imgURLnew = null;
 
 	private Util _util;
-	@Inject PreLugar(Application app, Util util)
+	public @Inject PreLugar(Application app, Util util)
 	{
 		super(app);
 		_util = util;

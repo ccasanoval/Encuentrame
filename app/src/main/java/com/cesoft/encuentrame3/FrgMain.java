@@ -106,8 +106,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 			switch(_sectionNumber)
 			{
 				case Constantes.LUGARES:	_main.onLugar();	break;
-				case Constantes.RUTAS:	_main.onRuta();		break;
-				case Constantes.AVISOS:	_main.onAviso();	break;
+				case Constantes.RUTAS:		_main.onRuta();		break;
+				case Constantes.AVISOS:		_main.onAviso();	break;
 			}
 		});
 
@@ -244,7 +244,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		switch(tipo)
 		{
-			case Constantes.LUGARES:	_main.goLugar(obj);	break;
+			case Constantes.LUGARES:_main.goLugar(obj);	break;
 			case Constantes.AVISOS:	_main.goAviso(obj);	break;
 			case Constantes.RUTAS:	_main.goRuta(obj);	break;
 		}
@@ -254,7 +254,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		switch(tipo)
 		{
-			case Constantes.LUGARES:	_main.goLugarMap(obj);	break;
+			case Constantes.LUGARES:_main.goLugarMap(obj);	break;
 			case Constantes.AVISOS:	_main.goAvisoMap(obj);	break;
 			case Constantes.RUTAS:	_main.goRutaMap(obj);	break;
 		}
@@ -289,7 +289,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	private void newListeners()
 	{
 		delListeners();
-		//---
+		//--- LUGARES
 		_lisLugar = new Fire.DatosListener<Lugar>()
 		{
 			@Override
@@ -307,15 +307,18 @@ public class FrgMain extends Fragment implements IListaItemClick
 					catch(Exception e){Log.e(TAG, String.format("_acLugar:%s",e), e);}
 				}
 				if(_listView != null && _rootView != null)
+				{
 					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, FrgMain.this));
+					_listView.setContentDescription(getString(R.string.lugares));//Para Espresso
+				}
 			}
 			@Override
 			public void onError(String err)//FirebaseError err)
 			{
-				Log.e(TAG, String.format("LUGARES2:GET:e:%s",err));
+				Log.e(TAG, "LUGARES2:GET:e:---------------------------------------------------------"+err);
 			}
 		};
-		//---
+		//--- RUTAS
 		_lisRuta = new Fire.DatosListener<Ruta>()
 		{
 			@Override
@@ -335,18 +338,18 @@ public class FrgMain extends Fragment implements IListaItemClick
 				{
 					RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, FrgMain.this);
 					_listView.setAdapter(r);
+					_listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
 					if(android.os.Build.VERSION.SDK_INT>=19)
 						_listView.scrollListBy(_listView.getMaxScrollAmount());
 				}
 			}
-			@Override
-			public void onError(String err)
+			@Override public void onError(String err)
 			{
-				Log.e(TAG, String.format("RUTAS2:GET:e:%s",err));
+				Log.e(TAG, "RUTAS2:GET:e:-----------------------------------------------------------"+err);
 			}
 		};
-		//---
+		//--- AVISO
 		_lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override
@@ -360,13 +363,12 @@ public class FrgMain extends Fragment implements IListaItemClick
 						catch(Exception e){Log.e(TAG, String.format("AVISOS:handleResponse:e:%s",e), e);}
 				}
 				if(_listView != null && _rootView != null)
+				{
 					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, FrgMain.this));
+					_listView.setContentDescription(getString(R.string.avisos));//Para Espresso
+				}
 			}
-			@Override
-			public void onError(String err)
-			{
-				Log.e(TAG, String.format("AVISOS2:GET:e:%s",err));
-			}
+			@Override public void onError(String err) { Log.e(TAG, "AVISOS2:GET:e:------------------"+err); }
 		};
 	}
 

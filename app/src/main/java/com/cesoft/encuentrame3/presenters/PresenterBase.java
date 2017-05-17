@@ -78,7 +78,7 @@ public abstract class PresenterBase
 	public void unsubscribe()
 	{
 		//Log.e(TAG, "-------------------------------unsubscribe------"+_dlgSucio+"------- elim = "+_bEliminar+"---------------------------------");
-		_view = null;
+		//_view = null;		// Lo quito porque falla Espresso ?????????
 		//delListeners();
 		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
 		if(_dlgEliminar != null)

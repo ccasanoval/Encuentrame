@@ -44,7 +44,6 @@ public class ActLugar extends VistaBase
 		((App)getApplication()).getGlobalComponent().inject(this);
 		super.ini(_presenter, _util, new Lugar(), R.layout.act_lugar);
 		super.onCreate(savedInstanceState);
-
 		//------------------------------------
 		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
 		//if(btnActPos != null)

@@ -36,6 +36,7 @@ public class PreRuta extends PresenterBase
 	}
 	public String getId(){return _o.getId();}
 
+	//----------------------------------------------------------------------------------------------
 	private Application _app;
 	private Util _util;
 	private CesService _servicio;
@@ -47,6 +48,7 @@ public class PreRuta extends PresenterBase
 		_servicio = servicio;
 	}
 
+	//----------------------------------------------------------------------------------------------
 	@Override
 	public void subscribe(IVista view)
 	{
@@ -64,6 +66,7 @@ public class PreRuta extends PresenterBase
 		_dlgEstadisticas = null;
 	}
 
+	//----------------------------------------------------------------------------------------------
 	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
@@ -101,7 +104,7 @@ public class PreRuta extends PresenterBase
 		//Solo si es nuevo?
 		CesService.setMinTrackingDelay();
 	}
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	private boolean checkCampos()
 	{
 		if(_view.getTextNombre().isEmpty())
@@ -113,7 +116,7 @@ public class PreRuta extends PresenterBase
 		return true;
 	}
 
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	public synchronized void eliminar()
 	{
 		_view.iniEspera();
@@ -140,7 +143,7 @@ public class PreRuta extends PresenterBase
 		});
 	}
 
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	public void startTrackingRecord()
 	{
 		if( ! checkCampos())return;
@@ -167,7 +170,7 @@ public class PreRuta extends PresenterBase
 			}
 		});
 	}
-	//______________________________________________________________________________________________
+	//----------------------------------------------------------------------------------------------
 	public void stopTrackingRecord()
 	{
 		_util.setTrackingRoute("");
