@@ -77,8 +77,8 @@ public abstract class PresenterBase
 	}
 	public void unsubscribe()
 	{
+		Log.e(TAG, "-------------------------------unsubscribe------1--------------------------------");
 		//Log.e(TAG, "-------------------------------unsubscribe------"+_dlgSucio+"------- elim = "+_bEliminar+"---------------------------------");
-		//_view = null;		// Lo quito porque falla Espresso ?????????
 		//delListeners();
 		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
 		if(_dlgEliminar != null)
@@ -91,7 +91,9 @@ public abstract class PresenterBase
 		//
 		if(_dlgSucio != null)_dlgSucio.dismiss();
 		_dlgSucio = null;
-		Log.e(TAG, "-------------------------------unsubscribe--------------------------------------");
+		//
+		_view = null;
+		Log.e(TAG, "-------------------------------unsubscribe------2--------------------------------");
 	}
 
 	private static final String SUCIO = "sucio";
@@ -133,6 +135,7 @@ public abstract class PresenterBase
 	private AlertDialog _dlgSucio = null;
 	public void onSalir()
 	{
+Log.e(TAG, "--------------------------------ON SALIR---1------------------------------");
 		if(_bSucio)
 		{
 			AlertDialog.Builder dialog = new AlertDialog.Builder(_view.getAct());
@@ -146,6 +149,7 @@ public abstract class PresenterBase
 		}
 		else
 			_view.finish();
+Log.e(TAG, "--------------------------------ON SALIR---2------------------------------");
 	}
 	boolean _bGuardar = true;
 	protected abstract void guardar();

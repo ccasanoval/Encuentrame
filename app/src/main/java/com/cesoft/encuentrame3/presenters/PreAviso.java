@@ -46,7 +46,6 @@ public class PreAviso extends PresenterBase
 
 	@Override public void setLatLon(double lat, double lon)
 	{
-
 		_o.setLatLon(lat, lon);
 	}
 
@@ -84,7 +83,7 @@ public class PreAviso extends PresenterBase
 	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
-		Log.e(TAG, "+++++++++++++++++++++ "+_view+" ++++++++++++++++ "+super._view);
+		//Log.e(TAG, "+++++++++++++++++++++ "+_view+" ++++++++++++++++ "+super._view);
 
 		if(_o.getLatitud()==0 && _o.getLongitud()==0)
 		{
@@ -119,32 +118,9 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onError(String err, int code)
 			{
-				Log.e(TAG, "guardar:handleFault:f:" + err);
-
-				//***************************************************************************** TODO: eliminar o repetir en Lugar,Ruta?
-				/*try{Thread.sleep(500);}catch(InterruptedException ignored){}
-				((Aviso)_o).guardar(new Fire.CompletadoListener()
-				{
-					@Override
-					protected void onDatos(String id)
-					{
-						finEspera();
-						_bGuardar = true;
-						_servicio.cargarListaGeoAvisos();
-						openMain(true, _app.getString(R.string.ok_guardar_aviso));
-					}
-					@Override
-					protected void onError(String err, int code)
-					{
-						finEspera();
-						_bGuardar = true;
-						Log.e(TAG, "guardar:handleFault2:e:-----------------------------------------"+err);
-						_view.toast(R.string.error_guardar, err);
-					}
-				});*/
 				_view.finEspera();
 				_bGuardar = true;
-				Log.e(TAG, "guardar:handleFault2:e:-----------------------------------------"+err);
+				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------------"+err);
 				_view.toast(R.string.error_guardar, err);
 			}
 		});
@@ -169,7 +145,7 @@ public class PreAviso extends PresenterBase
 			{
 				_view.finEspera();
 				_bEliminar=true;
-				Log.e(TAG, "eliminar:handleFault:e:---------------------------------------------"+err);
+				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
 				_view.toast(R.string.error_eliminar, err);
 			}
 		});

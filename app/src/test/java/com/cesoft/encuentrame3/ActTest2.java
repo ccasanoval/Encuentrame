@@ -1,31 +1,91 @@
 package com.cesoft.encuentrame3;
 
+import android.content.Intent;
+import android.widget.EditText;
+
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.presenters.PreLugar;
-import com.cesoft.encuentrame3.presenters.PresenterBase;
-import com.cesoft.encuentrame3.util.Util;
+import com.google.firebase.FirebaseApp;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+
+import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar Casanova on 16/05/2017.
-//
+// TODO: READ: https://medium.com/@sergiygrechukha/android-ui-and-unit-tests-coverage-report-with-jacoco-and-sonarqube-1db5576f79b0
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class ActTest2
 {
+
+	/*
+	@Test
+	public void test1()
+	{
+		/*ActMain act = Robolectric.setupActivity(ActMain.class);
+		act.findViewById(R.id.fabNuevo).performClick();
+		Intent expectedIntent = new Intent(act, ActLugar.class);
+		assertThat(shadowOf(act).getNextStartedActivity()).isEqualTo(expectedIntent);* /
+		ActLugar act = Robolectric.setupActivity(ActLugar.class);
+		EditText txtNombre = (EditText)act.findViewById(R.id.txtNombre);
+		txtNombre.setText("test");
+
+	}
+
+	ActivityController<ActLugar> _controller;
+	ActLugar _act;
+	@Before
+	public void setUp() {
+		// Call the "buildActivity" method so we get an ActivityController which we can use
+		// to have more control over the activity lifecycle
+
+
+		Intent intent = new Intent(RuntimeEnvironment.application, ActLugar.class);
+		Lugar l = new Lugar();
+		l.setLatLon(40.69, -3.69);
+		l.setNombre("Lugar Test");
+		l.setDescripcion("descripcion...");
+		l.setId("69");
+		l.setFecha(new Date());
+		intent.putExtra(Objeto.NOMBRE, l);
+
+		_controller = Robolectric.buildActivity(ActLugar.class, intent);
+	}
+	@After
+	public void tearDown() {
+		// Destroy activity after every test
+		_controller
+				.pause()
+				.stop()
+				.destroy();
+	}
+
+	@Test public void test2()
+	{
+		_act = _controller
+				//.withIntent(intent) deprecated
+				.create()
+				.start()
+				.resume()
+				.visible()
+				.get();
+	}
+
+	/*
 	private VistaBase view;
 	@Mock PreLugar presenter;
 	@Mock Util util;

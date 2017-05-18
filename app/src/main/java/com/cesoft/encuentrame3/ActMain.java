@@ -44,6 +44,9 @@ import com.cesoft.encuentrame3.util.Util;
 // *** Charles, Fiddle
 //https://jaanus.com/debugging-http-on-an-android-phone-or-tablet-with-charles-proxy-for-fun-and-profit/
 
+// *** DEX
+//I run the ./gradlew assembleRelease and use DEX decompiler tools https://github.com/skylot/jadx to decompile the APK. It’s like looking into code in Github...
+
 //TODO: READ  -----------------------  https://nullpointer.wtf/  -------------------------
 
 //TODO: https://github.com/patloew/RxLocation

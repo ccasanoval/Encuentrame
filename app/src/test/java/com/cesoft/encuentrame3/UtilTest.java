@@ -21,7 +21,7 @@ import java.util.TimeZone;
 import static junit.framework.Assert.assertTrue;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Created by booster-bikes on 09/05/2017.
+// Created by Cesar Casanova on 09/05/2017.
 //
 @RunWith(JUnit4.class)
 public class UtilTest

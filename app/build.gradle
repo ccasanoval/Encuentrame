@@ -17,7 +17,7 @@ android {
 	}
 	buildTypes {
 		release {
-			minifyEnabled false
+			minifyEnabled true
 			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 		}
 	}
@@ -94,6 +94,10 @@ dependencies {
 	testCompile "junit:junit:${JUNIT}"
 	testCompile "org.robolectric:robolectric:3.3.2"
 	testCompile 'org.mockito:mockito-android:2.6.2'
+	testCompile "com.google.dagger:dagger-compiler:${DAGGER}"
+	testAnnotationProcessor "com.google.dagger:dagger-compiler:${DAGGER}"
+	annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER}"
+	//testApt "com.google.dagger:dagger-compiler:${DAGGER}"
 	// Android Test
 	androidTestCompile "junit:junit:${JUNIT}"
 	androidTestCompile 'org.mockito:mockito-android:2.6.2'

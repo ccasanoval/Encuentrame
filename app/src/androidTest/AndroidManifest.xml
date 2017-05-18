@@ -1,0 +1,14 @@
+<!--
+The workaround for Mockito issue #922
+https://github.com/mockito/mockito/issues/922
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		  package="com.cesoft.encuentrame3">
+	<!--suppress AndroidDomInspection -->
+	<instrumentation>
+		<!--suppress AndroidElementNotAllowed -->
+		<meta-data
+			android:name="notPackage"
+			android:value="net.bytebuddy" />
+	</instrumentation>
+</manifest>
