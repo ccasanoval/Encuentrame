@@ -1,17 +1,17 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'	//RetroLambda
+//apply plugin: 'me.tatarka.retrolambda'	//RetroLambda
 //apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-	compileSdkVersion 25
-	buildToolsVersion '25.0.3'
+	compileSdkVersion 28
+	buildToolsVersion '27.0.3'
 
 	defaultConfig {
 		applicationId 'com.cesoft.encuentrame3'
 		minSdkVersion 15
-		targetSdkVersion 25
-		versionCode 14
-		versionName "1.94"
+		targetSdkVersion 28
+		versionCode 15
+		versionName "1.95"
 		multiDexEnabled true
 		testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
 	}
@@ -27,89 +27,83 @@ android {
 		targetCompatibility JavaVersion.VERSION_1_8
 	}
 
-	/*//---------------------------------------------------------
-	if (project.hasProperty('keyAlias')) {
-		signingConfigs.release.keyAlias = keyAlias
-	}
-	if (project.hasProperty('keyPassword')) {
-		signingConfigs.release.keyPassword = keyPassword
-	}
-	if (project.hasProperty('storePassword')) {
-		signingConfigs.release.storePassword = storePassword
-	}
-	if (project.hasProperty('storeFile')) {
-		signingConfigs.release.storeFile = storeFile
-	}
-	*/
-
 	return true
 }
 
-final ANDROID = '25.3.1'
-final GOOGLE = '10.2.4'
-final FIREBASE = '10.2.1'
-final DAGGER = '2.8'
-final RUNNER = '0.5'
-final ESPRESSO = '2.2.2'
-final JUNIT = '4.12'
+def VER_ANDROID = '28+'
+def VER_GOOGLE = '15.0.1'
+def VER_FIREBASE = '16+'
+def VER_DAGGER_TEST = '2.8'
+def VER_DAGGER = '2.15'
+def VER_RUNNER = '0.5'
+def VER_ESPRESSO = '2.2.2'
+def VER_JUNIT = '4.12'
+def VER_LEAKCANARY = '1.5.4'
 
 dependencies {
-	compile fileTree(include: ['*.jar'], dir: 'libs')
+	implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-	compile 'org.jetbrains:annotations:13.0'
-	compile 'com.android.support:multidex:1.0.1'
+	implementation 'org.jetbrains:annotations:13.0'
+	implementation 'com.android.support:multidex:1.0.3'
 
 	// Android
-	compile "com.android.support:appcompat-v7:${ANDROID}"
-	compile "com.android.support:design:${ANDROID}"
-	compile "com.android.support:support-v4:${ANDROID}"
+	implementation "com.android.support:appcompat-v7:${VER_ANDROID}"
+	implementation "com.android.support:design:${VER_ANDROID}"
+	implementation "com.android.support:support-v4:${VER_ANDROID}"
 	// Google
-	compile "com.google.android.gms:play-services-location:${GOOGLE}"
-	compile "com.google.android.gms:play-services-auth:${GOOGLE}"
-	compile "com.google.android.gms:play-services-maps:${GOOGLE}"
-	compile "com.google.android.gms:play-services-gcm:${GOOGLE}"
+	implementation "com.google.android.gms:play-services-location:${VER_GOOGLE}"
+	implementation "com.google.android.gms:play-services-auth:${VER_GOOGLE}"
+	implementation "com.google.android.gms:play-services-maps:${VER_GOOGLE}"
+	implementation "com.google.android.gms:play-services-gcm:${VER_GOOGLE}"
 	// Firebase
-	compile "com.google.firebase:firebase-auth:${FIREBASE}"
-	compile "com.google.firebase:firebase-core:${FIREBASE}"
-	compile "com.google.firebase:firebase-database:${FIREBASE}"
-	compile "com.google.firebase:firebase-storage:${FIREBASE}"
-	compile "com.google.firebase:firebase-crash:${FIREBASE}"
-	compile "com.firebase:geofire-android:2.1.0"
+	implementation "com.google.firebase:firebase-auth:${VER_FIREBASE}"
+	implementation "com.google.firebase:firebase-core:${VER_FIREBASE}"
+	implementation "com.google.firebase:firebase-database:${VER_FIREBASE}"
+	implementation "com.google.firebase:firebase-storage:${VER_FIREBASE}"
+	implementation "com.google.firebase:firebase-crash:${VER_FIREBASE}"
+	implementation "com.firebase:geofire-android:2.1.0"
+
 
 	// Img
-	//compile 'com.squareup.picasso:picasso:2.5.2'
-	compile 'com.github.bumptech.glide:glide:3.7.0'
+	//implementation 'com.squareup.picasso:picasso:2.5.2'
+	implementation 'com.github.bumptech.glide:glide:4.7.1'
+	annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 
 	// Dagger
-	annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER}"
-	compile "com.google.dagger:dagger:${DAGGER}"
-	provided 'javax.annotation:jsr250-api:1.0'
+	//annotationProcessor "com.google.dagger:dagger-implementationr:1.0"
+	//implementation "com.google.dagger:dagger:2.11"
+	//compileOnly 'javax.annotation:jsr250-api:1.0'
+	annotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER}"
+    implementation "com.google.dagger:dagger:${VER_DAGGER}"
+    implementation "com.google.dagger:dagger-android:${VER_DAGGER}"
+    implementation "com.google.dagger:dagger-android-support:${VER_DAGGER}"
+	annotationProcessor "com.google.dagger:dagger-android-processor:${VER_DAGGER}"
 
 	// Leak Canary
-	debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-	releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-	testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+	debugImplementation "com.squareup.leakcanary:leakcanary-android:${VER_LEAKCANARY}"
+	releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${VER_LEAKCANARY}"
+	testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${VER_LEAKCANARY}"
 
 	// Test
-	testCompile "junit:junit:${JUNIT}"
-	testCompile "org.robolectric:robolectric:3.3.2"
-	testCompile 'org.mockito:mockito-android:2.6.2'
-	testCompile "com.google.dagger:dagger-compiler:${DAGGER}"
-	testAnnotationProcessor "com.google.dagger:dagger-compiler:${DAGGER}"
-	annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER}"
+	testImplementation "junit:junit:${VER_JUNIT}"
+	testImplementation "org.robolectric:robolectric:3.8"
+	testImplementation 'org.mockito:mockito-android:2.18.3'
+	testImplementation "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
+	testAnnotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
+	annotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
+	androidTestAnnotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
 	//testApt "com.google.dagger:dagger-compiler:${DAGGER}"
 	// Android Test
-	androidTestCompile "junit:junit:${JUNIT}"
-	androidTestCompile 'org.mockito:mockito-android:2.6.2'
-	androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-	androidTestCompile "com.android.support.test:runner:${RUNNER}"
-	androidTestCompile "com.android.support.test:rules:${RUNNER}"
-	androidTestCompile "com.android.support.test.espresso:espresso-core:${ESPRESSO}"
-	androidTestCompile "com.android.support.test.espresso:espresso-intents:${ESPRESSO}"
-	androidTestCompile "com.android.support:support-annotations:${ANDROID}"
-	androidTestAnnotationProcessor "com.google.dagger:dagger-compiler:${DAGGER}"
+	androidTestImplementation "junit:junit:${VER_JUNIT}"
+	androidTestImplementation 'org.mockito:mockito-android:2.18.3'
+	androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+	androidTestImplementation "com.android.support.test:runner:${VER_RUNNER}"
+	androidTestImplementation "com.android.support.test:rules:${VER_RUNNER}"
+	androidTestImplementation "com.android.support.test.espresso:espresso-core:${VER_ESPRESSO}"
+	androidTestImplementation "com.android.support.test.espresso:espresso-intents:${VER_ESPRESSO}"
+	androidTestImplementation "com.android.support:support-annotations:${VER_ANDROID}"
 
-	/*androidTestCompile("com.android.support.test.espresso:espresso-contrib:2.2")
+	/*androidTestImplementation("com.android.support.test.espresso:espresso-contrib:2.2")
 	{
 		// Necessary to avoid version conflicts
 		exclude group: 'com.android.support', module: 'appcompat'

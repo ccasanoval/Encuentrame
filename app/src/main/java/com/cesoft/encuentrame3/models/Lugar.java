@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import com.bumptech.glide.Glide;
 
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -136,7 +137,7 @@ public class Lugar extends Objeto
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
-			public void onDataChange(DataSnapshot data)
+			public void onDataChange(@NonNull DataSnapshot data)
 			{
 				long n = data.getChildrenCount();
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
@@ -147,7 +148,7 @@ public class Lugar extends Objeto
 				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onCancelled(@NonNull DatabaseError err)
 			{
 				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Lugar:getLista:onCancelled:"+err);
@@ -174,20 +175,20 @@ public class Lugar extends Objeto
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
-			public void onDataChange(DataSnapshot data)
+			public void onDataChange(@NonNull DataSnapshot data)
 			{
 				long n = data.getChildrenCount();
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 				{
 					Lugar l = o.getValue(Lugar.class);
-					if( ! l.pasaFiltro(filtro))continue;
+					if(l != null && ! l.pasaFiltro(filtro))continue;
 					aLugares.add(l);
 				}
 				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onCancelled(@NonNull DatabaseError err)
 			{
 				String s = String.format("Lugar:buscarPorFiltro:onCancelled:e:%s",err);
 				Log.e(TAG, s);
@@ -219,15 +220,15 @@ public class Lugar extends Objeto
 				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
-					public void onDataChange(DataSnapshot data)
+					public void onDataChange(@NonNull DataSnapshot data)
 					{
 						nCount--;
 						Lugar l = data.getValue(Lugar.class);
-						if(l.pasaFiltro(filtro))aLugares.add(l);
+						if(l != null && l.pasaFiltro(filtro))aLugares.add(l);
 						if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
 					}
 					@Override
-					public void onCancelled(DatabaseError err)
+					public void onCancelled(@NonNull DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
@@ -254,24 +255,13 @@ public class Lugar extends Objeto
 	private Lugar(Parcel in)
 	{
 		super(in);
-		//
-		//setLatLon(in.readDouble(), in.readDouble());
-		//
-		//setImgUrl(in.readString());
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
-		/*
-		dest.writeDouble(getLatitud());
-		dest.writeDouble(getLongitud());
-		//
-		//dest.writeString(getImgUrl());*/
 	}
 
-	//@Override
-	//public int describeContents() { return 0; }
 	public static final Parcelable.Creator<Lugar> CREATOR = new Parcelable.Creator<Lugar>()
 	{
 		@Override public Lugar createFromParcel(Parcel in) { return new Lugar(in); }
@@ -326,8 +316,11 @@ public class Lugar extends Objeto
 			}
 			_datos = newFirebase().child(getId());
 		}
-		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
-		storageRef.delete().addOnCompleteListener(task -> Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString()));
+		if(_datos.getKey() == null)return;
+		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+		storageRef.delete().addOnCompleteListener(task ->
+				Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString()));
 
 		Uri file = Uri.fromFile(new File(path));
 		UploadTask uploadTask = storageRef.putFile(file);
@@ -337,16 +330,18 @@ public class Lugar extends Objeto
 			long n = t.getBytesTransferred();
 			Log.e(TAG, "uploadImagen:onProgress:"+n);
 		});
+		storageRef.getDownloadUrl().addOnSuccessListener(uri ->
+				Log.e(TAG, "uploadImagen:onSuccess:------BBBB-----"+uri.toString()));
 
-		uploadTask.addOnFailureListener(exception -> Log.e(TAG, "uploadImagen:onFailure:"+exception, exception))
-		.addOnSuccessListener(taskSnapshot ->
-		{
-			// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-			//if(_img != null)StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(_img);
-			@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
-			//if(img != null)Lugar.this.setImgUrl(img.toString());
-			Log.e(TAG, "uploadImagen:onSuccess:-----------"+img);
-		});
+		uploadTask
+				.addOnFailureListener(exception -> Log.e(TAG, "uploadImagen:onFailure:"+exception, exception))
+				.addOnSuccessListener(taskSnapshot ->
+				{
+					//@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
+					//Log.e(TAG, "uploadImagen:onSuccess:-----------"+img);
+					storageRef.getDownloadUrl().addOnSuccessListener(uri ->
+							Log.e(TAG, "uploadImagen:onSuccess:----AAAAA-------"+uri.toString()));
+				});
 	}
 	//______________________________________________________________________________________________
 	public void downloadImg(final ImageView iv, final Activity act, final Fire.SimpleListener<String> listener)
@@ -360,64 +355,35 @@ public class Lugar extends Objeto
 			}
 			_datos = newFirebase().child(getId());
 		}
-		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+		if(_datos.getKey() == null)return;
+		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
 Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
 //Log.e(TAG, "BBB: "+getImgUrl());
 
 		OnSuccessListener<Uri> lisOk = uri ->
 		{
-			Log.e(TAG, "downloadImagen: onSuccess: uri: ------------------------------------"+uri);
+			Log.e(TAG, "downloadImagen: onSuccess: uri: ---------------------------------"+uri);
 			loadFromCache(uri, iv, act);
 			listener.onDatos(new String[]{uri.toString()});
 		};
 		OnFailureListener lisKo = exception ->
 		{
-			Log.e(TAG, "downloadImagen:onFailure:e: ----------------------------------------"+exception);
+			Log.e(TAG, "downloadImagen:onFailure:e: -------------------------------"+exception);
 			listener.onError(exception.toString());
 		};
-//String img = "https://firebasestorage.googleapis.com/v0/b/sonic-totem-131614.appspot.com/o/fO47HYtdhMYhvD61wUjOygRNMYz1%2Flugar%2F-Ki4cj5oRDm6pCtnt_0D?alt=media&token=183000c4-9f06-4119-aea3-783db9435d22";
-		/*String img = getImgUrl();
-		if(img != null)
-			FirebaseStorage.getInstance().getReferenceFromUrl(img).getDownloadUrl()
-				.addOnSuccessListener(lisOk)
-				.addOnFailureListener(lisKo);
-		else*/
-			storageRef.getDownloadUrl()
-				.addOnSuccessListener(lisOk)
-				.addOnFailureListener(lisKo);
-
-		//StorageReference storageRef = FirebaseStorage.getInstance().reference().child("folderName/file.jpg");
-//storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener() {
-/*
-		final long ONE_MEGABYTE = 1024 * 1024;
-		storageRef.getBytes(ONE_MEGABYTE)
-			.addOnSuccessListener(new OnSuccessListener<byte[]>()
-			{
-				@Override
-				public void onSuccess(byte[] bytes)
-				{
-					// Data for "images/island.jpg" is returns, use this as needed
-				}
-			})
-			.addOnFailureListener(new OnFailureListener()
-			{
-				@Override
-				public void onFailure(@NonNull Exception exception)
-				{
-					// Handle any errors
-				}
-			});*/
+		storageRef.getDownloadUrl()
+			.addOnSuccessListener(lisOk)
+			.addOnFailureListener(lisKo);
 	}
 	//______________________________________________________________________________________________
-	//TODO: listener para avisar que picasso no pudo cargar la imagen.......... toas y poner imagen de cruz
 	private void loadFromCache(final Uri imgUri, final ImageView iv, final Activity act)
 	{
-		//https://futurestud.io/tutorials/glide-placeholders-fade-animations
 		Glide.with(act)
 			.load(imgUri)
-			//.centerCrop()
-		    .placeholder(android.R.drawable.gallery_thumb)
-		    .crossFade()
+			.apply(new RequestOptions()
+					.placeholder(android.R.drawable.gallery_thumb)
+					.error(android.R.drawable.alert_dark_frame))
 		    .into(iv);
 	}
 	//______________________________________________________________________________________________
@@ -432,7 +398,9 @@ Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+
 			}
 			_datos = newFirebase().child(getId());
 		}
-		StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+		if(_datos.getKey() == null)return;
+		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
 		storageRef.delete().addOnCompleteListener(task -> Log.e(TAG, "delImg:addOnCompleteListener:"+task.toString()));
 	}
 	// IMAGEN

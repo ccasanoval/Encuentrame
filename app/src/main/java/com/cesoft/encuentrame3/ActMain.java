@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -87,7 +88,7 @@ Log.e(TAG, "----------- MAIN CREATE");
 		_login = ((App)getApplication()).getGlobalComponent().login();
 		if(!_login.isLogged())gotoLogin();
 
-		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		toolbar.setSubtitle(Login.getCurrentUserName());
 
@@ -133,11 +134,11 @@ Log.e(TAG, "----------- MAIN START");
 	{
 //Log.e(TAG, "-------------------- CREATE VIEWS -------------------");
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-		_viewPager = (ViewPager)findViewById(R.id.container);
+		_viewPager = findViewById(R.id.container);
 		_viewPager.setAdapter(sectionsPagerAdapter);
-		TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
+		TabLayout tabLayout = findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(_viewPager);
-		tabLayout.setSelectedTabIndicatorHeight(10);
+		tabLayout.setSelectedTabIndicatorHeight(10);//TODO
 	}
 	private void gotoPage(Intent intent)
 	{
@@ -181,6 +182,10 @@ Log.e(TAG, "----------- MAIN START");
 				FrgMain frg = _aFrg[_viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
 				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager()).getItem(_viewPager.getCurrentItem());
 				buscar(_aFrg[_viewPager.getCurrentItem()]);
+				return true;
+			case R.id.action_privacy_policy:
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
+				startActivity(browserIntent);
 				return true;
 		}
 		return super.onOptionsItemSelected(item);

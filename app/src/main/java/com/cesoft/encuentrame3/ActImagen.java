@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.opengl.GLES10;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,6 +38,12 @@ public class ActImagen extends AppCompatActivity
 	private static final String TAG = ActImagen.class.getSimpleName();
 	public static final String PARAM_LUGAR = "lugar";
 	public static final String PARAM_IMG_PATH = "img_path";
+
+	public static final int IMAGE_CAPTURE = 6969;
+
+	private static final int REQUEST_ACTION_IMAGE_CAPTURE = 6970;
+	private static final int REQUEST_PERMISSION_EXTERNAL_STORAGE = 6971;
+	private static final int REQUEST_PERMISSION_CAMERA = 6972;
 
 	private Lugar _l;
 	private ImageView _iv;
@@ -91,10 +98,14 @@ public class ActImagen extends AppCompatActivity
 	 * Touch listener to use for in-layout UI controls to delay hiding the system UI.
 	 * This is to prevent the jarring behavior of controls going away while interacting with activity UI.
 	 */
-	private final View.OnTouchListener mDelayHideTouchListener = (view, motionEvent) ->
+	/*private final View.OnTouchListener mDelayHideTouchListener = (view, motionEvent) ->
 	{
 		if(AUTO_HIDE) delayedHide(AUTO_HIDE_DELAY_MILLIS);
 		return false;
+	};*/
+	private final View.OnClickListener mHideClickListener = (view) ->
+	{
+		if(AUTO_HIDE) delayedHide(AUTO_HIDE_DELAY_MILLIS);
 	};
 
 	//______________________________________________________________________________________________
@@ -115,8 +126,9 @@ public class ActImagen extends AppCompatActivity
 
 		// Upon interacting with UI controls, delay any scheduled hide() operations
 		// to prevent the jarring behavior of controls going away while interacting with the UI.
-		findViewById(R.id.tomar_foto).setOnTouchListener(mDelayHideTouchListener);
-		Button b = (Button)findViewById(R.id.tomar_foto);
+		//findViewById(R.id.tomar_foto).setOnTouchListener(mDelayHideTouchListener);
+		findViewById(R.id.tomar_foto).setOnClickListener(mHideClickListener);
+		Button b = findViewById(R.id.tomar_foto);
 		b.setOnClickListener(view -> dispatchTakePictureIntent());
 		//----
 		int[] maxTextureSize = new int[1];
@@ -172,7 +184,7 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 						{
 							Log.e(TAG, "onCreate: no tiene imagen o error---------------------------: "+err);
 							refreshMenu(ESTADO.SIN_IMG);
-							pedirCamara();
+							takePhoto();
 						}
 					});
 				}
@@ -180,7 +192,7 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 				{
 					Log.e(TAG, "onCreate: no existe url ni Lugar -----------------------------------");
 					refreshMenu(ESTADO.SIN_IMG);
-					pedirCamara();
+					takePhoto();
 				}
 			}
 		}
@@ -284,32 +296,25 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 	private final static String _imgPath = getImgPath();
 	private static String getImgPath()
 	{
-		/*String[] projection = { MediaStore.Images.Media.DATA };
-		Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
-		//managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
-		if(cursor == null)return null;
-		cursor.moveToLast();
-		int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		String s = cursor.getString(column_index_data);
-		cursor.close();*/
-		//return s;
-
+		//File privateDir = getExternalFilesDir(null);
+		File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+		Log.e(TAG, "getImgPath---------------------"+dir);
+		return (new File(dir, "CESoftEncuentrame.jpg")).getPath();
+/*
 		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CESoft");
+		Log.e(TAG, "getImgPath---------------------"+mediaStorageDir);
 		if( ! mediaStorageDir.exists())
 		{
 			if( ! mediaStorageDir.mkdirs())
 				return (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Encuentrame.jpg")).getPath();
 		}
-		return (new File(mediaStorageDir, "CESoftEncuentrame.jpg")).getPath();
-		//return Uri.fromFile(new File(Environment.getExternalStorageDirectory(), "CESoftEncuentrame.jpg")).getPath();
-		//return Uri.fromFile(new File(getFilesDir(), "CESoftEncuentrame.jpg")).getPath(); DOESNT WORK
+		return (new File(mediaStorageDir, "CESoftEncuentrame.jpg")).getPath();*/
 	}
 
 	//______________________________________________________________________________________________
-	private static final int REQUEST_IMAGE_CAPTURE = 1;
 	private void dispatchTakePictureIntent()
 	{
-		if( ! isCamara())
+		if(isNoCamaraPermission())
 		{
 			Toast.makeText(this, getString(R.string.sin_permiso_camara), Toast.LENGTH_LONG).show();
 			return;
@@ -322,20 +327,25 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 		}
 		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 Log.e(TAG, "dispatchTakePictureIntent222---------------------");
+
+
+//TODO: Por que necesitamos esto para que no pete abrir la camara?--------------------
+		StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+		StrictMode.setVmPolicy(builder.build());
+
+		Log.e(TAG, "dispatchTakePictureIntent------------------------------"+_imgPath);
 		i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(_imgPath)));
 		if(i.resolveActivity(getPackageManager()) != null)
-			startActivityForResult(i, REQUEST_IMAGE_CAPTURE);
+			startActivityForResult(i, REQUEST_ACTION_IMAGE_CAPTURE);
 	}
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
+		//super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode == REQUEST_ACTION_IMAGE_CAPTURE)// && resultCode == RESULT_OK)
 		{
 			refreshMenu(ESTADO.NEW_IMG);
 			show();
-
-			//int max = Util.getMaxTextureSize();Log.e(TAG, "AAA-----------------------------------------"+max);
 			_imgURLnew = _imgPath;
 			try
 			{
@@ -355,7 +365,7 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 
 
 	//______________________________________________________________________________________________
-	public static final int IMAGE_CAPTURE = 6969;
+
 	private void guardar()
 	{
 		Intent i = new Intent();
@@ -382,26 +392,59 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 		}
 	}
 
-	//----------------------------------------------------------------------------------------------
-	private boolean isCamara()
-	{
-		int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-		return permissionCheck == PackageManager.PERMISSION_GRANTED;
+
+	private boolean isCameraHardware() {
+		return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
 	}
-	private void pedirCamara()
+	private boolean isNoStoragePermission() {
+		int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+		return permission != PackageManager.PERMISSION_GRANTED;
+	}
+	private boolean isNoCamaraPermission()
 	{
-		if( ! isCamara())
-			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 6970);
-		else
-			dispatchTakePictureIntent();
+		int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+		return permission != PackageManager.PERMISSION_GRANTED;
+	}
+	private void requestCameraPermission()
+	{
+		ActivityCompat.requestPermissions(this,
+				new String[]{Manifest.permission.CAMERA},
+				REQUEST_PERMISSION_CAMERA);
 	}
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
 	{
-		Log.e(TAG, "-------------------------------------------------------------------------------- requestCode = "+requestCode+" : ");
-		dispatchTakePictureIntent();
-		/*if(requestCode == 6969)
-			if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-				try{_Map.setMyLocationEnabled(true);}catch(SecurityException ignore){}*/
+		//Log.e(TAG, "------------------------------------- requestCode = "+requestCode+" : ");
+		//for(String s : permissions)Log.e(TAG, "------------------------------------- permissions = "+s);
+		//for(int i : grantResults)Log.e(TAG, "------------------------------------- granted = "+i);
+		switch(requestCode) {
+			case REQUEST_PERMISSION_CAMERA:
+			case REQUEST_PERMISSION_EXTERNAL_STORAGE:
+				if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+					takePhoto();
+				break;
+		}
+	}
+
+
+	private void requestStoragePermission() {
+		ActivityCompat.requestPermissions(this,
+				new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+				REQUEST_PERMISSION_EXTERNAL_STORAGE);
+	}
+
+
+	private void takePhoto() {
+		if( ! isCameraHardware()) {
+			Toast.makeText(this, R.string.no_camera_hardware, Toast.LENGTH_LONG).show();
+		}
+		else if(isNoCamaraPermission()) {
+			requestCameraPermission();
+		}
+		else if(isNoStoragePermission()) {
+			requestStoragePermission();
+		}
+		else
+			dispatchTakePictureIntent();
 	}
 }

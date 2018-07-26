@@ -19,5 +19,11 @@
 		android:orderInCategory="120"
 		android:title="@string/config"
 		android:icon="@android:drawable/ic_menu_preferences"
-		app:showAsAction="always"/>
+		app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/action_privacy_policy"
+		android:orderInCategory="130"
+		android:title="@string/privacy_policy"
+		android:icon="@android:drawable/ic_menu_view"
+		app:showAsAction="ifRoom"/>
 </menu>
