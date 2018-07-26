@@ -79,7 +79,7 @@
 
 	<string name="pref_header_opciones">Options</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
-	<string name="pref_save_login">Save login &amp; password</string>
+	<string name="pref_save_login">Save login and password</string>
 
 	<string name="pref_header_notifications">Alerts</string>
 	<string name="pref_ringtone">Ringtone</string>
@@ -127,4 +127,6 @@
 
 	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
 	<string name="err_conn_google">Failed to connect to Google services: %s</string>
+	<string name="privacy_policy">Privacy Policy</string>
+	<string name="no_camera_hardware">There is no camera hardware in this device</string>
 </resources>

@@ -38,6 +38,7 @@ def VER_DAGGER = '2.15'
 def VER_RUNNER = '0.5'
 def VER_ESPRESSO = '2.2.2'
 def VER_JUNIT = '4.12'
+def VER_GLIDE = '4.7.1'
 def VER_LEAKCANARY = '1.5.4'
 
 dependencies {
@@ -66,8 +67,8 @@ dependencies {
 
 	// Img
 	//implementation 'com.squareup.picasso:picasso:2.5.2'
-	implementation 'com.github.bumptech.glide:glide:4.7.1'
-	annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+	implementation "com.github.bumptech.glide:glide:${VER_GLIDE}"
+	annotationProcessor "com.github.bumptech.glide:compiler:${VER_GLIDE}"
 
 	// Dagger
 	//annotationProcessor "com.google.dagger:dagger-implementationr:1.0"

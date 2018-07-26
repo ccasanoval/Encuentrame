@@ -134,4 +134,6 @@
 	<string name="sin_permiso_camara">Sin permiso para usar la cámara</string>
 	<string name="err_get_ruta_pts">Error al obtener los puntos de la ruta</string>
 	<string name="err_conn_google">Error al conectar a los servicios de Google: %s</string>
+	<string name="privacy_policy">Política de Privacidad</string>
+	<string name="no_camera_hardware">Este dispositivo no tiene cámara</string>
 </resources>
