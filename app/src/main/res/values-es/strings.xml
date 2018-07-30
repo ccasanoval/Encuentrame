@@ -136,4 +136,5 @@
 	<string name="err_conn_google">Error al conectar a los servicios de Google: %s</string>
 	<string name="privacy_policy">Política de Privacidad</string>
 	<string name="no_camera_hardware">Este dispositivo no tiene cámara</string>
+    <string name="error_img_path">Sucedió un error al recuperar la imagen de la cámara</string>
 </resources>

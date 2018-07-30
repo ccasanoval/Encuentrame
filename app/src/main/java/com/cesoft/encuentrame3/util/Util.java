@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
@@ -29,17 +30,17 @@ import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -167,19 +168,32 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
 		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
 		//vibrator.vibrate(pattern, -1);
-		vibrator.vibrate(1000);//1seg
+		if(vibrator != null)vibrator.vibrate(1000);//1seg
 		//vibrator.cancel();
     }
 
 	//______________________________________________________________________________________________
 	private void showLights(int color)
 	{
-		_nm.cancel(1); // clear previous notification
+		Notification.Builder builder = new Notification.Builder(_app);
+		builder
+				.setSmallIcon(R.mipmap.ic_launcher)
+				//.setTicker("My Ticker")
+				.setWhen(System.currentTimeMillis())
+				.setAutoCancel(true)
+				.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND | Notification.FLAG_SHOW_LIGHTS)
+				.setLights(color, 300, 100)//color=0xff00ff00
+				//.setContentTitle("My Title 1")
+				//.setContentText("My Text 1")
+		;
+		Notification notification = builder.getNotification();
+		_nm.notify(1, notification);
+		/*_nm.cancel(1); // clear previous notification
 		final Notification notification = new Notification();
 		notification.ledARGB = color;
 		notification.ledOnMS = 1000;
 		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		_nm.notify(1, notification);
+		_nm.notify(1, notification);*/
 	}
 
 	//______________________________________________________________________________________________
@@ -203,10 +217,10 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
 
 		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
-		wakeLock.acquire();
+		wakeLock.acquire(2000);
 
 		Integer idNotificacion = _conversor(a.getId());
-		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app)
+		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(titulo)
@@ -340,7 +354,6 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	}
 	public void return2Main(Activity act, Filtro filtro)
 	{
-android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 		Intent intent = new Intent();
 		intent.putExtra(Constantes.DIRTY, true);
 		intent.putExtra(Filtro.FILTRO, filtro);
@@ -425,7 +438,7 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 	public void onBuscar(final Context c, final GoogleMap map, final float zoom)
 	{
 		View viewBuscarCalle = View.inflate(c, R.layout.dialog_buscar_calle, null);
-		final EditText direccion = (EditText)viewBuscarCalle.findViewById(R.id.direccion);
+		final EditText direccion = viewBuscarCalle.findViewById(R.id.direccion);
 		AlertDialog dlg = new AlertDialog.Builder(c).create();
 		dlg.setView(viewBuscarCalle);
 		dlg.setCancelable(true);
@@ -458,7 +471,7 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 	}
 
 	//______________________________________________________________________________________________
-	public static void pideGPS(Activity a, GoogleApiClient googleApiClient, LocationRequest locationRequest)
+	/*public static void pideGPS(Activity a, GoogleApiClient googleApiClient, LocationRequest locationRequest)
 	{
 		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -486,45 +499,45 @@ android.util.Log.e(TAG, "------- buscar 3 "+filtro);
 					break;
 			}
 		});
-	}
+	}*/
 
-	//----------------------------------------------------------------------------------------------
-	// IMAGEN
-	/*int getMaxTextureSize()
-	{
-		int[] maxSize = new int[1];
-		android.opengl.GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxSize, 0);
-		return maxSize[0];
-	}*/
-	/*public static Bitmap imgResize(Bitmap b, int x, int y)
-	{
-		Bitmap background = Bitmap.createBitmap((int)x, (int)y, Bitmap.Config.ARGB_8888);
-		float originalWidth = b.getWidth(), originalHeight = b.getHeight();
-		Canvas canvas = new Canvas(background);
-		float scale = x/originalWidth;
-		float xTranslation = 0.0f, yTranslation = (y - originalHeight * scale)/2.0f;
-		Matrix transformation = new Matrix();
-		transformation.postTranslate(xTranslation, yTranslation);
-		transformation.preScale(scale, scale);
-		Paint paint = new Paint();
-		paint.setFilterBitmap(true);
-		canvas.drawBitmap(b, transformation, paint);
-		return background;
-	}*//*
-	public static Bitmap imgScaleCompress(Bitmap b, String path)
-	{
-		try
-		{
-			java.io.OutputStream imagefile = new java.io.FileOutputStream(path);
-			//b.compress(Bitmap.CompressFormat.PNG, 95, imagefile);
-			b.compress(Bitmap.CompressFormat.JPEG, 95, imagefile);
-			return BitmapFactory.decodeFile(path);
-		}
-		catch(Exception e)
-		{
-			Log.e(TAG, String.format("imgScaleCompress:e:%s",e), e);
-			return null;
-		}
-	}*/
+	public static void pideGPS2(Activity a, LocationRequest locationRequest) {
+		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+				.addLocationRequest(locationRequest);
+		builder.setAlwaysShow(true);
+		Task<LocationSettingsResponse> task =
+				LocationServices.getSettingsClient(a).checkLocationSettings(builder.build());
+
+		task.addOnCompleteListener(task1 -> {
+            try {
+                //LocationSettingsResponse response =
+				task1.getResult(ApiException.class);
+                // All location settings are satisfied. The client can initialize location requests here.
+			}
+			catch (ApiException exception) {
+                switch (exception.getStatusCode()) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user a dialog.
+                        try {
+                            // Cast to a resolvable exception.
+                            ResolvableApiException resolvable = (ResolvableApiException) exception;
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            resolvable.startResolutionForResult(a,1000);
+                        }
+                        catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        } catch (ClassCastException e) {
+                            // Ignore, should be an impossible error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
+	}
 
 }

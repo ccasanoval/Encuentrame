@@ -71,12 +71,12 @@ public class PreAviso extends PresenterBase
 
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
-	private void openMain(boolean bDirty, String sMensaje)
+	private void openMain(String sMensaje)
 	{
 		if(_bDesdeNotificacion)
-			_util.openMain(_view.getAct(), bDirty, sMensaje, Constantes.AVISOS);
+			_util.openMain(_view.getAct(), true, sMensaje, Constantes.AVISOS);
 		else
-			_util.return2Main(_view.getAct(), bDirty, sMensaje);
+			_util.return2Main(_view.getAct(), true, sMensaje);
 	}
 
 	//______________________________________________________________________________________________
@@ -113,7 +113,7 @@ public class PreAviso extends PresenterBase
 				_view.finEspera();
 				_bGuardar = true;
 				_servicio.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
-				openMain(true, _app.getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
+				openMain(_app.getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
 			}
 			@Override
 			protected void onError(String err, int code)
@@ -138,7 +138,7 @@ public class PreAviso extends PresenterBase
 			{
 				_view.finEspera();
 				_bEliminar=true;
-				openMain(true, _app.getString(R.string.ok_eliminar_aviso));
+				openMain(_app.getString(R.string.ok_eliminar_aviso));
 			}
 			@Override
 			protected void onError(String err, int code)

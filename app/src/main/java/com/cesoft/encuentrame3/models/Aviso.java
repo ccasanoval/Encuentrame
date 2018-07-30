@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import com.cesoft.encuentrame3.util.Log;
 import com.firebase.geofire.GeoFire;
@@ -15,7 +16,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
-import java.util.Date;
 
 import com.cesoft.encuentrame3.Login;
 
@@ -183,13 +183,13 @@ public class Aviso extends Objeto
 		newFirebase().child(sId).addListenerForSingleValueEvent(new ValueEventListener()
 		{
 			@Override
-			public void onDataChange(DataSnapshot ds)
+			public void onDataChange(@NonNull DataSnapshot ds)
 			{
 				Aviso a = ds.getValue(Aviso.class);
 				listener.onDatos(new Aviso[]{a});
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onCancelled(@NonNull DatabaseError err)
 			{
 				listener.onError(err.getMessage());
 			}
@@ -236,7 +236,7 @@ public class Aviso extends Objeto
 		vel = new ValueEventListener()
 		{
 			@Override
-			public void onDataChange(DataSnapshot data)
+			public void onDataChange(@NonNull DataSnapshot data)
 			{
 				long n = data.getChildrenCount();
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
@@ -245,7 +245,7 @@ public class Aviso extends Objeto
 				listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onCancelled(@NonNull DatabaseError err)
 			{
 				Log.e(TAG, "getLista:onCancelled:"+err);
 				listener.onError("Aviso:getLista:onCancelled:"+err);
@@ -279,20 +279,20 @@ public class Aviso extends Objeto
 		vel = new ValueEventListener()//AJAX
 		{
 			@Override
-			public void onDataChange(DataSnapshot data)
+			public void onDataChange(@NonNull DataSnapshot data)
 			{
 				long n = data.getChildrenCount();
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 				{
 					Aviso a = o.getValue(Aviso.class);
-					if( ! a.pasaFiltro(filtro))continue;
+					if(a != null && ! a.pasaFiltro(filtro))continue;
 					aAvisos.add(o.getValue(Aviso.class));
 				}
 				listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 			}
 			@Override
-			public void onCancelled(DatabaseError err)
+			public void onCancelled(@NonNull DatabaseError err)
 			{
 				Log.e(TAG, "buscarPorFiltro:onCancelled:"+err);
 				listener.onError(err.toString());
@@ -322,15 +322,15 @@ public class Aviso extends Objeto
 				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
-					public void onDataChange(DataSnapshot data)
+					public void onDataChange(@NonNull DataSnapshot data)
 					{
 						nCount--;
 						Aviso a = data.getValue(Aviso.class);
-						if(a.pasaFiltro(filtro))aAvisos.add(a);
+						if(a != null && a.pasaFiltro(filtro))aAvisos.add(a);
 						if(nCount < 1)listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
 					}
 					@Override
-					public void onCancelled(DatabaseError err)
+					public void onCancelled(@NonNull DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, "buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);

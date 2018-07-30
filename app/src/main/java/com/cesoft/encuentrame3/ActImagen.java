@@ -4,13 +4,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.opengl.GLES10;
 import android.os.Environment;
-import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +25,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.bumptech.glide.Glide;
 import com.cesoft.encuentrame3.models.Fire;
@@ -293,7 +301,7 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 	/// MENU
 
 	//______________________________________________________________________________________________
-	private final static String _imgPath = getImgPath();
+	/*private final static String _imgPath = getImgPath();
 	private static String getImgPath()
 	{
 		//File privateDir = getExternalFilesDir(null);
@@ -309,10 +317,47 @@ Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 				return (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Encuentrame.jpg")).getPath();
 		}
 		return (new File(mediaStorageDir, "CESoftEncuentrame.jpg")).getPath();*/
+	//}
+
+	private String currentPhotoPath;
+	private File createImageFile() throws Exception {
+		// Create an image file name
+		@SuppressLint("SimpleDateFormat")
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		String imageFileName = "JPEG_" + timeStamp + "_";
+		File storageDir = new File(
+				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
+		File image = File.createTempFile(imageFileName,".jpg", storageDir);
+		// Save a file: path for use with ACTION_VIEW intents
+		currentPhotoPath = "file:" + image.getAbsolutePath();
+		return image;
 	}
 
 	//______________________________________________________________________________________________
-	private void dispatchTakePictureIntent()
+	private void dispatchTakePictureIntent() {
+		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		// Ensure that there's a camera activity to handle the intent
+		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+			// Create the File where the photo should go
+			File photoFile;
+			try {
+				photoFile = createImageFile();
+				if(photoFile != null) {
+					//Uri photoURI = Uri.fromFile(createImageFile());//targetSdkVersion < 24
+					Uri photoURI = FileProvider.getUriForFile(
+							this,
+							BuildConfig.APPLICATION_ID + ".provider",
+							createImageFile());
+					takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+					startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
+				}
+			}
+			catch(Exception e) {
+				Log.e(TAG, "dispatchTakePictureIntent:e:-------------------------------------",e);
+			}
+		}
+	}
+	/*private void dispatchTakePictureIntent()
 	{
 		if(isNoCamaraPermission())
 		{
@@ -330,31 +375,51 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 
 
 //TODO: Por que necesitamos esto para que no pete abrir la camara?--------------------
-		StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-		StrictMode.setVmPolicy(builder.build());
+		//StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+		//StrictMode.setVmPolicy(builder.build());
+
+		//Uri.fromFile(new File(_imgPath));
+		Uri photoURI = FileProvider.getUriForFile(this,
+				BuildConfig.APPLICATION_ID + ".provider",
+				createImageFile());
 
 		Log.e(TAG, "dispatchTakePictureIntent------------------------------"+_imgPath);
-		i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(_imgPath)));
+		i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 		if(i.resolveActivity(getPackageManager()) != null)
 			startActivityForResult(i, REQUEST_ACTION_IMAGE_CAPTURE);
-	}
+	}*/
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		//super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode == REQUEST_ACTION_IMAGE_CAPTURE)// && resultCode == RESULT_OK)
+		if(requestCode == REQUEST_ACTION_IMAGE_CAPTURE && resultCode == RESULT_OK)
 		{
 			refreshMenu(ESTADO.NEW_IMG);
 			show();
-			_imgURLnew = _imgPath;
-			try
-			{
-				_iv.setImageURI(Uri.fromFile(new File(_imgURLnew)));
+
+			// Show the thumbnail on ImageView
+			Uri imageUri = Uri.parse(currentPhotoPath);
+			File file = new File(imageUri.getPath());
+			try {
+				InputStream ims = new FileInputStream(file);
+				_iv.setImageBitmap(BitmapFactory.decodeStream(ims));
 			}
-			catch(Exception e)
-			{
-				Log.e(TAG, String.format("onActivityResult:e:%s",e), e);
+			catch(FileNotFoundException e) {
+				Log.e(TAG, "onActivityResult:FileNotFoundException:e:-------------------------",e);
+				Toast.makeText(this, R.string.error_img_path, Toast.LENGTH_LONG).show();
+				return;
 			}
+
+			// ScanFile so it will be appeared on Gallery
+			MediaScannerConnection.scanFile(this,
+					new String[]{imageUri.getPath()},
+					null,
+					(path, uri) -> { });
+
+			// Variable to store the img
+			if(currentPhotoPath.contains("file:"))
+				_imgURLnew = currentPhotoPath.substring("file:".length());
+			Log.e(TAG, "onActivityResult:--------------------- IMG:"+_imgURLnew);
 		}
 		else
 		{

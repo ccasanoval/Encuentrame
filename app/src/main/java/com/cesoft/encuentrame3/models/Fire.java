@@ -1,5 +1,7 @@
 package com.cesoft.encuentrame3.models;
 
+import android.support.annotation.NonNull;
+
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -79,7 +81,7 @@ public class Fire
 		protected abstract void onDatos(String id);
 		protected abstract void onError(String err, int code);
 		@Override
-		public void onComplete(DatabaseError err, DatabaseReference data)
+		public void onComplete(DatabaseError err, @NonNull DatabaseReference data)
 		{
 			if(err == null)	onDatos(data.getKey());
 			else			onError(err.getMessage(), err.getCode());

@@ -70,7 +70,7 @@ public class PreRuta extends PresenterBase
 	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
-		if( ! checkCampos())return;
+		if(isErrorEnCampos())return;
 
 		if(!_bGuardar)return;
 		_bGuardar = false;
@@ -105,15 +105,15 @@ public class PreRuta extends PresenterBase
 		CesService.setMinTrackingDelay();
 	}
 	//----------------------------------------------------------------------------------------------
-	private boolean checkCampos()
+	private boolean isErrorEnCampos()
 	{
 		if(_view.getTextNombre().isEmpty())
 		{
 			_view.toast(R.string.sin_nombre);
 			_view.requestFocusNombre();
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	public void startTrackingRecord()
 	{
-		if( ! checkCampos())return;
+		if(isErrorEnCampos())return;
 		_view.iniEspera();
 		guardar(new Fire.CompletadoListener()
 		{

@@ -142,5 +142,6 @@
 	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
 	<string name="err_conn_google">Failed to connect to Google services: %s</string>
 	<string name="no_camera_hardware">There is no camera hardware in this device</string>
+    <string name="error_img_path">Failed trying to get the image path</string>
 
 </resources>

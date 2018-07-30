@@ -40,6 +40,7 @@ import com.cesoft.encuentrame3.util.Log;
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //https://firebase.google.com/docs/database/android/save-data
+//https://stackoverflow.com/questions/37890025/classmapper-warnings-after-upgrading-firebase
 @IgnoreExtraProperties
 public class Lugar extends Objeto
 {
@@ -322,8 +323,9 @@ public class Lugar extends Objeto
 		storageRef.delete().addOnCompleteListener(task ->
 				Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString()));
 
-		Uri file = Uri.fromFile(new File(path));
-		UploadTask uploadTask = storageRef.putFile(file);
+		File file = new File(path);
+		Uri uriToUpload = Uri.fromFile(file);
+		UploadTask uploadTask = storageRef.putFile(uriToUpload);
 		uploadTask.addOnProgressListener(t ->
 		{
 			@SuppressWarnings("VisibleForTests")

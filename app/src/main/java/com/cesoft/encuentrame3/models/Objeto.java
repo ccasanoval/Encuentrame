@@ -2,6 +2,9 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.google.firebase.database.Exclude;
+
 import java.util.Date;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,32 +21,37 @@ public class Objeto implements Parcelable
 
 	//General
 	protected String id = null;
-		public String getId(){return id;}
-		public void setId(String v){id = v;}
+        @Exclude public String getId(){return id;}
+        @Exclude public void setId(String v){id = v;}
 
 	protected String nombre;
 	protected String descripcion;
-		public String getNombre(){return nombre;}
-		public void setNombre(String v){nombre=v;}
-		public String getDescripcion(){return descripcion;}
-		public void setDescripcion(String v){descripcion=v;}
+        @Exclude public String getNombre(){return nombre;}
+        @Exclude public void setNombre(String v){nombre=v;}
+        @Exclude public String getDescripcion(){return descripcion;}
+        @Exclude public void setDescripcion(String v){descripcion=v;}
 
 	//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
+    //https://stackoverflow.com/questions/37890025/classmapper-warnings-after-upgrading-firebase
 	//^(?!.*(No setter|NativeCrypto|IOnlyOwnerSimSupport|Asset path|IInputConnectionWrapper)).*$
+	/*protected long fecha;
+        @Exclude public Date getFecha(){return new Date(fecha);}
+        @Exclude public void setFecha(Date v){fecha=v.getTime();}*/
 	protected Date fecha;
-		public Date getFecha(){return fecha;}
-		public void setFecha(Date v){fecha=v;}
+		@Exclude public Date getFecha(){return fecha;}
+		@Exclude public void setFecha(Date v){fecha=v;}
 
 	protected double latitud, longitud;
-		public double getLatitud(){return latitud;}
-		public double getLongitud(){return longitud;}
-		public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}//TODO: validacion
+        @Exclude public double getLatitud(){return latitud;}
+        @Exclude public double getLongitud(){return longitud;}
+        @Exclude public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}//TODO: validacion
 		//public void setLatitud(double v){latitud=v;}
 		//public void setLongitud(double v){longitud=v;}
 
 
 	//______________________________________________________________________________________________
 	Objeto() { fecha = new Date(); }
+	//Objeto() { fecha = new Date().getTime(); }
 	//______________________________________________________________________________________________
 	@Override public String toString()
 	{

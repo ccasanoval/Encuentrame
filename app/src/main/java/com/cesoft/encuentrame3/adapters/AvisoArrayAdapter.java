@@ -45,10 +45,10 @@ public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 		{
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.lista, parent, false);
 			holder = new ViewHolder();
-			holder.txtNombre = (TextView)convertView.findViewById(R.id.txtNombre);
-			holder.txtFecha = (TextView)convertView.findViewById(R.id.txtFecha);
-			holder.btnEditar = (ImageButton)convertView.findViewById(R.id.btnEditar);
-			holder.btnMapa = (ImageButton)convertView.findViewById(R.id.btnMapa);
+			holder.txtNombre = convertView.findViewById(R.id.txtNombre);
+			holder.txtFecha = convertView.findViewById(R.id.txtFecha);
+			holder.btnEditar = convertView.findViewById(R.id.btnEditar);
+			holder.btnMapa = convertView.findViewById(R.id.btnMapa);
 			convertView.setTag(holder);
 		}
 		else
