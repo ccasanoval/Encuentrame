@@ -54,6 +54,7 @@ import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 /// Created by Cesar_Casanova on 27/01/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //TODO: Si no hay avisos en bbdd quitar servicio, solo cuando se añada uno, activarlo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO: activity aware & pending intent
 @Singleton
 public class CesService extends IntentService
 		implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener

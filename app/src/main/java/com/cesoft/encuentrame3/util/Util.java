@@ -3,7 +3,6 @@ package com.cesoft.encuentrame3.util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -173,7 +172,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
     }
 
 	//______________________________________________________________________________________________
-	private void showLights(int color)
+	/*private void showLights(int color)
 	{
 		Notification.Builder builder = new Notification.Builder(_app);
 		builder
@@ -193,8 +192,8 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		notification.ledARGB = color;
 		notification.ledOnMS = 1000;
 		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		_nm.notify(1, notification);*/
-	}
+		_nm.notify(1, notification);
+	}*/
 
 	//______________________________________________________________________________________________
 	// NOTIFICATION
@@ -227,14 +226,18 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 				.setContentText(a.getNombre()+":"+a.getDescripcion())
 				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
-				//.setDefaults(Notification.DEFAULT_ALL)
+				.setDefaults(NotificationCompat.DEFAULT_ALL)
 				;
 		if( ! sSound.isEmpty())		notificationBuilder.setSound(Uri.parse(sSound));
 		else						notificationBuilder.setSound(null);
 
-		if(bLights)					//notificationBuilder.setLights(android.graphics.Color.RED, 500, 500);			//notificationBuilder.setLights(0xff00ff00, 300, 500);
-			showLights(android.graphics.Color.RED);//TODO: no funciona, llamar directamente a luces
-		else						notificationBuilder.setLights(0, 0, 0);
+		if(bLights) {
+			notificationBuilder
+					//.setDefaults(NotificationCompat.DEFAULT_VIBRATE | NotificationCompat.DEFAULT_SOUND | NotificationCompat.FLAG_SHOW_LIGHTS)
+					.setLights(0xff00ff00, 300, 100);//android.graphics.Color.RED
+			notificationBuilder.setLights(0xff, 0, 0);
+		}
+		//else notificationBuilder.setLights(0, 0, 0);
 
 		if(bVibrate)				//notificationBuilder.setVibrate(new long[]{1000L});//TODO: no funciona, llamar directamente a vibrar
 			vibrate(_app);

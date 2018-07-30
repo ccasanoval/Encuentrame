@@ -54,9 +54,6 @@ import com.cesoft.encuentrame3.util.Util;
 
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
-//TODO: Servicio solo arrancado si hay avisos activos!!! O es mejor que corra, simplemente aumentar delay?
-//TODO: https://github.com/geodynamics/specfem3d/wiki/Merging-Development-Branches-into-Master
-
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
 //TODO: Cambiar ListView por recyclerview
 //TODO: AVISO: no molestar mas por hoy
@@ -67,6 +64,14 @@ import com.cesoft.encuentrame3.util.Util;
 //TODO: Opcion que diga no preguntar por activar GPS (en tablet que no tiene gps... es un coñazo)
 //http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
 // small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
+
+//TODO:---------------------------------------------------------------------------------------------
+// CesService -> to intent pending
+// Servicio solo arrancado si hay avisos activos!!! O es mejor que corra, simplemente aumentar delay?
+// Guardar actividad de cada punto, desactivar servicios si esta parado, etc
+// https://developers.google.com/location-context/activity-recognition/
+// https://github.com/googlesamples/android-play-location
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
