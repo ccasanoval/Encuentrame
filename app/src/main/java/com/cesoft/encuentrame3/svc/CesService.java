@@ -114,7 +114,6 @@ public class CesService extends IntentService
 
 		DELAY_TRACK = DELAY_TRACK_MIN;
 		createListAviso();
-		//_util = ((App)getApplication()).getGlobalComponent().util();
 		App.getComponent(getApplicationContext()).inject(this);
 		_login.login(new Fire.AuthListener()
 		{
@@ -131,7 +130,6 @@ public class CesService extends IntentService
 			}
 		});
 		iniGeoTracking();
-		//Ruta.RutaPunto.eliminar(null);
 
 		EventBus.getDefault().register(this);
 	}
@@ -143,7 +141,10 @@ public class CesService extends IntentService
 	protected void onHandleIntent(Intent workIntent)
 	{
 		try
-		{
+		{//TODO:
+			//https://blog.xamarin.com/replacing-services-jobs-android-oreo-8-0/
+			//http://www.zoftino.com/android-job-scheduler-example
+			//http://www.vogella.com/tutorials/AndroidTaskScheduling/article.html
 			long tmLoad = System.currentTimeMillis() - 2* DELAY_LOAD;
 			while(_bRun)//No hay un sistema para listen y not polling??????
 			{
@@ -153,14 +154,12 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 					_login.login(new Fire.AuthListener()
 					{
 						@Override
-						public void onExito(FirebaseUser usr)
-						{
+						public void onExito(FirebaseUser usr) {
 							//Log.w(TAG, String.format("loop----------------------------------------Login OK:%s",usr));
 						}
 						@Override
-						public void onFallo(Exception e)
-						{
-							Log.e(TAG, String.format("loop------------------------------------------Login kk:%s",e), e);
+						public void onFallo(Exception e) {
+							Log.e(TAG, "loop------------------------------------------Login error:", e);
 						}
 					});
 					try{Thread.sleep(DELAY_TRACK_MIN);}catch(InterruptedException ignored){}
@@ -192,10 +191,8 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 	public void _restartDelayRuta()
 	{
 		DELAY_TRACK = DELAY_TRACK_MIN;
-Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 		saveGeoTracking();
 		_tmTrack = System.currentTimeMillis();
-		//if(_hiloLoop!=null)_hiloLoop.interrupt();Doesnt work
 	}
 
 	//______________________________________________________________________________________________
@@ -250,20 +247,12 @@ Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 				Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------"+err);
 			}
 		};
-		//return _lisAviso;
 	}
 	//______________________________________________________________________________________________
 	public void cargarListaGeoAvisos()
 	{
-		try
-		{
-			Aviso.getActivos(_lisAviso);
-		}
-		catch(Exception e)
-		{
-			Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------", e);
-			//_lista.clear();
-		}
+		try { Aviso.getActivos(_lisAviso); }
+		catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
 	}
 
 	//______________________________________________________________________________________________
@@ -273,7 +262,7 @@ Log.e(TAG, "_restartDelayRuta:------------------------------"+DELAY_TRACK);
 	{
 		final String sId = _util.getTrackingRoute();
 Log.e(TAG, "saveGeoTracking ************************************** "+_sId+" ***** "+sId);
-if(_sId.isEmpty())Log.e(TAG, "saveGeoTracking ************************************** _sId  ======= EMPTY ***********************************************************");
+if(_sId.isEmpty())Log.e(TAG, "saveGeoTracking ************************ _sId  ======= EMPTY *******************************");
 		if(sId.isEmpty())
 		{
 			stopTracking();
@@ -306,12 +295,6 @@ if(_sId.isEmpty())Log.e(TAG, "saveGeoTracking **********************************
 		});
 	}
 
-	/*public void handleResponse(Ruta r, String sId)
-	{
-		if(r == null)return;
-		final Location loc = _util.getLocation();
-		guardarPunto(loc, r, sId);
-	}*/
 
 	//----------------------------------------------------------------------------------------------
 	//TODO: puntos mas cercanos dependiendo de si tienes wifi? opcion de no guardar hasta tener wifi?
@@ -392,7 +375,6 @@ Log.w(TAG, "guardarPunto:----------------************************---------------
 		}
 		r.guardar(new GuardarListener(loc));
 		_locLastSaved = loc;
-Log.w(TAG, "guardarPunto:    B    *** ");
 	}
 
 
@@ -405,7 +387,7 @@ Log.w(TAG, "guardarPunto:    B    *** ");
 		@Override
 		protected void onDatos(String id)
 		{
-Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
+			Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
 			Ruta.addPunto(id, _loc.getLatitude(), _loc.getLongitude(), _loc.getAccuracy(),
 					_loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(), _lastActividad,
 				new Fire.SimpleListener<Long>()
@@ -492,7 +474,6 @@ Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
 			//LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
 			_fusedLocationClient.removeLocationUpdates(new LocationCallback());
 		DELAY_TRACK = DELAY_TRACK_MAX;
-//Log.e(TAG, "stopTracking:---------------------------------------------------------------------------");
 		_locLastSaved = null;
 		_locLast = null;
 		_velLast = 0;
@@ -500,12 +481,6 @@ Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
 
 
 	///------------------------ CALLBACKS ----------------------------------------------------------
-	/*@Override
-	public void onLocationChanged(Location location)
-	{
-		_util.setLocation(location);
-		Log.w(TAG, "----------------onLocationChanged:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
-	}*/
 	LocationCallback _locationCallback = new LocationCallback() {
 		@Override
 		public void onLocationResult(LocationResult locationResult) {
@@ -537,75 +512,7 @@ Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
 	//----------------------------------------------------------------------------------------------
 	public void pideGPS() {
 		_util.pideGPS(this, null, _LocationRequest);
-
-		/*LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-				.addLocationRequest(_LocationRequest)
-				.setAlwaysShow(true);
-		Task<LocationSettingsResponse> task = LocationServices
-						.getSettingsClient(this)
-						.checkLocationSettings(builder.build());
-
-		task.addOnCompleteListener(task1 -> {
-			try {
-				//LocationSettingsResponse response =
-				task1.getResult(ApiException.class);
-				// All location settings are satisfied. The client can initialize location requests here.
-			}
-			catch (ApiException exception) {
-				switch (exception.getStatusCode()) {
-					case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-						// Location settings are not satisfied. But could be fixed by showing the user a dialog.
-						try {
-							// Cast to a resolvable exception.
-							ResolvableApiException resolvable = (ResolvableApiException) exception;
-							// Show the dialog by calling startResolutionForResult(),
-							// and check the result in onActivityResult().
-							resolvable.startResolutionForResult(null,1000);
-						}
-						catch (IntentSender.SendIntentException e) {
-							// Ignore the error.
-						} catch (ClassCastException e) {
-							// Ignore, should be an impossible error.
-						}
-						break;
-					case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-						// Location settings are not satisfied. However, we have no way to fix the
-						// settings so we won't show the dialog.
-						break;
-				}
-			}
-		});*/
 	}
-	/*private void pideGPS()
-	{
-		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
-		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-				.addLocationRequest(_LocationRequest)
-				.setAlwaysShow(true)//so it ask for GPS activation like google maps
-				;
-		if(_GoogleApiClient == null)
-		{
-			Log.e(TAG, "pideGPS:e:------------------------------------------------------------------ GoogleApiClient == null");
-			return;
-		}
-		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(_GoogleApiClient, builder.build());
-		result.setResultCallback(result1 ->
-		{
-			final Status status = result1.getStatus();
-			switch(status.getStatusCode())
-			{
-			case LocationSettingsStatusCodes.SUCCESS:
-				Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
-				break;
-			case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-				try{status.startResolutionForResult(null, 1000);}catch(Exception ignored){}//catch(android.content.IntentSender.SendIntentException ignored){}
-				break;
-			case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-				Log.w(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
-				break;
-			}
-		});
-	}*/
 
 	//----------------------------------------------------------------------------------------------
 	// Restaura el servicio cuando se le mata el proceso
