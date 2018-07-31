@@ -177,8 +177,7 @@ public abstract class VistaBase
 		buildLocationRequest();
 		SupportMapFragment smf = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 		if(smf != null) smf.getMapAsync(this);
-		//Util.pideGPS(this, _GoogleApiClient, _LocationRequest);
-		Util.pideGPS2(this, _LocationRequest);
+		_util.pideGPS(this, this, _LocationRequest);
 		Log.e(TAG, "-------------------- ON START");
 	}
 

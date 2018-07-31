@@ -132,6 +132,7 @@
 	<string name="info_nor">\nBearing: %.0f º</string>
 	<string name="info_speed">\nSpeed: %.2f m/s</string>
 	<string name="info_speed2">\nSpeed: %.0f Km/h</string>
+	<string name="info_activity" translatable="false">\nActiv.: %s</string>
 
 	<string name="title_act_imagen">Picture</string>
 	<string name="tomar_imagen">Take a picture</string>
@@ -144,4 +145,14 @@
 	<string name="no_camera_hardware">There is no camera hardware in this device</string>
     <string name="error_img_path">Failed trying to get the image path</string>
 
+	<string name="in_vehicle">In a vehicle</string>
+	<string name="on_bicycle">On a bicycle</string>
+	<string name="on_foot">On foot</string>
+	<string name="running">Running</string>
+	<string name="still">Still</string>
+	<string name="tilting">Tilting</string>
+	<string name="unknown">Unknown activity</string>
+	<string name="walking">Walking</string>
+	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
+    <string name="active_gps">The tracking service needs you to activate the GPS</string>
 </resources>

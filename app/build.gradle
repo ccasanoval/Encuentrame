@@ -104,6 +104,9 @@ dependencies {
 	androidTestImplementation "com.android.support.test.espresso:espresso-intents:${VER_ESPRESSO}"
 	androidTestImplementation "com.android.support:support-annotations:${VER_ANDROID}"
 
+	//
+	implementation 'org.greenrobot:eventbus:3.1.1'
+
 	/*androidTestImplementation("com.android.support.test.espresso:espresso-contrib:2.2")
 	{
 		// Necessary to avoid version conflicts

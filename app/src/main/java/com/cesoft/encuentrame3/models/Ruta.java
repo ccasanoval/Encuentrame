@@ -355,10 +355,11 @@ public class Ruta extends Objeto implements Parcelable
 	//______________________________________________________________________________________________
 	public static void addPunto(final String idRuta, double lat, double lon,
 	                            float precision, double altura, float velocidad, float direccion,
+								int actividad,
 								final Fire.SimpleListener<Long> listener)
 	                            //final Fire.Transaccion listener)
 	{
-		RutaPunto pto = new RutaPunto(idRuta, lat, lon, precision, altura, velocidad, direccion);
+		RutaPunto pto = new RutaPunto(idRuta, lat, lon, precision, altura, velocidad, direccion, actividad);
 		pto.guardar((err, databaseReference) ->
 		{
 			if(err == null)
@@ -436,6 +437,17 @@ public class Ruta extends Objeto implements Parcelable
 			public float getDireccion(){return direccion;}
 			//public void setDireccion(float v){direccion = v;}
 
+//		DetectedActivity.STILL,
+//		DetectedActivity.ON_FOOT,
+//		DetectedActivity.WALKING,
+//		DetectedActivity.RUNNING,
+//		DetectedActivity.ON_BICYCLE,
+//		DetectedActivity.IN_VEHICLE,
+//		DetectedActivity.TILTING,
+//		DetectedActivity.UNKNOWN
+		private int actividad;//
+			public int getActividad(){return actividad;}
+
 		//__________________________________________________________________________________________
 		@Override public String toString()
 		{
@@ -444,8 +456,8 @@ public class Ruta extends Objeto implements Parcelable
 		}
 		//__________________________________________________________________________________________
 		@SuppressWarnings("unused") public RutaPunto(){}//NOTE: Constructor with no arguments required by Firebase !!!!!!!!!!!!!!!!!!!!
-		@SuppressWarnings("unused") RutaPunto(String idRuta, double lat, double lon, float precision,
-											  double altura, float velocidad, float direccion)
+		RutaPunto(String idRuta, double lat, double lon, float precision,
+						  double altura, float velocidad, float direccion, int actividad)
 		{
 			this.idRuta = idRuta;
 			this.latitud = lat;
@@ -455,6 +467,7 @@ public class Ruta extends Objeto implements Parcelable
 			this.altura = altura;
 			this.velocidad = velocidad;
 			this.direccion = direccion;
+			this.actividad = actividad;
 		}
 
 		//// PARCEL
@@ -535,7 +548,7 @@ public class Ruta extends Objeto implements Parcelable
 			}
 			saveGeo();
 		}
-		public static void getLista(String sIdRuta, final Fire.SimpleListener<Ruta.RutaPunto> listener)//final ValueEventListener listener)
+		public static void getLista(String sIdRuta, final Fire.SimpleListener<Ruta.RutaPunto> listener)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
 			//queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc

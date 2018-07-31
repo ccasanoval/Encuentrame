@@ -137,4 +137,15 @@
 	<string name="privacy_policy">Política de Privacidad</string>
 	<string name="no_camera_hardware">Este dispositivo no tiene cámara</string>
     <string name="error_img_path">Sucedió un error al recuperar la imagen de la cámara</string>
+
+	<string name="in_vehicle">En un vehículo</string>
+	<string name="on_bicycle">En bicicleta</string>
+	<string name="on_foot">De pie</string>
+	<string name="running">Corriendo</string>
+	<string name="still">Parado</string>
+	<string name="tilting">Inclinado</string>
+	<string name="unknown">Actividad desconocida</string>
+	<string name="walking">Caminando</string>
+	<string name="unidentifiable_activity">Actividad no identificada: %1$d</string>
+    <string name="active_gps">El servicio de tracking necesita que actives la localización por GPS</string>
 </resources>

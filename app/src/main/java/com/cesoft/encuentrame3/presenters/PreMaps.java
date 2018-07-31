@@ -194,7 +194,6 @@ public class PreMaps extends PresenterBase
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
-//if(r.getPuntosCount() != aData.length)Log.e(TAG, "showRuta:--------------------------------------------------------"+r.getPuntosCount()+"---<>--- "+aData.length);
 				((IMapsView)_view).showRutaHelper(r, aData);
 			}
 			@Override

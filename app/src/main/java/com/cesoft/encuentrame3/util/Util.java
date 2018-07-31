@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -31,6 +33,7 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -45,7 +48,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -93,19 +95,12 @@ public class Util
 	// LOCATION
 	//______________________________________________________________________________________________
 	private static Location _locLast;
-	public void setLocation(Location loc)
-	{
-		_locLast=loc;
-//System.err.println("Util.setLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
-	}
+	public void setLocation(Location loc) { _locLast=loc; }
 	public Location getLocation()
 	{
 		Location location1=null, location2=null;
 		try
 		{
-			//if(c == null)return null;
-			//LocationManager locationManager = (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
-
 			if(_lm == null)return _locLast;
 			boolean isGPSEnabled = _lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			boolean isNetworkEnabled = _lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -129,7 +124,6 @@ public class Util
 		{
 			se.printStackTrace();
 		}
-//System.err.println("Util.getLocation="+_locLast.getLatitude()+", "+_locLast.getLongitude()+", "+_locLast.getTime());
 		return _locLast;
     }
 
@@ -137,33 +131,9 @@ public class Util
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	/*public static void playNotificacion(Context c)
+	private static void vibrate(Context context)
 	{
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-		if(prefs.getBoolean("notifications_new_message", true))//true o false ha de coincidir con lo que tengas en pref_notificacion.xml
-		{
-System.err.println("-----------------------------Ding Dong!!!!!!!!!");
-			String sound = prefs.getString("notifications_new_message_ringtone", "");
-			if( ! sound.isEmpty())
-				playSound(_app, Uri.parse(sound));
-
-			if(prefs.getBoolean("notifications_new_message_vibrate", true))
-				vibrate(_app);
-		}
-	}
-
-	//______________________________________________________________________________________________
-	private static void playSound(Context c, Uri sound)
-	{
-		if(sound == null)
-			sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		Ringtone r = RingtoneManager.getRingtone(c, sound);
-		if(r != null)r.play();
-	}*/
-	//______________________________________________________________________________________________
-	private static void vibrate(Context c)
-	{
-        Vibrator vibrator = (Vibrator)c.getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
 		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
 		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
 		//vibrator.vibrate(pattern, -1);
@@ -172,43 +142,15 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
     }
 
 	//______________________________________________________________________________________________
-	/*private void showLights(int color)
-	{
-		Notification.Builder builder = new Notification.Builder(_app);
-		builder
-				.setSmallIcon(R.mipmap.ic_launcher)
-				//.setTicker("My Ticker")
-				.setWhen(System.currentTimeMillis())
-				.setAutoCancel(true)
-				.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND | Notification.FLAG_SHOW_LIGHTS)
-				.setLights(color, 300, 100)//color=0xff00ff00
-				//.setContentTitle("My Title 1")
-				//.setContentText("My Text 1")
-		;
-		Notification notification = builder.getNotification();
-		_nm.notify(1, notification);
-		/*_nm.cancel(1); // clear previous notification
-		final Notification notification = new Notification();
-		notification.ledARGB = color;
-		notification.ledOnMS = 1000;
-		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		_nm.notify(1, notification);
-	}*/
-
-	//______________________________________________________________________________________________
 	// NOTIFICATION
 	//______________________________________________________________________________________________
-	private void showAviso(String sTitulo, Aviso a, Intent intent)
+	private void showAviso(String sTitulo, Aviso aviso, Intent intent)
 	{
-		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-		if(prefs.getBoolean("notifications_new_message_type", true))
-			showNotificacionDlg(c, a, intent);
-		else*/
-			showNotificacion(sTitulo, a, intent);
+		showNotificacion(sTitulo, aviso, intent);
 	}
 	//______________________________________________________________________________________________
 	//private static int _idNotificacion = 1;
-	private void showNotificacion(String titulo, Aviso a, Intent intent)
+	private void showNotificacion(String titulo, Aviso aviso, Intent intent)
 	{
 		String sSound = _sp.getString("notifications_new_message_ringtone", "");
 		Boolean bVibrate = _sp.getBoolean("notifications_new_message_vibrate", false);
@@ -218,12 +160,12 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire(2000);
 
-		Integer idNotificacion = _conversor(a.getId());
+		Integer idNotificacion = _conversor(aviso.getId());
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
 				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(titulo)
-				.setContentText(a.getNombre()+":"+a.getDescripcion())
+				.setContentText(aviso.getNombre()+":"+aviso.getDescripcion())
 				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
 				.setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -241,23 +183,11 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 
 		if(bVibrate)				//notificationBuilder.setVibrate(new long[]{1000L});//TODO: no funciona, llamar directamente a vibrar
 			vibrate(_app);
-		else						notificationBuilder.setVibrate(null);
+		else
+			notificationBuilder.setVibrate(null);
 
-			//notificationBuilder.setSound(Uri.parse(sSound));
-		//visibility 	int: One of VISIBILITY_PRIVATE (the default), VISIBILITY_PUBLIC, or VISIBILITY_SECRET.
 		_nm.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
-
-		//http://stackoverflow.com/questions/18094791/android-notification-pendingintent-open-activity-per-notification-click
-		/*
-       setNumber(g_push.Counter)
-        .setWhen(g_push.Timestamp)
-        .setDeleteIntent(PendingIntent.getBroadcast(c, 0, new Intent(ACTION_CLEAR_NOTIFICATION), PendingIntent.FLAG_CANCEL_CURRENT))
-        .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE)
-        .setSound(Uri.parse(prefs.getString(
-                SharedPreferencesID.PREFERENCE_ID_PUSH_SOUND_URI,
-                "android.resource://ru.mail.mailapp/raw/new_message_bells")));
-		*/
 	}
 	//______________________________________________________________________________________________
 	private static int _conversor(String s)
@@ -269,17 +199,42 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 			sb.append(s.charAt(i) % 10);
 		return Integer.valueOf(sb.toString().substring(0, 9));
 	}
-	//______________________________________________________________________________________________
-	/*private static void showNotificacionDlg(Context c, Aviso a, Intent intent)
-	{
-		Intent i = new Intent(c, ActAvisoDlg.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.putExtra("aviso", a);
-		i.putExtra("intent", intent);
-		c.startActivity(i);
-		//Util.playNotificacion(c);Aqui no funcionaria
-	}*/
 
+	private void showNotifGPS()
+	{
+		String sSound = _sp.getString("notifications_new_message_ringtone", "");
+		Boolean bVibrate = _sp.getBoolean("notifications_new_message_vibrate", false);
+		Boolean bLights = _sp.getBoolean("notifications_new_message_lights", false);
+
+		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
+		wakeLock.acquire(2000);
+
+		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
+				.setSmallIcon(android.R.drawable.ic_menu_compass)
+				.setLargeIcon(BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
+				.setContentTitle(_app.getString(R.string.active_gps))
+				.setContentText("GPS")
+				//.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
+				.setAutoCancel(true)
+				.setDefaults(NotificationCompat.DEFAULT_ALL)
+				;
+		if( ! sSound.isEmpty())		notificationBuilder.setSound(Uri.parse(sSound));
+		else						notificationBuilder.setSound(null);
+
+		if(bLights) {
+			notificationBuilder
+					.setLights(0xff00ff00, 300, 100);//android.graphics.Color.RED
+			notificationBuilder.setLights(0xff, 0, 0);
+		}
+
+		if(bVibrate)
+			vibrate(_app);
+		else
+			notificationBuilder.setVibrate(null);
+
+		_nm.notify(6969, notificationBuilder.build());
+		wakeLock.release();
+	}
 
 	//______________________________________________________________________________________________
 	/// TEXT TO SPEECH
@@ -400,13 +355,10 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	private SimpleDateFormat timeFormatter = null;
 	public String formatTiempo(long t)
 	{
-		//Calendar cal = Calendar.getInstance();
-		//cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-		//cal.setTimeInMillis(t);
 		if(timeFormatter == null)
 		{
 			timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
-			timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+			//timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return timeFormatter.format(new Date(t));//cal.getTime());
 	}
@@ -415,12 +367,10 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	public String formatFecha(Date date)
 	{
 		if(date == null)return "";
-		//DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(_app);
-		//return dateFormat.format(date);
 		if(dateFormatter == null)
 		{
 			dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-			dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+			//dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return dateFormatter.format(date);
 	}
@@ -432,7 +382,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		if(dateTimeFormatter == null)
 		{
 			dateTimeFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-			dateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+			//dateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return dateTimeFormatter.format(date);
 	}
@@ -466,7 +416,7 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 		dlg.show();
 	}
 
-	//----------------------------------------------------------------------------------------------
+	//______________________________________________________________________________________________
 	//TODO: static vs injected ?!
 	public static void exeDelayed(long delay, Runnable runnable)
 	{
@@ -474,42 +424,12 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
 	}
 
 	//______________________________________________________________________________________________
-	/*public static void pideGPS(Activity a, GoogleApiClient googleApiClient, LocationRequest locationRequest)
-	{
-		//https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi
+	public void pideGPS(Context settingsClient, Activity act, LocationRequest locationRequest) {
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
 				.addLocationRequest(locationRequest)
-				.setAlwaysShow(true)//so it ask for GPS activation like google maps
-				//.addLocationRequest()
-				;
-		PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-		result.setResultCallback(res ->
-		{
-			final Status status = res.getStatus();
-			//final LocationSettingsStates le = result.getLocationSettingsStates();
-			switch(status.getStatusCode())
-			{
-				case LocationSettingsStatusCodes.SUCCESS:
-					Log.w(TAG, "LocationSettingsStatusCodes.SUCCESS");
-					// All location settings are satisfied. The client can initialize location requests here.
-					break;
-				case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-					try{status.startResolutionForResult(a, 1000);}catch(android.content.IntentSender.SendIntentException ignored){}
-					break;
-				case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-					Log.w(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
-					// Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
-					break;
-			}
-		});
-	}*/
-
-	public static void pideGPS2(Activity a, LocationRequest locationRequest) {
-		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-				.addLocationRequest(locationRequest);
-		builder.setAlwaysShow(true);
+				.setAlwaysShow(true);
 		Task<LocationSettingsResponse> task =
-				LocationServices.getSettingsClient(a).checkLocationSettings(builder.build());
+				LocationServices.getSettingsClient(settingsClient).checkLocationSettings(builder.build());
 
 		task.addOnCompleteListener(task1 -> {
             try {
@@ -524,13 +444,19 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
                         try {
                             // Cast to a resolvable exception.
                             ResolvableApiException resolvable = (ResolvableApiException) exception;
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            resolvable.startResolutionForResult(a,1000);
+                            // Show the dialog by calling startResolutionForResult(), and check the result in onActivityResult().
+							if(act != null)
+                            	resolvable.startResolutionForResult(act,1000);
+							else {
+								showNotifGPS();
+
+								//TODO: Notificacion pidiendo que arranque GPS
+							}
                         }
-                        catch (IntentSender.SendIntentException e) {
+                        catch(IntentSender.SendIntentException e) {
                             // Ignore the error.
-                        } catch (ClassCastException e) {
+                        }
+                        catch(ClassCastException e) {
                             // Ignore, should be an impossible error.
                         }
                         break;
@@ -543,4 +469,29 @@ System.err.println("-----------------------------Ding Dong!!!!!!!!!");
         });
 	}
 
+
+	//______________________________________________________________________________________________
+	public String getActivityString(int detectedActivityType) {
+		Resources resources = _app.getResources();
+		switch(detectedActivityType) {
+			case DetectedActivity.IN_VEHICLE:
+				return resources.getString(R.string.in_vehicle);
+			case DetectedActivity.ON_BICYCLE:
+				return resources.getString(R.string.on_bicycle);
+			case DetectedActivity.ON_FOOT:
+				return resources.getString(R.string.on_foot);
+			case DetectedActivity.RUNNING:
+				return resources.getString(R.string.running);
+			case DetectedActivity.STILL:
+				return resources.getString(R.string.still);
+			case DetectedActivity.TILTING:
+				return resources.getString(R.string.tilting);
+			case DetectedActivity.UNKNOWN:
+				return resources.getString(R.string.unknown);
+			case DetectedActivity.WALKING:
+				return resources.getString(R.string.walking);
+			default:
+				return resources.getString(R.string.unidentifiable_activity, detectedActivityType);
+		}
+	}
 }

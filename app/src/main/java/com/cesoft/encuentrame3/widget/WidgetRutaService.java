@@ -42,30 +42,29 @@ public class WidgetRutaService extends Service
 	private Util _util;
 
 	//----
-	public static Intent bindSvc(ServiceConnection sc, Context c)
+	public static void bindSvc(ServiceConnection sc, Context c)
 	{
 		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
 		c.bindService(serviceIntent, sc, Context.BIND_AUTO_CREATE);
-		return serviceIntent;
+		//return serviceIntent;
 	}
-	public static void unbindSvc(ServiceConnection sc, Context c)//, Intent serviceIntent)
+	public static void unbindSvc(ServiceConnection sc, Context c)
 	{
 		c.unbindService(sc);
-		//c.stopService(serviceIntent);
 	}
 	//----
-	public static void startSvc(Context c)
+	public static void startSvc(Context context)
 	{
-		Log.e(TAG, "____________________startSvc__A_____________________________");
-		if(isServiceRunning(c, WidgetRutaService.class))return;
-		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
-		c.startService(serviceIntent);
-		//return serviceIntent;
-		Log.e(TAG, "____________________startSvc__B_____________________________");
+		//Log.e(TAG, "____________________startSvc__A_____________________________");
+		if(isServiceRunning(context, WidgetRutaService.class))return;
+		Intent serviceIntent = new Intent(context, WidgetRutaService.class);
+		context.startService(serviceIntent);
+		//Log.e(TAG, "____________________startSvc__B_____________________________");
 	}
 	private static boolean isServiceRunning(Context c, Class<?> serviceClass)
 	{
 		ActivityManager manager = (ActivityManager)c.getSystemService(Context.ACTIVITY_SERVICE);
+		if(manager != null)
 		for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
 		{
 			if(serviceClass.getName().equals(service.service.getClassName()))
@@ -75,18 +74,13 @@ public class WidgetRutaService extends Service
 		}
 		return false;
 	}
-	/*public static void stopSvc(Activity act, Intent serviceIntent)
-	{
-		if(act != null && serviceIntent != null)
-		act.stopService(serviceIntent);
-	}*/
 
 	//______________________________________________________________________________________________
 	@Override
 	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
-Log.w(TAG, "--------------onStartCommand----------------------------------------------------");
+		//Log.w(TAG, "--------------onStartCommand----------------------------------------------------");
 		_util = App.getComponent(getApplicationContext()).util();
 
 		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
@@ -132,7 +126,7 @@ Log.w(TAG, "--------------onStartCommand----------------------------------------
 	private void payLoad()
 	{
 		String idRuta = _util.getTrackingRoute();
-Log.w(TAG, "_________________________________________payLoad________________________________________"+idRuta);
+		//Log.w(TAG, "_________________________________________payLoad________________________________________"+idRuta);
 		if(idRuta.isEmpty())
 		{
 			borrarRuta();
@@ -212,18 +206,19 @@ Log.w(TAG, "_________________________________________payLoad____________________
 	@Override
 	public void onTaskRemoved(Intent rootIntent)
 	{
-		Log.e(TAG, "-------------------onTaskRemoved---------------------");
+		Log.e(TAG, "-------------------------------onTaskRemoved-------------------------------");
 		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
 		restartServiceIntent.setPackage(getPackageName());
 
 		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
 		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+		if(alarmService != null)
 		alarmService.set(
 				AlarmManager.ELAPSED_REALTIME,
 				SystemClock.elapsedRealtime() + 500,
 				restartServicePendingIntent);
 
-		Log.e(TAG, "-------------------Reiniciando...---------------------");
+		Log.e(TAG, "-------------------------------Reiniciando...-------------------------------");
 		super.onTaskRemoved(rootIntent);
 	}
 }

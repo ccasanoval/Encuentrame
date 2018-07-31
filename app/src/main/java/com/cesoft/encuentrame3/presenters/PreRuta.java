@@ -293,7 +293,6 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
-				//Log.e(TAG, "------------------------------DatosListener --------------------------------------"+aData.length);
 				showRutaHelper(aData);
 			}
 			@Override
@@ -360,6 +359,7 @@ public class PreRuta extends PresenterBase
 				snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_speed), pto.getVelocidad());
 			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_nor), pto.getDireccion());
 			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_alt), pto.getAltura());
+			snippet += String.format(_app.getString(R.string.info_activity), _util.getActivityString(pto.getActividad()));
 			mo.snippet(snippet);
 
 			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
