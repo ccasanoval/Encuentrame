@@ -72,6 +72,8 @@ import com.cesoft.encuentrame3.util.Util;
 // https://developers.google.com/location-context/activity-recognition/
 // https://github.com/googlesamples/android-play-location
 
+//TODO:
+//https://developer.android.com/training/monitoring-device-state/doze-standby?hl=es-419
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
@@ -89,7 +91,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
 		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_content);
-Log.e(TAG, "----------- MAIN CREATE");
 		_login = ((App)getApplication()).getGlobalComponent().login();
 		if(!_login.isLogged())gotoLogin();
 
@@ -104,7 +105,6 @@ Log.e(TAG, "----------- MAIN CREATE");
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
-Log.e(TAG, "----------- MAIN RE CREATE");
 		gotoPage(intent);
 		showMensaje(intent);
 	}
@@ -114,13 +114,11 @@ Log.e(TAG, "----------- MAIN RE CREATE");
 	{
 		super.onDestroy();
 		_viewPager = null;
-//Log.e(TAG, "----------- MAIN DESTROY");
 	}
 	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onStart()
 	{
-Log.e(TAG, "----------- MAIN START");
 		super.onStart();
 		pideGPS();
 		if(!_login.isLogged())gotoLogin();

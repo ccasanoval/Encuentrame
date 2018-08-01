@@ -8,6 +8,8 @@ import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
 import com.cesoft.encuentrame3.svc.ActividadIntentService;
 import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
+import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.squareup.leakcanary.LeakCanary;
 
@@ -35,18 +37,27 @@ public class App extends Application
 		WidgetRutaService.startSvc(this);
 		CesService.start(this);
 		ActividadIntentService.start(this);
+		LoadGeofenceJobService.start(this);
+		GeoTrackingJobService.start(this);
 	}
 
 	public static GlobalComponent getComponent(Context context)
 	{
+		if(context == null)return null;
 		return ((App)context.getApplicationContext()).getGlobalComponent();
 	}
-	 public GlobalComponent getGlobalComponent()
-	 {
-		 if(_globalComponent == null)
+	public GlobalComponent getGlobalComponent()
+	{
+		if(_globalComponent == null)
 			_globalComponent = DaggerGlobalComponent.builder()
-                .globalModule(new GlobalModule(this))
-                .build();
-		 return _globalComponent;
-	 }
+				.globalModule(new GlobalModule(this))
+				.build();
+		return _globalComponent;
+	}
+
+	public void iniServicesDependantOnLogin() {
+		//ActividadIntentService.start(this);TODO
+		LoadGeofenceJobService.start(this);
+		GeoTrackingJobService.start(this);
+	}
 }

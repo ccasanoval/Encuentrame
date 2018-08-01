@@ -22,7 +22,7 @@ public class ActividadIntentService extends IntentService {
 
     // Time between activity detections. Larger values result in fewer detections while improving
     // battery life. A value of 0 results in activity detections at the fastest rate possible
-    static final long DETECTION_INTERVAL_IN_MILLISECONDS = 30 * 1000; // 30 seconds
+    static final long DETECTION_INTERVAL_IN_MILLISECONDS = 10 * 1000;//TODO: Settings
     private static PendingIntent getPendingIntent(Context context) {
         // FLAG_UPDATE_CURRENT to get the same pending intent back when ini and destroy service
         Intent intent = new Intent(context, ActividadIntentService.class);
@@ -64,19 +64,19 @@ public class ActividadIntentService extends IntentService {
         //EventBus.getDefault().post(new ActividadEvent(detectedActivities));
         DetectedActivity act = getMostProbableAct(detectedActivities);
         //DetectedActivity act2 = getNextMostProbableAct(detectedActivities, act);
-        if(act != null && act.getConfidence() >= 40) {
+        if(act != null && act.getConfidence() >= 30) {
             EventBus.getDefault().post(new ActividadEvent(act));
         }
         //else if(act2 != null && act2.getConfidence() >= 30){
 
-        Log.e(TAG, "--------------------------------------------------------------------");
-        Log.e(TAG, "---IN_VEHICLE = 0;   ON_BICYCLE = 1;   ON_FOOT = 2;     STILL   = 3;");
-        Log.e(TAG, "---UNKNOWN    = 4;   TILTING    = 5;   WALKING = 7;     RUNNING = 8;");
-        Log.e(TAG, "-------------------activities selected: "+act);
+        //Log.e(TAG, "--------------------------------------------------------------------");
+        //Log.e(TAG, "---IN_VEHICLE = 0;   ON_BICYCLE = 1;   ON_FOOT = 2;     STILL   = 3;");
+        //Log.e(TAG, "---UNKNOWN    = 4;   TILTING    = 5;   WALKING = 7;     RUNNING = 8;");
+        /*Log.e(TAG, "-------------------activities selected: "+act);
         Log.e(TAG, "-------------------activities detected: "+detectedActivities.size());
         for(DetectedActivity da: detectedActivities) {
             Log.e(TAG, "------"+da.getType() + " " + da.getConfidence() + "%");
-        }
+        }*/
     }
 
     public static DetectedActivity getMostProbableAct(List<DetectedActivity> list)
@@ -93,22 +93,6 @@ public class ActividadIntentService extends IntentService {
         }
         return mostProbable;
     }
-    /*public static DetectedActivity getNextMostProbableAct(List<DetectedActivity> list, DetectedActivity act0)
-    {
-        if(act0 == null)return null;
-        DetectedActivity mostProbable = null;
-        int confidence = 0;
-        for(DetectedActivity act : list) {
-            if(act.getType() != act0.getType()
-                && act.getConfidence() <= act0.getConfidence()
-                && act.getConfidence() > confidence)
-            {
-                confidence = act.getConfidence();
-                mostProbable = act;
-            }
-        }
-        return mostProbable;
-    }*/
 
     public static class ActividadEvent {
         private DetectedActivity actividad;
@@ -116,10 +100,5 @@ public class ActividadIntentService extends IntentService {
         ActividadEvent(DetectedActivity actividad) {
             this.actividad = actividad;
         }
-        /*private List<DetectedActivity> lista;
-        public List<DetectedActivity> getLista() { return lista; }
-        ActividadEvent(List<DetectedActivity> lista) {
-            this.lista = lista;
-        }*/
     }
 }

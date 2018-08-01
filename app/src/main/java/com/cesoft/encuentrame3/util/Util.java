@@ -25,6 +25,7 @@ import android.widget.EditText;
 
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActMain;
+import com.cesoft.encuentrame3.ActMaps;
 import com.cesoft.encuentrame3.adapters.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
@@ -200,8 +201,17 @@ public class Util
 		return Integer.valueOf(sb.toString().substring(0, 9));
 	}
 
+	private long _lastShowNotifGPS = 0;
+	private long _delayShowNotifGPS = 0;
 	private void showNotifGPS()
 	{
+		//TODO: Settings: ask for activating GPS if its not activated...
+		//TODO: Only ask if there is a route or geofence active!!
+		if(_delayShowNotifGPS < 60*60*1000)
+			_delayShowNotifGPS += 5*60*1000;
+		if(_lastShowNotifGPS + _delayShowNotifGPS > System.currentTimeMillis())return;
+		_lastShowNotifGPS = System.currentTimeMillis();
+
 		String sSound = _sp.getString("notifications_new_message_ringtone", "");
 		Boolean bVibrate = _sp.getBoolean("notifications_new_message_vibrate", false);
 		Boolean bLights = _sp.getBoolean("notifications_new_message_lights", false);
@@ -209,12 +219,15 @@ public class Util
 		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire(2000);
 
+		Intent intent = new Intent(_app, ActMaps.class);
+		int idNotificacion = 6969;
+
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_compass)
 				.setLargeIcon(BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(_app.getString(R.string.active_gps))
 				.setContentText("GPS")
-				//.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
+				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
 				.setDefaults(NotificationCompat.DEFAULT_ALL)
 				;
@@ -448,9 +461,7 @@ public class Util
 							if(act != null)
                             	resolvable.startResolutionForResult(act,1000);
 							else {
-								showNotifGPS();
-
-								//TODO: Notificacion pidiendo que arranque GPS
+								showNotifGPS();//TODO: Evitar que salga continuamente... timer...
 							}
                         }
                         catch(IntentSender.SendIntentException e) {

@@ -11,7 +11,6 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,7 +25,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -34,7 +32,6 @@ import com.google.android.gms.location.LocationServices;
 
 import com.google.firebase.auth.FirebaseUser;			//TODO: todo la logica BBDD a clase Fire
 
-import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Ruta;
 
 import org.greenrobot.eventbus.EventBus;
@@ -51,7 +48,6 @@ import static com.cesoft.encuentrame3.util.Constantes.DELAY_TRACK_MAX;
 import static com.cesoft.encuentrame3.util.Constantes.DELAY_TRACK_MIN;
 import static com.cesoft.encuentrame3.util.Constantes.DISTANCE_MAX;
 import static com.cesoft.encuentrame3.util.Constantes.DISTANCE_MIN;
-import static com.cesoft.encuentrame3.util.Constantes.GEOFEN_DWELL_TIME;
 import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 
 
@@ -74,8 +70,8 @@ public class CesService extends IntentService
 	@Inject	Util _util;
 	@Inject	Login _login;
 
-	private CesGeofenceStore _GeofenceStoreAvisos;
-	private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
+	//private CesGeofenceStore _GeofenceStoreAvisos;
+	//private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
 	private int _lastActividad = DetectedActivity.STILL;
 
 	//----------------------------------------------------------------------------------------------
@@ -88,9 +84,9 @@ public class CesService extends IntentService
 			{
 				INSTANCE._bRun=false;
 				INSTANCE.stopSelf();
-				if(INSTANCE._GeofenceStoreAvisos != null)
-					INSTANCE._GeofenceStoreAvisos.clear();
-				INSTANCE._GeofenceStoreAvisos = null;
+//				if(INSTANCE._GeofenceStoreAvisos != null)
+//					INSTANCE._GeofenceStoreAvisos.clear();
+//				INSTANCE._GeofenceStoreAvisos = null;
 				INSTANCE = null;
 			}
 		}
@@ -113,7 +109,7 @@ public class CesService extends IntentService
 		super.onCreate();
 
 		DELAY_TRACK = DELAY_TRACK_MIN;
-		createListAviso();
+		//createListAviso();
 		App.getComponent(getApplicationContext()).inject(this);
 		_login.login(new Fire.AuthListener()
 		{
@@ -167,7 +163,7 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 				}
 				if(tmLoad + DELAY_LOAD < System.currentTimeMillis())
 				{
-					cargarListaGeoAvisos();
+					//cargarListaGeoAvisos();
 					tmLoad = System.currentTimeMillis();
 				}
 				else if(_tmTrack + DELAY_TRACK < System.currentTimeMillis()
@@ -196,7 +192,7 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 	}
 
 	//______________________________________________________________________________________________
-	private Fire.DatosListener<Aviso> _lisAviso;
+	/*private Fire.DatosListener<Aviso> _lisAviso;
 	private void createListAviso()
 	{
 		final Context context = getApplicationContext();
@@ -253,7 +249,7 @@ Log.w(TAG, String.format(Locale.ENGLISH, "CesService:loop---------------------DE
 	{
 		try { Aviso.getActivos(_lisAviso); }
 		catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
-	}
+	}*/
 
 	//______________________________________________________________________________________________
 	private Location _locLastSaved = null;

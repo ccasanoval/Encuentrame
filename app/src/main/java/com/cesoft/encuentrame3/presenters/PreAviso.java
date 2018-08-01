@@ -6,7 +6,7 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -36,8 +36,9 @@ public class PreAviso extends PresenterBase
 	}*/
 
 	private Util _util;
-	private CesService _servicio;
-	@Inject PreAviso(Application app, Util util, CesService servicio)
+	//private CesService _servicio;
+	private LoadGeofenceJobService _servicio;
+	@Inject PreAviso(Application app, Util util, LoadGeofenceJobService servicio)
 	{
 		super(app);
 		_util = util;

@@ -11,7 +11,7 @@ public class Constantes
 	public static final long ACCURACY_MAX = 15;//m
 	public static final long DISTANCE_MIN = 16;//m
 	public static final long DISTANCE_MAX = 50;//m
-	public static final long DELAY_LOAD = DELAY_TRACK_MAX;
+	public static final long DELAY_LOAD = DELAY_TRACK_MAX;//TODO: rename DELAY_LOAD_GEOFENCE
 	public static final long SPEED_MAX = 60;// m/s => 50=180km/h 60=216Km/h
 	public static final long ACCEL_MAX = 6;// m/s2
 	// Cuando se actualiza el widget?
@@ -23,4 +23,7 @@ public class Constantes
 	public static final String WIN_TAB = "wintab", MENSAJE = "mensaje";
 	static final String DIRTY = "dirty";
 	public static final String NOTIF = "notificacion";
+
+	public static final int ID_JOB_GEOFENCE_LOADING = 69;
+	public static final int ID_JOB_TRACKING = 70;
 }

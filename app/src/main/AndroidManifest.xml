@@ -99,6 +99,15 @@
 			android:name=".svc.CesService"
 			android:exported="false"/>
 
+		<service
+			android:name=".svc.LoadGeofenceJobService"
+			android:label="GeoFence Load Service"
+			android:permission="android.permission.BIND_JOB_SERVICE" />
+		<service
+			android:name=".svc.GeoTrackingJobService"
+			android:label="GeoTraking Service"
+			android:permission="android.permission.BIND_JOB_SERVICE" />
+
 		<receiver
 			android:name=".svc.CesGeofenceReceiver"
 			android:exported="false">
@@ -107,7 +116,8 @@
 			</intent-filter>
 		</receiver>
 
-		<receiver android:name=".svc.CesOnSysBoot">
+		<receiver
+			android:name=".svc.CesOnSysBoot">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
 			</intent-filter>

@@ -26,10 +26,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -59,30 +56,21 @@ public class ActLogin extends AppCompatActivity
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
 		SectionsPagerAdapter SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
-		ViewPager viewPager = (ViewPager)findViewById(R.id.container);
+		ViewPager viewPager = findViewById(R.id.container);
 		if(viewPager != null)
 		viewPager.setAdapter(SectionsPagerAdapter);
-		_tabLayout = (TabLayout)findViewById(R.id.tabs);
+		_tabLayout = findViewById(R.id.tabs);
 		if(_tabLayout != null)
 		{
 			_tabLayout.setupWithViewPager(viewPager);
 			_tabLayout.setSelectedTabIndicatorHeight(10);
 		}
-
-		//
-		//--- INICIAR
-		// Ya lo hago en App !!!
-		//Crea servicio si no está ya creado, dentro del servicio se llama a login
-		//startService(new Intent(this, CesService.class));
-		// Rute Widget Svc
-		//WidgetRutaService.startSvc(this);
 	}
 
 	public void onDestroy()
 	{
 		super.onDestroy();
 		_tabLayout = null;
-		//WidgetRutaService.stopServ(this, _serviceIntent);
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
@@ -165,7 +153,8 @@ public class ActLogin extends AppCompatActivity
 				if(result.isSuccess())
 				{
 					GoogleSignInAccount account = result.getSignInAccount();
-					firebaseAuthWithGoogle(account);
+					if(account != null)
+						firebaseAuthWithGoogle(account);
 				}
 				else
 				{
@@ -180,26 +169,20 @@ public class ActLogin extends AppCompatActivity
 			final String usr = acct.getEmail();
 			Log.e(TAG, "firebaseAuthWithGoogle:"+acct.getId()+" ::: "+acct.getEmail());
 			AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-			_FirebaseAuth.signInWithCredential(credential).addOnCompleteListener(this.getActivity(),
-				new OnCompleteListener<AuthResult>()
-				{
-					@Override
-					public void onComplete(@NonNull Task<AuthResult> task)
-					{
+			_FirebaseAuth.signInWithCredential(credential).addOnCompleteListener(_main,
+					task -> {
 						if (!task.isSuccessful())
 						{
-							//Log.w(TAG, "signInWithCredential", task.getException());
 							Toast.makeText(PlaceholderFragment.this._main, "Authentication failed.", Toast.LENGTH_SHORT).show();
 						}
 						else
 						{
-							//Log.w(TAG, "signInWithCredential: "+task.getResult());
+							((App)_main.getApplication()).iniServicesDependantOnLogin();
 							_main.finEsperaLogin();
 							Toast.makeText(_main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
 							_main.goMain();
 						}
-					}
-				});
+					});
 		}
 
 
@@ -222,119 +205,101 @@ public class ActLogin extends AppCompatActivity
 		{
 			super.onCreate(b);
 			//App.getInstance().getGlobalComponent().inject(this);
-			_login = App.getComponent(getContext()).login();
+			_login = App.getComponent(_main).login();
 		}
 		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			if(_login.isLogged())_main.goMain();
 
-			final int sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
+			final int sectionNumber = getArguments()!=null ? getArguments().getInt(ARG_SECTION_NUMBER) : 0;
 			final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
-			final TextView lblTitulo = (TextView)rootView.findViewById(R.id.lblTitulo);
-			final EditText txtPassword = (EditText)rootView.findViewById(R.id.txtPassword);
-			final EditText txtPassword2 = (EditText)rootView.findViewById(R.id.txtPassword2);
-			final EditText txtEmail = (EditText)rootView.findViewById(R.id.txtEmail);
-			final Button btnSend = (Button)rootView.findViewById(R.id.btnSend);
-			final SignInButton btnGoogle = (SignInButton)rootView.findViewById(R.id.btnGoogle);
-			final TextInputLayout lblPassword = (TextInputLayout)rootView.findViewById(R.id.lblPassword);
-			final TextInputLayout lblPassword2 = (TextInputLayout)rootView.findViewById(R.id.lblPassword2);
+			final TextView lblTitulo = rootView.findViewById(R.id.lblTitulo);
+			final EditText txtPassword = rootView.findViewById(R.id.txtPassword);
+			final EditText txtPassword2 = rootView.findViewById(R.id.txtPassword2);
+			final EditText txtEmail = rootView.findViewById(R.id.txtEmail);
+			final Button btnSend = rootView.findViewById(R.id.btnSend);
+			final SignInButton btnGoogle = rootView.findViewById(R.id.btnGoogle);
+			final TextInputLayout lblPassword = rootView.findViewById(R.id.lblPassword);
+			final TextInputLayout lblPassword2 = rootView.findViewById(R.id.lblPassword2);
 
 			switch(sectionNumber)
 			{
 			case ENTER://----------------------- ----------------------------------------------------
 				lblPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));
-				btnSend.setOnClickListener(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						_main.iniEsperaLogin();
-						_login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
-								new Fire.AuthListener()
-								{
-									@Override
-									public void onExito(FirebaseUser usr)
-									{
-										_main.finEsperaLogin();
-										Toast.makeText(_main, String.format(getString(R.string.login_ok), usr.getEmail()), Toast.LENGTH_LONG).show();
-										_main.goMain();
-									}
-									@Override
-									public void onFallo(Exception e)
-									{
-										_main.finEsperaLogin();
-										Toast.makeText(_main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
-									}
-								});
+				btnSend.setOnClickListener(v -> {
+                    _main.iniEsperaLogin();
+                    _login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
+                            new Fire.AuthListener()
+                            {
+                                @Override
+                                public void onExito(FirebaseUser usr)
+                                {
+									((App)_main.getApplication()).iniServicesDependantOnLogin();
+                                    _main.finEsperaLogin();
+                                    Toast.makeText(_main, String.format(getString(R.string.login_ok), usr.getEmail()), Toast.LENGTH_LONG).show();
+                                    _main.goMain();
+                                }
+                                @Override
+                                public void onFallo(Exception e)
+                                {
+                                    _main.finEsperaLogin();
+                                    Toast.makeText(_main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                });
+				txtPassword.setOnEditorActionListener((v, actionId, event) -> {
+                    if((event != null && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER))
+                            || (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE))
+                    {
+                        btnSend.callOnClick();
 					}
-				});
-				txtPassword.setOnEditorActionListener(new android.widget.TextView.OnEditorActionListener()
-				{
-					public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event)
-					{
-						if((event != null && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER))
-								|| (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE))
-						{
-							btnSend.callOnClick();
-                        }
-                        return false;
-			        }
-			    });
+					return false;
+                });
 				GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 					.requestIdToken(getString(R.string.default_web_client_id))
 					.requestEmail()
 					.build();
-				_GoogleApiClient = new GoogleApiClient.Builder(this.getContext())
-						.enableAutoManage(this.getActivity()/* FragmentActivity */, this/* OnConnectionFailedListener */)
+				_GoogleApiClient = new GoogleApiClient.Builder(_main)
+						.enableAutoManage(_main/* FragmentActivity */, this/* OnConnectionFailedListener */)
 						.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
 						.build();
 				_FirebaseAuth = FirebaseAuth.getInstance();
-				btnGoogle.setOnClickListener(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View view)
-					{
-						Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(_GoogleApiClient);
-						startActivityForResult(signInIntent, RC_SIGN_IN);
-					}
-				});
+				btnGoogle.setOnClickListener(view -> {
+                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(_GoogleApiClient);
+                    startActivityForResult(signInIntent, RC_SIGN_IN);
+                });
 				break;
 
 			case REGISTER://------------------------------------------------------------------------
 				btnGoogle.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.register_lbl));
-				btnSend.setOnClickListener(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
-						{
-							Toast.makeText(_main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
-							return;
-						}
-						_main.iniEsperaLogin();
-						Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
-								new Fire.AuthListener()
-								{
-									@Override
-									public void onExito(FirebaseUser usr)
-									{
-										_main.finEsperaLogin();
-										if(usr != null)
-											Toast.makeText(_main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
-									}
-									@Override
-									public void onFallo(Exception e)
-									{
-										_main.finEsperaLogin();//TODO: Añadir %s en la cadena
-										Toast.makeText(_main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
-									}
-								});
-					}
-				});
+				btnSend.setOnClickListener(v -> {
+                    if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
+                    {
+                        Toast.makeText(_main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    _main.iniEsperaLogin();
+                    Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
+                            new Fire.AuthListener()
+                            {
+                                @Override
+                                public void onExito(FirebaseUser usr)
+                                {
+                                    _main.finEsperaLogin();
+                                    if(usr != null)
+                                        Toast.makeText(_main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
+                                }
+                                @Override
+                                public void onFallo(Exception e)
+                                {
+                                    _main.finEsperaLogin();//TODO: Añadir %s en la cadena
+                                    Toast.makeText(_main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                });
 				break;
 
 			case RECOVER://-------------------------------------------------------------------------
@@ -342,31 +307,24 @@ public class ActLogin extends AppCompatActivity
 				lblPassword.setVisibility(View.GONE);
 				lblPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.recover_lbl));
-				btnSend.setOnClickListener(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						Login.restoreUser(txtEmail.getText().toString(),
-							new Fire.AuthListener()
-							{
-								@Override
-								public void onExito(FirebaseUser usr)
-								{
-									//System.err.println("ActLogin:RECOVER:"+usr);
-									Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-									TabLayout.Tab t = _main._tabLayout.getTabAt(ENTER);
-									if(t!=null)t.select();
-								}
-								@Override
-								public void onFallo(Exception e)
-								{
-									Log.e(TAG, String.format("RECOVER:e:%s",e), e);
-									Toast.makeText(rootView.getContext(), R.string.recover_ko +"  "+ e.toString(), Toast.LENGTH_LONG).show();
-								}
-							});
-					}
-				});
+				btnSend.setOnClickListener(v -> Login.restoreUser(txtEmail.getText().toString(),
+                    new Fire.AuthListener()
+                    {
+                        @Override
+                        public void onExito(FirebaseUser usr)
+                        {
+                            //System.err.println("ActLogin:RECOVER:"+usr);
+                            Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
+                            TabLayout.Tab t = _main._tabLayout.getTabAt(ENTER);
+                            if(t!=null)t.select();
+                        }
+                        @Override
+                        public void onFallo(Exception e)
+                        {
+                            Log.e(TAG, String.format("RECOVER:e:%s",e), e);
+                            Toast.makeText(rootView.getContext(), R.string.recover_ko +"  "+ e.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    }));
 				break;
 			}
 
