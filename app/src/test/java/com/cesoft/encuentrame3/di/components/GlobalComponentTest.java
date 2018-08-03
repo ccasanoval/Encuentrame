@@ -12,7 +12,6 @@ import com.cesoft.encuentrame3.FrgMain;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.di.modules.GlobalModuleTest;
-import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
@@ -36,7 +35,6 @@ public interface GlobalComponentTest
 	void inject(WidgetRutaService v);
 	void inject(RutaArrayAdapter v);
 	void inject(FrgMain v);
-	void inject(CesService v);
 
 	Util util();
 	Login login();

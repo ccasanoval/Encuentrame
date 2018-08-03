@@ -36,7 +36,6 @@ public class PreAviso extends PresenterBase
 	}*/
 
 	private Util _util;
-	//private CesService _servicio;
 	private LoadGeofenceJobService _servicio;
 	@Inject PreAviso(Application app, Util util, LoadGeofenceJobService servicio)
 	{

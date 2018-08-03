@@ -91,13 +91,8 @@
 			android:theme="@style/FullscreenTheme"/>
 
 		<!-- ************************* SERVICES ******************************** -->
-		<receiver android:name=".svc.CesWakefulReceiver"/>
 
 		<service android:name=".svc.ActividadIntentService" />
-
-		<service
-			android:name=".svc.CesService"
-			android:exported="false"/>
 
 		<service
 			android:name=".svc.LoadGeofenceJobService"

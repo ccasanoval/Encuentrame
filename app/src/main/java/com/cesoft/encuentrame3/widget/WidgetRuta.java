@@ -25,10 +25,8 @@ public class WidgetRuta extends AppWidgetProvider
 
 	//______________________________________________________________________________________________
 	@Override
-	public void onReceive(Context context, Intent intent)//http://stackoverflow.com/questions/2471875/processing-more-than-one-button-click-at-android-widget
+	public void onReceive(Context context, Intent intent)
 	{
-//Log.w("WidgetRuta", "onReceive-----------------------------------------------------************************"+intent.getAction());
-		//Intent iSvc = new Intent(context, WidgetRutaService.class);context.startService(iSvc);
 		WidgetRutaService.startSvc(context);
 
 		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
@@ -42,7 +40,6 @@ public class WidgetRuta extends AppWidgetProvider
 		else if(ACTION_WIDGET_RUTA_STOP.equals(intent.getAction()))
 		{
 			_util.setTrackingRoute("");
-			//CesService.setMaxTrackingDelay();//TODO: Activar y desactivar JobService
 			//
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 			remoteViews.setTextViewText(R.id.txtRuta, "");

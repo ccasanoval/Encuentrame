@@ -34,7 +34,6 @@ public class App extends Application
 		getGlobalComponent();
 System.err.println("----------------------- APP ON CREATE ----------------------------");
 		WidgetRutaService.startSvc(this);
-		//CesService.start(this);
 		ActividadIntentService.start(this);
 		LoadGeofenceJobService.start(this);
 		GeoTrackingJobService.start(this);

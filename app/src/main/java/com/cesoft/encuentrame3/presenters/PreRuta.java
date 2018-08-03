@@ -41,13 +41,11 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	private Application _app;
 	private Util _util;
-	//private CesService _servicio;
 	@Inject PreRuta(Application app, Util util)
 	{
 		super(app);
 		_app = app;
 		_util = util;
-		//_servicio = servicio;
 	}
 
 	//----------------------------------------------------------------------------------------------

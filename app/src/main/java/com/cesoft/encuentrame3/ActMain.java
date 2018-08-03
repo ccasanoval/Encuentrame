@@ -66,8 +66,6 @@ import com.cesoft.encuentrame3.util.Util;
 // small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
 //TODO:---------------------------------------------------------------------------------------------
-// CesService -> to intent pending
-// Servicio solo arrancado si hay avisos activos!!! O es mejor que corra, simplemente aumentar delay?
 // Guardar actividad de cada punto, desactivar servicios si esta parado, etc
 // https://developers.google.com/location-context/activity-recognition/
 // https://github.com/googlesamples/android-play-location

@@ -77,20 +77,16 @@ public class WidgetRutaService extends Service
 
 	//______________________________________________________________________________________________
 	@Override
-	//public void onStart(Intent intent, int startId)
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
-		//Log.w(TAG, "--------------onStartCommand----------------------------------------------------");
 		_util = App.getComponent(getApplicationContext()).util();
 
-		if(_h == null)//TODO: mejorar la forma de actualizar... cerrar servicio si no hay ruta? y actualizar mas rapido cuando se añade o para la ruta desde propio widget...
+		if(_h == null)
 		{
 			_h = new Handler();
 			_r = this::payLoad;
-			//_h.postDelayed(_r, _DELAY_SHORT);
 			payLoad();
 		}
-		//return
 		super.onStartCommand(intent, flags, startId);
 		return START_STICKY;//START_REDELIVER_INTENT
 	}
@@ -126,7 +122,6 @@ public class WidgetRutaService extends Service
 	private void payLoad()
 	{
 		String idRuta = _util.getTrackingRoute();
-		//Log.w(TAG, "_________________________________________payLoad________________________________________"+idRuta);
 		if(idRuta.isEmpty())
 		{
 			borrarRuta();
@@ -135,7 +130,7 @@ public class WidgetRutaService extends Service
 		else
 		{
 			setRuta();
-			_h.postDelayed(_r, Constantes.WIDGET_DELAY_SHORT);//TODO: cambiante, acorde con CesService.DELAY_TRACK
+			_h.postDelayed(_r, Constantes.WIDGET_DELAY_SHORT);
 		}
 	}
 	private void borrarRuta()

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -81,16 +82,18 @@ public class FrgMain extends Fragment implements IListaItemClick
 		//if(getArguments() != null)int sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 	}*/
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		if(App.getComponent(getContext()) != null)
 		App.getComponent(getContext()).inject(this);
 
 		Bundle args = getArguments();
+		if(args != null)
 		_sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 		_filtro = new Filtro(_sectionNumber);
 
 		_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
-		_listView = (ListView)_rootView.findViewById(R.id.listView);
+		_listView = _rootView.findViewById(R.id.listView);
 //Log.e(TAG, "on CREATE view ---------------------------------------------------------------"+_sectionNumber);
 
 		if(_sectionNumber < 0)
@@ -100,7 +103,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			return null;
 		}
 
-		FloatingActionButton fab = (FloatingActionButton) _rootView.findViewById(R.id.fabNuevo);
+		FloatingActionButton fab = _rootView.findViewById(R.id.fabNuevo);
 		fab.setOnClickListener(view ->
 		{
 			switch(_sectionNumber)
@@ -131,7 +134,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 	@Override
 	public void onDestroyView()
 	{
-//Log.e(TAG, "on DESTROY view ---------------------------------------------------------------"+_sectionNumber);
 		super.onDestroyView();
 		((ViewGroup)_rootView.getParent()).removeView(_rootView);
 		_rootView = null;
@@ -155,7 +157,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 		/// Actualizar lista de rutas
 		if(_sectionNumber == Constantes.RUTAS)
 		{
-			Util.setRefreshCallback(this);// CesService(on new track point) -> Util(refres ruta) -> this fragment(broadcast -> refresh lista rutas)
+			Util.setRefreshCallback(this);
 			_MessageReceiver = new BroadcastReceiver()
 			{
 				@Override
@@ -183,7 +185,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 		super.onResume();
 		if(_sectionNumber == Constantes.RUTAS)
 		{
-			LocalBroadcastManager.getInstance(getContext()).registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
+			if(getContext() != null)
+				LocalBroadcastManager
+						.getInstance(getContext())
+						.registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
 			refreshRutas();
 		}
 	}
@@ -191,7 +196,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onPause()
 	{
 		super.onPause();
-		if(_sectionNumber == Constantes.RUTAS)
+		if(_sectionNumber == Constantes.RUTAS && getContext() != null)
 			LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(_MessageReceiver);
 	}
 
@@ -270,8 +275,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 	public void onRefreshListaRutas()
 	{
-		//ActMain._this.runOnUiThread(new Runnable(){public void run(){refreshRutas();}});//No funciona, ha de hacerse mediante broadcast...
-		LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(RUTA_REFRESH));
+		if(getContext() != null)
+			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(RUTA_REFRESH));
 	}
 
 
@@ -340,8 +345,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 					_listView.setAdapter(r);
 					_listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
-					if(android.os.Build.VERSION.SDK_INT>=19)
-						_listView.scrollListBy(_listView.getMaxScrollAmount());
+					_listView.scrollListBy(_listView.getMaxScrollAmount());
 				}
 			}
 			@Override public void onError(String err)
@@ -434,12 +438,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		if(resultCode != RESULT_OK)return;
 
-		/*if(requestCode == Util.CONFIG)
-		{
-			_main.gotoLogin();
-			return;
-		}*/
-
 		if(data != null)
 		{
 			try
@@ -451,7 +449,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			catch(Exception e){Log.e(TAG, "onActivityResult:e:--------------------------------------",e);}
 			if( ! data.getBooleanExtra(DIRTY, true))return;
 			Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
-//Log.e(TAG, "--------------------------onActivityResult: A::"+filtro);
+
 			if(filtro != null && filtro.getTipo() != Constantes.NADA)
 			{
 				_filtro = filtro;
@@ -463,7 +461,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 		if(requestCode == Constantes.BUSCAR)requestCode = _filtro.getTipo();
 		switch(requestCode)
 		{
-			case Constantes.LUGARES:	refreshLugares(); break;
+			case Constantes.LUGARES:refreshLugares(); break;
 			case Constantes.RUTAS:	refreshRutas(); break;
 			case Constantes.AVISOS:	refreshAvisos(); break;
 		}
