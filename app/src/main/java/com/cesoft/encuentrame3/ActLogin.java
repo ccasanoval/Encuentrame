@@ -171,18 +171,20 @@ public class ActLogin extends AppCompatActivity
 			AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
 			_FirebaseAuth.signInWithCredential(credential).addOnCompleteListener(_main,
 					task -> {
-						if (!task.isSuccessful())
-						{
+						if (!task.isSuccessful()) {
 							Toast.makeText(PlaceholderFragment.this._main, "Authentication failed.", Toast.LENGTH_SHORT).show();
 						}
-						else
-						{
-							((App)_main.getApplication()).iniServicesDependantOnLogin();
-							_main.finEsperaLogin();
-							Toast.makeText(_main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
-							_main.goMain();
+						else {
+							logginOk(usr);
 						}
 					});
+		}
+
+		private void logginOk(String usr) {
+			((App)_main.getApplication()).iniServicesDependantOnLogin();
+			_main.finEsperaLogin();
+			Toast.makeText(_main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
+			_main.goMain();
 		}
 
 
@@ -234,16 +236,11 @@ public class ActLogin extends AppCompatActivity
                             new Fire.AuthListener()
                             {
                                 @Override
-                                public void onExito(FirebaseUser usr)
-                                {
-									((App)_main.getApplication()).iniServicesDependantOnLogin();
-                                    _main.finEsperaLogin();
-                                    Toast.makeText(_main, String.format(getString(R.string.login_ok), usr.getEmail()), Toast.LENGTH_LONG).show();
-                                    _main.goMain();
+                                public void onExito(FirebaseUser usr) {
+									logginOk(usr.getEmail());
                                 }
                                 @Override
-                                public void onFallo(Exception e)
-                                {
+                                public void onFallo(Exception e) {
                                     _main.finEsperaLogin();
                                     Toast.makeText(_main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
                                 }

@@ -9,7 +9,6 @@ import com.cesoft.encuentrame3.di.modules.GlobalModule;
 import com.cesoft.encuentrame3.svc.ActividadIntentService;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
-import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.squareup.leakcanary.LeakCanary;
 
 
@@ -32,11 +31,8 @@ public class App extends Application
 		LeakCanary.install(this);
 
 		getGlobalComponent();
-System.err.println("----------------------- APP ON CREATE ----------------------------");
-		WidgetRutaService.startSvc(this);
-		ActividadIntentService.start(this);
-		LoadGeofenceJobService.start(this);
-		GeoTrackingJobService.start(this);
+
+		iniServicesDependantOnLogin();
 	}
 
 	public static GlobalComponent getComponent(Context context)
@@ -54,8 +50,9 @@ System.err.println("----------------------- APP ON CREATE ----------------------
 	}
 
 	public void iniServicesDependantOnLogin() {
-		//ActividadIntentService.start(this);TODO
+		ActividadIntentService.start(this);
 		LoadGeofenceJobService.start(this);
 		GeoTrackingJobService.start(this);
+		//WidgetRutaService.startSvc(this);//It's already started by GeoTrackingJobService
 	}
 }

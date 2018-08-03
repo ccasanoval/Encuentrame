@@ -210,7 +210,7 @@ public abstract class VistaBase
 
 	private void stopTracking() {
         if (_GoogleApiClient == null || !_GoogleApiClient.isConnected())return;
-		_fusedLocationClient.removeLocationUpdates(new LocationCallback());
+		_fusedLocationClient.removeLocationUpdates(_locationCallback);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////

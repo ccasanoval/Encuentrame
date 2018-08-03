@@ -47,8 +47,7 @@ import static com.cesoft.encuentrame3.util.Constantes.DISTANCE_MIN;
 import static com.cesoft.encuentrame3.util.Constantes.ID_JOB_TRACKING;
 import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 
-//TODO: https://github.com/mcharmas/Android-ReactiveLocation
-//@Singleton
+@Singleton
 public class GeoTrackingJobService
         extends JobService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -185,7 +184,7 @@ public class GeoTrackingJobService
     private void stopTracking()
     {
         if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
-            _fusedLocationClient.removeLocationUpdates(new LocationCallback());
+            _fusedLocationClient.removeLocationUpdates(_locationCallback);
         _locLastSaved = null;
         _locLast = null;
         _velLast = 0;

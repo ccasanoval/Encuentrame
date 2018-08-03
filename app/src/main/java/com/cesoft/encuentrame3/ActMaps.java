@@ -54,9 +54,9 @@ public class ActMaps
 		super.ini(_presenter, _util, new Lugar(), R.layout.act_maps);
 		super.onCreate(savedInstanceState);
 
-		FloatingActionButton fabGuardar = (FloatingActionButton)findViewById(R.id.btnGuardar);
+		FloatingActionButton fabGuardar = findViewById(R.id.btnGuardar);
 		if( ! _presenter.isAviso() && ! _presenter.isLugar())
-			fabGuardar.setVisibility(View.GONE);
+			fabGuardar.hide();//fabGuardar.setVisibility(View.GONE);
 		fabGuardar.setOnClickListener(view -> _presenter.guardar());
 	}
 

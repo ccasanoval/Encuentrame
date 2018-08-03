@@ -24,13 +24,11 @@ import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD;
 import static com.cesoft.encuentrame3.util.Constantes.GEOFEN_DWELL_TIME;
 import static com.cesoft.encuentrame3.util.Constantes.ID_JOB_GEOFENCE_LOADING;
 
+//TODO: Read: https://medium.com/google-developers/scheduling-jobs-like-a-pro-with-jobscheduler-286ef8510129
+//TODO: Check: https://github.com/mcharmas/Android-ReactiveLocation
 @Singleton
 public class LoadGeofenceJobService extends JobService {
     private static final String TAG = LoadGeofenceJobService.class.getSimpleName();
-
-    @Inject Login _login;
-    @Inject public LoadGeofenceJobService() { }
-    private Context context;
 
     public static void start(Context context) {
         Log.e(TAG, "************************* start *************************");
@@ -49,6 +47,10 @@ public class LoadGeofenceJobService extends JobService {
             jobScheduler.schedule(builder.build());
     }
 
+    @Inject Login _login;
+    @Inject public LoadGeofenceJobService() { }
+    private Context context;
+
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStartJob *************************");
@@ -56,7 +58,7 @@ public class LoadGeofenceJobService extends JobService {
         App.getComponent(context).inject(this);
         new Thread(() -> {
             if( ! _login.isLogged()) {
-                Log.e(TAG, "No hay usuario logado !!");
+                Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
                 stopSelf();
                 LoadGeofenceJobService.this.jobFinished(jobParameters, false);
             }
@@ -97,7 +99,6 @@ public class LoadGeofenceJobService extends JobService {
     {
         if(_isIni)return;
         _isIni = true;
-        //final Context context = getApplicationContext();
         _lisAviso = new Fire.DatosListener<Aviso>()
         {
             @Override

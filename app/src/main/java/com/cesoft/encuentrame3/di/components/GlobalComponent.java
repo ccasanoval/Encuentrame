@@ -12,6 +12,7 @@ import com.cesoft.encuentrame3.FrgMain;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
+import com.cesoft.encuentrame3.svc.ActividadIntentService;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.cesoft.encuentrame3.util.Util;
@@ -38,6 +39,7 @@ public interface GlobalComponent
 	void inject(FrgMain v);
 	void inject(LoadGeofenceJobService v);
 	void inject(GeoTrackingJobService v);
+	void inject(ActividadIntentService v);
 
 	Util util();
 	Login login();

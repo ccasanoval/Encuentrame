@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -16,7 +18,10 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: Inejct
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class ActividadIntentService extends IntentService {
 
     protected static final String TAG = ActividadIntentService.class.getSimpleName();
@@ -43,13 +48,19 @@ public class ActividadIntentService extends IntentService {
         task.addOnFailureListener(e -> Log.e(TAG, "stop:e:------------------------------------",e));
     }
 
-    public ActividadIntentService() {
-        super(TAG);
-    }
+
+    @Inject Login _login;
+    @Inject public ActividadIntentService() { super(TAG); }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Context appContext = getApplicationContext();
+        App.getComponent(appContext).inject(this);
+        if( ! _login.isLogged()) {
+            Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
+            stop(appContext);
+        }
     }
 
     @SuppressWarnings("unchecked")
