@@ -45,7 +45,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		super.onCreate(savedInstanceState);
 
 		//-----------------------------------
-		final ImageButton btnStart = (ImageButton)findViewById(R.id.btnStart);
+		final ImageButton btnStart = findViewById(R.id.btnStart);
 		if(btnStart != null)
 		{
 			btnStart.setEnabled(true);
@@ -57,7 +57,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 				_presenter.startTrackingRecord();
 			});
 		}
-		final ImageButton btnStop = (ImageButton)findViewById(R.id.btnStop);
+		final ImageButton btnStop = findViewById(R.id.btnStop);
 		if(btnStop != null)
 		{
 			btnStop.setEnabled(true);
@@ -77,9 +77,11 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			try
 			{	//Oculta el mapa, no hay puntos que enseñar en el
 				SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-				FragmentTransaction ft = mapFragment.getFragmentManager().beginTransaction();
-				ft.hide(mapFragment);
-				ft.commit();
+				if(mapFragment != null && mapFragment.getFragmentManager() != null) {
+					FragmentTransaction ft = mapFragment.getFragmentManager().beginTransaction();
+					ft.hide(mapFragment);
+					ft.commit();
+				}
 			}
 			catch(Exception e){e.printStackTrace();}
 		}

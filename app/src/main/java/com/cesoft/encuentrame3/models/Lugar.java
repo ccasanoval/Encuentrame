@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 import android.widget.ImageView;
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import com.cesoft.encuentrame3.util.Log;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //https://firebase.google.com/docs/database/android/save-data
 //https://stackoverflow.com/questions/37890025/classmapper-warnings-after-upgrading-firebase
+@Keep
 @IgnoreExtraProperties
 public class Lugar extends Objeto
 {
@@ -51,38 +53,6 @@ public class Lugar extends Objeto
 	@Exclude private DatabaseReference _datos;
 
 	//TODO: ADD	Altitud, velocidad, bearing ...
-
-	///---------------------------------------------------------------------------------------------
-	//Yet Another Firebase Bug:
-	//Serialization of inherited properties from the base class, is missing in the current release of the
-	// Firebase Database SDK for Android. It will be added back in an upcoming version.
-	// ...
-	//Serialization of inherited properties from the base class, is missing in the in releases 9.0 to 9.6 (iirc)
-	// of the Firebase Database SDK for Android. It was added back in versions since then.
-	//
-	/*protected String id = null;
-		public String getId(){return id;}
-		public void setId(String v){id = v;}
-	protected String nombre;
-	protected String descripcion;
-		public String getNombre(){return nombre;}
-		public void setNombre(String v){nombre=v;}
-		public String getDescripcion(){return descripcion;}
-		public void setDescripcion(String v){descripcion=v;}
-	private Date fecha;
-		public Date getFecha(){return fecha;}
-		public void setFecha(Date v){fecha=v;}
-	//private String imgUrl;
-	//	private String getImgUrl(){return imgUrl;}
-	//	private void setImgUrl(String v){imgUrl = v;}
-	///______________________________________________________________
-
-	//______________________________________________________________________________________________
-	protected double latitud, longitud;
-		public double getLatitud(){return latitud;}
-		public double getLongitud(){return longitud;}
-		//public void setLatitud(double v){latitud=v;}
-		//public void setLongitud(double v){longitud=v;}*/
 
 	//______________________________________________________________________________________________
 	public Lugar() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
@@ -142,11 +112,20 @@ public class Lugar extends Objeto
 			{
 				long n = data.getChildrenCount();
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
-				for(DataSnapshot o : data.getChildren())
-				{
-					aLugares.add(o.getValue(Lugar.class));
+				for(DataSnapshot o : data.getChildren()) {
+					try {
+						aLugares.add(o.getValue(Lugar.class));
+					}
+					catch(Exception e) {
+						Log.e(TAG, "getLista:onDataChange:e:-----------------------------------",e);
+					}
 				}
-				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+				try {
+					listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+				}
+				catch(Exception e) {
+					Log.e(TAG, "getLista:e:----------------------------------------------------",e);
+				}
 			}
 			@Override
 			public void onCancelled(@NonNull DatabaseError err)

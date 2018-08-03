@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
@@ -41,7 +41,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		_txtNombre = (EditText)findViewById(R.id.txtNombre);
+		_txtNombre = findViewById(R.id.txtNombre);
 		_txtNombre.setHint(R.string.nueva_ruta);
 		//_util = ((App)getApplication()).getGlobalComponent().util();
 		((App)getApplication()).getGlobalComponent().inject(this);
@@ -59,7 +59,6 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
 		_progressDialog.hide();
 		//
-		//Login _login = ((App)getApplication()).getGlobalComponent().login();
 		if( ! _login.isLogged())
 		{
 			_login.login(new Fire.AuthListener()
@@ -79,12 +78,10 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 			});
 		}
 		//
-		//Util.setTrackingRoute("");
-		//_txtNombre.setText("");
 		//TODO: ruta_activa = false
 		//TODO: desactiva boton stop
 		//
-		ImageButton btnSave = (ImageButton)findViewById(R.id.btnSave);
+		ImageButton btnSave = findViewById(R.id.btnSave);
 		btnSave.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -95,7 +92,7 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 					Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_SHORT).show();
 					return;
 				}
-				_progressDialog.show();//runOnUiThread(new Runnable()
+				_progressDialog.show();
 
 				// if(ruta_activa)"quiere parar la ruta actual y crear una nueva?"
 				//TODO: ruta_activa = true
@@ -115,9 +112,9 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 						Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 						ActWidgetNuevaRuta.this.finish();
 						//
-						//WidgetRutaService.startServ(ActWidgetNuevaRuta.this.getApplicationContext());
 						refreshWidget();
-						CesService.setMinTrackingDelay();//TODO: start Service? ...
+                        // Start tracking
+						GeoTrackingJobService.start(getApplicationContext());
 					}
 					@Override
 					protected void onError(String err, int code)
@@ -129,10 +126,8 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 							return;
 						}
 						Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:e:----------------------------------"+err);
-						_progressDialog.hide();//if(_progressDialog.isShowing())
+						_progressDialog.hide();
 						Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
-						//Intent i = new Intent(ActWidgetNuevaRuta.this, WidgetRutaService.class);
-						//ActWidgetNuevaRuta.this.startService(i);
 						//
 						refreshWidget();
 					}
@@ -171,12 +166,4 @@ public class ActWidgetNuevaRuta extends Activity//AppCompatActivity porque se mu
 	{
 		WidgetRutaService.bindSvc(_sc, getApplicationContext());
 	}
-	//----------------------------------------------------------------------------------------------
-	/*@Override
-	public void onStop()
-	{
-		super.onStop();
-		try{ WidgetRutaService.unbindSvc(_sc, getApplicationContext()); }catch(Exception e){}
-	}*/
-
 }

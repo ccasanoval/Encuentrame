@@ -19,13 +19,15 @@ public class Objeto implements Parcelable
 	static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
 	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 
+	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
+
 	//General
-	protected String id = null;
+	public String id = null;
         @Exclude public String getId(){return id;}
         @Exclude public void setId(String v){id = v;}
 
-	protected String nombre;
-	protected String descripcion;
+	public String nombre;
+	public String descripcion;
         @Exclude public String getNombre(){return nombre;}
         @Exclude public void setNombre(String v){nombre=v;}
         @Exclude public String getDescripcion(){return descripcion;}
@@ -37,11 +39,11 @@ public class Objeto implements Parcelable
 	/*protected long fecha;
         @Exclude public Date getFecha(){return new Date(fecha);}
         @Exclude public void setFecha(Date v){fecha=v.getTime();}*/
-	protected Date fecha;
+	public Date fecha;
 		@Exclude public Date getFecha(){return fecha;}
 		@Exclude public void setFecha(Date v){fecha=v;}
 
-	protected double latitud, longitud;
+	public double latitud, longitud;
         @Exclude public double getLatitud(){return latitud;}
         @Exclude public double getLongitud(){return longitud;}
         @Exclude public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}//TODO: validacion

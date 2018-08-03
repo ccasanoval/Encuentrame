@@ -13,9 +13,7 @@ import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
-import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.util.Constantes;
-import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +42,7 @@ public class WidgetRuta extends AppWidgetProvider
 		else if(ACTION_WIDGET_RUTA_STOP.equals(intent.getAction()))
 		{
 			_util.setTrackingRoute("");
-			CesService.setMaxTrackingDelay();
+			//CesService.setMaxTrackingDelay();//TODO: Activar y desactivar JobService
 			//
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 			remoteViews.setTextViewText(R.id.txtRuta, "");

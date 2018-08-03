@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.util;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
@@ -44,6 +45,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
+
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -363,6 +368,23 @@ public class Util
 	}
 
 	//----------------------------------------------------------------------------------------------
+	@SuppressLint("DefaultLocale")
+	public String formatDiffTimes(DateTime timeIni, DateTime timeEnd) {
+		Interval interval = new Interval(timeIni, timeEnd);
+		Period period = interval.toPeriod();
+		StringBuilder sb = new StringBuilder();
+		if(period.getMonths() > 0)
+			sb.append(String.format(" %dM", period.getMonths()));
+		if(period.getDays() > 0)
+			sb.append(String.format(" %dd", period.getDays()));
+		if(sb.length() > 0 || period.getHours() > 0)
+			sb.append(String.format(" %dh", period.getHours()));
+		if(sb.length() > 0 || period.getMinutes() > 0)
+			sb.append(String.format(" %dm", period.getMinutes()));
+		//if(sb.length() > 0 || period.getSeconds() > 0)
+			sb.append(String.format(" %ds", period.getSeconds()));
+		return sb.toString();
+	}
 	//private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
 	//---
 	private SimpleDateFormat timeFormatter = null;
@@ -464,13 +486,10 @@ public class Util
 								showNotifGPS();//TODO: Evitar que salga continuamente... timer...
 							}
                         }
-                        catch(IntentSender.SendIntentException e) {
+                        catch(IntentSender.SendIntentException | ClassCastException e) {
                             // Ignore the error.
                         }
-                        catch(ClassCastException e) {
-                            // Ignore, should be an impossible error.
-                        }
-                        break;
+						break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         // Location settings are not satisfied. However, we have no way to fix the
                         // settings so we won't show the dialog.

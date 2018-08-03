@@ -32,7 +32,8 @@ public class UtilTest
 	@Before
 	public void ini()
 	{
-		_util = new Util(null, null, null, null, null);//Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm);
+		//Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm);
+		_util = new Util(null, null, null, null, null);
 	}
 
 	//----------------------------------------------------------------------------------------------

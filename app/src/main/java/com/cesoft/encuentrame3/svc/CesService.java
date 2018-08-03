@@ -65,7 +65,7 @@ public class CesService extends IntentService
 	//private static final int RADIO_TRACKING = 10;//El radio es el nuevo periodo, config al crear NUEVA ruta...
 	private static long DELAY_TRACK = DELAY_TRACK_MIN;
 		public static void setMinTrackingDelay(){DELAY_TRACK = DELAY_TRACK_MIN;Log.e(TAG, "****** "+DELAY_TRACK);}
-		public static void setMaxTrackingDelay(){DELAY_TRACK = DELAY_TRACK_MAX;Log.e(TAG, "****** "+DELAY_TRACK);}
+		//public static void setMaxTrackingDelay(){DELAY_TRACK = DELAY_TRACK_MAX;Log.e(TAG, "****** "+DELAY_TRACK);}
 
 	@Inject	Util _util;
 	@Inject	Login _login;
@@ -359,15 +359,15 @@ Log.w(TAG, "guardarPunto:----------------************************---------------
 			if(distLastSaved < DISTANCE_MIN)//Puntos muy cercanos
 			{
 				Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
-				DELAY_TRACK += 2*1000;
-				if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
+				//DELAY_TRACK += 2*1000;
+				//if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
 				return;
 			}
-			else if(distLastSaved > 10*DISTANCE_MIN)
-				DELAY_TRACK = DELAY_TRACK_MIN;
-			else if(distLastSaved > 5*DISTANCE_MIN)//TODO: Mejorar... con actividad actual del dispositivo -------------------------
-				DELAY_TRACK -= DELAY_TRACK_MIN;
-			if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
+			//else if(distLastSaved > 10*DISTANCE_MIN)
+			//	DELAY_TRACK = DELAY_TRACK_MIN;
+			//else if(distLastSaved > 5*DISTANCE_MIN)//TODO: Mejorar... con actividad actual del dispositivo -------------------------
+			//	DELAY_TRACK -= DELAY_TRACK_MIN;
+			//if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
 		}
 		r.guardar(new GuardarListener(loc));
 		_locLastSaved = loc;
@@ -469,7 +469,7 @@ Log.w(TAG, "guardarPunto:----------------************************---------------
 		if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
 			//LocationServices.FusedLocationApi.removeLocationUpdates(_GoogleApiClient, this);
 			_fusedLocationClient.removeLocationUpdates(new LocationCallback());
-		DELAY_TRACK = DELAY_TRACK_MAX;
+		//DELAY_TRACK = DELAY_TRACK_MAX;
 		_locLastSaved = null;
 		_locLast = null;
 		_velLast = 0;

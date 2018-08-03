@@ -7,7 +7,6 @@ import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent;
 import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
 import com.cesoft.encuentrame3.svc.ActividadIntentService;
-import com.cesoft.encuentrame3.svc.CesService;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
@@ -33,9 +32,9 @@ public class App extends Application
 		LeakCanary.install(this);
 
 		getGlobalComponent();
-
+System.err.println("----------------------- APP ON CREATE ----------------------------");
 		WidgetRutaService.startSvc(this);
-		CesService.start(this);
+		//CesService.start(this);
 		ActividadIntentService.start(this);
 		LoadGeofenceJobService.start(this);
 		GeoTrackingJobService.start(this);

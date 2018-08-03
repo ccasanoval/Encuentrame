@@ -35,42 +35,15 @@ public class Aviso extends Objeto
 				.child(NOMBRE);
 	}
 	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
-	@Exclude
-	private DatabaseReference _datos;
+	@Exclude private DatabaseReference _datos;
 
-	///______________________________________________________________
-	//Yet Another Firebase Bug:
-	//Serialization of inherited properties from the base class, is missing in the current release of the
-	// Firebase Database SDK for Android. It will be added back in an upcoming version.
-	/*protected String id = null;
-		public String getId(){return id;}
-		public void setId(String v){id = v;}
-	protected String nombre;
-	protected String descripcion;
-		public String getNombre(){return nombre;}
-		public void setNombre(String v){nombre=v;}
-		public String getDescripcion(){return descripcion;}
-		public void setDescripcion(String v){descripcion=v;}
-
-		//TODO:? para que firebase no se queje de 'No setter/field for day found on class java.util.Date'...
-		//^(?!.*(No setter|NativeCrypto|IOnlyOwnerSimSupport|Asset path|IInputConnectionWrapper)).*$
-	//protected long fecha;
-	private Date fecha;
-		public Date getFecha(){return fecha;}
-		public void setFecha(Date v){fecha=v;}*/
-	///______________________________________________________________
+	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
 
 	//______________________________________________________________________________________________
 	private final static String ACTIVO = "activo";
 	protected boolean activo = true;
 		public boolean isActivo(){return activo;}
 		public void setActivo(boolean v){activo=v;}
-
-	/*private double latitud, longitud;
-		public double getLatitud(){return latitud;}//TODO: con GeoFire, quiza esto podrias sobrar...pero complicaria igual que quitar id de objeto
-		public double getLongitud(){return longitud;}
-		public void setLatitud(double v){latitud=v;}//TODO: validacion
-		public void setLongitud(double v){longitud=v;}*/
 
 	private double radio;//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
 		public double getRadio(){return radio;}

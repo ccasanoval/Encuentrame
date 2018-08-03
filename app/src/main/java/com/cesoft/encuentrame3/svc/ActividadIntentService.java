@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: Inejct
 public class ActividadIntentService extends IntentService {
 
     protected static final String TAG = ActividadIntentService.class.getSimpleName();

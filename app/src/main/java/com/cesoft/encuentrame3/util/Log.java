@@ -8,16 +8,16 @@ import com.cesoft.encuentrame3.BuildConfig;
 public class Log
 {
 	private static final String DOMINIO = "CESoft:";
-	public static void w(String TAG, String msg)
-	{
+	public static void d(String TAG, String msg) {
+		if(BuildConfig.DEBUG) android.util.Log.d(TAG, DOMINIO+msg);
+	}
+	public static void w(String TAG, String msg) {
 		if(BuildConfig.DEBUG) android.util.Log.w(TAG, DOMINIO+msg);
 	}
-	public static void e(String TAG, String msg)
-	{
+	public static void e(String TAG, String msg) {
 		if(BuildConfig.DEBUG) android.util.Log.e(TAG, DOMINIO+msg);
 	}
-	public static void e(String TAG, String msg, Throwable t)
-	{
+	public static void e(String TAG, String msg, Throwable t) {
 		if(BuildConfig.DEBUG) android.util.Log.e(TAG, DOMINIO+msg, t);
 	}
 }

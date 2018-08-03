@@ -8,6 +8,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
@@ -26,43 +28,46 @@ import static com.cesoft.encuentrame3.util.Constantes.ID_JOB_GEOFENCE_LOADING;
 public class LoadGeofenceJobService extends JobService {
     private static final String TAG = LoadGeofenceJobService.class.getSimpleName();
 
-    @Inject LoadGeofenceJobService() { }
+    @Inject Login _login;
+    @Inject public LoadGeofenceJobService() { }
+    private Context context;
 
     public static void start(Context context) {
         Log.e(TAG, "************************* start *************************");
 
         ComponentName componentName = new ComponentName(context, LoadGeofenceJobService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_GEOFENCE_LOADING, componentName).setPersisted(true);
 
-        JobInfo jobInfo;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
-            jobInfo = new JobInfo.Builder(ID_JOB_GEOFENCE_LOADING, componentName)
-                    .setMinimumLatency(DELAY_LOAD)
-                    .setPersisted(true)
-                    .build();
-        } else {
-            jobInfo = new JobInfo.Builder(ID_JOB_GEOFENCE_LOADING, componentName)
-                    .setPeriodic(DELAY_LOAD)
-                    .setPersisted(true)
-                    .build();
-        }
-        /*JobInfo jobInfo = new JobInfo.Builder(ID_JOB_GEOFENCE_LOADING, serviceComponent)
-                .setPeriodic(30000)//.setPeriodic(DELAY_LOAD)
-                .setBackoffCriteria(DELAY_LOAD, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setPersisted(true) //Esto haria innecesario el <receiver android:name=".svc.CesOnSysBoot"><action android:name="android.intent.action.BOOT_COMPLETED"/>
-                .build();*/
+        //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            builder.setMinimumLatency(DELAY_LOAD);//TODO: Faster the firts time?
+        else
+            builder.setPeriodic(DELAY_LOAD);
+
         JobScheduler jobScheduler = (JobScheduler)context.getSystemService(JOB_SCHEDULER_SERVICE);
         if(jobScheduler != null)
-            jobScheduler.schedule(jobInfo);
+            jobScheduler.schedule(builder.build());
     }
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStartJob *************************");
-        cargarListaGeoAvisos();
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            start(getApplicationContext());
-        }
+        context = getApplicationContext();
+        App.getComponent(context).inject(this);
+        new Thread(() -> {
+            if( ! _login.isLogged()) {
+                Log.e(TAG, "No hay usuario logado !!");
+                stopSelf();
+                LoadGeofenceJobService.this.jobFinished(jobParameters, false);
+            }
+            else {
+                cargarListaGeoAvisos();//PAYLOAD
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    start(getApplicationContext());
+                LoadGeofenceJobService.this.jobFinished(jobParameters, true);
+            }
+        }).start();
         return false;
     }
 
@@ -70,7 +75,7 @@ public class LoadGeofenceJobService extends JobService {
     public boolean onStopJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStopJob *************************");
         if(_GeofenceStoreAvisos != null)
-           _GeofenceStoreAvisos.clear();
+            _GeofenceStoreAvisos.clear();
         _GeofenceStoreAvisos = null;
         return false;
     }
@@ -92,7 +97,7 @@ public class LoadGeofenceJobService extends JobService {
     {
         if(_isIni)return;
         _isIni = true;
-        final Context context = getApplicationContext();
+        //final Context context = getApplicationContext();
         _lisAviso = new Fire.DatosListener<Aviso>()
         {
             @Override

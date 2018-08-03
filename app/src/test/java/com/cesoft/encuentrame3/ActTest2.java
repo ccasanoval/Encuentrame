@@ -1,27 +1,9 @@
 package com.cesoft.encuentrame3;
 
-import android.content.Intent;
-import android.widget.EditText;
-
-import com.cesoft.encuentrame3.models.Lugar;
-import com.cesoft.encuentrame3.models.Objeto;
-import com.google.firebase.FirebaseApp;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.robolectric.Shadows.shadowOf;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

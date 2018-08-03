@@ -7,13 +7,15 @@ import android.graphics.Color;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.cesoft.encuentrame3.svc.CesService;
+import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.joda.time.DateTime;
 
 import java.util.Date;
 import java.util.Locale;
@@ -39,13 +41,13 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	private Application _app;
 	private Util _util;
-	private CesService _servicio;
-	@Inject PreRuta(Application app, Util util, CesService servicio)
+	//private CesService _servicio;
+	@Inject PreRuta(Application app, Util util)
 	{
 		super(app);
 		_app = app;
 		_util = util;
-		_servicio = servicio;
+		//_servicio = servicio;
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -101,8 +103,8 @@ public class PreRuta extends PresenterBase
 		_o.setNombre(_view.getTextNombre());
 		_o.setDescripcion(_view.getTextDescripcion());
 		((Ruta)_o).guardar(res);
-		//Solo si es nuevo?
-		CesService.setMinTrackingDelay();
+        // Start tracking
+		GeoTrackingJobService.start(_view.getAct().getApplicationContext());
 	}
 	//----------------------------------------------------------------------------------------------
 	private boolean isErrorEnCampos()
@@ -156,7 +158,8 @@ public class PreRuta extends PresenterBase
 				_view.finEspera();
 				_util.setTrackingRoute(_o.getId());
 				//
-				_servicio._restartDelayRuta();
+				//_servicio._restartDelayRuta();
+                GeoTrackingJobService.start(_view.getAct().getApplicationContext());
 				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_ruta));
 			}
 			@Override
@@ -207,7 +210,9 @@ public class PreRuta extends PresenterBase
 				if(aData.length > 0)
 				{
 					long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
-					sTiempo = _util.formatTiempo(t);
+					sTiempo = _util.formatDiffTimes(
+							new DateTime(aData[0].getFecha().getTime()),		//Time Ini
+							new DateTime(aData[aData.length-1].getFecha()));	//Time End
 
 					if(t > 0)
 					{

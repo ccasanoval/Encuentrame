@@ -70,7 +70,7 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.RUTAS, _rutas[position]));
 		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.RUTAS, _rutas[position]));
 		// Si la ruta se está grabando, resaltar
-		if(_rutas[position].getId().equals(_util.getTrackingRoute()))
+		if(_rutas[position].getId() != null && _rutas[position].getId().equals(_util.getTrackingRoute()))
 		{
 			holder.txtNombre.setTextColor(Color.RED);
 			convertView.setBackgroundColor(Color.YELLOW);
