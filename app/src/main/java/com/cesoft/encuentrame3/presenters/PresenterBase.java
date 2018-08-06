@@ -65,10 +65,7 @@ public abstract class PresenterBase
 	}
 	public void subscribe(IVista view)
 	{
-		//Log.e(TAG, "-------------------------------subscribe--------------"+_bEliminar+"--------------------------------");
 		_view = view;
-		//newListeners();
-		//_bEliminar=true;
 		if( ! _bEliminar)
 		{
 			_bEliminar=true;
@@ -78,8 +75,6 @@ public abstract class PresenterBase
 	public void unsubscribe()
 	{
 		Log.e(TAG, "-------------------------------unsubscribe------1--------------------------------");
-		//Log.e(TAG, "-------------------------------unsubscribe------"+_dlgSucio+"------- elim = "+_bEliminar+"---------------------------------");
-		//delListeners();
 		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
 		if(_dlgEliminar != null)
 		{
@@ -105,11 +100,9 @@ public abstract class PresenterBase
 			_bSucio = savedInstanceState.getBoolean(SUCIO);
 			_bEliminar = savedInstanceState.getBoolean(ELIMINAR);
 		}
-		//Log.e(TAG, "++++++++++++++++++++ LOAD  sucio="+_bSucio+"   eliminar="+_bEliminar);
 	}
 	public void onSaveInstanceState(Bundle outState)
 	{
-		//Log.e(TAG, "++++++++++++++++++++ SAVE  sucio="+_bSucio+"   eliminar="+_bEliminar);
 		outState.putBoolean(SUCIO, _bSucio);
 		outState.putBoolean(ELIMINAR, _bEliminar);
 	}
@@ -121,13 +114,14 @@ public abstract class PresenterBase
 		{
 			_o = _view.getAct().getIntent().getParcelableExtra(Objeto.NOMBRE);
 			if(_o == null)throw new Exception();
+            _bNuevo = false;
+			Log.e(TAG, "loadObjeto:-----------------------------------------------------------"+_o);
 		}
 		catch(Exception e)
 		{
+			Log.e(TAG, "loadObjeto:e:---------------------------------------------------------",e);
 			_bNuevo = true;
-			_o = objDefault;//new Lugar();
-			//Location loc = _util.getLocation();
-			//if(loc != null)_view.setPosLugar(loc);
+			_o = objDefault;
 		}
 	}
 
@@ -135,7 +129,6 @@ public abstract class PresenterBase
 	private AlertDialog _dlgSucio = null;
 	public void onSalir()
 	{
-Log.e(TAG, "--------------------------------ON SALIR---1------------------------------");
 		if(_bSucio)
 		{
 			AlertDialog.Builder dialog = new AlertDialog.Builder(_view.getAct());
@@ -149,7 +142,6 @@ Log.e(TAG, "--------------------------------ON SALIR---1------------------------
 		}
 		else
 			_view.finish();
-Log.e(TAG, "--------------------------------ON SALIR---2------------------------------");
 	}
 	boolean _bGuardar = true;
 	protected abstract void guardar();

@@ -263,7 +263,7 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("estadisticas:onCancelled:-----------:%s",err));
+				Log.e(TAG, String.format("estadisticas:onCancelled:-------------------------------:%s",err));
 				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
 			}
 		});
@@ -293,13 +293,11 @@ public class PreRuta extends PresenterBase
 		delListeners();
 		_lisRuta = new Fire.DatosListener<Ruta.RutaPunto>()
 		{
-			@Override
-			public void onDatos(Ruta.RutaPunto[] aData)
+			@Override public void onDatos(Ruta.RutaPunto[] aData)
 			{
 				showRutaHelper(aData);
 			}
-			@Override
-			public void onError(String err)
+			@Override public void onError(String err)
 			{
 				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------------"+err);
 				_view.toast(R.string.err_get_ruta_pts);

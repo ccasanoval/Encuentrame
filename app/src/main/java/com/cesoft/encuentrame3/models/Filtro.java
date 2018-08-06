@@ -85,7 +85,6 @@ public class Filtro implements Parcelable
 	{
 		turnOff();
 		setTipo(tipo);
-		//Filtro(Util.LUGARES, Filtro.TODOS, "", null, null, null, Util.NADA);
 	}
 
 	//______________________________________________________________________________________________

@@ -59,7 +59,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		super.onCreate(savedInstanceState);
 
 		//------------------------------------
-		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
+		ImageButton btnActPos = findViewById(R.id.btnActPos);
 		//if(btnActPos != null)
 		btnActPos.setOnClickListener(v ->
 		{
@@ -68,14 +68,14 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		});
 
 		//------------------------------------
-		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
+		_lblPosicion = findViewById(R.id.lblPosicion);
 		setPosLabel(_presenter.getLatitud(), _presenter.getLongitud());
 
-		_swtActivo = (Switch)findViewById(R.id.bActivo);
+		_swtActivo = findViewById(R.id.bActivo);
 		_swtActivo.setChecked(_presenter.isActivo());
 		_swtActivo.setOnCheckedChangeListener((buttonView, isChecked) -> _presenter.setActivo(isChecked));
 
-		Spinner _spnRadio = (Spinner)findViewById(R.id.spnRadio);
+		Spinner _spnRadio = findViewById(R.id.spnRadio);
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		_spnRadio.setAdapter(adapter);

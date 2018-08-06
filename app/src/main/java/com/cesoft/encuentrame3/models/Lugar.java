@@ -149,7 +149,6 @@ public class Lugar extends Objeto
 	}
 	private static void buscarPorFiltro(final Fire.DatosListener<Lugar> listener, final Filtro filtro)//ValueEventListener listener
 	{
-		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;
 		vel = new ValueEventListener()//AJAX
@@ -318,8 +317,6 @@ public class Lugar extends Objeto
 				.addOnFailureListener(exception -> Log.e(TAG, "uploadImagen:onFailure:"+exception, exception))
 				.addOnSuccessListener(taskSnapshot ->
 				{
-					//@SuppressWarnings("VisibleForTests") Uri img = taskSnapshot.getDownloadUrl();
-					//Log.e(TAG, "uploadImagen:onSuccess:-----------"+img);
 					storageRef.getDownloadUrl().addOnSuccessListener(uri ->
 							Log.e(TAG, "uploadImagen:onSuccess:----AAAAA-------"+uri.toString()));
 				});
@@ -339,8 +336,7 @@ public class Lugar extends Objeto
 		if(_datos.getKey() == null)return;
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
 				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
-Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
-//Log.e(TAG, "BBB: "+getImgUrl());
+//Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
 
 		OnSuccessListener<Uri> lisOk = uri ->
 		{

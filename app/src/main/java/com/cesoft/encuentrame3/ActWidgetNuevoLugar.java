@@ -56,8 +56,8 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 			finish();
 		}
 		//
-		final EditText txtNombre = (EditText)findViewById(R.id.txtNombre);
-		ImageButton btnSave = (ImageButton)findViewById(R.id.btnSave);
+		final EditText txtNombre = findViewById(R.id.txtNombre);
+		ImageButton btnSave = findViewById(R.id.btnSave);
 		btnSave.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -99,8 +99,8 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 							l.guardar(this);
 							return;
 						}
-						Log.e(TAG, "ActWidgetNuevoLugar:addNuevo:backendlessFault: "+err);
-						_progressDialog.hide();//if(_progressDialog.isShowing())
+						Log.e(TAG, "ActWidgetNuevoLugar:addNuevo:backendlessFault: ------------"+err);
+						_progressDialog.hide();
 						Toast.makeText(ActWidgetNuevoLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 					}
 				});

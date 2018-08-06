@@ -34,7 +34,9 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	@Inject Util _util;
 	@Inject PreRuta _presenter;
 
-	@Override public void moveCamara(LatLng pos){_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));}
+	@Override public void moveCamara(LatLng pos) {
+		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
+	}
 
 	//______________________________________________________________________________________________
 	@Override

@@ -27,13 +27,6 @@ public class PreAviso extends PresenterBase
 	{
 		boolean isActivo();
 	}
-	/*@SuppressWarnings("WeakerAccess")
-	protected IVistaAviso _view;
-	@Override void ini(IVista view)
-	{
-		super.ini(view);
-		_view = (IVistaAviso)view;
-	}*/
 
 	private Util _util;
 	private LoadGeofenceJobService _servicio;
@@ -83,8 +76,6 @@ public class PreAviso extends PresenterBase
 	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
-		//Log.e(TAG, "+++++++++++++++++++++ "+_view+" ++++++++++++++++ "+super._view);
-
 		if(_o.getLatitud()==0 && _o.getLongitud()==0)
 		{
 			_view.toast(R.string.sin_lugar);

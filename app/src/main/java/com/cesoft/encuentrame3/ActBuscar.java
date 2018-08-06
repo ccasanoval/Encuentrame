@@ -67,22 +67,22 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 		App.getComponent(getApplicationContext()).inject(this);
 
-		//_coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+		if(mapFragment != null)
 		mapFragment.getMapAsync(this);
 
-		Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabVolver);
+		FloatingActionButton fab = findViewById(R.id.fabVolver);
 		if(fab != null)
 		fab.setOnClickListener(view -> finish());
 
 		//------------------------------------------------------------------------------------------
-		_txtNombre = (EditText)findViewById(R.id.txtNombre);//txtLogin.requestFocus();
+		_txtNombre = findViewById(R.id.txtNombre);
 
 		ArrayAdapter<String> adapter;
 		//_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
-		Spinner _spnActivo = (Spinner)findViewById(R.id.spnActivo);
+		Spinner _spnActivo = findViewById(R.id.spnActivo);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		if(_spnActivo != null)
@@ -108,7 +108,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			});
 		}
 		//
-		Spinner _spnRadio = (Spinner)findViewById(R.id.spnRadio);
+		Spinner _spnRadio = findViewById(R.id.spnRadio);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		if(_spnRadio != null)
@@ -159,9 +159,9 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 				},
 			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 
-		_txtFechaIni = (EditText)findViewById(R.id.txtFechaIni);
-		_txtFechaFin = (EditText)findViewById(R.id.txtFechaFin);
-		ImageButton ib = (ImageButton)findViewById(R.id.btnFechaIni);
+		_txtFechaIni = findViewById(R.id.txtFechaIni);
+		_txtFechaFin = findViewById(R.id.txtFechaFin);
+		ImageButton ib = findViewById(R.id.btnFechaIni);
 		if(ib != null)
 		ib.setOnClickListener(v ->
 		{
@@ -171,7 +171,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 			//_txtFechaIni.clearFocus();_txtFechaFin.clearFocus();
 		});
-		ib = (ImageButton)findViewById(R.id.btnFechaFin);
+		ib = findViewById(R.id.btnFechaFin);
 		if(ib != null)
 		ib.setOnClickListener(v ->
 		{
@@ -182,21 +182,12 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		});
 
 		//------------------------------------------------------------------------------------------
-		/*_GoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-		_GoogleApiClient.connect();
-		_LocationRequest = new LocationRequest();
-		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		//mLocationRequestBalancedPowerAccuracy  || LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-		pideGPS();*/
 		try
 		{
 			_filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
 			//-----
-			//_iTipo = getIntent().getIntExtra(Util.TIPO, Util.NADA);
 			_txtNombre.setText(_filtro.getNombre());
 			//-----
-			//_swtActivo.setChecked(_filtro.getActivo() == Filtro.ACTIVO);
 			if(_spnActivo != null)
 			switch(_filtro.getActivo())
 			{

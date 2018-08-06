@@ -41,7 +41,6 @@ import java.util.List;
 public abstract class VistaBase
 		extends AppCompatActivity
 		implements PresenterBase.IVista, OnMapReadyCallback,
-        //, LocationListener
 		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 	protected static final String TAG = VistaBase.class.getSimpleName();
 	private static final int DELAY_LOCATION = 30 * 1000;

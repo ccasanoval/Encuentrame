@@ -45,8 +45,7 @@ public class ActLugar extends VistaBase
 		super.ini(_presenter, _util, new Lugar(), R.layout.act_lugar);
 		super.onCreate(savedInstanceState);
 		//------------------------------------
-		ImageButton btnActPos = (ImageButton)findViewById(R.id.btnActPos);
-		//if(btnActPos != null)
+		ImageButton btnActPos = findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(v ->
 		{
 			Location loc = _util.getLocation();
@@ -54,7 +53,7 @@ public class ActLugar extends VistaBase
 		});
 
 		//------------------------------------
-		_lblPosicion = (TextView)findViewById(R.id.lblPosicion);
+		_lblPosicion = findViewById(R.id.lblPosicion);
 		setPosLabel(_presenter.getLatitud(), _presenter.getLongitud());
 
 		//------------------------------------

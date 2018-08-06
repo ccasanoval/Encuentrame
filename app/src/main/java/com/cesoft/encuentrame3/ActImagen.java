@@ -57,7 +57,6 @@ public class ActImagen extends AppCompatActivity
 	private ImageView _iv;
 	private String _imgURLnew;
 
-	//private boolean _bSucio = false;//TODO: ?
 	private enum ESTADO {SIN_IMG, OLD_IMG, NEW_IMG}
 	private ESTADO _estado;
 
@@ -106,11 +105,6 @@ public class ActImagen extends AppCompatActivity
 	 * Touch listener to use for in-layout UI controls to delay hiding the system UI.
 	 * This is to prevent the jarring behavior of controls going away while interacting with activity UI.
 	 */
-	/*private final View.OnTouchListener mDelayHideTouchListener = (view, motionEvent) ->
-	{
-		if(AUTO_HIDE) delayedHide(AUTO_HIDE_DELAY_MILLIS);
-		return false;
-	};*/
 	private final View.OnClickListener mHideClickListener = (view) ->
 	{
 		if(AUTO_HIDE) delayedHide(AUTO_HIDE_DELAY_MILLIS);
@@ -142,27 +136,18 @@ public class ActImagen extends AppCompatActivity
 		int[] maxTextureSize = new int[1];
 		GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
 
-//Log.e(TAG, "zzzzzz-------- max: "+maxTextureSize[0]);
-//Log.e(TAG, "zzzzzz-------- max: "+_util.getMaxTextureSize());
 		//------------------------------------------------------------------------------------------
 		try
 		{
 			_imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
 			_l = getIntent().getParcelableExtra(PARAM_LUGAR);
-Log.e(TAG, "00000-------- : "+_imgURLnew+" "+_l.getId());
 			if(_imgURLnew != null)
 			{
 				File file = new File(_imgURLnew);
-Log.e(TAG, "oncreate-------- INI: "+_imgURLnew+" :: "+file.exists());
 				if(file.exists())
 				{
 					try{
-					//Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-					//_iv.setImageBitmap(myBitmap);
-
-
 					Glide.with(this).load(_imgURLnew).into(_iv);
-					//_iv.setImageURI(Uri.fromFile(new File(_imgURLnew)));
 					refreshMenu(ESTADO.NEW_IMG);
 					}
 					catch(OutOfMemoryError e)

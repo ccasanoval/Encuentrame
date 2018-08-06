@@ -17,6 +17,5 @@ public class ActSplash extends AppCompatActivity
 		Intent intent = new Intent(this, ActLogin.class);
 		startActivity(intent);
 		finish();
-		//com.cesoft.encuentrame3.util.Log.e("SPLASH", "------------------------------SPLASH----------------------------");
 	}
 }

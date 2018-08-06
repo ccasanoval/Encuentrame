@@ -20,27 +20,6 @@ public class Fire
 
 	@Inject public Fire(){}
 
-	/*private FirebaseDatabase _fbdb = null;
-	//private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-	/*private synchronized FirebaseDatabase getDBInstance()
-	{
-		if(_fbdb == null)
-		{
-			_fbdb = FirebaseDatabase.getInstance();
-			try
-			{
-				_fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
-			}
-			catch(Exception e){Log.e(TAG, "getDBInstance:e:-----------------------------------------", e);}
-		}
-		return _fbdb;
-	}
-	public synchronized DatabaseReference getDB(String user, String child)
-	{
-		return getDBInstance().getReference().child(user).child(child);
-	}*/
-
-
 	//----------------------------------------------------------------------------------------------
 	//-----
 	public interface AuthListener
@@ -56,10 +35,8 @@ public class Fire
 
 		private ValueEventListener _vel = null;
 			public void setListener(ValueEventListener vel){delListener();_vel = vel;}
-			//ValueEventListener getListener(){return _vel;}
 			private void delListener()
 			{
-				//Log.e(TAG, "ObjetoListener:delListener: ref="+_ref+", vel="+_vel);
 				if(_ref!=null && _vel!=null)_ref.removeEventListener(_vel);
 			}
 	}
@@ -69,12 +46,7 @@ public class Fire
 		void onDatos(T[] aData);
 		void onError(String err);
 	}
-	//----------------------------------------------------------------------------------------------
-	/*public interface SingleListener<T> //TODO
-	{
-		void onDatos(T data);
-		void onError(String err);
-	}*/
+
 	//----------------------------------------------------------------------------------------------
 	public static abstract class CompletadoListener implements DatabaseReference.CompletionListener
 	{

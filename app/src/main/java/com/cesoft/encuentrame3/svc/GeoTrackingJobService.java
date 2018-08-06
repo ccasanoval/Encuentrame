@@ -363,7 +363,7 @@ public class GeoTrackingJobService
     {
         DetectedActivity act = event.getActividad();
         _lastActividad = act.getType();
-        Log.e(TAG, "onActividadEvent:(last="+_lastActividad+")-------"+_util.getActivityString(_lastActividad)+" : "+act.getConfidence());
+        //Log.e(TAG, "onActividadEvent:(last="+_lastActividad+")-------"+_util.getActivityString(_lastActividad)+" : "+act.getConfidence());
     }
 
 }
