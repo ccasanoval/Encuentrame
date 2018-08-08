@@ -90,7 +90,7 @@ public abstract class VistaBase
 	protected void buildLocationRequest() {
 		_LocationRequest = new LocationRequest();
 		_LocationRequest.setInterval(DELAY_LOCATION);
-		_LocationRequest.setFastestInterval(DELAY_LOCATION - 100);
+		_LocationRequest.setFastestInterval(DELAY_LOCATION);
 		_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
 
@@ -176,7 +176,7 @@ public abstract class VistaBase
 		buildLocationRequest();
 		SupportMapFragment smf = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 		if(smf != null) smf.getMapAsync(this);
-		_util.pideGPS(this, this, _LocationRequest);
+		//_util.pidePermisosGPS(this, this, _LocationRequest);
 		Log.e(TAG, "-------------------- ON START");
 	}
 
@@ -203,7 +203,9 @@ public abstract class VistaBase
 
 	private void startTracking() {
         if (_GoogleApiClient == null || !_GoogleApiClient.isConnected())return;
-		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)return;
+		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+		    return;
 		_fusedLocationClient.requestLocationUpdates(_LocationRequest, _locationCallback, Looper.myLooper());
 	}
 
@@ -221,23 +223,19 @@ public abstract class VistaBase
 	@Override public String getTextNombre() { return _txtNombre.getText().toString(); }
 	@Override public String getTextDescripcion() { return _txtDescripcion.getText().toString(); }
 	@Override public void requestFocusNombre() { _txtNombre.requestFocus(); }
-	@Override public void toast(int msg)
-	{
+	@Override public void toast(int msg) {
 		Toast.makeText(this, getString(msg), Toast.LENGTH_LONG).show();
 	}
-	@Override public void toast(int msg, String err)
-	{
+	@Override public void toast(int msg, String err) {
 		Toast.makeText(this, String.format(getString(msg), err), Toast.LENGTH_LONG).show();
 	}
 
 	//----------------------------------------------------------------------------------------------
 	private ProgressDialog _progressDialog = null;
-	@Override public void iniEspera()
-	{
+	@Override public void iniEspera() {
 		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
 	}
-	@Override public void finEspera()
-	{
+	@Override public void finEspera() {
 		if(_progressDialog!=null)_progressDialog.dismiss();
 	}
 
@@ -245,31 +243,27 @@ public abstract class VistaBase
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// OnConnectionFailedListener : https://developers.google.com/android/reference/com/google/android/gms/common/ConnectionResult
 	//----------------------------------------------------------------------------------------------
-	@Override public void onConnectionFailed(@NonNull ConnectionResult result)
-	{
+	@Override public void onConnectionFailed(@NonNull ConnectionResult result) {
 		Log.e(TAG, "onConnectionFailed:e:*****************************************************"+result.getErrorCode());
 		toast(R.string.err_conn_google, result.getErrorMessage());
 	}
-	@Override public void onConnected(Bundle arg0)
-	{
+	@Override public void onConnected(Bundle arg0) {
 		Log.w(TAG, "------------------------------onConnected---------------------------------");
 	}
-	@Override public void onConnectionSuspended(int arg0)
-	{
+	@Override public void onConnectionSuspended(int arg0) {
 		if(_GoogleApiClient != null)
 			_GoogleApiClient.connect();
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// ResultCallback
 	//----------------------------------------------------------------------------------------------
-	@Override public void onResult(@NonNull Status status)
-	{
+	@Override public void onResult(@NonNull Status status) {
 		Log.w(TAG, "---------------------------------onResult---------------------------------"+status);
 	}
 
 
 
-	LocationCallback _locationCallback = new LocationCallback() {
+	private LocationCallback _locationCallback = new LocationCallback() {
 		@Override
 		public void onLocationResult(LocationResult locationResult) {
 			List<Location> locationList = locationResult.getLocations();
@@ -281,7 +275,6 @@ public abstract class VistaBase
 			}
 		}
 	};
-
 	protected void setPosLugar(double lat, double lon) { _presenter.setLatLon(lat, lon); }
 
 	////////////////////////////////////////////////////////////////////////////////////////////////

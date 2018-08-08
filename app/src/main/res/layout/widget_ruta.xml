@@ -5,11 +5,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="70dp"
 	android:orientation="vertical"
-	android:background="@drawable/widget"
-	>
-	<!--
-	 android:background="@null"
-	 -->
+	android:background="@drawable/widget">
 
 	<ImageButton
 		android:id="@+id/btnApp"
@@ -25,7 +21,6 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:orientation="horizontal"
-		android:layout_toRightOf="@+id/btnApp"
 		android:layout_toEndOf="@+id/btnApp"
 		android:layout_alignParentBottom="true">
 
@@ -44,7 +39,7 @@
 			android:layout_weight="1"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			style="@android:style/TextAppearance.Medium"
+			style="@android:style/TextAppearance.Medium.Inverse"
 			android:gravity="center_horizontal|center_vertical"
 			android:layout_gravity="center_horizontal|center_vertical"
 			android:layout_margin="2dip" />

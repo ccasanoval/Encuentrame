@@ -147,5 +147,6 @@
 	<string name="unknown">Actividad desconocida</string>
 	<string name="walking">Caminando</string>
 	<string name="unidentifiable_activity">Actividad no identificada: %1$d</string>
-    <string name="active_gps">El servicio de tracking necesita que actives la localización por GPS</string>
+	<string name="ask_to_enable_gps">El servicio de tracking necesita que actives la localización por GPS</string>
+	<string name="ok">Aceptar</string>
 </resources>

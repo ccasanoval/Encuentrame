@@ -8,7 +8,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
@@ -20,31 +19,23 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.EditText;
 
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActMain;
-import com.cesoft.encuentrame3.ActMaps;
 import com.cesoft.encuentrame3.adapters.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.Task;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -65,14 +56,6 @@ import javax.inject.Singleton;
 public class Util
 {
 	private static final String TAG = Util.class.getSimpleName();
-	/*public enum Tipo
-	{
-		NADA(-1), LUGAR(1), RUTA(2), AVISO(3), BUSCAR(9);
-		private int value;
-		private Tipo(int value){this.value = value;}
-		public int getValue(){return value;}
-	}*/
-
 	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
@@ -101,7 +84,10 @@ public class Util
 	// LOCATION
 	//______________________________________________________________________________________________
 	private static Location _locLast;
-	public void setLocation(Location loc) { _locLast=loc; }
+	public void setLocation(Location loc) {
+		Log.e(TAG, "setLocation:-------------------"+loc);
+		_locLast=loc;
+	}
 	public Location getLocation()
 	{
 		Location location1=null, location2=null;
@@ -208,10 +194,8 @@ public class Util
 
 	private long _lastShowNotifGPS = 0;
 	private long _delayShowNotifGPS = 0;
-	private void showNotifGPS()
+	public void showNotifGPS()
 	{
-		//TODO: Settings: ask for activating GPS if its not activated...
-		//TODO: Only ask if there is a route or geofence active!!
 		if(_delayShowNotifGPS < 60*60*1000)
 			_delayShowNotifGPS += 5*60*1000;
 		if(_lastShowNotifGPS + _delayShowNotifGPS > System.currentTimeMillis())return;
@@ -224,13 +208,13 @@ public class Util
 		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire(2000);
 
-		Intent intent = new Intent(_app, ActMaps.class);
+		Intent intent = new Intent(_app, ActMain.class);
 		int idNotificacion = 6969;
 
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_compass)
 				.setLargeIcon(BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
-				.setContentTitle(_app.getString(R.string.active_gps))
+				.setContentTitle(_app.getString(R.string.ask_to_enable_gps))
 				.setContentText("GPS")
 				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
@@ -254,46 +238,6 @@ public class Util
 		wakeLock.release();
 	}
 
-	//______________________________________________________________________________________________
-	/// TEXT TO SPEECH
-	//______________________________________________________________________________________________
-	/*private static TextToSpeech tts = null;
-	public static void hablar(final Context c, String texto)
-	{
-		if(tts == null)
-		tts = new TextToSpeech(c.getApplicationContext(), new TextToSpeech.OnInitListener()
-		{
-   			@Override
-   			public void onInit(int status)
-			{
-				if(status != TextToSpeech.ERROR)
-					tts.setLanguage(c.getResources().getConfiguration().locale);//new Locale("es", "ES");Locale.forLanguageTag("ES")
-			}
-		});
-		//tts.speak(s, TextToSpeech.QUEUE_FLUSH, null);//DEPRECATED
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-    		ttsGreater21(c, tts, texto);
-		else
-    		ttsUnder20(tts, texto);
-
-	}
-	//______________________________________________________________________________________________
-	@SuppressWarnings("deprecation")
-	private static void ttsUnder20(TextToSpeech tts, String texto)
-	{
-		//System.err.println("------ttsUnder20");
-    	HashMap<String, String> map = new HashMap<>();
-    	map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
-    	tts.speak(texto, TextToSpeech.QUEUE_FLUSH, map);
-	}
-	//______________________________________________________________________________________________
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private static void ttsGreater21(Context c, TextToSpeech tts, String texto)
-	{
-		//System.err.println("------ttsGreater21");
-    	String utteranceId=c.hashCode() + "";
-    	tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
-	}*/
 
 	//______________________________________________________________________________________________
 	/// CONFIG
@@ -453,26 +397,43 @@ public class Util
 
 	//______________________________________________________________________________________________
 	//TODO: static vs injected ?!
-	public static void exeDelayed(long delay, Runnable runnable)
-	{
+	public static void exeDelayed(long delay, Runnable runnable) {
 		new Handler().postDelayed(runnable, delay);
 	}
 
 	//______________________________________________________________________________________________
-	public void pideGPS(Context settingsClient, Activity act, LocationRequest locationRequest) {
+	public boolean pideActivarGPS(Context context) {
+		final LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+		if(manager != null && ! manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setMessage(R.string.ask_to_enable_gps)
+					.setCancelable(false)
+					.setPositiveButton(R.string.ok, (dialog, id) ->
+							context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+					.setNegativeButton(R.string.cancelar, (dialog, id) ->dialog.cancel())
+				;
+			final AlertDialog alert = builder.create();
+			alert.show();
+			return true;
+		}
+		return false;
+	}
+	//______________________________________________________________________________________________
+	/*public void pidePermisosGPS(Context settingsClient, Activity act, LocationRequest locationRequest) {
 		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
 				.addLocationRequest(locationRequest)
 				.setAlwaysShow(true);
 		Task<LocationSettingsResponse> task =
 				LocationServices.getSettingsClient(settingsClient).checkLocationSettings(builder.build());
-
-		task.addOnCompleteListener(task1 -> {
+		Log.e(TAG, "pidePermisosGPS:-------------------AAA-----------------");
+		task.addOnCompleteListener(res -> {
             try {
                 //LocationSettingsResponse response =
-				task1.getResult(ApiException.class);
+				res.getResult(ApiException.class);
+				Log.e(TAG, "pidePermisosGPS:-------------------BBB-----------------");
                 // All location settings are satisfied. The client can initialize location requests here.
 			}
-			catch (ApiException exception) {
+			catch(ApiException exception) {
                 switch (exception.getStatusCode()) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied. But could be fixed by showing the user a dialog.
@@ -480,24 +441,29 @@ public class Util
                             // Cast to a resolvable exception.
                             ResolvableApiException resolvable = (ResolvableApiException) exception;
                             // Show the dialog by calling startResolutionForResult(), and check the result in onActivityResult().
-							if(act != null)
-                            	resolvable.startResolutionForResult(act,1000);
+							if(act != null) {
+								resolvable.startResolutionForResult(act, 1000);
+								Log.e(TAG, "pidePermisosGPS:resolvable.startResolutionForResult-------------------------------------");
+							}
 							else {
-								showNotifGPS();//TODO: Evitar que salga continuamente... timer...
+								showNotifGPS();
+								Log.e(TAG, "pidePermisosGPS:showNotifGPS-------------------------------------");
 							}
                         }
                         catch(IntentSender.SendIntentException | ClassCastException e) {
                             // Ignore the error.
+							Log.e(TAG, "pidePermisosGPS:e:-------------------------------------",e);
                         }
 						break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way to fix the
-                        // settings so we won't show the dialog.
+                    	Log.e(TAG, "pidePermisosGPS: LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+                        // Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
                         break;
                 }
             }
         });
-	}
+		Log.e(TAG, "pidePermisosGPS:-------------------CCC-----------------");
+	}*/
 
 
 	//______________________________________________________________________________________________

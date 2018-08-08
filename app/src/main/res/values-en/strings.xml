@@ -141,5 +141,6 @@
 	<string name="unknown">Unknown activity</string>
 	<string name="walking">Walking</string>
 	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
-    <string name="active_gps">The tracking service needs you to activate the GPS</string>
+    <string name="ask_to_enable_gps">The tracking service needs you to activate the GPS</string>
+	<string name="ok">OK</string>
 </resources>

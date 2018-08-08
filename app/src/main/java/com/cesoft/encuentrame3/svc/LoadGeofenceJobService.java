@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD;
+import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD_GEOFENCE;
 import static com.cesoft.encuentrame3.util.Constantes.GEOFEN_DWELL_TIME;
 import static com.cesoft.encuentrame3.util.Constantes.ID_JOB_GEOFENCE_LOADING;
 
@@ -38,9 +38,9 @@ public class LoadGeofenceJobService extends JobService {
 
         //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            builder.setMinimumLatency(DELAY_LOAD);//TODO: Faster the firts time?
+            builder.setMinimumLatency(DELAY_LOAD_GEOFENCE);//TODO: Faster the firts time?
         else
-            builder.setPeriodic(DELAY_LOAD);
+            builder.setPeriodic(DELAY_LOAD_GEOFENCE);
 
         JobScheduler jobScheduler = (JobScheduler)context.getSystemService(JOB_SCHEDULER_SERVICE);
         if(jobScheduler != null)

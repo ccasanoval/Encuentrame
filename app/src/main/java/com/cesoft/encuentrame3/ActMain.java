@@ -333,7 +333,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 
 
 	//----------------------------------------------------------------------------------------------
-	public void pideGPS()//TODO: a Util.pideGPS(Activity a)
+	public void pideGPS()
 	{
 		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
 		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -343,7 +343,9 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
 	{
-		Log.e(TAG, "onRequestPermissionsResult------------------------------------------------- requestCode = "+requestCode+" : ");
+		try {
+			Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
+					+ requestCode + " : " + permissions[0] + " = " + grantResults[0]);
+		}catch(Exception ignore){}
 	}
-
 }

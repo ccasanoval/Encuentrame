@@ -1,17 +1,21 @@
 package com.cesoft.encuentrame3.svc;
 
+import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
@@ -50,30 +54,32 @@ import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 @Singleton
 public class GeoTrackingJobService
         extends JobService
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
-{
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = GeoTrackingJobService.class.getSimpleName();
 
     @Inject Util _util;
     @Inject Login _login;
-    @Inject public GeoTrackingJobService() {
+    @Inject
+    public GeoTrackingJobService() {
         EventBus.getDefault().register(this);
     }
 
 
-    private Context appContext;
-    private int _lastActividad = DetectedActivity.STILL;
-    private LocationRequest _LocationRequest;
-    private GoogleApiClient _GoogleApiClient;
+    private Context _appContext;
     private FusedLocationProviderClient _fusedLocationClient;
-    private Location _locLastSaved = null;
-    private String _sId = "";
-    private Location _locLast = null;
-    private double _velLast = 0;
+    private PowerManager.WakeLock _wakeLock = null;
+    private JobParameters _jobParameters;
+    private GoogleApiClient _GoogleApiClient;
+
+    private static int _lastActividad = DetectedActivity.STILL;//Actividad actual: Coche, bici, parado...
+    private static String _sId = "";                //Ruta actual
+    private static Location _locLastSaved = null;   //Para calculo de distancia minima
+    private static Location _locLast = null;        //Para calculo de punto erroneo
+    private static double _velLast = 0;             //Para calculo de punto erroneo
 
 
     public static void start(Context context) {
-        Log.e(TAG, "************************* start *************************");
+        Log.e(TAG, "************************* GEO Start *************************");
 
         ComponentName componentName = new ComponentName(context, GeoTrackingJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName).setPersisted(true);
@@ -84,64 +90,117 @@ public class GeoTrackingJobService
         else
             builder.setPeriodic(DELAY_TRACK_MIN);
 
-        JobScheduler jobScheduler = (JobScheduler)context.getSystemService(JOB_SCHEDULER_SERVICE);
-        if(jobScheduler != null)
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(JOB_SCHEDULER_SERVICE);
+        if (jobScheduler != null)
             jobScheduler.schedule(builder.build());
     }
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
-        Log.e(TAG, "************************* onStartJob *************************");
-        WidgetRutaService.startSvc(getApplicationContext());//Ini widget
-        appContext = getApplicationContext();
-        App.getComponent(appContext).inject(this);
-        new Thread(() -> {
-            if( ! _login.isLogged()) {
-                Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
-                stopSelf();
-                GeoTrackingJobService.this.jobFinished(jobParameters, false);
-            }
-            else if(_util.getTrackingRoute().isEmpty()) {
-                Log.e(TAG, "getTrackingRoute().isEmpty() !! STOPPING JOB " + _sId);
-                stopTracking();
-                stopSelf();
-                GeoTrackingJobService.this.jobFinished(jobParameters, false);
-            }
-            else {
-                //PAYLOAD
-                saveGeoTracking();
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    start(getApplicationContext());
-                GeoTrackingJobService.this.jobFinished(jobParameters, true);
-            }
-        }).start();
+        Log.e(TAG, "************************* GEO onStartJob *************************");
+        runPayload(jobParameters);
         return false;
     }
 
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        Log.e(TAG, "************************* onStopJob *************************");
+        Log.e(TAG, "************************* GEO onStopJob *************************");
         return false;
     }
 
     //---
 
-    public void iniGeoTracking()
-    {
-        if(checkPlayServices())buildGoogleApiClient();
-        if(_GoogleApiClient != null)_GoogleApiClient.connect();
-        _LocationRequest = new LocationRequest();
-        _LocationRequest.setInterval(DELAY_TRACK_MIN);//TODO: ajustar por usuario...
-        _LocationRequest.setFastestInterval(DELAY_TRACK_MIN);
-        _LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    private void runPayload(JobParameters jobParameters) {
+        _jobParameters = jobParameters;
+        WidgetRutaService.startSvc(getApplicationContext());//Ini widget
+        iniEnviron();
+        if (!_login.isLogged()) {
+            Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
+            finish();
+        } else if (_util.getTrackingRoute().isEmpty()) {
+            Log.e(TAG, "getTrackingRoute().isEmpty() !! STOPPING JOB " + _sId);
+            notTracking();
+        } else {
+            iniWakeLock();
+            iniTracking();
+            new Thread(this::saveGeoTracking).start();
+        }
+    }
+
+    private void iniWakeLock() {
+        //if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)//TODO: When would wakelock be needed? DELETE
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if(powerManager != null) {
+            _wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft::GeoTrackingJobService");
+            _wakeLock.acquire(2 * 60 * 1000);//x minutes max
+            Log.e(TAG, "iniWakeLock--------------------------------------------");
+        }
+    }
+
+    private void endWakeLock() {
+        if (_wakeLock != null)
+            _wakeLock.release();
+        _wakeLock = null;
+        Log.e(TAG, "endWakeLock--------------------------------------------");
+    }
+
+    private void iniEnviron() {
+        _appContext = getApplicationContext();
+        App.getComponent(_appContext).inject(this);
+    }
+
+    private void reschedule() {
+        endWakeLock();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            start(getApplicationContext());
+        GeoTrackingJobService.this.jobFinished(_jobParameters, true);
+    }
+
+    private void finish() {
+        stopSelf();
+        endWakeLock();
+        GeoTrackingJobService.this.jobFinished(_jobParameters, false);
+    }
+
+    private void notTracking() {
+        stopTracking();
+        finish();
+    }
+
+
+    //---
+
+    private void stopTracking() {
+        Log.e(TAG, "stopTracking:-----------------------------------------------------------");
+        if (_GoogleApiClient != null && _GoogleApiClient.isConnected())
+            _GoogleApiClient.disconnect();
+        if(_fusedLocationClient != null)
+            _fusedLocationClient.removeLocationUpdates(_locationCallback);
+        _fusedLocationClient = null;
+        _locLastSaved = null;
+        _locLast = null;
+        _velLast = 0;
+    }
+
+    private void iniTracking() {
+        Log.e(TAG, "iniGeoTracking:------------------------1-----------------------------------");
+        if (checkPlayServices()) buildGoogleApiClient();
+        if (_GoogleApiClient != null) _GoogleApiClient.connect();
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(DELAY_TRACK_MIN);//TODO: ajustar segun velocidad cambio pos...
+        locationRequest.setFastestInterval(DELAY_TRACK_MIN);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         _fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        pideGPS();
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "pideGPS:---------------------------------------------------------------");
+            _util.showNotifGPS();
+        }
+        _fusedLocationClient.requestLocationUpdates(locationRequest, _locationCallback, Looper.myLooper());
+        Log.e(TAG, "iniGeoTracking:------------------------2-----------------------------------"+_fusedLocationClient);
     }
-    protected void pideGPS() {
-        _util.pideGPS(this, null, _LocationRequest);
-    }
-    protected synchronized void buildGoogleApiClient()
+
+    private synchronized void buildGoogleApiClient()
     {
         _GoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -153,7 +212,7 @@ public class GeoTrackingJobService
     {
         try {
             GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-            int result = googleAPI.isGooglePlayServicesAvailable(appContext);
+            int result = googleAPI.isGooglePlayServicesAvailable(_appContext);
             if (result != ConnectionResult.SUCCESS) {
                 //TODO: Notificacion?
                 Log.e(TAG, String.format("checkPlayServices: No tiene Google Services? result = %s !!!!!!!!!!!!!!!", result));
@@ -167,42 +226,7 @@ public class GeoTrackingJobService
         }
     }
 
-    private void startTracking() {
-        if(_GoogleApiClient != null && _GoogleApiClient.isConnected()) {
-            try {
-                if(_LocationRequest == null) {
-                    iniGeoTracking();
-                    throw new SecurityException("_LocationRequest = NULL");
-                }
-                _fusedLocationClient.requestLocationUpdates(_LocationRequest, _locationCallback, Looper.myLooper());
-            }
-            catch(SecurityException e) {
-                Log.e(TAG, "startTracking:e:---------------------------------------------------", e);
-            }
-        }
-    }
-    private void stopTracking()
-    {
-        if(_GoogleApiClient != null && _GoogleApiClient.isConnected())
-            _fusedLocationClient.removeLocationUpdates(_locationCallback);
-        _locLastSaved = null;
-        _locLast = null;
-        _velLast = 0;
-    }
 
-
-    ///------------------------ CALLBACKS ----------------------------------------------------------
-    LocationCallback _locationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            List<Location> locationList = locationResult.getLocations();
-            if (locationList.size() > 0) {
-                Location location = locationList.get(locationList.size() - 1);
-                _util.setLocation(location);
-                Log.w(TAG, "----------------LocationCallback:::"+location.getAccuracy()+"--"+location.getProvider()+"--"+(new java.util.Date(location.getTime())));
-            }
-        }
-    };
 
     public void saveGeoTracking()
     {
@@ -210,54 +234,59 @@ public class GeoTrackingJobService
         Log.e(TAG, "saveGeoTracking ************************************** "+_sId+" / "+sId);
         if(sId.isEmpty())
         {
-            stopTracking();
+            Log.e(TAG, "saveGeoTracking ************************sId.isEmpty() IS EMPTY************** ");
+            //stopTracking();
+            //reschedule();
+            finish();
             return;
         }
-        startTracking();
+        //startTracking();
+
 
         Ruta.getById(sId, new Fire.SimpleListener<Ruta>() {
             @Override
             public void onDatos(Ruta[] aData) {
                 if(aData[0] == null) {
-                    Log.e(TAG, "saveGeoTracking:Ruta.getById: RUTA == NULL -------------------------------------------"+sId);
+                    Log.e(TAG, "saveGeoTracking:Ruta.getById: RUTA == NULL --------------------"+sId);
                     _util.setTrackingRoute("");
-                    stopTracking();
+                    finish();
                 }
                 else {
                     final Location loc = _util.getLocation();
-                    guardarPunto(loc, aData[0], sId);
+                    if(guardarPunto(loc, aData[0]))
+                        Log.e(TAG, "saveGeoTracking: guardarPunto OK --------------------------");
+                    reschedule();
                 }
             }
             @Override
             public void onError(String err) {
-                Log.e(TAG, "saveGeoTracking:findById:e:---------------------------------------------:" + err);
+                Log.e(TAG, "saveGeoTracking:findById:e:----------------------------------------:" + err);
             }
         });
     }
 
-    private synchronized void guardarPunto(Location loc, Ruta r, String sId)
+    private synchronized boolean guardarPunto(Location loc, Ruta r)//, String sId)
     {
-        Log.w(TAG, "guardarPunto:    A    *** ");
+        Log.e(TAG, "guardarPunto:    A    ********************* \nLOC:"+loc+"\n : RUT:"+r.id+"\n :  _ID:"+_sId);
         if(loc == null) {
-            Log.w(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
-            return;
+            Log.e(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
+            return false;
         }
         if( ! loc.hasAccuracy()) {
-            Log.w(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
-            return;
+            Log.e(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
+            return false;
         }
-        if(r.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 15+ DISTANCE_MIN)) {
-            Log.w(TAG, "guardarPunto:loc.getAccuracy() ("+loc.getAccuracy()+")   > MAX_ACCURACY ("+ ACCURACY_MAX+")  or  > DISTANCE_MIN+15 ("+ DISTANCE_MIN+")    :::: n pts "+r.getPuntosCount());
-            return;
+        if(r.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 2*DISTANCE_MIN)) {
+            Log.e(TAG, "guardarPunto:loc.getAccuracy()("+loc.getAccuracy()+")   > MAX_ACCURACY("+ ACCURACY_MAX+")  or  > DISTANCE_MIN*2("+2*DISTANCE_MIN+")    :::: n pts "+r.getPuntosCount());
+            return false;
         }
 
-        if( ! _sId.equals(sId))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
+        if( ! _sId.equals(r.id))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
         {
-            Log.w(TAG, "guardarPunto: NUEVA RUTA: -----------------"+(_sId.equals(sId))+"-------------------------- "+_sId+" ------- "+sId);//TODO : se llama dos veces, _sID=='' ?????!!!!!
-            _sId = sId;
+            Log.e(TAG, "guardarPunto: NUEVA RUTA: --------------------------------- "+_sId+" ------- "+r.id);
+            _sId = r.id;
             _locLastSaved = null;
             _locLast = loc;
-//            DELAY_TRACK = DELAY_TRACK_MIN;
         }
         else if(_locLastSaved != null)
         {
@@ -275,13 +304,11 @@ public class GeoTrackingJobService
                     double speed = distLast / time;	//60 m/s = 216 Km/h
                     double accel = (speed - _velLast)/time;//Aceleración coche muy potente (desde parado!) < 8 m/s2
 
-                    Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*************----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, _velLast, accel));
-                    //if(speed > 40 && _velLastSaved < 20 && time < 2*60)//|| speed > (_velLastSaved+1)*50)//50m/s = 180Km/h
+                    Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*************----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, _velLast, accel));
                     if(speed > SPEED_MAX || accel > ACCEL_MAX)//imaginamos que es un punto erróneo, salvo que vayas en un cohete
                     {
-                        Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.2f *****************************", speed, _velLast, time, accel));
-//                        DELAY_TRACK = DELAY_TRACK_MIN;
-                        return;
+                        Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.2f ***************************** !!!", speed, _velLast, time, accel));
+                        return false;
                     }
                     _velLast = speed;
                 }
@@ -291,22 +318,17 @@ public class GeoTrackingJobService
             //---
 
             float distLastSaved = loc.distanceTo(_locLastSaved);
-            Log.w(TAG, "guardarPunto:----------------************************---------------------distLastSaved="+distLastSaved+"  acc="+loc.getAccuracy());
-            if(distLastSaved < DISTANCE_MIN)//Puntos muy cercanos
-            {
-//                Log.w(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto repetido o sin precision: %s   dist=%.1f  acc=%.1f", sId, distLastSaved, loc.getAccuracy()));
-//                DELAY_TRACK += 2*1000;
-//                if(DELAY_TRACK > DELAY_TRACK_MAX) DELAY_TRACK = DELAY_TRACK_MAX;
-                return;
-            }
-//            else if(distLastSaved > 10*DISTANCE_MIN)
-//                DELAY_TRACK = DELAY_TRACK_MIN;
-//            else if(distLastSaved > 5*DISTANCE_MIN)//TODO: Mejorar... con actividad actual del dispositivo -------------------------
-//                DELAY_TRACK -= DELAY_TRACK_MIN;
-//            if(DELAY_TRACK < DELAY_TRACK_MIN) DELAY_TRACK = DELAY_TRACK_MIN;
+            Log.e(TAG, "guardarPunto:-------********---last="+_locLastSaved
+                    +"\n---newLoc="+loc
+                    +"\n----distLastSaved="+distLastSaved
+                    +"\n-----acc="+loc.getAccuracy());
+            //Puntos muy cercanos
+            if(distLastSaved < DISTANCE_MIN) return false;
+//TODO: Retardar bucle?? ... actividad == Still -------------------------
         }
         r.guardar(new GuardarListener(loc));
         _locLastSaved = loc;
+        return true;
     }
 
 
@@ -318,13 +340,13 @@ public class GeoTrackingJobService
 
         @Override
         protected void onDatos(String id) {
-            Log.w(TAG, "GuardarListener:onComplete:----------------------:" + id);
+            Log.e(TAG, "GuardarListener:onComplete:----------------------:" + id);
             Ruta.addPunto(id, _loc.getLatitude(), _loc.getLongitude(), _loc.getAccuracy(),
                     _loc.getAltitude(), _loc.getSpeed(), _loc.getBearing(), _lastActividad,
                     new Fire.SimpleListener<Long>() {
                         @Override
                         public void onDatos(Long[] puntos) {
-                            Log.w(TAG, String.format(Locale.ENGLISH, "GuardarListener:addPunto: n ptos: %d", puntos[0]));
+                            Log.e(TAG, String.format(Locale.ENGLISH, "GuardarListener:addPunto: n ptos: %d", puntos[0]));
                             Util.refreshListaRutas();//Refrescar lista rutas en main..
                         }
                         @Override
@@ -339,10 +361,10 @@ public class GeoTrackingJobService
         }
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    //implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+    // Implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "onConnected");
+        Log.d(TAG, "onConnected----------------------------------------------------------------");
     }
     @Override
     public void onConnectionSuspended(int i) {
@@ -351,11 +373,24 @@ public class GeoTrackingJobService
     }
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, String.format("onConnectionFailed:e: %s", connectionResult.getErrorCode()));
+        Log.e(TAG, String.format("**********************onConnectionFailed:e: %s", connectionResult.getErrorCode()));
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+    //https://github.com/mcharmas/Android-ReactiveLocation
+    private LocationCallback _locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            List<Location> locationList = locationResult.getLocations();
+            if(locationList.size() > 0) {
+                Location location = locationList.get(locationList.size() - 1);
+                _util.setLocation(location);
+                /*Log.e(TAG, "**************************----------------LocationCallback:::"
+                        +"-- accu:"+location.getAccuracy()
+                        +"-- prov:"+location.getProvider()
+                        +"-- time:"+(new java.util.Date(location.getTime())));*/
+            }
+        }
+    };
 
 
     @Subscribe(threadMode = ThreadMode.POSTING)//BACKGROUND)

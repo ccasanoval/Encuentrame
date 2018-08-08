@@ -26,8 +26,6 @@ import com.cesoft.encuentrame3.models.Ruta;
 import java.util.Locale;
 
 
-//TODO: si no hay ruta, parar sin fecha de activacion: ACTIVAR solo cuando se cree una nueva ruta...
-// listener new punto ruta... o cambiar delay segun situacion...
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +44,6 @@ public class WidgetRutaService extends Service
 	{
 		Intent serviceIntent = new Intent(c, WidgetRutaService.class);
 		c.bindService(serviceIntent, sc, Context.BIND_AUTO_CREATE);
-		//return serviceIntent;
 	}
 	public static void unbindSvc(ServiceConnection sc, Context c)
 	{
@@ -65,12 +62,9 @@ public class WidgetRutaService extends Service
 	{
 		ActivityManager manager = (ActivityManager)c.getSystemService(Context.ACTIVITY_SERVICE);
 		if(manager != null)
-		for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
-		{
+		for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
 			if(serviceClass.getName().equals(service.service.getClassName()))
-			{
 				return true;
-			}
 		}
 		return false;
 	}
@@ -80,9 +74,7 @@ public class WidgetRutaService extends Service
 	public int onStartCommand(final Intent intent, int flags, int startId)
 	{
 		_util = App.getComponent(getApplicationContext()).util();
-
-		if(_h == null)
-		{
+		if(_h == null) {
 			_h = new Handler();
 			_r = this::payLoad;
 			payLoad();
@@ -100,21 +92,18 @@ public class WidgetRutaService extends Service
 	 * runs in the same process as its clients, we don't need to deal with IPC.
 	 */
 	private final IBinder _Binder = new LocalBinder();
-	public class LocalBinder extends android.os.Binder
-	{
+	public class LocalBinder extends android.os.Binder {
 		public WidgetRutaService getService() { return WidgetRutaService.this; }
 	}
 	@Override public IBinder onBind(Intent intent) { return _Binder; }
 	//______________________________________________________________________________________________
 	public void refresh()
 	{
-		try
-		{
+		try {
 			_h.removeCallbacks(_r);
 			payLoad();
 		}
-		catch(Exception e)
-		{
+		catch(Exception e) {
 			Log.e(TAG, "refresh:e:------------------------------------------------------------------",e);
 		}
 	}
@@ -122,13 +111,11 @@ public class WidgetRutaService extends Service
 	private void payLoad()
 	{
 		String idRuta = _util.getTrackingRoute();
-		if(idRuta.isEmpty())
-		{
+		if(idRuta.isEmpty()) {
 			borrarRuta();
 			_h.postDelayed(_r, Constantes.WIDGET_DELAY_LONG);
 		}
-		else
-		{
+		else {
 			setRuta();
 			_h.postDelayed(_r, Constantes.WIDGET_DELAY_SHORT);
 		}
@@ -177,22 +164,6 @@ public class WidgetRutaService extends Service
 		Context context = getApplicationContext();
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(getApplication(), WidgetRuta.class));
-		/*for(int widgetId : allWidgetIds)
-		{
-			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
-
-			// Actualiza tarea actual
-			remoteViews.setTextViewText(R.id.txtRuta, sRuta);
-
-			//  onClick  ->  Actualiza tarea actual
-			Intent clickIntent = new Intent(context, WidgetRuta.class);
-			clickIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-			clickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-			remoteViews.setOnClickPendingIntent(R.id.txtRuta, pendingIntent);
-
-			appWidgetManager.updateAppWidget(widgetId, remoteViews);
-		}*/
 		WidgetRuta.setWidget(context, appWidgetManager, allWidgetIds, sRuta, bRuta);
 	}
 

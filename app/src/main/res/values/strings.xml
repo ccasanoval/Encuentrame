@@ -32,6 +32,7 @@
 	<string name="editar_ruta">Edit Route</string>
 	<string name="eliminar">Remove</string>
 	<string name="cancelar">Cancel</string>
+	<string name="ok">OK</string>
 	<string name="direccion">Address…</string>
 	<string name="estadisticas">Statistics</string>
 	<string name="imagen">Picture</string>
@@ -77,6 +78,7 @@
 	<string name="rutas">Routes</string>
 	<string name="seguro_eliminar">Are you sure you want to remove?</string>
 	<string name="seguro_salir">You made changes. Do you want to save?</string>
+	<string name="ask_to_enable_gps">The tracking service needs you to activate the GPS</string>
 	<string name="send">Send</string>
 	<string name="sin_lugar">A location must be stablished…</string>
 	<string name="sin_nombre">A name must be stablished…</string>
@@ -154,5 +156,5 @@
 	<string name="unknown">Unknown activity</string>
 	<string name="walking">Walking</string>
 	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
-    <string name="active_gps">The tracking service needs you to activate the GPS</string>
+
 </resources>
