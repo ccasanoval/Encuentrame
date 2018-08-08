@@ -15,7 +15,7 @@ public class Constantes
 	public static final long SPEED_MAX = 60;// m/s => 50=180km/h 60=216Km/h
 	public static final long ACCEL_MAX = 6;// m/s2
 	// Cuando se actualiza el widget?
-	public static final long WIDGET_DELAY_SHORT = 2*DELAY_TRACK_MIN;
+	public static final long WIDGET_DELAY_SHORT = DELAY_TRACK_MIN;
 	public static final long WIDGET_DELAY_LONG = DELAY_LOAD_GEOFENCE;
 
 	//

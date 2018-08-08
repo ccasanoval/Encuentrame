@@ -115,11 +115,11 @@ public abstract class PresenterBase
 			_o = _view.getAct().getIntent().getParcelableExtra(Objeto.NOMBRE);
 			if(_o == null)throw new Exception();
             _bNuevo = false;
-			Log.e(TAG, "loadObjeto:-----------------------------------------------------------"+_o);
+			//Log.e(TAG, "loadObjeto:-----------------------------------------------------------"+_o);
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "loadObjeto:e:---------------------------------------------------------",e);
+			//Log.e(TAG, "loadObjeto:e:---------------------------------------------------------",e);
 			_bNuevo = true;
 			_o = objDefault;
 		}

@@ -142,9 +142,8 @@ public abstract class VistaBase
 			_txtDescripcion = findViewById(R.id.txtDescripcion);
 			_txtNombre.setText(_presenter.getNombre());
 			_txtDescripcion.setText(_presenter.getDescripcion());
-			_presenter.setOnTextChange(_txtNombre, _txtDescripcion);//Todo, aqui, no en presenter...?
-		} catch (Exception ignore) {
-		}//ActMaps no tiene campos
+			_presenter.setOnTextChange(_txtNombre, _txtDescripcion);
+		} catch (Exception ignore) { }//ActMaps no tiene campos
 
 		//----------------------------
 		if (savedInstanceState != null) {
@@ -177,7 +176,7 @@ public abstract class VistaBase
 		SupportMapFragment smf = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 		if(smf != null) smf.getMapAsync(this);
 		//_util.pidePermisosGPS(this, this, _LocationRequest);
-		Log.e(TAG, "-------------------- ON START");
+		//Log.e(TAG, "-------------------- ON START");
 	}
 
 	@Override
@@ -185,7 +184,7 @@ public abstract class VistaBase
 		super.onStop();
 		_presenter.unsubscribe();
 		clean();
-		Log.e(TAG, "-------------------- ON STOP");
+		//Log.e(TAG, "-------------------- ON STOP");
 	}
 
 	//----------------------------------------------------------------------------------------------

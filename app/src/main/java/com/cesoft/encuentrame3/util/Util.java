@@ -85,7 +85,7 @@ public class Util
 	//______________________________________________________________________________________________
 	private static Location _locLast;
 	public void setLocation(Location loc) {
-		Log.e(TAG, "setLocation:-------------------"+loc);
+		//Log.e(TAG, "setLocation:-------------------"+loc);
 		_locLast=loc;
 	}
 	public Location getLocation()
