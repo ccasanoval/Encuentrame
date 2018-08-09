@@ -21,6 +21,7 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
@@ -38,7 +39,9 @@ public class Ruta extends Objeto implements Parcelable
 	private static final String TAG = Ruta.class.getSimpleName();
 	public static final String NOMBRE = "ruta";
 	private static final String IDRUTA = "idRuta";
-	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
+	private static DatabaseReference newFirebase() {
+		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
+	}
 	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude private DatabaseReference _datos;
 
@@ -169,7 +172,8 @@ public class Ruta extends Objeto implements Parcelable
 					ArrayList<Ruta> aRutas = new ArrayList<>(n);
 					for(DataSnapshot o : data.getChildren())
 						aRutas.add(o.getValue(Ruta.class));
-					listener.onDatos(aRutas.toArray(new Ruta[n]));
+					//Collections.reverse(aRutas);
+					listener.onDatos(reverse(aRutas));//aRutas.toArray(new Ruta[n]));
 				}
 				else
 				{
@@ -225,7 +229,7 @@ public class Ruta extends Objeto implements Parcelable
 					if(r != null && ! r.pasaFiltro(filtro, r.getId(), idRutaAct))continue;
 					aRutas.add(r);
 				}
-				listener.onDatos(aRutas.toArray(new Ruta[aRutas.size()]));
+				listener.onDatos(reverse(aRutas));
 			}
 			@Override
 			public void onCancelled(@NonNull DatabaseError err)
@@ -235,7 +239,6 @@ public class Ruta extends Objeto implements Parcelable
 			}
 		};
 		listener.setRef(ddbb);
-		//listener.delListener();
 		listener.setListener(vel);
 		ddbb.addValueEventListener(vel);
 	}
@@ -251,7 +254,8 @@ public class Ruta extends Objeto implements Parcelable
 			{
 				final ArrayList<Ruta> aRutas = new ArrayList<>();
 				final ArrayList<Ruta> aIgnorados = new ArrayList<>();
-				if(aData.length < 1)listener.onDatos(new Ruta[0]);
+				if(aData.length < 1)
+					listener.onDatos(new Ruta[0]);
 				else
 				for(String idRuta : aData)
 				{
@@ -262,15 +266,21 @@ public class Ruta extends Objeto implements Parcelable
 						public void onDataChange(@NonNull DataSnapshot data)
 						{
 							Ruta r = data.getValue(Ruta.class);
-							if(r != null && r.pasaFiltro(filtro, r.getId(), idRutaAct))aRutas.add(r);
-							else aIgnorados.add(r);
-							if(aRutas.size()+aIgnorados.size() == aData.length)listener.onDatos(aRutas.toArray(new Ruta[aRutas.size()]));
+							if(r != null && r.pasaFiltro(filtro, r.getId(), idRutaAct))
+								aRutas.add(r);
+							else
+								aIgnorados.add(r);
+							if(aRutas.size()+aIgnorados.size() == aData.length) {
+								listener.onDatos(reverse(aRutas));
+							}
 						}
 						@Override
 						public void onCancelled(@NonNull DatabaseError err)
 						{
 							Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:%s",err));
-							if(aRutas.size() == aData.length)listener.onDatos(aRutas.toArray(new Ruta[aRutas.size()]));
+							if(aRutas.size() == aData.length) {
+								listener.onDatos(reverse(aRutas));
+							}
 						}
 					});
 				}
@@ -302,21 +312,24 @@ public class Ruta extends Objeto implements Parcelable
 						RutaPunto rp = data.getValue(RutaPunto.class);
 						if(rp != null)
 						asRutas.add(rp.getIdRuta());
-						if(nCount < 1)lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
+						if(nCount < 1)
+							lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
 					}
 					@Override
 					public void onCancelled(@NonNull DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:e:%s",err));
-						if(nCount < 1)lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
+						if(nCount < 1)
+							lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
 					}
 				});
 			}
 			@Override
 			public void onGeoQueryReady()
 			{
-				if(nCount == 0)lis.onDatos(new String[0]);
+				if(nCount == 0)
+					lis.onDatos(new String[0]);
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
 
@@ -400,8 +413,12 @@ public class Ruta extends Objeto implements Parcelable
 	public static class RutaPunto implements Parcelable
 	{
 		public static final String NOMBRE = "ruta_punto";
-		private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-		private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+		private static DatabaseReference newFirebase() {
+			return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
+		}
+		private static GeoFire newGeoFire() {
+			return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
+		}
 		@Exclude
 		private DatabaseReference _datos;
 
@@ -698,4 +715,11 @@ public class Ruta extends Objeto implements Parcelable
 			return dist[0];
 		}
 	}
+
+
+	private static Ruta[] reverse(ArrayList<Ruta> aRutas) {
+		Collections.reverse(aRutas);
+		return aRutas.toArray(new Ruta[aRutas.size()]);
+	}
+
 }

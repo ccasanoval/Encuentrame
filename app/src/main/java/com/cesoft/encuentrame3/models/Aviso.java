@@ -16,6 +16,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.cesoft.encuentrame3.Login;
 
@@ -34,7 +35,9 @@ public class Aviso extends Objeto
 				.child(Login.getCurrentUserID())
 				.child(NOMBRE);
 	}
-	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+	private static GeoFire newGeoFire() {
+		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
+	}
 	@Exclude private DatabaseReference _datos;
 
 	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
@@ -180,15 +183,15 @@ public class Aviso extends Objeto
 		ValueEventListener vel = new ValueEventListener()
 		{
 			@Override
-			public void onDataChange(DataSnapshot ds)
+			public void onDataChange(DataSnapshot data)
 			{
-				int i = 0;
-				Aviso[] aAvisos = new Aviso[(int)ds.getChildrenCount()];
-				for(DataSnapshot l : ds.getChildren())
-				{
-					aAvisos[i++] = l.getValue(Aviso.class);
+				//Aviso[] aAvisos = new Aviso[(int)data.getChildrenCount()];
+				ArrayList<Aviso> aAvisos = new ArrayList<>((int)data.getChildrenCount());
+				for(DataSnapshot o : data.getChildren()) {
+					//aAvisos[i++] = l.getValue(Aviso.class);
+					aAvisos.add(o.getValue(Aviso.class));
 				}
-				listener.onDatos(aAvisos);
+				listener.onDatos(reverse(aAvisos));
 			}
 			@Override
 			public void onCancelled(DatabaseError err)
@@ -215,7 +218,7 @@ public class Aviso extends Objeto
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 					aAvisos.add(o.getValue(Aviso.class));
-				listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
+				listener.onDatos(reverse(aAvisos));
 			}
 			@Override
 			public void onCancelled(@NonNull DatabaseError err)
@@ -262,7 +265,7 @@ public class Aviso extends Objeto
 					if(a != null && ! a.pasaFiltro(filtro))continue;
 					aAvisos.add(o.getValue(Aviso.class));
 				}
-				listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
+				listener.onDatos(reverse(aAvisos));
 			}
 			@Override
 			public void onCancelled(@NonNull DatabaseError err)
@@ -299,15 +302,18 @@ public class Aviso extends Objeto
 					{
 						nCount--;
 						Aviso a = data.getValue(Aviso.class);
-						if(a != null && a.pasaFiltro(filtro))aAvisos.add(a);
-						if(nCount < 1)listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
+						if(a != null && a.pasaFiltro(filtro))
+							aAvisos.add(a);
+						if(nCount < 1)
+							listener.onDatos(reverse(aAvisos));
 					}
 					@Override
 					public void onCancelled(@NonNull DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, "buscarPorGeoFiltro:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onDatos(aAvisos.toArray(new Aviso[aAvisos.size()]));
+						if(nCount < 1)
+							listener.onDatos(reverse(aAvisos));
 					}
 				});
 			}
@@ -357,4 +363,9 @@ public class Aviso extends Objeto
 	}
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------
+
+	private static Aviso[] reverse(ArrayList<Aviso> aAvisos) {
+		Collections.reverse(aAvisos);
+		return aAvisos.toArray(new Aviso[aAvisos.size()]);
+	}
 }

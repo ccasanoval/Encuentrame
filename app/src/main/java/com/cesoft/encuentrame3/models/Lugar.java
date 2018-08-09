@@ -8,6 +8,7 @@ import android.support.annotation.Keep;
 import android.widget.ImageView;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.bumptech.glide.Glide;
 
@@ -48,8 +49,12 @@ public class Lugar extends Objeto
 {
 	private static final String TAG = Lugar.class.getSimpleName();
 	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
-	private static DatabaseReference newFirebase(){return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);}
-	private static GeoFire newGeoFire(){return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
+	private static DatabaseReference newFirebase() {
+		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
+	}
+	private static GeoFire newGeoFire() {
+		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
+	}
 	@Exclude private DatabaseReference _datos;
 
 	//TODO: ADD	Altitud, velocidad, bearing ...
@@ -121,7 +126,7 @@ public class Lugar extends Objeto
 					}
 				}
 				try {
-					listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+					listener.onDatos(reverse(aLugares));
 				}
 				catch(Exception e) {
 					Log.e(TAG, "getLista:e:----------------------------------------------------",e);
@@ -164,7 +169,7 @@ public class Lugar extends Objeto
 					if(l != null && ! l.pasaFiltro(filtro))continue;
 					aLugares.add(l);
 				}
-				listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+				listener.onDatos(reverse(aLugares));
 			}
 			@Override
 			public void onCancelled(@NonNull DatabaseError err)
@@ -203,22 +208,26 @@ public class Lugar extends Objeto
 					{
 						nCount--;
 						Lugar l = data.getValue(Lugar.class);
-						if(l != null && l.pasaFiltro(filtro))aLugares.add(l);
-						if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+						if(l != null && l.pasaFiltro(filtro))
+							aLugares.add(l);
+						if(nCount < 1)
+							listener.onDatos(reverse(aLugares));
 					}
 					@Override
 					public void onCancelled(@NonNull DatabaseError err)
 					{
 						nCount--;
 						Log.e(TAG, "getLista:onKeyEntered:onCancelled:"+err);
-						if(nCount < 1)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+						if(nCount < 1)
+							listener.onDatos(reverse(aLugares));
 					}
 				});
 			}
 			@Override
 			public void onGeoQueryReady()
 			{
-				if(nCount==0)listener.onDatos(aLugares.toArray(new Lugar[aLugares.size()]));
+				if(nCount==0)
+					listener.onDatos(reverse(aLugares));
 				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
 			}
 			@Override public void onKeyExited(String key){Log.w(TAG, "getLista:onKeyExited");}
@@ -231,10 +240,7 @@ public class Lugar extends Objeto
 
 	// PARCELABLE
 	//______________________________________________________________________________________________
-	private Lugar(Parcel in)
-	{
-		super(in);
-	}
+	private Lugar(Parcel in) { super(in); }
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
@@ -316,10 +322,8 @@ public class Lugar extends Objeto
 		uploadTask
 				.addOnFailureListener(exception -> Log.e(TAG, "uploadImagen:onFailure:"+exception, exception))
 				.addOnSuccessListener(taskSnapshot ->
-				{
 					storageRef.getDownloadUrl().addOnSuccessListener(uri ->
-							Log.e(TAG, "uploadImagen:onSuccess:----AAAAA-------"+uri.toString()));
-				});
+                       	Log.e(TAG, "uploadImagen:onSuccess:----AAAAA-------"+uri.toString())));
 	}
 	//______________________________________________________________________________________________
 	public void downloadImg(final ImageView iv, final Activity act, final Fire.SimpleListener<String> listener)
@@ -336,7 +340,6 @@ public class Lugar extends Objeto
 		if(_datos.getKey() == null)return;
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
 				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
-//Log.e(TAG, "AAA: "+storageRef.getPath() +" ::: "+storageRef.getBucket() + ":::"+_datos);
 
 		OnSuccessListener<Uri> lisOk = uri ->
 		{
@@ -382,4 +385,10 @@ public class Lugar extends Objeto
 	}
 	// IMAGEN
 	//----------------------------------------------------------------------------------------------
+
+
+	private static Lugar[] reverse(ArrayList<Lugar> aLugares) {
+		Collections.reverse(aLugares);
+		return aLugares.toArray(new Lugar[aLugares.size()]);
+	}
 }
