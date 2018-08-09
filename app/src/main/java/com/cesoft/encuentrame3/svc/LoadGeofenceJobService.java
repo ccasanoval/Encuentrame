@@ -31,7 +31,7 @@ public class LoadGeofenceJobService extends JobService {
     private static final String TAG = LoadGeofenceJobService.class.getSimpleName();
 
     public static void start(Context context) {
-        Log.e(TAG, "************************* start *************************");
+        Log.e(TAG, "************************* FENCE Start *************************");
 
         ComponentName componentName = new ComponentName(context, LoadGeofenceJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_GEOFENCE_LOADING, componentName).setPersisted(true);

@@ -54,17 +54,15 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 	public int _sectionNumber = Constantes.LUGARES;//Util.NADA;
 	private View _rootView;
-	private ListView _listView;
-
+	private ListView _listView;			//Lista de Lugares, Rutas, Avisos
+	private Parcelable _scroll = null;	//Recuerda posicion del scroll de la lista
 	private MainIterface _main;
 
 	//----------------------------------------------------------------------------------------------
-	public FrgMain()
-	{
+	public FrgMain() {
 		// Required empty public constructor
 	}
-	public static FrgMain newInstance(int sectionNumber)
-	{
+	public static FrgMain newInstance(int sectionNumber) {
 		FrgMain fragment = new FrgMain();
 		Bundle args = new Bundle();
 		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -72,7 +70,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 		fragment.setRetainInstance(true);
 		return fragment;
 	}
-
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -109,13 +106,13 @@ public class FrgMain extends Fragment implements IListaItemClick
 		TextView textView = new TextView(_rootView.getContext());
 		switch(_sectionNumber)
 		{
-			case Constantes.LUGARES://-------------------------------------------------------------------------
+			case Constantes.LUGARES:
 				textView.setText(getString(R.string.lugares));
 				break;
-			case Constantes.RUTAS://---------------------------------------------------------------------------
+			case Constantes.RUTAS:
 				textView.setText(getString(R.string.rutas));
 				break;
-			case Constantes.AVISOS://--------------------------------------------------------------------------
+			case Constantes.AVISOS:
 				textView.setText(getString(R.string.avisos));
 				break;
 		}
@@ -180,21 +177,12 @@ public class FrgMain extends Fragment implements IListaItemClick
 						.registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
 			refreshRutas();
 		}
-		// Restore previous state (including selected item index and scroll position)
-		//Log.e(TAG, "onResume-------"+_sectionNumber+"---"+scroll);
-		//if(scroll != null)_listView.onRestoreInstanceState(scroll);
 	}
-	private Parcelable scroll = null;
-	//private static int[] _scrollPos = new int[3];
 	@Override
 	public void onPause()
 	{
 		super.onPause();
-
-		scroll = _listView.onSaveInstanceState();
-		Log.e(TAG, "onPause------"+_sectionNumber+"--------"+scroll);
-		//_scrollPos[_sectionNumber] = _listView.getVerticalScrollbarPosition();
-
+		_scroll = _listView.onSaveInstanceState();
 		if(_sectionNumber == Constantes.RUTAS && getContext() != null)
 			LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(_MessageReceiver);
 	}
@@ -270,8 +258,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	private BroadcastReceiver _MessageReceiver;
 	private static final String RUTA_REFRESH = "ces";
 
-	public void onRefreshListaRutas()
-	{
+	public void onRefreshListaRutas() {
 		if(getContext() != null)
 			LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(RUTA_REFRESH));
 	}
@@ -310,9 +297,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 				}
 				if(_listView != null && _rootView != null)
 				{
+					_scroll = _listView.onSaveInstanceState();
 					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, FrgMain.this));
 					_listView.setContentDescription(getString(R.string.lugares));//Para Espresso
-					if(scroll != null)_listView.onRestoreInstanceState(scroll);
+					_listView.onRestoreInstanceState(_scroll);
 				}
 			}
 			@Override
@@ -339,13 +327,13 @@ public class FrgMain extends Fragment implements IListaItemClick
 				}
 				if(_rootView != null)
 				{
+					_scroll = _listView.onSaveInstanceState();
 					RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, FrgMain.this);
 					_listView.setAdapter(r);
 					_listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
-					//_listView.scrollListBy(_listView.getMaxScrollAmount());
-                    //Log.e(TAG, "newListeners:_lisRuta-------"+_sectionNumber+"---"+scroll);
-                    if(scroll != null)_listView.onRestoreInstanceState(scroll);
+                    //Log.e(TAG, "newListeners:_lisRuta---B----"+_sectionNumber+":"+_scroll);
+                    _listView.onRestoreInstanceState(_scroll);
 				}
 			}
 			@Override public void onError(String err) {
@@ -367,9 +355,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 				}
 				if(_listView != null && _rootView != null)
 				{
+					_scroll = _listView.onSaveInstanceState();
 					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, FrgMain.this));
 					_listView.setContentDescription(getString(R.string.avisos));//Para Espresso
-					if(scroll != null)_listView.onRestoreInstanceState(scroll);
+					_listView.onRestoreInstanceState(_scroll);
 				}
 			}
 			@Override public void onError(String err) { Log.e(TAG, "AVISOS2:GET:e:------------------"+err); }
@@ -437,7 +426,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		if(resultCode != RESULT_OK)return;
-
 		if(data != null)
 		{
 			try

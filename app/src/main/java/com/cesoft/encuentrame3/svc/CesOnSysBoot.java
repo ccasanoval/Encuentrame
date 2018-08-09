@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,9 +19,9 @@ public class CesOnSysBoot extends BroadcastReceiver
  	@Override
 	public void onReceive(Context context, Intent intent)
 	{
-		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
+		Preferencias _pref = ((App)context.getApplicationContext()).getGlobalComponent().pref();
 		if(intent.getAction() != null
-			&& _util.isAutoArranque()
+			&& _pref.isAutoArranque()
 			&& intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED))
 		{
 			Log.e(TAG, "------------------CesOnSysBoot : onReceive : action="+intent.getAction());

@@ -9,6 +9,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 
 import javax.inject.Singleton;
@@ -29,29 +30,25 @@ public class GlobalModule
 
 	@Singleton
 	@Provides
-	SharedPreferences providePreferenceManager()
-	{
+	SharedPreferences providePreferenceManager() {
 		return PreferenceManager.getDefaultSharedPreferences(_app);
 	}
 
 	@Singleton
 	@Provides
-	LocationManager provideLocationManager()
-	{
+	LocationManager provideLocationManager() {
 		return (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	@Singleton
 	@Provides
-	NotificationManager provideNotificationManager()
-	{
+	NotificationManager provideNotificationManager() {
 		return (NotificationManager)_app.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	@Singleton
 	@Provides
-	PowerManager providePowerManager()
-	{
+	PowerManager providePowerManager() {
 		return (PowerManager)_app.getSystemService(Context.POWER_SERVICE);
 	}
 
@@ -63,14 +60,17 @@ public class GlobalModule
 
 	@Singleton
 	@Provides
-	Util provideUtil(Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm)
-	{
-		return new Util(app, sp, lm, nm, pm);
+	Preferencias providePreferencias(SharedPreferences sp) {
+		return new Preferencias(sp);
 	}
 	@Singleton
 	@Provides
-	Login provideLogin(SharedPreferences sp)
-	{
+	Util provideUtil(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm) {
+		return new Util(app, pref, lm, nm, pm);
+	}
+	@Singleton
+	@Provides
+	Login provideLogin(SharedPreferences sp) {
 		return new Login(sp);
 	}
 

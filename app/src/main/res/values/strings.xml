@@ -107,6 +107,8 @@
 	<string name="pref_header_opciones_sum">Settings…</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
 	<string name="pref_save_login">Save login and password</string>
+	<string name="pref_save_all">Save all tracking points, without smart filter</string>
+	<string name="pref_tracking_seconds">Tracking period (seconds)</string>
 
 	<string name="pref_header_notifications">Alerts</string>
 	<string name="pref_header_notifications_sum">Alerts settings…</string>

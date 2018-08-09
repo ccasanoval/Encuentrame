@@ -9,6 +9,7 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -41,11 +42,13 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	private Application _app;
 	private Util _util;
-	@Inject PreRuta(Application app, Util util)
+	private Preferencias _pref;
+	@Inject PreRuta(Application app, Util util, Preferencias pref)
 	{
 		super(app);
 		_app = app;
 		_util = util;
+		_pref = pref;
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -102,7 +105,7 @@ public class PreRuta extends PresenterBase
 		_o.setDescripcion(_view.getTextDescripcion());
 		((Ruta)_o).guardar(res);
         // Start tracking
-		GeoTrackingJobService.start(_view.getAct().getApplicationContext());
+		GeoTrackingJobService.start(_view.getAct().getApplicationContext(), _pref.getTrackingDelay());
 	}
 	//----------------------------------------------------------------------------------------------
 	private boolean isErrorEnCampos()
@@ -157,7 +160,7 @@ public class PreRuta extends PresenterBase
 				_util.setTrackingRoute(_o.getId());
 				//
 				//_servicio._restartDelayRuta();
-                GeoTrackingJobService.start(_view.getAct().getApplicationContext());
+                GeoTrackingJobService.start(_view.getAct().getApplicationContext(), _pref.getTrackingDelay());
 				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_ruta));
 			}
 			@Override
@@ -212,7 +215,7 @@ public class PreRuta extends PresenterBase
 							new DateTime(aData[0].getFecha().getTime()),		//Time Ini
 							new DateTime(aData[aData.length-1].getFecha()));	//Time End
 
-					if(t > 0)
+					if(t > 1000)//No calcular velocidad media si tiempo < 1s
 					{
 						double d = fDistancia*1000/t;
 						if(d > 3)

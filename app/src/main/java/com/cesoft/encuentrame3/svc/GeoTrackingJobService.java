@@ -22,6 +22,7 @@ import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.google.android.gms.common.ConnectionResult;
@@ -57,13 +58,14 @@ public class GeoTrackingJobService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = GeoTrackingJobService.class.getSimpleName();
 
+
     @Inject Util _util;
     @Inject Login _login;
+    @Inject Preferencias _pref;
     @Inject
     public GeoTrackingJobService() {
         EventBus.getDefault().register(this);
     }
-
 
     private Context _appContext;
     private FusedLocationProviderClient _fusedLocationClient;
@@ -77,20 +79,25 @@ public class GeoTrackingJobService
     private static Location _locLast = null;        //Para calculo de punto erroneo
     private static double _velLast = 0;             //Para calculo de punto erroneo
 
+    private static long _delay = DELAY_TRACK_MIN;
+    private boolean _saveAll = true;
 
-    public static void start(Context context) {
-        Log.e(TAG, "************************* GEO Start *************************");
+    public static void start(Context context, long delay) {
+        start(context, delay,true);
+    }
+    private static void start(Context context, long delay, boolean first) {
+        Log.e(TAG, "************************* TRACKING Start *************************");
 
         ComponentName componentName = new ComponentName(context, GeoTrackingJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName).setPersisted(true);
 
         //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            builder.setMinimumLatency(DELAY_TRACK_MIN);
+            builder.setMinimumLatency(first ? 1000 : delay);//La primera vez espera solo 1s
         else
-            builder.setPeriodic(DELAY_TRACK_MIN);
+            builder.setPeriodic(delay);
 
-        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(JOB_SCHEDULER_SERVICE);
+        JobScheduler jobScheduler = (JobScheduler)context.getSystemService(JOB_SCHEDULER_SERVICE);
         if (jobScheduler != null)
             jobScheduler.schedule(builder.build());
     }
@@ -132,7 +139,7 @@ public class GeoTrackingJobService
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if(powerManager != null) {
             _wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft::GeoTrackingJobService");
-            _wakeLock.acquire(2 * 60 * 1000);//x minutes max
+            _wakeLock.acquire(_delay);//x milliseconds max
             Log.e(TAG, "iniWakeLock--------------------------------------------");
         }
     }
@@ -147,19 +154,22 @@ public class GeoTrackingJobService
     private void iniEnviron() {
         _appContext = getApplicationContext();
         App.getComponent(_appContext).inject(this);
+        _saveAll = _pref.isSaveAllPoints();
+        _delay = _pref.getTrackingDelay();
+        Log.e(TAG, "iniEnviron-------------------------------------"+_saveAll+" : "+_delay);
     }
 
     private void reschedule() {
         endWakeLock();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            start(getApplicationContext());
-        GeoTrackingJobService.this.jobFinished(_jobParameters, true);
+            start(getApplicationContext(), _delay, false);
+        jobFinished(_jobParameters, true);
     }
 
     private void finish() {
         stopSelf();
         endWakeLock();
-        GeoTrackingJobService.this.jobFinished(_jobParameters, false);
+        jobFinished(_jobParameters, false);
     }
 
     private void notTracking() {
@@ -169,6 +179,7 @@ public class GeoTrackingJobService
 
 
     //---
+
 
     private void stopTracking() {
         Log.e(TAG, "stopTracking:-----------------------------------------------------------");
@@ -187,8 +198,8 @@ public class GeoTrackingJobService
         if (checkPlayServices()) buildGoogleApiClient();
         if (_GoogleApiClient != null) _GoogleApiClient.connect();
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(DELAY_TRACK_MIN);//TODO: ajustar segun velocidad cambio pos...
-        locationRequest.setFastestInterval(DELAY_TRACK_MIN);
+        locationRequest.setInterval(_delay-100);//TODO: ajustar segun velocidad cambio pos...
+        locationRequest.setFastestInterval(_delay-100);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         _fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -196,7 +207,9 @@ public class GeoTrackingJobService
             Log.e(TAG, "pideGPS:---------------------------------------------------------------");
             _util.showNotifGPS();
         }
-        _fusedLocationClient.requestLocationUpdates(locationRequest, _locationCallback, Looper.myLooper());
+        else {
+            _fusedLocationClient.requestLocationUpdates(locationRequest, _locationCallback, Looper.myLooper());
+        }
         Log.e(TAG, "iniGeoTracking:------------------------2-----------------------------------"+_fusedLocationClient);
     }
 
@@ -227,21 +240,17 @@ public class GeoTrackingJobService
     }
 
 
-
+    //----------------------------------------------------------------------------------------------
     public void saveGeoTracking()
     {
         final String sId = _util.getTrackingRoute();
         Log.e(TAG, "saveGeoTracking ************************************** "+_sId+" / "+sId);
         if(sId.isEmpty())
         {
-            Log.e(TAG, "saveGeoTracking ************************sId.isEmpty() IS EMPTY************** ");
-            //stopTracking();
-            //reschedule();
+            Log.e(TAG, "saveGeoTracking ******************sId.isEmpty() IS EMPTY***************");
             finish();
             return;
         }
-        //startTracking();
-
 
         Ruta.getById(sId, new Fire.SimpleListener<Ruta>() {
             @Override
@@ -265,30 +274,33 @@ public class GeoTrackingJobService
         });
     }
 
-    private synchronized boolean guardarPunto(Location loc, Ruta r)//, String sId)
+    private synchronized boolean guardarPunto(Location loc, Ruta r)
     {
         Log.e(TAG, "guardarPunto:    A    ********************* \nLOC:"+loc+"\n : RUT:"+r.id+"\n :  _ID:"+_sId);
         if(loc == null) {
             Log.e(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
-            return false;
+            if(_saveAll)
+                loc = new Location("FAKE");//?
+            else
+                return false;
         }
-        if( ! loc.hasAccuracy()) {
+        if(!_saveAll&& ! loc.hasAccuracy()) {
             Log.e(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
             return false;
         }
-        if(r.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 2*DISTANCE_MIN)) {
+        if(!_saveAll&& r.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 2*DISTANCE_MIN)) {
             Log.e(TAG, "guardarPunto:loc.getAccuracy()("+loc.getAccuracy()+")   > MAX_ACCURACY("+ ACCURACY_MAX+")  or  > DISTANCE_MIN*2("+2*DISTANCE_MIN+")    :::: n pts "+r.getPuntosCount());
             return false;
         }
 
-        if( ! _sId.equals(r.id))//TODO: if sId exist in bbdd, not new route, _locLastSaved = last loc in bbdd ==> Too much monkey business
+        if( ! _sId.equals(r.id))
         {
             Log.e(TAG, "guardarPunto: NUEVA RUTA: --------------------------------- "+_sId+" ------- "+r.id);
             _sId = r.id;
             _locLastSaved = null;
             _locLast = loc;
         }
-        else if(_locLastSaved != null)
+        else if(!_saveAll&& _locLastSaved != null)
         {
             //---
             //Determinar probabilidad de punto erroneo (velocidad actual, velocidad pasada, distancia al anterior punto, tiempo transcurrido)
@@ -314,7 +326,6 @@ public class GeoTrackingJobService
                 }
                 catch(Exception e){Log.e(TAG, "guardarPunto:e:-----------------------------------------",e);}
             }
-            _locLast = loc;
             //---
 
             float distLastSaved = loc.distanceTo(_locLastSaved);
@@ -324,7 +335,8 @@ public class GeoTrackingJobService
                     +"\n-----acc="+loc.getAccuracy());
             //Puntos muy cercanos
             if(distLastSaved < DISTANCE_MIN) return false;
-//TODO: Retardar bucle?? ... actividad == Still -------------------------
+            _locLast = loc;
+            //TODO: Retardar bucle?? ... actividad == Still -------------------------
         }
         r.guardar(new GuardarListener(loc));
         _locLastSaved = loc;

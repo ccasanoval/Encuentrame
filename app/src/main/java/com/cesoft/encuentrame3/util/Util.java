@@ -8,7 +8,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -60,15 +59,15 @@ public class Util
 
 	//______________________________________________________________________________________________
 	private Application _app;
-	private SharedPreferences _sp;
+	private Preferencias _pref;
 	private LocationManager _lm;
 	private NotificationManager _nm;
 	private PowerManager _pm;
 	@Inject
-	public Util(Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm)
+	public Util(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm)
 	{
 		_app = app;
-		_sp = sp;
+		_pref = pref;
 		_lm = lm;
 		_nm = nm;
 		_pm = pm;
@@ -85,8 +84,7 @@ public class Util
 	//______________________________________________________________________________________________
 	private static Location _locLast;
 	public void setLocation(Location loc) {
-		//Log.e(TAG, "setLocation:-------------------"+loc);
-		_locLast=loc;
+		_locLast=loc;//Log.e(TAG, "setLocation:-------------------"+loc);
 	}
 	public Location getLocation()
 	{
@@ -144,9 +142,9 @@ public class Util
 	//private static int _idNotificacion = 1;
 	private void showNotificacion(String titulo, Aviso aviso, Intent intent)
 	{
-		String sSound = _sp.getString("notifications_new_message_ringtone", "");
-		Boolean bVibrate = _sp.getBoolean("notifications_new_message_vibrate", false);
-		Boolean bLights = _sp.getBoolean("notifications_new_message_lights", false);
+		String sSound = _pref.getNotificationRingtone();
+		Boolean bVibrate = _pref.isNotificationVibrate();
+		Boolean bLights = _pref.isNotificationLights();
 		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
 
 		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
@@ -201,9 +199,9 @@ public class Util
 		if(_lastShowNotifGPS + _delayShowNotifGPS > System.currentTimeMillis())return;
 		_lastShowNotifGPS = System.currentTimeMillis();
 
-		String sSound = _sp.getString("notifications_new_message_ringtone", "");
-		Boolean bVibrate = _sp.getBoolean("notifications_new_message_vibrate", false);
-		Boolean bLights = _sp.getBoolean("notifications_new_message_lights", false);
+		String sSound = _pref.getNotificationRingtone();
+		Boolean bVibrate = _pref.isNotificationVibrate();
+		Boolean bLights = _pref.isNotificationLights();
 
 		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
 		wakeLock.acquire(2000);
@@ -240,25 +238,11 @@ public class Util
 
 
 	//______________________________________________________________________________________________
-	/// CONFIG
-	//______________________________________________________________________________________________
-	public boolean isAutoArranque()
-	{
-		return _sp.getBoolean("is_auto_arranque", true);
+	public void setTrackingRoute(String idRoute) {
+		_pref.setTrackingRoute(idRoute);
 	}
-
-	//______________________________________________________________________________________________
-	//private static final String PREF_TRACKING = "tracking_prefs";
-	private static final String ID_TRACKING = "id_tracking_route";
-	public void setTrackingRoute(String sIdRoute)
-	{
-		SharedPreferences.Editor editor = _sp.edit();
-		editor.putString(ID_TRACKING, sIdRoute);
-		editor.apply();//editor.commit(); Apply does it in background
-	}
-	public String getTrackingRoute()
-	{
- 		return _sp.getString(ID_TRACKING, "");
+	public String getTrackingRoute() {
+ 		return _pref.getTrackingRoute();
 	}
 
 	//______________________________________________________________________________________________

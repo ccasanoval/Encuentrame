@@ -56,7 +56,7 @@ public class ActMaps
 
 		FloatingActionButton fabGuardar = findViewById(R.id.btnGuardar);
 		if( ! _presenter.isAviso() && ! _presenter.isLugar())
-			fabGuardar.hide();//fabGuardar.setVisibility(View.GONE);
+			fabGuardar.hide();
 		fabGuardar.setOnClickListener(view -> _presenter.guardar());
 	}
 
@@ -186,7 +186,6 @@ public class ActMaps
 	//----------------------------------------------------------------------------------------------
 	public void showAviso(Aviso a)
 	{
-		//BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
 		LatLng pos = new LatLng(a.getLatitud(), a.getLongitud());
 		MarkerOptions mo = new MarkerOptions()
 				.position(pos)
@@ -200,12 +199,9 @@ public class ActMaps
 				.radius(a.getRadio())
 				.strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55000000 + _iColor));
-				//.fillColor(0x55AA0000));//Color.BLUE
-		//}catch(Exception e){System.err.println("ActMapas:showAviso:e:"+e);}
 	}
 	@Override public void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
-//Log.e(TAG, "---------------------------------------------------------------------showRutaHelper:::"+r.getId()+" ::: "+aPts.length);
 		try
 		{
 			if(aPts.length < 1)return;
@@ -260,8 +256,7 @@ public class ActMaps
 			po.width(5).color(_iColor);
 			_Map.addPolyline(po);//Polyline line =
 			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), _fMapZoom));
-			//addLinea(po);
-			//moveCamera(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
-		}catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
+		}
+		catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
 	}
 }

@@ -56,9 +56,10 @@ public class App extends Application implements ActivityCompat.OnRequestPermissi
 	}
 
 	public void iniServicesDependantOnLogin() {
+		long delay = getGlobalComponent().pref().getTrackingDelay();
 		ActividadIntentService.start(this);
 		LoadGeofenceJobService.start(this);
-		GeoTrackingJobService.start(this);
+		GeoTrackingJobService.start(this, delay);
 		//WidgetRutaService.startSvc(this);//It's already started by GeoTrackingJobService
 	}
 

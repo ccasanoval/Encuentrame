@@ -15,6 +15,7 @@ import com.cesoft.encuentrame3.di.modules.GlobalModule;
 import com.cesoft.encuentrame3.svc.ActividadIntentService;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
@@ -43,4 +44,5 @@ public interface GlobalComponent
 
 	Util util();
 	Login login();
+	Preferencias pref();
 }

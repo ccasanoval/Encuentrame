@@ -21,6 +21,7 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
@@ -36,6 +37,7 @@ public class ActWidgetNuevaRuta extends Activity
 
 	@Inject	Util _util;
 	@Inject Login _login;
+	@Inject Preferencias _pref;
 
 	private ProgressDialog _progressDialog;
 	private EditText _txtNombre;
@@ -132,7 +134,7 @@ public class ActWidgetNuevaRuta extends Activity
 				//
 				refreshWidget();
 				// Start tracking
-				GeoTrackingJobService.start(getApplicationContext());
+				GeoTrackingJobService.start(getApplicationContext(), _pref.getTrackingDelay());
 				//ActWidgetNuevaRuta.this.finish();
 			}
 			@Override
@@ -154,48 +156,25 @@ public class ActWidgetNuevaRuta extends Activity
 	}
 
 
-	//----------------------------------------------------------------------------------------------
-	// Defines callbacks for service binding, passed to bindService()
-	private WidgetRutaService _svcWidget;
-	//boolean _bBound = false;
-	//
-	private ServiceConnection _sc = new ServiceConnection()
-	{
+	private ServiceConnection _sc = new ServiceConnection() {
 		@Override
-		public void onServiceConnected(ComponentName className, IBinder service)
-		{
+		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.e(TAG, "---------------------------- onServiceConnected --------------------------------------------");
 			// We've bound to LocalService, cast the IBinder and get LocalService instance
 			WidgetRutaService.LocalBinder binder = (WidgetRutaService.LocalBinder)service;
-			_svcWidget = binder.getService();
-			if(_svcWidget != null)_svcWidget.refresh();
+			WidgetRutaService _svcWidget = binder.getService();
+			if(_svcWidget != null) _svcWidget.refresh();
 			WidgetRutaService.unbindSvc(_sc, getApplicationContext());
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) { }
 	};
 	//
-	private void refreshWidget()
-	{
+	private void refreshWidget() {
 		WidgetRutaService.bindSvc(_sc, getApplicationContext());
 	}
 
-
-	/*private boolean pidePermisosGPS() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-            && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-		{
-			Log.e(TAG, "pideGPS:---------------------------------------------------------------");
-			LocationRequest locationRequest = new LocationRequest();
-			locationRequest.setInterval(DELAY_TRACK_MIN);
-			locationRequest.setFastestInterval(DELAY_TRACK_MIN);
-			locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-			_util.pidePermisosGPS(this, this, locationRequest);
-			return true;
-		}
-		return false;
-	}*/
+	// Permisos de GPS
 	private boolean pidePermisosGPS()
 	{
 		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
