@@ -31,6 +31,7 @@ import java.util.Locale;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //@Singleton
 //TODO: hacer en thread... para no ralentizar MainThread
+//TODO: a veces no actualiza?
 public class WidgetRutaService extends Service
 {
 	private static final String TAG = WidgetRutaService.class.getSimpleName();
@@ -50,13 +51,10 @@ public class WidgetRutaService extends Service
 		c.unbindService(sc);
 	}
 	//----
-	public static void startSvc(Context context)
-	{
-		//Log.e(TAG, "____________________startSvc__A_____________________________");
+	public static void startSvc(Context context) {
 		if(isServiceRunning(context, WidgetRutaService.class))return;
 		Intent serviceIntent = new Intent(context, WidgetRutaService.class);
 		context.startService(serviceIntent);
-		//Log.e(TAG, "____________________startSvc__B_____________________________");
 	}
 	private static boolean isServiceRunning(Context c, Class<?> serviceClass)
 	{

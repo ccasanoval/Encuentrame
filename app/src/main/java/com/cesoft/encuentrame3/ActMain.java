@@ -1,10 +1,14 @@
 package com.cesoft.encuentrame3;
 
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -39,6 +43,7 @@ import com.cesoft.encuentrame3.util.Util;
 // *** Rx
 //https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
 //https://github.com/nmoskalenko/rxFirebase
+//https://github.com/patloew/RxLocation
 //
 //http://sglora.com/android-tutorial-sobre-retrolambda/
 
@@ -48,9 +53,9 @@ import com.cesoft.encuentrame3.util.Util;
 // *** DEX
 //I run the ./gradlew assembleRelease and use DEX decompiler tools https://github.com/skylot/jadx to decompile the APK. It’s like looking into code in Github...
 
-//TODO: READ  -----------------------  https://nullpointer.wtf/  -------------------------
-
-//TODO: https://github.com/patloew/RxLocation
+// *** BATTERY
+//https://developer.android.com/training/monitoring-device-state/doze-standby?hl=es-419
+//https://developer.zebra.com/community/home/blog/2017/05/04/keeping-your-application-running-when-the-device-wants-to-sleep
 
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
@@ -60,8 +65,7 @@ import com.cesoft.encuentrame3.util.Util;
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
-//TODO: Preparar para tablet
-//TODO: Opcion que diga no preguntar por activar GPS (en tablet que no tiene gps... es un coñazo)
+//TODO: Opcion que diga no preguntar por activar GPS ni BATTERY (en tablet que no tiene gps...)
 //http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
 // small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
@@ -70,8 +74,6 @@ import com.cesoft.encuentrame3.util.Util;
 // https://developers.google.com/location-context/activity-recognition/
 // https://github.com/googlesamples/android-play-location
 
-//TODO:
-//https://developer.android.com/training/monitoring-device-state/doze-standby?hl=es-419
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
@@ -117,13 +119,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public void onStart()
 	{
 		super.onStart();
-		pideGPS();
 		if(!_login.isLogged())gotoLogin();
+		pideBateria();
+		pideGPS();
 	}
 	//----------------------------------------------------------------------------------------------
 	@Override
-	public void onStop()
-	{
+	public void onStop() {
 		super.onStop();
 	}
 
@@ -333,16 +335,54 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 
 
 	//----------------------------------------------------------------------------------------------
-	public void pideGPS()
-	{
+	//solo una vez por arranque
+    //private boolean isPideBateria = false;
+	@SuppressLint("BatteryLife")
+	private void pideBateria() {
+	    //if(isPideBateria)return;
+        //isPideBateria = false;
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
+			if(pm != null) {
+				if(pm.isIgnoringBatteryOptimizations(getPackageName())) {
+					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ----*******************************************************************----------------AAA:"+getPackageName());
+				}
+				else {
+					/*AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setMessage(R.string.ignore_battery_optimization)
+							.setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+							    //finish();
+								Intent intent = new Intent();
+								intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+								startActivity(intent);
+							})
+							.show();
+							*/
+					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+					// But by including this Google may delete the app from the store...
+					Intent intent = new Intent();
+					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+					intent.setData(Uri.parse("package:"+getApplicationContext().getPackageName()));
+					startActivity(intent);
+
+					// CHECK:
+					//  turn off the screen and:
+					//adb shell dumpsys battery unplug
+					//adb shell dumpsys deviceidle step --> Till status =  IDLE_PENDING, SENSING, (LOCATING), IDLE_MAINTENANCE, IDLE
+
+					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ------**********************************************--------------BBB"+getPackageName());
+				}
+			}
+		}
+	}
+	private void pideGPS() {
 		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
 		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
 		if(permissionCheck == PackageManager.PERMISSION_DENIED)
 			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 6969);
 	}
 	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
-	{
+	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 		try {
 			Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
 					+ requestCode + " : " + permissions[0] + " = " + grantResults[0]);

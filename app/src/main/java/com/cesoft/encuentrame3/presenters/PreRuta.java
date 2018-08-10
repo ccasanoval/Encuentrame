@@ -147,9 +147,9 @@ public class PreRuta extends PresenterBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public void startTrackingRecord()
+	public boolean startTrackingRecord()
 	{
-		if(isErrorEnCampos())return;
+		if(isErrorEnCampos())return false;
 		_view.iniEspera();
 		guardar(new Fire.CompletadoListener()
 		{
@@ -173,12 +173,13 @@ public class PreRuta extends PresenterBase
 				_view.toast(R.string.error_guardar,err);
 			}
 		});
+		return true;
 	}
 	//----------------------------------------------------------------------------------------------
 	public void stopTrackingRecord()
 	{
 		_util.setTrackingRoute("");
-		_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_stop_tracking));
+		//_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_stop_tracking));
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -315,13 +316,11 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
-		if(aPts.length < 1)
-		{
+		if(aPts.length < 1) {
 			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- n pts = "+aPts.length);
 			return;
 		}
-		if(_view.getMap()==null)
-		{
+		if(_view.getMap()==null) {
 			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- MAP = NULL");
 			return;
 		}
@@ -389,6 +388,6 @@ public class PreRuta extends PresenterBase
 		}
 		po.width(5).color(Color.BLUE);
 		_view.getMap().addPolyline(po);
-		((IVistaRuta)_view).moveCamara(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()));
+		((IVistaRuta)_view).moveCamara(new LatLng(gpFin.getLatitud(), gpFin.getLongitud()));
 	}
 }

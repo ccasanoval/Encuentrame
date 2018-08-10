@@ -54,11 +54,14 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			btnStart.setOnClickListener(v ->
 			{
 				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
-				btnStart.setEnabled(false);
-				btnStart.setAlpha(0.5f);
-				_presenter.startTrackingRecord();
+				if(_presenter.startTrackingRecord()) {
+					_util.pideActivarGPS(ActRuta.this);
+					btnStart.setEnabled(false);
+					btnStart.setAlpha(0.5f);
+				}
 			});
 		}
+		//TODO: Hacer tambien funcion pausa
 		final ImageButton btnStop = findViewById(R.id.btnStop);
 		if(btnStop != null)
 		{

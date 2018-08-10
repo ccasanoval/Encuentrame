@@ -92,7 +92,7 @@ public class GeoTrackingJobService
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName).setPersisted(true);
 
         //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             builder.setMinimumLatency(first ? 1000 : delay);//La primera vez espera solo 1s
         else
             builder.setPeriodic(delay);
@@ -119,7 +119,7 @@ public class GeoTrackingJobService
 
     private void runPayload(JobParameters jobParameters) {
         _jobParameters = jobParameters;
-        WidgetRutaService.startSvc(getApplicationContext());//Ini widget
+        WidgetRutaService.startSvc(getApplicationContext());//Init widget serv if it isn't
         iniEnviron();
         if (!_login.isLogged()) {
             Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
@@ -136,10 +136,10 @@ public class GeoTrackingJobService
 
     private void iniWakeLock() {
         //if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)//TODO: When would wakelock be needed? DELETE
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
         if(powerManager != null) {
             _wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft::GeoTrackingJobService");
-            _wakeLock.acquire(_delay);//x milliseconds max
+            _wakeLock.acquire(5*60*1000);//_delay);//x milliseconds max
             Log.e(TAG, "iniWakeLock--------------------------------------------");
         }
     }
@@ -160,7 +160,7 @@ public class GeoTrackingJobService
     }
 
     private void reschedule() {
-        endWakeLock();
+        //endWakeLock();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             start(getApplicationContext(), _delay, false);
         jobFinished(_jobParameters, true);
@@ -277,14 +277,15 @@ public class GeoTrackingJobService
     private synchronized boolean guardarPunto(Location loc, Ruta r)
     {
         Log.e(TAG, "guardarPunto:    A    ********************* \nLOC:"+loc+"\n : RUT:"+r.id+"\n :  _ID:"+_sId);
-        if(loc == null) {
+        if(loc == null)
+        {
             Log.e(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
-            if(_saveAll)
-                loc = new Location("FAKE");//?
-            else
+            //if(_saveAll)loc = new Location("FAKE");//?
+            //else
                 return false;
         }
-        if(!_saveAll&& ! loc.hasAccuracy()) {
+        if( ! loc.hasAccuracy())//!_saveAll&&
+        {
             Log.e(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
             return false;
         }

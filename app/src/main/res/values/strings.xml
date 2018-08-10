@@ -159,4 +159,13 @@
 	<string name="walking">Walking</string>
 	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
 
+	<string name="ignore_battery_optimization"> Route tracking service needs to disable energy optimizations.\n\n
+		In the next window, select \"All apps\" and pick this app from the list, then select \"Don\'t optimize\" and \"Done\".
+		</string>
+	<!-- string name="ignore_battery_optimization">For route tracking service to work, the app needs to disable energy optimizations. Please do the following:\n
+		In the next window, select \"All apps\" and pick this app from the list, then select \"Dont optimize\" and save.
+		</string -->
+	<!-- string name="ignore_battery_optimization">This App needs to disable the energy optimizations in order to keep tracking the location when the device goes to sleep.
+		Please, select the App in the list and check "Don't optimize" for a perfect route tracking</string -->
+
 </resources>
