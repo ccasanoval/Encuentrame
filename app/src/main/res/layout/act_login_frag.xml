@@ -71,15 +71,13 @@
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/lblPassword2"
 		android:layout_centerHorizontal="true"
-		android:layout_marginTop="25dp"
-		>
+		android:layout_marginTop="25dp">
 		<Button
 			android:id="@+id/btnSend"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			style="@style/btnStyle"
-			android:text="@string/send"
-			/>
+			android:text="@string/send"/>
 	</android.support.v7.widget.LinearLayoutCompat>
 
 	<android.support.v7.widget.LinearLayoutCompat
@@ -88,13 +86,28 @@
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/layBoton"
 		android:layout_centerHorizontal="true"
-		android:layout_marginTop="25dp">
+		android:layout_marginTop="50dp">
 		<com.google.android.gms.common.SignInButton
 			android:id="@+id/btnGoogle"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:visibility="visible"
 			android:layout_gravity="center"/>
+	</android.support.v7.widget.LinearLayoutCompat>
+
+	<android.support.v7.widget.LinearLayoutCompat
+		android:id="@+id/layPrivacyPolicy"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/layBotonGoogle"
+		android:layout_centerHorizontal="true"
+		android:layout_marginTop="25dp">
+		<Button
+			android:id="@+id/btnPrivacyPolicy"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			style="@style/btnStyle"
+			android:text="@string/privacy_policy"/>
 	</android.support.v7.widget.LinearLayoutCompat>
 
 </RelativeLayout>

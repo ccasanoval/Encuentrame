@@ -45,29 +45,7 @@ public class Ruta extends Objeto implements Parcelable
 	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
 	@Exclude private DatabaseReference _datos;
 
-	///______________________________________________________________
-	//Yet Another Firebase Bug:
-	//Serialization of inherited properties from the base class, is missing in the current release of the
-	// Firebase Database SDK for Android. It will be added back in an upcoming version.
-	/*protected String id = null;
-		public String getId(){return id;}
-		public void setId(String v){id = v;}
-	protected String nombre;
-	protected String descripcion;
-		public String getNombre(){return nombre;}
-		public void setNombre(String v){nombre=v;}
-		public String getDescripcion(){return descripcion;}
-		public void setDescripcion(String v){descripcion=v;}
-	private Date fecha;
-		public Date getFecha(){return fecha;}
-		public void setFecha(Date v){fecha=v;}*/
-	///______________________________________________________________
-
-	//
-	//Quitar si se utiliza geofence tracking y cambiar por radio...
-	/*private int periodo=2*60*1000;
-		public int getPeriodo(){return periodo;}
-		public void setPeriodo(int v){periodo=v;}*/
+	//TODO: añadir info: DELAY, ALL_POINTS, IGNORING_BATTERY_OPTIMIZATION ? y mostrarlo en estadisticas
 
 	//______________________________________________________________________________________________
 	public Ruta() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos

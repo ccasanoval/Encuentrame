@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
@@ -221,6 +222,7 @@ public class ActLogin extends AppCompatActivity
 			final EditText txtPassword2 = rootView.findViewById(R.id.txtPassword2);
 			final EditText txtEmail = rootView.findViewById(R.id.txtEmail);
 			final Button btnSend = rootView.findViewById(R.id.btnSend);
+			final Button btnPrivacyPolicy = rootView.findViewById(R.id.btnPrivacyPolicy);
 			final SignInButton btnGoogle = rootView.findViewById(R.id.btnGoogle);
 			final TextInputLayout lblPassword = rootView.findViewById(R.id.lblPassword);
 			final TextInputLayout lblPassword2 = rootView.findViewById(R.id.lblPassword2);
@@ -230,6 +232,14 @@ public class ActLogin extends AppCompatActivity
 			case ENTER://----------------------- ----------------------------------------------------
 				lblPassword2.setVisibility(View.GONE);
 				lblTitulo.setText(getString(R.string.enter_lbl));
+				//
+				btnPrivacyPolicy.setOnClickListener(v -> {
+					Intent browserIntent = new Intent(
+							Intent.ACTION_VIEW,
+							Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
+					startActivity(browserIntent);
+				});
+				//
 				btnSend.setOnClickListener(v -> {
                     _main.iniEsperaLogin();
                     _login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),

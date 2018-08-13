@@ -118,6 +118,7 @@ public class ActWidgetNuevaRuta extends Activity
 		//TODO: ruta_activa = true
 		//TODO: activa boton stop
 
+		//TODO:añadir flags: ignore_battery_optimization, delay, etc
 		final int[] flag = new int[]{0};
 		final Ruta r = new Ruta();
 		r.setNombre(_txtNombre.getText().toString());
