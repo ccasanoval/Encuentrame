@@ -1,21 +1,14 @@
 package com.cesoft.encuentrame3;
 
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -83,6 +76,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	private FrgMain[] _aFrg = new FrgMain[3];
 	private ViewPager _viewPager;
 	private Login _login;
+	private Util _util;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -91,6 +85,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
 		_login = ((App)getApplication()).getGlobalComponent().login();
+		_util = ((App)getApplication()).getGlobalComponent().util();
 		if(!_login.isLogged())gotoLogin();
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
@@ -120,8 +115,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	{
 		super.onStart();
 		if(!_login.isLogged())gotoLogin();
-		pideBateria();
-		pideGPS();
+		_util.pideBateria(this);
+		_util.pideGPS(this, 6969);
 	}
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -335,12 +330,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 
 
 	//----------------------------------------------------------------------------------------------
-	//solo una vez por arranque
-    //private boolean isPideBateria = false;
-	@SuppressLint("BatteryLife")
+	/*@SuppressLint("BatteryLife")
 	private void pideBateria() {
-	    //if(isPideBateria)return;
-        //isPideBateria = false;
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
 			if(pm != null) {
@@ -348,16 +339,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ----*******************************************************************----------------AAA:"+getPackageName());
 				}
 				else {
-					/*AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					builder.setMessage(R.string.ignore_battery_optimization)
-							.setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-							    //finish();
-								Intent intent = new Intent();
-								intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-								startActivity(intent);
-							})
-							.show();
-							*/
+
 					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 					// But by including this Google may delete the app from the store...
 					Intent intent = new Intent();
@@ -380,7 +362,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
 		if(permissionCheck == PackageManager.PERMISSION_DENIED)
 			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 6969);
-	}
+	}*/
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 		try {

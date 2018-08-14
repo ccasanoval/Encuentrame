@@ -57,7 +57,7 @@
 	<string name="rutas">Routes</string>
 	<string name="seguro_eliminar">Are you sure you want to remove?</string>
 	<string name="seguro_salir">You made changes. Do you want to save?</string>
-	<string name="send">Send</string>
+	<string name="login">Log in</string>
 	<string name="sin_lugar">A location must be stablished…</string>
 	<string name="sin_nombre">A name must be stablished…</string>
 	<string name="sin_posicion">No location</string>

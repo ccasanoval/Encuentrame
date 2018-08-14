@@ -136,19 +136,19 @@ public class GeoTrackingJobService
 
     private void iniWakeLock() {
         //if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)//TODO: When would wakelock be needed? DELETE
-        PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
+       /*PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
         if(powerManager != null) {
             _wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft::GeoTrackingJobService");
             _wakeLock.acquire(5*60*1000);//_delay);//x milliseconds max
             Log.e(TAG, "iniWakeLock--------------------------------------------");
-        }
+        }*/
     }
 
     private void endWakeLock() {
-        if (_wakeLock != null)
+        /*if (_wakeLock != null)
             _wakeLock.release();
         _wakeLock = null;
-        Log.e(TAG, "endWakeLock--------------------------------------------");
+        Log.e(TAG, "endWakeLock--------------------------------------------");*/
     }
 
     private void iniEnviron() {

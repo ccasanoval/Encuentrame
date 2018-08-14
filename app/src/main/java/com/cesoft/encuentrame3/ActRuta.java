@@ -56,6 +56,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
 				if(_presenter.startTrackingRecord()) {
 					_util.pideActivarGPS(ActRuta.this);
+                    _util.pideBateria(ActRuta.this);
 					btnStart.setEnabled(false);
 					btnStart.setAlpha(0.5f);
 				}

@@ -98,9 +98,15 @@ public class ActWidgetNuevaRuta extends Activity
 
 	//private boolean oncePermisos = false;
 	private boolean oncePideActivarGPS = true;
+	private boolean oncePideActivarBateria = true;
 	private void save() {
 		if(pidePermisosGPS()) {
 		    Log.e(TAG, "save:e:------------------------------Sin permisos");
+			return;
+		}
+		if(oncePideActivarBateria && _util.pideBateria(ActWidgetNuevaRuta.this)) {
+			Log.e(TAG, "save:e:------------------------------Bateria desactivado");
+			oncePideActivarBateria = false;
 			return;
 		}
 		if(oncePideActivarGPS && _util.pideActivarGPS(this)) {

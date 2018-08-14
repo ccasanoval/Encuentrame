@@ -23,7 +23,7 @@
 	<string name="enter">Entrar</string>
 	<string name="register">Registrate</string>
 	<string name="recover">Recordar</string>
-	<string name="send">Enviar</string>
+	<string name="login">Iniciar sesión</string>
 
 	<string name="enter_lbl">Introduce tu usuario</string>
 	<string name="register_lbl">Crea una cuenta</string>

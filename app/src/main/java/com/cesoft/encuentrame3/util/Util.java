@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -15,11 +16,14 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.EditText;
 
@@ -47,6 +51,8 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static android.content.Context.POWER_SERVICE;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -385,6 +391,54 @@ public class Util
 		new Handler().postDelayed(runnable, delay);
 	}
 
+
+
+	@SuppressLint("BatteryLife")
+	public boolean pideBateria(Context context) {
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			PowerManager pm = (PowerManager)context.getSystemService(POWER_SERVICE);
+			if(pm != null) {
+				if(pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
+					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ----*******************************************************************----------------AAA:");
+					return false;
+				}
+				else {
+					/*AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setMessage(R.string.ignore_battery_optimization)
+							.setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+							    //finish();
+								Intent intent = new Intent();
+								intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+								startActivity(intent);
+							})
+							.show();
+							*/
+					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+					// But by including this Google may delete the app from the store...
+					Intent intent = new Intent();
+					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+					intent.setData(Uri.parse("package:"+context.getPackageName()));
+					context.startActivity(intent);
+					// CHECK:
+					//  turn off the screen and:
+					//adb shell dumpsys battery unplug
+					//adb shell dumpsys deviceidle step --> Till status =  IDLE_PENDING, SENSING, (LOCATING), IDLE_MAINTENANCE, IDLE
+					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ------**********************************************--------------BBB");
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	public void pideGPS(Activity act, int requestCode) {
+		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
+		int permissionCheck = ContextCompat.checkSelfPermission(act, android.Manifest.permission.ACCESS_FINE_LOCATION);
+		if(permissionCheck == PackageManager.PERMISSION_DENIED)
+			ActivityCompat.requestPermissions(
+					act,
+					new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+					requestCode);
+	}
 	//______________________________________________________________________________________________
 	public boolean pideActivarGPS(Context context) {
 		final LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);

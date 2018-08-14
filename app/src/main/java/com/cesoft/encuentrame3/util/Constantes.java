@@ -8,7 +8,7 @@ public class Constantes
 	public static final int GEOFEN_DWELL_TIME = 2*60*1000;
 	public static final long DELAY_TRACK_MIN = 30*1000;//20*1000;
 	//public static final long DELAY_TRACK_MAX = 5*60*1000;//7*60*1000;
-	public static final long ACCURACY_MAX = 18;//m
+	public static final long ACCURACY_MAX = 30;//m
 	public static final long DISTANCE_MIN = 5;//m
 	//public static final long DISTANCE_MAX = 50;//m
 	public static final long DELAY_LOAD_GEOFENCE = 5*60*1000;

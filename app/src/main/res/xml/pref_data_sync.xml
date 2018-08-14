@@ -12,7 +12,7 @@
 		android:title="@string/pref_save_login"/>
 
 	<SwitchPreference
-		android:defaultValue="false"
+		android:defaultValue="true"
 		android:key="save_all_points"
 		android:title="@string/pref_save_all"/>
 
