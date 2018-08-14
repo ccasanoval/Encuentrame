@@ -190,12 +190,14 @@ public abstract class VistaBase
 	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onPause() {
+		Log.e(TAG, "-------------onPause-----------------------");
 		super.onPause();
 		stopTracking();
 	}
 
 	@Override
 	protected void onResume() {
+		Log.e(TAG, "-------------onResume-----------------------");
 		super.onResume();
 		startTracking();
 	}
@@ -205,12 +207,14 @@ public abstract class VistaBase
 		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 		    return;
+		_locationCallback = createLocationCallback();
 		_fusedLocationClient.requestLocationUpdates(_LocationRequest, _locationCallback, Looper.myLooper());
 	}
 
 	private void stopTracking() {
         if (_GoogleApiClient == null || !_GoogleApiClient.isConnected())return;
-		_fusedLocationClient.removeLocationUpdates(_locationCallback);
+		if(_locationCallback != null)_fusedLocationClient.removeLocationUpdates(_locationCallback);
+		_locationCallback = null;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,20 +264,21 @@ public abstract class VistaBase
 		Log.w(TAG, "---------------------------------onResult---------------------------------"+status);
 	}
 
-
-
-	private LocationCallback _locationCallback = new LocationCallback() {
-		@Override
-		public void onLocationResult(LocationResult locationResult) {
-			List<Location> locationList = locationResult.getLocations();
-			if (locationList.size() > 0) {
-				Location location = locationList.get(locationList.size() - 1);
-				_util.setLocation(location);
-				if(_presenter.getLatitud() == 0 && _presenter.getLongitud() == 0)
-					setPosLugar(location.getLatitude(), location.getLongitude());
+	private LocationCallback _locationCallback = null;// = new LocationCallback() {
+	private LocationCallback createLocationCallback() {
+		return new LocationCallback() {
+			@Override
+			public void onLocationResult(LocationResult locationResult) {
+				List<Location> locationList = locationResult.getLocations();
+				if (locationList.size() > 0) {
+					Location location = locationList.get(locationList.size() - 1);
+					_util.setLocation(location);
+					if(_presenter.getLatitud() == 0 && _presenter.getLongitud() == 0)
+						setPosLugar(location.getLatitude(), location.getLongitude());
+				}
 			}
-		}
-	};
+		};
+	}
 	protected void setPosLugar(double lat, double lon) { _presenter.setLatLon(lat, lon); }
 
 	////////////////////////////////////////////////////////////////////////////////////////////////

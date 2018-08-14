@@ -138,6 +138,10 @@
 	<string name="no_camera_hardware">Este dispositivo no tiene cámara</string>
     <string name="error_img_path">Sucedió un error al recuperar la imagen de la cámara</string>
 
+	<string name="ask_to_ignore_energy_saving_again">Al apagarse la pantalla, el tracking se detendrá si no desactiva las optimizaciones de batería. Está seguro?</string>
+	<string name="yes">Sí</string>
+	<string name="no">No</string>
+
 	<string name="in_vehicle">En un vehículo</string>
 	<string name="on_bicycle">En bicicleta</string>
 	<string name="on_foot">De pie</string>

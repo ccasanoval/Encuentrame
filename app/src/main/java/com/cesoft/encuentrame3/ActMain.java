@@ -110,12 +110,16 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		_viewPager = null;
 	}
 	//----------------------------------------------------------------------------------------------
+	private static boolean oncePideBateria = true;
 	@Override
 	public void onStart()
 	{
 		super.onStart();
 		if(!_login.isLogged())gotoLogin();
-		_util.pideBateria(this);
+		if(oncePideBateria) {
+			_util.pideBateria(this);
+			oncePideBateria = false;
+		}
 		_util.pideGPS(this, 6969);
 	}
 	//----------------------------------------------------------------------------------------------

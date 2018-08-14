@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
@@ -99,25 +100,30 @@ public class ActWidgetNuevaRuta extends Activity
 	//private boolean oncePermisos = false;
 	private boolean oncePideActivarGPS = true;
 	private boolean oncePideActivarBateria = true;
+	private boolean oncePideActivarBateria2 = true;
 	private void save() {
-		if(pidePermisosGPS()) {
-		    Log.e(TAG, "save:e:------------------------------Sin permisos");
-			return;
-		}
-		if(oncePideActivarBateria && _util.pideBateria(ActWidgetNuevaRuta.this)) {
-			Log.e(TAG, "save:e:------------------------------Bateria desactivado");
+		if(oncePideActivarBateria && _util.pideBateria(this)) {
 			oncePideActivarBateria = false;
 			return;
 		}
+		if(oncePideActivarBateria2 && _util.pideBateriaDeNuevoSiEsNecesario(this)) {
+			oncePideActivarBateria2 = false;
+			return;
+		}
+
+        if(pidePermisosGPS()) {
+            return;
+        }
 		if(oncePideActivarGPS && _util.pideActivarGPS(this)) {
-			Log.e(TAG, "save:e:------------------------------GPS desactivado");
 			oncePideActivarGPS = false;
 			return;
 		}
+
 		if(_txtNombre.getText().length() < 1) {
 			Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_SHORT).show();
 			return;
 		}
+
 		_progressDialog.show();
 
 		// if(ruta_activa)"quiere parar la ruta actual y crear una nueva?"

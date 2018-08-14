@@ -149,6 +149,10 @@
 	<string name="no_camera_hardware">There is no camera hardware in this device</string>
     <string name="error_img_path">Failed trying to get the image path</string>
 
+	<string name="ask_to_ignore_energy_saving_again">The tracking will stop in doze mode if battery optimizations are on. Are you sure?</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+
 	<string name="in_vehicle">In a vehicle</string>
 	<string name="on_bicycle">On a bicycle</string>
 	<string name="on_foot">On foot</string>

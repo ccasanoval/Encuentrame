@@ -39,6 +39,9 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	}
 
 	//______________________________________________________________________________________________
+	private boolean oncePideActivarGPS = true;
+	private boolean oncePideActivarBateria = true;
+	private boolean oncePideActivarBateria2 = true;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -53,10 +56,20 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			btnStart.setEnabled(true);
 			btnStart.setOnClickListener(v ->
 			{
+                if(oncePideActivarBateria && _util.pideBateria(this)) {
+                    oncePideActivarBateria = false;
+                    return;
+                }
+                if(oncePideActivarBateria2 && _util.pideBateriaDeNuevoSiEsNecesario(this)) {
+                    oncePideActivarBateria2 = false;
+                    return;
+                }
+				if(oncePideActivarGPS && _util.pideActivarGPS(this)) {
+					oncePideActivarGPS = false;
+					return;
+				}
 				//http://mobisoftinfotech.com/resources/blog/android/3-ways-to-implement-efficient-location-tracking-in-android-applications/
 				if(_presenter.startTrackingRecord()) {
-					_util.pideActivarGPS(ActRuta.this);
-                    _util.pideBateria(ActRuta.this);
 					btnStart.setEnabled(false);
 					btnStart.setAlpha(0.5f);
 				}

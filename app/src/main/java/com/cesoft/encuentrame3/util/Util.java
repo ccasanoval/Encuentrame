@@ -430,6 +430,27 @@ public class Util
 		}
 		return false;
 	}
+	public boolean pideBateriaDeNuevoSiEsNecesario(Context context) {
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			PowerManager pm = (PowerManager) context.getSystemService(POWER_SERVICE);
+			if (pm != null) {
+				if (!pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
+					final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
+							.setCancelable(false)
+							.setPositiveButton(R.string.no, (dialog, id) -> pideBateria(context))
+							.setNegativeButton(R.string.yes, (dialog, id) -> dialog.cancel())
+					;
+					final AlertDialog alert = builder.create();
+					alert.show();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
 	public void pideGPS(Activity act, int requestCode) {
 		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
 		int permissionCheck = ContextCompat.checkSelfPermission(act, android.Manifest.permission.ACCESS_FINE_LOCATION);
