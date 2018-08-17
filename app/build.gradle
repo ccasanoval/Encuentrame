@@ -1,37 +1,43 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'me.tatarka.retrolambda'	//RetroLambda
-//apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-	compileSdkVersion 28
-	buildToolsVersion '27.0.3'
-
-	defaultConfig {
-		applicationId 'com.cesoft.encuentrame3'
-		minSdkVersion 21
-		targetSdkVersion 28
-		versionCode 20
-		versionName "2.0"
-		multiDexEnabled true
-		testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
-	}
-	buildTypes {
-		release {
-			minifyEnabled true
-			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-		}
-	}
-	compileOptions	//RetroLambda
-	{
-		sourceCompatibility JavaVersion.VERSION_1_8
-		targetCompatibility JavaVersion.VERSION_1_8
-	}
-
-	return true
+    signingConfigs {
+        config {
+            keyAlias 'keyAlias'
+            keyPassword 'keyPassword'
+            storeFile file('C:/zUSR/zCES/ks.jks')
+            storePassword 'keyPassword'
+        }
+    }
+    compileSdkVersion 28
+    buildToolsVersion '27.0.3'
+    defaultConfig {
+        applicationId 'com.cesoft.encuentrame3'
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 20
+        versionName "2.0"
+        multiDexEnabled true
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+    compileOptions    //RetroLambda
+            {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+    return true
 }
 
 def VER_ANDROID = '28.0.0-rc01'
 def VER_GOOGLE = '15.0.1'
+def VER_GOOGLE_AUTH = '16.0.0'
 def VER_FIREBASE = '16+'
 def VER_DAGGER_TEST = '2.8'
 def VER_DAGGER = '2.15'
@@ -42,82 +48,79 @@ def VER_GLIDE = '4.7.1'
 def VER_LEAKCANARY = '1.5.4'
 
 dependencies {
-	implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'org.jetbrains:annotations:13.0'
+    implementation 'com.android.support:multidex:1.0.3'
 
-	implementation 'org.jetbrains:annotations:13.0'
-	implementation 'com.android.support:multidex:1.0.3'
+    // Android
+    implementation "com.android.support:appcompat-v7:${VER_ANDROID}"
+    implementation "com.android.support:design:${VER_ANDROID}"
+    implementation "com.android.support:support-v4:${VER_ANDROID}"
 
-	// Android
-	implementation "com.android.support:appcompat-v7:${VER_ANDROID}"
-	implementation "com.android.support:design:${VER_ANDROID}"
-	implementation "com.android.support:support-v4:${VER_ANDROID}"
-	// Google
-	implementation "com.google.android.gms:play-services-location:${VER_GOOGLE}"
-	implementation "com.google.android.gms:play-services-auth:${VER_GOOGLE}"
-	implementation "com.google.android.gms:play-services-maps:${VER_GOOGLE}"
-	implementation "com.google.android.gms:play-services-gcm:${VER_GOOGLE}"
-	// Firebase
-	implementation "com.google.firebase:firebase-auth:${VER_FIREBASE}"
-	implementation "com.google.firebase:firebase-core:${VER_FIREBASE}"
-	implementation "com.google.firebase:firebase-database:${VER_FIREBASE}"
-	implementation "com.google.firebase:firebase-storage:${VER_FIREBASE}"
-	implementation "com.google.firebase:firebase-crash:${VER_FIREBASE}"
-	implementation "com.firebase:geofire-android:2.1.0"
+    // Google
+    implementation "com.google.android.gms:play-services-location:${VER_GOOGLE}"
+    implementation "com.google.android.gms:play-services-auth:${VER_GOOGLE_AUTH}"
+    implementation "com.google.android.gms:play-services-maps:${VER_GOOGLE}"
+    implementation "com.google.android.gms:play-services-gcm:${VER_GOOGLE}"
 
+    // Firebase
+    implementation "com.google.firebase:firebase-auth:${VER_FIREBASE}"
+    implementation "com.google.firebase:firebase-core:${VER_FIREBASE}"
+    implementation "com.google.firebase:firebase-database:${VER_FIREBASE}"
+    implementation "com.google.firebase:firebase-storage:${VER_FIREBASE}"
+    implementation "com.google.firebase:firebase-crash:${VER_FIREBASE}"
+    implementation 'com.firebase:geofire-android:2.1.0'
 
-	// Img
-	//implementation 'com.squareup.picasso:picasso:2.5.2'
-	implementation "com.github.bumptech.glide:glide:${VER_GLIDE}"
-	annotationProcessor "com.github.bumptech.glide:compiler:${VER_GLIDE}"
+    // Img
 
-	// Dagger
-	//annotationProcessor "com.google.dagger:dagger-implementationr:1.0"
-	//implementation "com.google.dagger:dagger:2.11"
-	//compileOnly 'javax.annotation:jsr250-api:1.0'
+    //implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.github.bumptech.glide:glide:${VER_GLIDE}"
+    annotationProcessor "com.github.bumptech.glide:compiler:${VER_GLIDE}"
+
+    // Dagger
+
+    //annotationProcessor "com.google.dagger:dagger-implementationr:1.0"
+
+    //implementation "com.google.dagger:dagger:2.11"
+
+    //compileOnly 'javax.annotation:jsr250-api:1.0'
     implementation "com.google.dagger:dagger:${VER_DAGGER}"
     implementation "com.google.dagger:dagger-android:${VER_DAGGER}"
     implementation "com.google.dagger:dagger-android-support:${VER_DAGGER}"
-	annotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER}"
-	annotationProcessor "com.google.dagger:dagger-android-processor:${VER_DAGGER}"
+    annotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER}"
+    annotationProcessor "com.google.dagger:dagger-android-processor:${VER_DAGGER}"
 
-	// Leak Canary
-	debugImplementation "com.squareup.leakcanary:leakcanary-android:${VER_LEAKCANARY}"
-	releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${VER_LEAKCANARY}"
-	testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${VER_LEAKCANARY}"
+    // Leak Canary
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:${VER_LEAKCANARY}"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${VER_LEAKCANARY}"
+    testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${VER_LEAKCANARY}"
 
-	// Test
-	testImplementation "junit:junit:${VER_JUNIT}"
-	testImplementation "org.robolectric:robolectric:3.8"
-	testImplementation 'org.mockito:mockito-android:2.18.3'
-	testImplementation "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
-	testAnnotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
-	annotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
-	androidTestAnnotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
-	//testApt "com.google.dagger:dagger-compiler:${DAGGER}"
-	// Android Test
-	androidTestImplementation "junit:junit:${VER_JUNIT}"
-	androidTestImplementation 'org.mockito:mockito-android:2.18.3'
-	androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
-	androidTestImplementation "com.android.support.test:runner:${VER_RUNNER}"
-	androidTestImplementation "com.android.support.test:rules:${VER_RUNNER}"
-	androidTestImplementation "com.android.support.test.espresso:espresso-core:${VER_ESPRESSO}"
-	androidTestImplementation "com.android.support.test.espresso:espresso-intents:${VER_ESPRESSO}"
-	androidTestImplementation "com.android.support:support-annotations:${VER_ANDROID}"
+    // Test
+    testImplementation "junit:junit:${VER_JUNIT}"
+    testImplementation 'org.robolectric:robolectric:3.8'
+    testImplementation 'org.mockito:mockito-android:2.18.3'
+    testImplementation "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
+    testAnnotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
+    annotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
+    androidTestAnnotationProcessor "com.google.dagger:dagger-compiler:${VER_DAGGER_TEST}"
 
-	// Event Bus
-	implementation 'org.greenrobot:eventbus:3.1.1'
+    //testApt "com.google.dagger:dagger-compiler:${DAGGER}"
 
-	// Time
-	implementation 'joda-time:joda-time:2.10'
+    // Android Test
+    androidTestImplementation "junit:junit:${VER_JUNIT}"
+    androidTestImplementation 'org.mockito:mockito-android:2.18.3'
+    androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+    androidTestImplementation "com.android.support.test:runner:${VER_RUNNER}"
+    androidTestImplementation "com.android.support.test:rules:${VER_RUNNER}"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:${VER_ESPRESSO}"
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:${VER_ESPRESSO}"
+    androidTestImplementation "com.android.support:support-annotations:${VER_ANDROID}"
 
-	/*androidTestImplementation("com.android.support.test.espresso:espresso-contrib:2.2")
-	{
-		// Necessary to avoid version conflicts
-		exclude group: 'com.android.support', module: 'appcompat'
-		exclude group: 'com.android.support', module: 'support-v4'
-		exclude group: 'com.android.support', module: 'support-annotations'
-		exclude module: 'recyclerview-v7'
-	}*/
+    // Event Bus
+    implementation 'org.greenrobot:eventbus:3.1.1'
+
+    // Time
+    implementation 'joda-time:joda-time:2.10'
 }
 
 apply plugin: 'com.google.gms.google-services'	//Google

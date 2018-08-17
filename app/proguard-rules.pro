@@ -15,15 +15,65 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--dontwarn
--keep class weborb.** {*;}
+
+# CES ---------------------------------------------------
+-keep class com.cesoft.encuentrame3.models.** { *; }
 
 
-# GLIDE
+# GLIDE ---------------------------------------------------
 -keep public class * implements com.bumptech.glide.module.GlideModule
--keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+-keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
   **[] $VALUES;
   public *;
 }
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+
+
+# ---------------------------------------------------
+-dontwarn com.google.errorprone.annotations.*
+
+
+# JODA ---------------------------------------------------
+-dontwarn org.joda.convert.**
+-dontwarn org.joda.time.**
+-keep class org.joda.time.** { *; }
+-keep interface org.joda.time.** { *; }
+
+
+# EVENTBUS ---------------------------------------------------
+-keepattributes *Annotation*
+-keepclassmembers class * {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+
+    #Only required if you use AsyncExecutor
+-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+    <init>(java.lang.Throwable);
+}
+
+
+# DAGGER ---------------------------------------------------
+-dontwarn dagger.internal.codegen.**
+-keepclassmembers,allowobfuscation class * {
+    @javax.inject.* *;
+    @dagger.* *;
+    <init>();
+}
+-keep class dagger.* { *; }
+-keep class javax.inject.* { *; }
+-keep class * extends dagger.internal.Binding
+-keep class * extends dagger.internal.ModuleAdapter
+-keep class * extends dagger.internal.StaticInjection
+
+
+# FIREBASE ---------------------------------------------------
+-keep class com.firebase.** { *; }
+-keep class org.apache.** { *; }
+-keepnames class com.fasterxml.jackson.** { *; }
+-keepnames class javax.servlet.** { *; }
+-keepnames class org.ietf.jgss.** { *; }
+-dontwarn org.w3c.dom.**
+-dontwarn org.joda.time.**
+-dontwarn org.shaded.apache.**
+-dontwarn org.ietf.jgss.**

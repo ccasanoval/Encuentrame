@@ -146,6 +146,6 @@
 	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
     <string name="ask_to_enable_gps">The tracking service needs you to activate the GPS</string>
 	<string name="ok">OK</string>
-    <string name="pref_save_all">Save all tracking points without smart dicrimination</string>
+    <string name="pref_save_all">Save also imprecise points</string>
     <string name="pref_tracking_seconds">Tracking period (seconds)</string>
 </resources>

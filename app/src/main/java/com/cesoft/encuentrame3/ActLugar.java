@@ -46,21 +46,26 @@ public class ActLugar extends VistaBase
 		super.onCreate(savedInstanceState);
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
-		btnActPos.setOnClickListener(v ->
-		{
-			Location loc = _util.getLocation();
-			if(loc != null) setPosicion(loc.getLatitude(), loc.getLongitude());
-		});
+		btnActPos.setOnClickListener(v -> setCurrentLocation());
 
 		//------------------------------------
 		_lblPosicion = findViewById(R.id.lblPosicion);
 		setPosLabel(_presenter.getLatitud(), _presenter.getLongitud());
 
 		//------------------------------------
-		if(_presenter.isNuevo())
+		if(_presenter.isNuevo()) {
 			setTitle(getString(R.string.nuevo_lugar));
-		else
+			setCurrentLocation();
+		}
+		else {
 			setTitle(getString(R.string.editar_lugar));
+		}
+	}
+
+	private void setCurrentLocation() {
+		Location loc = _util.getLocation();
+		if(loc != null)
+			setPosicion(loc.getLatitude(), loc.getLongitude());
 	}
 
 

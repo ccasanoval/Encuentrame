@@ -7,6 +7,7 @@ import android.content.Intent;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -21,14 +22,15 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static com.cesoft.encuentrame3.util.Constantes.DELAY_TRACK_MIN;
+
 @Singleton
 public class ActividadIntentService extends IntentService {
-
     protected static final String TAG = ActividadIntentService.class.getSimpleName();
 
     // Time between activity detections. Larger values result in fewer detections while improving
     // battery life. A value of 0 results in activity detections at the fastest rate possible
-    static final long DETECTION_INTERVAL_IN_MILLISECONDS = 10 * 1000;//TODO: Settings
+
     private static PendingIntent getPendingIntent(Context context) {
         // FLAG_UPDATE_CURRENT to get the same pending intent back when ini and destroy service
         Intent intent = new Intent(context, ActividadIntentService.class);
@@ -37,7 +39,7 @@ public class ActividadIntentService extends IntentService {
     public static void start(Context context) {
         ActivityRecognitionClient activityRecognitionClient = new ActivityRecognitionClient(context);
         Task<Void> task = activityRecognitionClient.requestActivityUpdates(
-                DETECTION_INTERVAL_IN_MILLISECONDS,
+                Constantes.DELAY_ACTIVITY_DETECTION,
                 getPendingIntent(context));
         //task.addOnSuccessListener(new OnSuccessListener<Void>() { @Override public void onSuccess(Void result) {
         task.addOnFailureListener(e -> Log.e(TAG, "start:e:-----------------------------------",e));
@@ -97,6 +99,11 @@ public class ActividadIntentService extends IntentService {
         int confidence = 0;
         for(DetectedActivity act : list)
         {
+            switch(act.getType()) {
+                case DetectedActivity.UNKNOWN:
+                case DetectedActivity.TILTING:
+                    continue;
+            }
             if(act.getConfidence() > confidence)
             {
                 confidence = act.getConfidence();

@@ -52,12 +52,12 @@ import static com.cesoft.encuentrame3.util.Constantes.DISTANCE_MIN;
 import static com.cesoft.encuentrame3.util.Constantes.ID_JOB_TRACKING;
 import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 
+//TODO://https://hashedin.com/blog/save-your-android-service-from-doze-mode/
 @Singleton
 public class GeoTrackingJobService
         extends JobService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = GeoTrackingJobService.class.getSimpleName();
-
 
     @Inject Util _util;
     @Inject Login _login;
@@ -89,7 +89,9 @@ public class GeoTrackingJobService
         Log.e(TAG, "************************* TRACKING Start *************************");
 
         ComponentName componentName = new ComponentName(context, GeoTrackingJobService.class);
-        JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName).setPersisted(true);
+        JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName);
+        builder.setPersisted(true);
+        builder.setOverrideDeadline(delay+10);
 
         //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -135,20 +137,20 @@ public class GeoTrackingJobService
     }
 
     private void iniWakeLock() {
-        //if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)//TODO: When would wakelock be needed? DELETE
-       /*PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
+        //if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)//TODO: Is wakelock needed? DELETE?
+       PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
         if(powerManager != null) {
             _wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft::GeoTrackingJobService");
             _wakeLock.acquire(5*60*1000);//_delay);//x milliseconds max
             Log.e(TAG, "iniWakeLock--------------------------------------------");
-        }*/
+        }
     }
 
     private void endWakeLock() {
-        /*if (_wakeLock != null)
+        if (_wakeLock != null)
             _wakeLock.release();
         _wakeLock = null;
-        Log.e(TAG, "endWakeLock--------------------------------------------");*/
+        Log.e(TAG, "endWakeLock--------------------------------------------");
     }
 
     private void iniEnviron() {
@@ -198,8 +200,8 @@ public class GeoTrackingJobService
         if (checkPlayServices()) buildGoogleApiClient();
         if (_GoogleApiClient != null) _GoogleApiClient.connect();
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(_delay-100);//TODO: ajustar segun velocidad cambio pos...
-        locationRequest.setFastestInterval(_delay-100);
+        locationRequest.setInterval(_delay);
+        locationRequest.setFastestInterval(_delay-500);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         _fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

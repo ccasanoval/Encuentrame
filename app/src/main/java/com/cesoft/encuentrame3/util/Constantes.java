@@ -17,6 +17,8 @@ public class Constantes
 	// Cuando se actualiza el widget?
 	public static final long WIDGET_DELAY_SHORT = DELAY_TRACK_MIN;
 	public static final long WIDGET_DELAY_LONG = DELAY_LOAD_GEOFENCE;
+	// Delay de servicio deteccion actividad
+	public static final long DELAY_ACTIVITY_DETECTION = DELAY_TRACK_MIN;
 
 	//
 	public static final int NADA=-1, LUGARES=0, RUTAS=1, AVISOS=2, BUSCAR=9, CONFIG=10;

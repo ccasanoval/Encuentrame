@@ -107,7 +107,7 @@
 	<string name="pref_header_opciones_sum">Settings…</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
 	<string name="pref_save_login">Save login and password</string>
-	<string name="pref_save_all">Save all tracking points, without smart filter</string>
+	<string name="pref_save_all">Save also imprecise points</string>
 	<string name="pref_tracking_seconds">Tracking period (seconds)</string>
 
 	<string name="pref_header_notifications">Alerts</string>
@@ -162,14 +162,5 @@
 	<string name="unknown">Unknown activity</string>
 	<string name="walking">Walking</string>
 	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
-
-	<!-- string name="ignore_battery_optimization"> Route tracking service needs to disable energy optimizations.\n\n
-		In the next window, select \"All apps\" and pick this app from the list, then select \"Don\'t optimize\" and \"Done\".
-	</string -->
-	<!-- string name="ignore_battery_optimization">For route tracking service to work, the app needs to disable energy optimizations. Please do the following:\n
-		In the next window, select \"All apps\" and pick this app from the list, then select \"Dont optimize\" and save.
-		</string -->
-	<!-- string name="ignore_battery_optimization">This App needs to disable the energy optimizations in order to keep tracking the location when the device goes to sleep.
-		Please, select the App in the list and check "Don't optimize" for a perfect route tracking</string -->
 
 </resources>
