@@ -140,6 +140,10 @@
 			android:name="com.google.android.gms.version"
 			android:value="@integer/google_play_services_version"/>
 
+		<meta-data
+			android:name="io.fabric.ApiKey"
+			android:value="4926232ef1705cf6e90da631c6e401a43a69151e" />
+
 		<!-- ************************* WIDGETs ************************* -->
 		<receiver
 			android:name=".widget.WidgetLugar"

@@ -1,0 +1,26 @@
+Se pueden hacer copias desde la consola de firebase!!!
+Database -> Menu de la izquierda -> Exportar a json  OR  Importar de json
+
+https://firebase.google.com/docs/firestore/manage-data/export-import
+
+--------------------------------------------------------------------------------------------------------
+
+
+https://github.com/steadyequipment/node-firestore-backup
+https://www.npmjs.com/package/firestore-backup-restore
+
+...
+
+Node.json
+
+npm install -g firestore-backup-restore
+
+...
+
+firestore-backup --accountCredentials path/to/credentials/file.json --backupPath /backups/myDatabase --prettyPrint
+
+firestore-backup --accountCredentials C:\zUSR\zCES\Encuentrame\z\sonic-totem-131614-firebase-adminsdk-d2mdf-afc2a57364.json --backupPath .\  --prettyPrint
+
+
+
+Si no funciona te bajas el codigo de github y lo ejecutas en local

@@ -91,13 +91,15 @@ public class GeoTrackingJobService
         ComponentName componentName = new ComponentName(context, GeoTrackingJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName);
         builder.setPersisted(true);
-        builder.setOverrideDeadline(delay+10);
 
         //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setMinimumLatency(first ? 1000 : delay);//La primera vez espera solo 1s
-        else
+            builder.setOverrideDeadline(delay+10);
+        }
+        else {
             builder.setPeriodic(delay);
+        }
 
         JobScheduler jobScheduler = (JobScheduler)context.getSystemService(JOB_SCHEDULER_SERVICE);
         if (jobScheduler != null)
