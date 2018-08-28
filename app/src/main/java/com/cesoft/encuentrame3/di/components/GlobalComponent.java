@@ -8,6 +8,7 @@ import com.cesoft.encuentrame3.ActMaps;
 import com.cesoft.encuentrame3.ActRuta;
 import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
 import com.cesoft.encuentrame3.ActWidgetNuevoLugar;
+import com.cesoft.encuentrame3.FrgLogin;
 import com.cesoft.encuentrame3.FrgMain;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
@@ -27,7 +28,7 @@ import dagger.Component;
 @Component(modules = {GlobalModule.class})
 public interface GlobalComponent
 {
-	void inject(ActLogin.PlaceholderFragment v);
+	void inject(FrgLogin v);
 	void inject(ActAviso v);
 	void inject(ActLugar v);
 	void inject(ActRuta v);
