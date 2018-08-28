@@ -28,4 +28,5 @@ public class Constantes
 
 	public static final int ID_JOB_GEOFENCE_LOADING = 69;
 	public static final int ID_JOB_TRACKING = 70;
+	public static final int ID_JOB_WIDGET = 71;
 }

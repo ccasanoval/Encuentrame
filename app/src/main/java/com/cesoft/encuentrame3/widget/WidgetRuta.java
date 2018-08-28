@@ -17,7 +17,7 @@ import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Util;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO : despues de matar app con TaskKiller el widget deja de responder...! QUIZA PORQUE SE MATO EL CONTEXTO ORIGINAL
+//
 public class WidgetRuta extends AppWidgetProvider
 {
 	private static final String ACTION_WIDGET_RUTA_ADD = "ACTION_WIDGET_RUTA_ADD";
@@ -27,7 +27,7 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
-		WidgetRutaService.startSvc(context);
+		WidgetRutaJobService.start(context);
 
 		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 
@@ -55,7 +55,6 @@ public class WidgetRuta extends AppWidgetProvider
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
-//		Log.w("WidgetRuta", "onUpdate-----------------------------------------------------**************************** ");
 		setWidget(context, appWidgetManager, appWidgetIds, null, false);
 	}
 
@@ -65,7 +64,6 @@ public class WidgetRuta extends AppWidgetProvider
 		Intent intent;
 		PendingIntent actionPendingIntent;
 		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
-//Log.w("WidgetRuta", "setWidget-----------------------------------------------------**************************** = "+sRuta);
 
 		// NOMBRE RUTA
 		if(sRuta != null)
@@ -102,7 +100,7 @@ public class WidgetRuta extends AppWidgetProvider
 		// REFRESH WIDGET SVC
 		ComponentName thisWidget = new ComponentName(context, WidgetRuta.class);
 		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-		intent = new Intent(context.getApplicationContext(), WidgetRutaService.class);
+		intent = new Intent(context.getApplicationContext(), WidgetRutaJobService.class);
 		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
 		context.startService(intent);
 

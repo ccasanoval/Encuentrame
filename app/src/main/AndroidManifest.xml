@@ -158,7 +158,10 @@
 				android:resource="@xml/widget_lugar"/>
 		</receiver>
 
-		<service android:name=".widget.WidgetRutaService"/>
+		<service
+			android:name=".widget.WidgetRutaJobService"
+			android:label="GeoFence Load Service"
+			android:permission="android.permission.BIND_JOB_SERVICE" />
 
 		<receiver
 			android:name=".widget.WidgetRuta"

@@ -13,7 +13,6 @@ import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.di.modules.GlobalModuleTest;
 import com.cesoft.encuentrame3.util.Util;
-import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
 import javax.inject.Singleton;
 

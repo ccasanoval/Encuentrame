@@ -12,12 +12,10 @@ import com.cesoft.encuentrame3.svc.ActividadIntentService;
 import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.cesoft.encuentrame3.util.Log;
-import com.crashlytics.android.Crashlytics;import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
 import com.squareup.leakcanary.LeakCanary;
-
-import io.fabric.sdk.android.Fabric;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

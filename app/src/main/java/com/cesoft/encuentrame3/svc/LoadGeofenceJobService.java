@@ -31,6 +31,9 @@ public class LoadGeofenceJobService extends JobService {
     private static final String TAG = LoadGeofenceJobService.class.getSimpleName();
 
     public static void start(Context context) {
+        start(context, true);
+    }
+    private static void start(Context context, boolean first) {
         Log.e(TAG, "************************* FENCE Start *************************");
 
         ComponentName componentName = new ComponentName(context, LoadGeofenceJobService.class);
@@ -38,7 +41,7 @@ public class LoadGeofenceJobService extends JobService {
 
         //SDK >= 24 => max periodic = JobInfo.getMinPeriodMillis() = 15min
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            builder.setMinimumLatency(DELAY_LOAD_GEOFENCE);//TODO: Faster the firts time?
+            builder.setMinimumLatency(first ? 1000 : DELAY_LOAD_GEOFENCE);//La primera vez espera solo 1s
         else
             builder.setPeriodic(DELAY_LOAD_GEOFENCE);
 
@@ -66,7 +69,7 @@ public class LoadGeofenceJobService extends JobService {
                 cargarListaGeoAvisos();//PAYLOAD
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    start(getApplicationContext());
+                    start(getApplicationContext(), false);
                 LoadGeofenceJobService.this.jobFinished(jobParameters, true);
             }
         }).start();

@@ -2,7 +2,6 @@ package com.cesoft.encuentrame3;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
@@ -24,8 +23,9 @@ import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
-import com.cesoft.encuentrame3.widget.WidgetRutaService;
+//import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
+import com.cesoft.encuentrame3.widget.WidgetRutaJobService;
 import com.google.firebase.auth.FirebaseUser;
 
 import javax.inject.Inject;
@@ -145,9 +145,8 @@ public class ActWidgetNuevaRuta extends Activity
 				Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 				ActWidgetNuevaRuta.this.finish();
 				//
-				refreshWidget();
-				// Start tracking
 				GeoTrackingJobService.start(getApplicationContext(), _pref.getTrackingDelay());
+				WidgetRutaJobService.start(getApplicationContext());
 				//ActWidgetNuevaRuta.this.finish();
 			}
 			@Override
@@ -163,29 +162,11 @@ public class ActWidgetNuevaRuta extends Activity
 				_progressDialog.hide();
 				Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 				//
-				refreshWidget();
+				WidgetRutaJobService.start(getApplicationContext());
 			}
 		});
 	}
 
-
-	private ServiceConnection _sc = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			Log.e(TAG, "---------------------------- onServiceConnected --------------------------------------------");
-			// We've bound to LocalService, cast the IBinder and get LocalService instance
-			WidgetRutaService.LocalBinder binder = (WidgetRutaService.LocalBinder)service;
-			WidgetRutaService _svcWidget = binder.getService();
-			if(_svcWidget != null) _svcWidget.refresh();
-			WidgetRutaService.unbindSvc(_sc, getApplicationContext());
-		}
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) { }
-	};
-	//
-	private void refreshWidget() {
-		WidgetRutaService.bindSvc(_sc, getApplicationContext());
-	}
 
 	// Permisos de GPS
 	private boolean pidePermisosGPS()

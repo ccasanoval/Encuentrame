@@ -24,7 +24,7 @@ import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
-import com.cesoft.encuentrame3.widget.WidgetRutaService;
+//import com.cesoft.encuentrame3.widget.WidgetRutaService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -123,7 +123,7 @@ public class GeoTrackingJobService
 
     private void runPayload(JobParameters jobParameters) {
         _jobParameters = jobParameters;
-        WidgetRutaService.startSvc(getApplicationContext());//Init widget serv if it isn't
+        //WidgetRutaService.startSvc(getApplicationContext());//Init widget serv if it isn't
         iniEnviron();
         if (!_login.isLogged()) {
             Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
