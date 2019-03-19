@@ -24,8 +24,8 @@ import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD_GEOFENCE;
 import static com.cesoft.encuentrame3.util.Constantes.GEOFEN_DWELL_TIME;
 import static com.cesoft.encuentrame3.util.Constantes.ID_JOB_GEOFENCE_LOADING;
 
-//TODO: Read: https://medium.com/google-developers/scheduling-jobs-like-a-pro-with-jobscheduler-286ef8510129
-//TODO: Check: https://github.com/mcharmas/Android-ReactiveLocation
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 @Singleton
 public class LoadGeofenceJobService extends JobService {
     private static final String TAG = LoadGeofenceJobService.class.getSimpleName();
@@ -50,17 +50,15 @@ public class LoadGeofenceJobService extends JobService {
             jobScheduler.schedule(builder.build());
     }
 
-    @Inject Login _login;
+    @Inject Login login;
     @Inject public LoadGeofenceJobService() { }
-    private Context context;
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStartJob *************************");
-        context = getApplicationContext();
-        App.getComponent(context).inject(this);
+        App.getComponent(getApplicationContext()).inject(this);
         new Thread(() -> {
-            if( ! _login.isLogged()) {
+            if( ! login.isLogged()) {
                 Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
                 stopSelf();
                 LoadGeofenceJobService.this.jobFinished(jobParameters, false);
@@ -79,9 +77,9 @@ public class LoadGeofenceJobService extends JobService {
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStopJob *************************");
-        if(_GeofenceStoreAvisos != null)
-            _GeofenceStoreAvisos.clear();
-        _GeofenceStoreAvisos = null;
+        if(geofenceStoreAvisos != null)
+            geofenceStoreAvisos.clear();
+        geofenceStoreAvisos = null;
         return false;
     }
 
@@ -91,18 +89,18 @@ public class LoadGeofenceJobService extends JobService {
     {
         Log.e(TAG, "************************* cargarListaGeoAvisos *************************");
         createListAviso();
-        try { Aviso.getActivos(_lisAviso); }
+        try { Aviso.getActivos(lisAviso); }
         catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
     }
-    private boolean _isIni = false;
-    private Fire.DatosListener<Aviso> _lisAviso;
-    private CesGeofenceStore _GeofenceStoreAvisos;
-    private ArrayList<Aviso> _listaGeoAvisos = new ArrayList<>();
+    private boolean isInit = false;
+    private Fire.DatosListener<Aviso> lisAviso;
+    private CesGeofenceStore geofenceStoreAvisos;
+    private ArrayList<Aviso> listaGeoAvisos = new ArrayList<>();
     private void createListAviso()
     {
-        if(_isIni)return;
-        _isIni = true;
-        _lisAviso = new Fire.DatosListener<Aviso>()
+        if(isInit)return;
+        isInit = true;
+        lisAviso = new Fire.DatosListener<Aviso>()
         {
             @Override
             public void onDatos(Aviso[] aData)
@@ -110,12 +108,14 @@ public class LoadGeofenceJobService extends JobService {
                 //TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
                 boolean bDirty = false;
                 long n = aData.length;
-                if(n != LoadGeofenceJobService.this._listaGeoAvisos.size())
+                Log.e(TAG, "aData.length:"+n+" VS "+listaGeoAvisos.size()+"-----------------------------------------------------");
+                if(n != listaGeoAvisos.size())
                 {
-                    if(_GeofenceStoreAvisos != null)_GeofenceStoreAvisos.clear();
-                    _listaGeoAvisos.clear();
+                    if(geofenceStoreAvisos != null) geofenceStoreAvisos.clear();
+                    listaGeoAvisos.clear();
                     bDirty = true;
                 }
+
                 ArrayList<Geofence> aGeofences = new ArrayList<>();
                 ArrayList<Aviso> aAvisos = new ArrayList<>();
                 for(int i=0; i < aData.length; i++)
@@ -128,20 +128,18 @@ public class LoadGeofenceJobService extends JobService {
                             .setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
                             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT).build();
                     aGeofences.add(gf);
-                    if( ! bDirty)
+                    if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))
                     {
-                        if(_listaGeoAvisos.size() < i)
-                            bDirty = true;
-                        else if( ! _listaGeoAvisos.contains(a))//else if(_listaGeoAvisos.get(i))
-                            bDirty = true;
-                        i++;
+                        bDirty = true;
+                        //i++;
                     }
                 }
                 if(bDirty)
                 {
-                    _listaGeoAvisos = aAvisos;
-                    _GeofenceStoreAvisos = new CesGeofenceStore(aGeofences, context);//Se puede añadir en lugar de crear desde cero?
+                    listaGeoAvisos = aAvisos;
+                    geofenceStoreAvisos = new CesGeofenceStore(aGeofences);//Se puede añadir en lugar de crear desde cero?
                 }
+                Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------aGeofences:"+aGeofences.size()+"-----------------------------------");
             }
             @Override
             public void onError(String err)

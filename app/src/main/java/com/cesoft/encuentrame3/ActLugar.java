@@ -30,30 +30,31 @@ public class ActLugar extends VistaBase
 {
 	protected static final String TAG = ActLugar.class.getSimpleName();
 
-	@Inject	Util _util;
-	@Inject	PreLugar _presenter;
+	@Inject	Util util;
+	@Inject	PreLugar presenter;
 
-	private Marker _marker;
-	private TextView _lblPosicion;
-	private void setPosLabel(double lat, double lon){_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
+	private Marker marker;
+	private TextView lblPosicion;
+	private void setPosLabel(double lat, double lon){
+		lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
 
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		((App)getApplication()).getGlobalComponent().inject(this);
-		super.ini(_presenter, _util, new Lugar(), R.layout.act_lugar);
+		super.ini(presenter, util, new Lugar(), R.layout.act_lugar);
 		super.onCreate(savedInstanceState);
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(v -> setCurrentLocation());
 
 		//------------------------------------
-		_lblPosicion = findViewById(R.id.lblPosicion);
-		setPosLabel(_presenter.getLatitud(), _presenter.getLongitud());
+		lblPosicion = findViewById(R.id.lblPosicion);
+		setPosLabel(presenter.getLatitud(), presenter.getLongitud());
 
 		//------------------------------------
-		if(_presenter.isNuevo()) {
+		if(presenter.isNuevo()) {
 			setTitle(getString(R.string.nuevo_lugar));
 			setCurrentLocation();
 		}
@@ -63,7 +64,7 @@ public class ActLugar extends VistaBase
 	}
 
 	private void setCurrentLocation() {
-		Location loc = _util.getLocation();
+		Location loc = util.getLocation();
 		if(loc != null)
 			setPosicion(loc.getLatitude(), loc.getLongitude());
 	}
@@ -76,7 +77,7 @@ public class ActLugar extends VistaBase
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_lugar, menu);
-		if(_presenter.isNuevo())
+		if(presenter.isNuevo())
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
 		return true;
 	}
@@ -84,11 +85,11 @@ public class ActLugar extends VistaBase
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if(item.getItemId() == R.id.menu_guardar)
-			_presenter.guardar();
+			presenter.guardar();
 		else if(item.getItemId() == R.id.menu_eliminar)
-			_presenter.onEliminar();
+			presenter.onEliminar();
 		else if(item.getItemId() == R.id.menu_img)
-			_presenter.imagen();
+			presenter.imagen();
 		return super.onOptionsItemSelected(item);
 	}
 	//______________________________________________________________________________________________
@@ -97,18 +98,18 @@ public class ActLugar extends VistaBase
 	//----------------------------------------------------------------------------------------------
 	// OnMapReadyCallback
 	@Override
-	public void onMapReady(GoogleMap Map)
+	public void onMapReady(GoogleMap map)
 	{
-		super.onMapReady(Map);
-		_Map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
+		super.onMapReady(map);
+		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
 		setMarker();
 	}
 	//----------------------------------------------------------------------------------------------
 	protected void setPosicion(double lat, double lon)
 	{
-		_presenter.setLatLon(lat, lon);
-		_presenter.setSucio();
-		_lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
+		presenter.setLatLon(lat, lon);
+		presenter.setSucio();
+		lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
 		setMarker();
 	}
 
@@ -117,14 +118,16 @@ public class ActLugar extends VistaBase
 	{
 		try
 		{
-			if(_marker != null)_marker.remove();
-			LatLng pos = new LatLng(_presenter.getLatitud(), _presenter.getLongitud());
+			if(marker != null) marker.remove();
+			LatLng pos = new LatLng(presenter.getLatitud(), presenter.getLongitud());
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
-					.title(_presenter.getNombre())
-					.snippet(_presenter.getDescripcion());
-			_marker = _Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
+					.title(presenter.getNombre())
+					.snippet(presenter.getDescripcion());
+			if(map != null) {
+				marker = map.addMarker(mo);
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, mapZoom));
+			}
 		}
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
@@ -135,7 +138,7 @@ public class ActLugar extends VistaBase
 	{
 		if(requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK)
 		{
-			_presenter.setImg(data);
+			presenter.setImg(data);
 			Log.e(TAG, "onActivityResult-----------------LUGAR----------- ");
 		}
 		else

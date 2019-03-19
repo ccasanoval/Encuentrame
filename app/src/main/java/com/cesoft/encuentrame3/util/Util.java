@@ -52,8 +52,6 @@ import java.util.Locale;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static android.content.Context.POWER_SERVICE;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/03/2016.
@@ -64,63 +62,66 @@ public class Util
 	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
-	private Application _app;
-	private Preferencias _pref;
-	private LocationManager _lm;
-	private NotificationManager _nm;
-	private PowerManager _pm;
+	private Application app;
+	private Preferencias pref;
+	private LocationManager lm;
+	private NotificationManager nm;
+	private PowerManager pm;
 	@Inject
 	public Util(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm)
 	{
-		_app = app;
-		_pref = pref;
-		_lm = lm;
-		_nm = nm;
-		_pm = pm;
+		this.app = app;
+		this.pref = pref;
+		this.lm = lm;
+		this.nm = nm;
+		this.pm = pm;
 	}
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
 	//______________________________________________________________________________________________
-	private static IListaItemClick _refresh;
-		public static void setRefreshCallback(IListaItemClick refresh){_refresh = refresh;}
-		public static void refreshListaRutas() { if(_refresh!=null)_refresh.onRefreshListaRutas(); }
+	private IListaItemClick refresh;
+		public void setRefreshCallback(IListaItemClick refresh) { this.refresh = refresh; }
+		public void refreshListaRutas() { if(refresh !=null) refresh.onRefreshListaRutas(); }
 
 	//______________________________________________________________________________________________
 	// LOCATION
 	//______________________________________________________________________________________________
-	private static Location _locLast;
+	private Location locLast;
 	public void setLocation(Location loc) {
-		_locLast=loc;//Log.e(TAG, "setLocation:-------------------"+loc);
+		locLast = loc;
 	}
 	public Location getLocation()
 	{
-		Location location1=null, location2=null;
+		Location location1=null;
+		Location location2=null;
 		try
 		{
-			if(_lm == null)return _locLast;
-			boolean isGPSEnabled = _lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-			boolean isNetworkEnabled = _lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			if(lm == null)return locLast;
+			boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+			boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 			try
 			{
-				if(isNetworkEnabled) location1 = _lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			}catch(SecurityException se){Log.e(TAG, "Network Loc:e:---------------------------------",se);}
+				if(isNetworkEnabled) location1 = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			}
+			catch(SecurityException se){Log.e(TAG, "Network Loc:e:---------------------------------",se);}
 			try
 			{
-				if(isGPSEnabled)location2 = _lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			}catch(SecurityException se){Log.e(TAG, "GPS Loc:e:-------------------------------------",se);}
+				if(isGPSEnabled)location2 = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			}
+			catch(SecurityException se){Log.e(TAG, "GPS Loc:e:-------------------------------------",se);}
 
-			if(location1==null && location2==null)return _locLast;
-			if(_locLast == null)_locLast = location1!=null?location1:location2;
-			if(location1 != null && location1.getTime() > _locLast.getTime())
-				_locLast = location1;
-			else if(location2 != null && location2.getTime() > _locLast.getTime())
-				_locLast = location2;
+			if(location1==null && location2==null)return locLast;
+			if(locLast == null) locLast = location1!=null?location1:location2;
+			if(location1 != null && location1.getTime() > locLast.getTime())
+				locLast = location1;
+			else if(location2 != null && location2.getTime() > locLast.getTime())
+				locLast = location2;
 		}
 		catch(SecurityException se)
 		{
-			se.printStackTrace();
+			Log.e(TAG, "getLocation:e:----------------------------------------------------",se);
 		}
-		return _locLast;
+		return locLast;
     }
 
 
@@ -132,9 +133,7 @@ public class Util
         Vibrator vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
 		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
 		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
-		//vibrator.vibrate(pattern, -1);
 		if(vibrator != null)vibrator.vibrate(1000);//1seg
-		//vibrator.cancel();
     }
 
 	//______________________________________________________________________________________________
@@ -145,24 +144,23 @@ public class Util
 		showNotificacion(sTitulo, aviso, intent);
 	}
 	//______________________________________________________________________________________________
-	//private static int _idNotificacion = 1;
 	private void showNotificacion(String titulo, Aviso aviso, Intent intent)
 	{
-		String sSound = _pref.getNotificationRingtone();
-		Boolean bVibrate = _pref.isNotificationVibrate();
-		Boolean bLights = _pref.isNotificationLights();
-		//android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
+		String sSound = pref.getNotificationRingtone();
+		boolean bVibrate = pref.isNotificationVibrate();
+		boolean bLights = pref.isNotificationLights();
+		/// android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
 
-		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
+		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame:Util");
 		wakeLock.acquire(2000);
 
-		Integer idNotificacion = _conversor(aviso.getId());
-		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
+		int idNotificacion = conversor(aviso.getId());
+		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(app, app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
-				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
+				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(app.getResources(), R.mipmap.ic_launcher))
 				.setContentTitle(titulo)
 				.setContentText(aviso.getNombre()+":"+aviso.getDescripcion())
-				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
+				.setContentIntent(PendingIntent.getActivity(app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
 				.setDefaults(NotificationCompat.DEFAULT_ALL)
 				;
@@ -175,20 +173,19 @@ public class Util
 					.setLights(0xff00ff00, 300, 100);//android.graphics.Color.RED
 			notificationBuilder.setLights(0xff, 0, 0);
 		}
-		//else notificationBuilder.setLights(0, 0, 0);
 
-		if(bVibrate)				//notificationBuilder.setVibrate(new long[]{1000L});//TODO: no funciona, llamar directamente a vibrar
-			vibrate(_app);
+		//notificationBuilder.setVibrate(new long[]{1000L});//no funciona, llamar directamente a vibrar
+		if(bVibrate)
+			vibrate(app);
 		else
 			notificationBuilder.setVibrate(null);
 
-		_nm.notify(idNotificacion, notificationBuilder.build());
+		nm.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
 	}
 	//______________________________________________________________________________________________
-	private static int _conversor(String s)
+	private int conversor(String s)
 	{
-		// PARA Backendless: Integer.parseInt(a.getId().substring(0,6).replace('-','0'), 16);
 		StringBuilder sb = new StringBuilder(10);
 		s = s.replace("-", "");
 		for(int i=0; i < 9; i++)
@@ -196,31 +193,31 @@ public class Util
 		return Integer.valueOf(sb.toString().substring(0, 9));
 	}
 
-	private long _lastShowNotifGPS = 0;
-	private long _delayShowNotifGPS = 0;
+	private long lastShowNotifGPS = 0;
+	private long delayShowNotifGPS = 0;
 	public void showNotifGPS()
 	{
-		if(_delayShowNotifGPS < 60*60*1000)
-			_delayShowNotifGPS += 5*60*1000;
-		if(_lastShowNotifGPS + _delayShowNotifGPS > System.currentTimeMillis())return;
-		_lastShowNotifGPS = System.currentTimeMillis();
+		if(delayShowNotifGPS < 60*60*1000)
+			delayShowNotifGPS += 5*60*1000;
+		if(lastShowNotifGPS + delayShowNotifGPS > System.currentTimeMillis())return;
+		lastShowNotifGPS = System.currentTimeMillis();
 
-		String sSound = _pref.getNotificationRingtone();
-		Boolean bVibrate = _pref.isNotificationVibrate();
-		Boolean bLights = _pref.isNotificationLights();
+		String sSound = pref.getNotificationRingtone();
+		boolean bVibrate = pref.isNotificationVibrate();
+		boolean bLights = pref.isNotificationLights();
 
-		PowerManager.WakeLock wakeLock = _pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
+		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame:Util");
 		wakeLock.acquire(2000);
 
-		Intent intent = new Intent(_app, ActMain.class);
+		Intent intent = new Intent(app, ActMain.class);
 		int idNotificacion = 6969;
 
-		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(_app, _app.getString(R.string.app_name))
+		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(app, app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_compass)
-				.setLargeIcon(BitmapFactory.decodeResource(_app.getResources(), R.mipmap.ic_launcher))
-				.setContentTitle(_app.getString(R.string.ask_to_enable_gps))
+				.setLargeIcon(BitmapFactory.decodeResource(app.getResources(), R.mipmap.ic_launcher))
+				.setContentTitle(app.getString(R.string.ask_to_enable_gps))
 				.setContentText("GPS")
-				.setContentIntent(PendingIntent.getActivity(_app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
+				.setContentIntent(PendingIntent.getActivity(app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
 				.setAutoCancel(true)
 				.setDefaults(NotificationCompat.DEFAULT_ALL)
 				;
@@ -234,21 +231,21 @@ public class Util
 		}
 
 		if(bVibrate)
-			vibrate(_app);
+			vibrate(app);
 		else
 			notificationBuilder.setVibrate(null);
 
-		_nm.notify(6969, notificationBuilder.build());
+		nm.notify(6969, notificationBuilder.build());
 		wakeLock.release();
 	}
 
 
 	//______________________________________________________________________________________________
 	public void setTrackingRoute(String idRoute) {
-		_pref.setTrackingRoute(idRoute);
+		pref.setTrackingRoute(idRoute);
 	}
 	public String getTrackingRoute() {
- 		return _pref.getTrackingRoute();
+ 		return pref.getTrackingRoute();
 	}
 
 	//______________________________________________________________________________________________
@@ -289,9 +286,9 @@ public class Util
 			@Override
 			public void onDatos(Aviso[] aData)
 			{
-				Intent i = new Intent(_app, ActAviso.class);//CesServiceAvisoGeo.this
+				Intent i = new Intent(app, ActAviso.class);//CesServiceAvisoGeo.this
 				i.putExtra(Objeto.NOMBRE, aData[0]);
-				showAviso(_app.getString(R.string.en_zona_aviso), aData[0], i);//CesServiceAvisoGeo.this
+				showAviso(app.getString(R.string.en_zona_aviso), aData[0], i);//CesServiceAvisoGeo.this
 			}
 			@Override
 			public void onError(String err)
@@ -329,7 +326,7 @@ public class Util
 			timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
 			//timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
-		return timeFormatter.format(new Date(t));//cal.getTime());
+		return timeFormatter.format(new Date(t));
 	}
 	//---
 	private SimpleDateFormat dateFormatter = null;
@@ -372,7 +369,7 @@ public class Util
 			try
 			{
 				addresses = geocoder.getFromLocationName(direccion.getText().toString(), 1);
-				if(addresses.size() > 0)
+				if( ! addresses.isEmpty())
 				{
 					double lat = addresses.get(0).getLatitude();
 					double lng = addresses.get(0).getLongitude();
@@ -386,8 +383,7 @@ public class Util
 	}
 
 	//______________________________________________________________________________________________
-	//TODO: static vs injected ?!
-	public static void exeDelayed(long delay, Runnable runnable) {
+	public void exeDelayed(long delay, Runnable runnable) {
 		new Handler().postDelayed(runnable, delay);
 	}
 
@@ -396,25 +392,13 @@ public class Util
 	@SuppressLint("BatteryLife")
 	public boolean pideBateria(Context context) {
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			PowerManager pm = (PowerManager)context.getSystemService(POWER_SERVICE);
 			if(pm != null) {
 				if(pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
-					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ----*******************************************************************----------------AAA:");
+					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: TRUE");
 					return false;
 				}
 				else {
-					/*AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					builder.setMessage(R.string.ignore_battery_optimization)
-							.setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-							    //finish();
-								Intent intent = new Intent();
-								intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-								startActivity(intent);
-							})
-							.show();
-							*/
 					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-					// But by including this Google may delete the app from the store...
 					Intent intent = new Intent();
 					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 					intent.setData(Uri.parse("package:"+context.getPackageName()));
@@ -423,7 +407,7 @@ public class Util
 					//  turn off the screen and:
 					//adb shell dumpsys battery unplug
 					//adb shell dumpsys deviceidle step --> Till status =  IDLE_PENDING, SENSING, (LOCATING), IDLE_MAINTENANCE, IDLE
-					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ------**********************************************--------------BBB");
+					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: FALSE");
 					return true;
 				}
 			}
@@ -432,19 +416,16 @@ public class Util
 	}
 	public boolean pideBateriaDeNuevoSiEsNecesario(Context context) {
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			PowerManager pm = (PowerManager) context.getSystemService(POWER_SERVICE);
-			if (pm != null) {
-				if (!pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
-					final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
-							.setCancelable(false)
-							.setPositiveButton(R.string.no, (dialog, id) -> pideBateria(context))
-							.setNegativeButton(R.string.yes, (dialog, id) -> dialog.cancel())
-					;
-					final AlertDialog alert = builder.create();
-					alert.show();
-					return true;
-				}
+			if(pm != null && !pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
+						.setCancelable(false)
+						.setPositiveButton(R.string.no, (dialog, id) -> pideBateria(context))
+						.setNegativeButton(R.string.yes, (dialog, id) -> dialog.cancel())
+				;
+				final AlertDialog alert = builder.create();
+				alert.show();
+				return true;
 			}
 		}
 		return false;
@@ -452,7 +433,6 @@ public class Util
 
 
 	public void pideGPS(Activity act, int requestCode) {
-		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
 		int permissionCheck = ContextCompat.checkSelfPermission(act, android.Manifest.permission.ACCESS_FINE_LOCATION);
 		if(permissionCheck == PackageManager.PERMISSION_DENIED)
 			ActivityCompat.requestPermissions(
@@ -477,57 +457,10 @@ public class Util
 		}
 		return false;
 	}
-	//______________________________________________________________________________________________
-	/*public void pidePermisosGPS(Context settingsClient, Activity act, LocationRequest locationRequest) {
-		LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-				.addLocationRequest(locationRequest)
-				.setAlwaysShow(true);
-		Task<LocationSettingsResponse> task =
-				LocationServices.getSettingsClient(settingsClient).checkLocationSettings(builder.build());
-		Log.e(TAG, "pidePermisosGPS:-------------------AAA-----------------");
-		task.addOnCompleteListener(res -> {
-            try {
-                //LocationSettingsResponse response =
-				res.getResult(ApiException.class);
-				Log.e(TAG, "pidePermisosGPS:-------------------BBB-----------------");
-                // All location settings are satisfied. The client can initialize location requests here.
-			}
-			catch(ApiException exception) {
-                switch (exception.getStatusCode()) {
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied. But could be fixed by showing the user a dialog.
-                        try {
-                            // Cast to a resolvable exception.
-                            ResolvableApiException resolvable = (ResolvableApiException) exception;
-                            // Show the dialog by calling startResolutionForResult(), and check the result in onActivityResult().
-							if(act != null) {
-								resolvable.startResolutionForResult(act, 1000);
-								Log.e(TAG, "pidePermisosGPS:resolvable.startResolutionForResult-------------------------------------");
-							}
-							else {
-								showNotifGPS();
-								Log.e(TAG, "pidePermisosGPS:showNotifGPS-------------------------------------");
-							}
-                        }
-                        catch(IntentSender.SendIntentException | ClassCastException e) {
-                            // Ignore the error.
-							Log.e(TAG, "pidePermisosGPS:e:-------------------------------------",e);
-                        }
-						break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                    	Log.e(TAG, "pidePermisosGPS: LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
-                        // Location settings are not satisfied. However, we have no way to fix the settings so we won't show the dialog.
-                        break;
-                }
-            }
-        });
-		Log.e(TAG, "pidePermisosGPS:-------------------CCC-----------------");
-	}*/
-
 
 	//______________________________________________________________________________________________
 	public String getActivityString(int detectedActivityType) {
-		Resources resources = _app.getResources();
+		Resources resources = app.getResources();
 		switch(detectedActivityType) {
 			case DetectedActivity.IN_VEHICLE:
 				return resources.getString(R.string.in_vehicle);

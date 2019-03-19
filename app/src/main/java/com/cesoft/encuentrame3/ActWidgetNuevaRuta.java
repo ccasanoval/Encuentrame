@@ -58,7 +58,7 @@ public class ActWidgetNuevaRuta extends Activity
             }
             return false;
         });
-		//_util = ((App)getApplication()).getGlobalComponent().util();
+		//util = ((App)getApplication()).getGlobalComponent().util();
 		((App)getApplication()).getGlobalComponent().inject(this);
 	}
 	@Override

@@ -19,14 +19,14 @@ import com.cesoft.encuentrame3.util.Constantes;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 {
-	private final Lugar[] _lugares;
-	private IListaItemClick _inter;
+	private final Lugar[] lugares;
+	private IListaItemClick inter;
 
 	public LugarArrayAdapter(Context context, Lugar[] lugares, IListaItemClick inter)
 	{
 		super(context, -1, lugares);
-		_lugares = lugares;
-		_inter = inter;
+		this.lugares = lugares;
+		this.inter = inter;
 	}
 
 	private class ViewHolder
@@ -55,10 +55,10 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 			holder = (ViewHolder)convertView.getTag();
 		}
 
-		holder.txtNombre.setText(_lugares[position].getNombre());
-		holder.txtFecha.setText(Lugar.DATE_FORMAT2.format(_lugares[position].getFecha()));
-		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.LUGARES, _lugares[position]));
-		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.LUGARES, _lugares[position]));
+		holder.txtNombre.setText(lugares[position].getNombre());
+		holder.txtFecha.setText(Lugar.DATE_FORMAT2.format(lugares[position].getFecha()));
+		holder.btnEditar.setOnClickListener(v -> inter.onItemEdit(Constantes.LUGARES, lugares[position]));
+		holder.btnMapa.setOnClickListener(v -> inter.onItemMap(Constantes.LUGARES, lugares[position]));
 
 		return convertView;
 	}

@@ -39,25 +39,25 @@ import java.util.Date;
 import javax.inject.Inject;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, LocationListener
 {
 	private static final String TAG = ActBuscar.class.getSimpleName();
 
-	@Inject	Util _util;
+	@Inject	Util util;
 
-	private Filtro _filtro;
-	private EditText _txtNombre;
+	private Filtro filtro;
+	private EditText txtNombre;
 
-	private EditText _txtFechaIni, _txtFechaFin;
-	private DatePickerDialog _datePickerDialogIni, _datePickerDialogFin;
+	private EditText txtFechaIni;
+	private EditText txtFechaFin;
 
+	private String[] asRadio = {"-",				 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private int[]	adRadio = { Constantes.NADA,	  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 
-	private String[] _asRadio = {"-",				 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private int[]    _adRadio = { Constantes.NADA,	  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
-
-	private GoogleMap _Map;
-	private Marker _marker;
-	private Circle _circle;
+	private GoogleMap map;
+	private Marker marker;
+	private Circle circle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -69,156 +69,161 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		if(mapFragment != null)
-		mapFragment.getMapAsync(this);
+			mapFragment.getMapAsync(this);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		FloatingActionButton fab = findViewById(R.id.fabVolver);
 		if(fab != null)
-		fab.setOnClickListener(view -> finish());
+			fab.setOnClickListener(view -> finish());
 
 		//------------------------------------------------------------------------------------------
-		_txtNombre = findViewById(R.id.txtNombre);
+		txtNombre = findViewById(R.id.txtNombre);
 
-		ArrayAdapter<String> adapter;
-		//_swtActivo = (Switch)findViewById(R.id.bActivo);_swtActivo.setChecked(true);
-		Spinner _spnActivo = findViewById(R.id.spnActivo);
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
+
+		//------------------------------------------------------------------------------------------
+		/// FECHAS
+		Calendar newCalendar = Calendar.getInstance();
+		DatePickerDialog datePickerDialogIni = new DatePickerDialog(this,
+				(view, year, monthOfYear, dayOfMonth) ->
+				{
+					Calendar newDate = Calendar.getInstance();
+					newDate.set(year, monthOfYear, dayOfMonth, 0, 0);
+					filtro.setFechaIni(newDate.getTime());
+					txtFechaIni.setText(util.formatFecha(newDate.getTime()));
+				},
+			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+		DatePickerDialog datePickerDialogFin = new DatePickerDialog(this,
+				(view, year, monthOfYear, dayOfMonth) ->
+				{
+					Calendar newDate = Calendar.getInstance();
+					newDate.set(year, monthOfYear, dayOfMonth, 23, 59);
+					filtro.setFechaFin(newDate.getTime());
+					txtFechaFin.setText(util.formatFecha(newDate.getTime()));
+				},
+			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+		txtFechaIni = findViewById(R.id.txtFechaIni);
+		txtFechaFin = findViewById(R.id.txtFechaFin);
+		ImageButton ib = findViewById(R.id.btnFechaIni);
+		if(ib != null)
+			ib.setOnClickListener(v ->
+			{
+				datePickerDialogIni.show();
+				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				//noinspection ConstantConditions
+				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			});
+		ib = findViewById(R.id.btnFechaFin);
+		if(ib != null)
+			ib.setOnClickListener(v ->
+			{
+				datePickerDialogFin.show();
+				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				//noinspection ConstantConditions
+				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			});
+
+		//------------------------------------------------------------------------------------------
+		initActivo();
+		initRadio();
+		initFiltro(datePickerDialogIni, datePickerDialogFin);
+		initLayoutActivo();
+	}
+
+	private void initActivo() {
+		Spinner spnActivo = findViewById(R.id.spnActivo);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
+				new String[]{"-", getString(R.string.activos), getString(R.string.inactivos)});
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		if(_spnActivo != null)
+		if(spnActivo != null)
 		{
-			_spnActivo.setAdapter(adapter);
-			_spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+			spnActivo.setAdapter(adapter);
+			spnActivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 			{
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 				{
 					switch(position)
 					{
-					case 1:		_filtro.setActivo(Filtro.ACTIVO);	break;
-					case 2:		_filtro.setActivo(Filtro.INACTIVO);	break;
-					default:	_filtro.setActivo(Constantes.NADA);		break;
+						case 1:		filtro.setActivo(Filtro.ACTIVO);	break;
+						case 2:		filtro.setActivo(Filtro.INACTIVO);	break;
+						default:	filtro.setActivo(Constantes.NADA);		break;
 					}
 				}
 				@Override
 				public void onNothingSelected(AdapterView<?> parent)
 				{
-					_filtro.setRadio(Constantes.NADA);
+					filtro.setRadio(Constantes.NADA);
 				}
 			});
 		}
-		//
-		Spinner _spnRadio = findViewById(R.id.spnRadio);
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
+	}
+	private void initRadio() {
+		Spinner spnRadio = findViewById(R.id.spnRadio);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, asRadio);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		if(_spnRadio != null)
+		if(spnRadio != null)
 		{
-			_spnRadio.setAdapter(adapter);
-			_spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+			spnRadio.setAdapter(adapter);
+			spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 			{
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 				{
-					_filtro.setRadio(_adRadio[position]);
+					filtro.setRadio(adRadio[position]);
 					setRadio();
 				}
 				@Override
 				public void onNothingSelected(AdapterView<?> parent)
 				{
-					_filtro.setRadio(Constantes.NADA);
+					filtro.setRadio(Constantes.NADA);
 				}
 			});
-			_spnRadio.setSelection(3);
+			spnRadio.setSelection(3);
 		}
-
-		//------------------------------------------------------------------------------------------
-		/// FECHAS
-		Calendar newCalendar = Calendar.getInstance();
-		/*Locale locale;
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-			locale = getResources().getConfiguration().getLocales().get(0);
-		else
-			locale = getResources().getConfiguration().locale;*/
-		_datePickerDialogIni = new DatePickerDialog(this,
-				(view, year, monthOfYear, dayOfMonth) ->
-				{
-					Calendar newDate = Calendar.getInstance();
-					newDate.set(year, monthOfYear, dayOfMonth, 0, 0);
-					_filtro.setFechaIni(newDate.getTime());
-					_txtFechaIni.setText(_util.formatFecha(newDate.getTime()));
-				},
-			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-
-		_datePickerDialogFin = new DatePickerDialog(this,
-				(view, year, monthOfYear, dayOfMonth) ->
-				{
-					Calendar newDate = Calendar.getInstance();
-					newDate.set(year, monthOfYear, dayOfMonth, 23, 59);
-					_filtro.setFechaFin(newDate.getTime());
-					_txtFechaFin.setText(_util.formatFecha(newDate.getTime()));
-				},
-			newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-
-		_txtFechaIni = findViewById(R.id.txtFechaIni);
-		_txtFechaFin = findViewById(R.id.txtFechaFin);
-		ImageButton ib = findViewById(R.id.btnFechaIni);
-		if(ib != null)
-		ib.setOnClickListener(v ->
-		{
-			_datePickerDialogIni.show();
-			InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-			//noinspection ConstantConditions
-			inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-			//_txtFechaIni.clearFocus();_txtFechaFin.clearFocus();
-		});
-		ib = findViewById(R.id.btnFechaFin);
-		if(ib != null)
-		ib.setOnClickListener(v ->
-		{
-			_datePickerDialogFin.show();
-			InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-			//noinspection ConstantConditions
-			inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-		});
-
-		//------------------------------------------------------------------------------------------
+	}
+	private void initFiltro(DatePickerDialog datePickerDialogIni, DatePickerDialog datePickerDialogFin) {
 		try
 		{
-			_filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
+			Spinner spnRadio = findViewById(R.id.spnRadio);
+			Spinner spnActivo = findViewById(R.id.spnActivo);
+
+			filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
 			//-----
-			_txtNombre.setText(_filtro.getNombre());
+			txtNombre.setText(filtro.getNombre());
 			//-----
-			if(_spnActivo != null)
-			switch(_filtro.getActivo())
-			{
-			case Filtro.ACTIVO:		_spnActivo.setSelection(1);break;
-			case Filtro.INACTIVO:	_spnActivo.setSelection(2);break;
-			default:				_spnActivo.setSelection(0);break;
-			}
+			if(spnActivo != null)
+				switch(filtro.getActivo())
+				{
+					case Filtro.ACTIVO:		spnActivo.setSelection(1);break;
+					case Filtro.INACTIVO:	spnActivo.setSelection(2);break;
+					default:				spnActivo.setSelection(0);break;
+				}
 			//-----
 			Calendar cal = Calendar.getInstance();
-			Date dt = _filtro.getFechaIni();
+			Date dt = filtro.getFechaIni();
 			if(dt != null)
 			{
 				cal.setTime(dt);
-				_txtFechaIni.setText(_util.formatFecha(dt));
-				_datePickerDialogIni.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+				txtFechaIni.setText(util.formatFecha(dt));
+				datePickerDialogIni.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 			}
 			//
-			dt = _filtro.getFechaFin();
+			dt = filtro.getFechaFin();
 			if(dt != null)
 			{
 				cal.setTime(dt);
-				_txtFechaFin.setText(_util.formatFecha(dt));
-				_datePickerDialogFin.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+				txtFechaFin.setText(util.formatFecha(dt));
+				datePickerDialogFin.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
 			}
 			//-----
-			for(int i=0; i < _adRadio.length; i++)
+			for(int i = 0; i < adRadio.length; i++)
 			{
-				if(_adRadio[i] == _filtro.getRadio())
+				if(adRadio[i] == filtro.getRadio() && spnRadio != null)
 				{
-					if(_spnRadio != null)
-					_spnRadio.setSelection(i);
+					spnRadio.setSelection(i);
 					break;
 				}
 			}
@@ -226,42 +231,47 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		catch(Exception e)
 		{
 			Log.e(TAG, String.format("ActBuscar:onCreate:e:%s",e));
-			_util.return2Main(this, null);
-		}
-
-		View viewActivo = findViewById(R.id.layActivo);
-		switch(_filtro.getTipo())
-		{
-		case Constantes.LUGARES:
-			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.lugares)));
-			viewActivo.setVisibility(View.GONE);
-			break;
-		case Constantes.RUTAS:
-			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.rutas)));
-			viewActivo.setVisibility(View.VISIBLE);
-			break;
-		case Constantes.AVISOS:
-			setTitle(String.format("%s %s", getString(R.string.buscar), getString(R.string.avisos)));
-			viewActivo.setVisibility(View.VISIBLE);
-			break;
+			util.return2Main(this, null);
 		}
 	}
+	private void initLayoutActivo() {
+		View viewActivo = findViewById(R.id.layActivo);
+		String patron = "%s %s";
+		switch(filtro.getTipo())
+		{
+			case Constantes.LUGARES:
+				setTitle(String.format(patron, getString(R.string.buscar), getString(R.string.lugares)));
+				viewActivo.setVisibility(View.GONE);
+				break;
+			case Constantes.RUTAS:
+				setTitle(String.format(patron, getString(R.string.buscar), getString(R.string.rutas)));
+				viewActivo.setVisibility(View.VISIBLE);
+				break;
+			case Constantes.AVISOS:
+				setTitle(String.format(patron, getString(R.string.buscar), getString(R.string.avisos)));
+				viewActivo.setVisibility(View.VISIBLE);
+				break;
+			default:break;
+		}
+	}
+
 
 	@Override
 	public void onMapReady(GoogleMap googleMap)
 	{
-		_Map = googleMap;
-		try{_Map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("onMapReady:setMyLocationEnabled:e:%s",se), se);}
-		Location loc = _util.getLocation();
+		map = googleMap;
+		try{
+			map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("onMapReady:setMyLocationEnabled:e:%s",se), se);}
+		Location loc = util.getLocation();
 		if(loc == null)return;
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
-		_Map.setOnMapClickListener(this::setPosLugar);
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));
+		map.setOnMapClickListener(this::setPosLugar);
 		setMarker();
 	}
 	//______________________________________________________________________________________________
 	private void setPosLugar(LatLng pos)
 	{
-		_filtro.setPunto(pos);
+		filtro.setPunto(pos);
 		setMarker();
 		setRadio();
 	}
@@ -269,22 +279,22 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		try
 		{
-			if(_marker != null)_marker.remove();
-			if(_filtro.getPunto() == null || (_filtro.getPunto().latitude == 0 && _filtro.getPunto().longitude == 0))return;
+			if(marker != null) marker.remove();
+			if(filtro.getPunto() == null || (filtro.getPunto().latitude == 0 && filtro.getPunto().longitude == 0))return;
 			MarkerOptions mo = new MarkerOptions()
-					.position(_filtro.getPunto())
+					.position(filtro.getPunto())
 					.title(getString(R.string.buscar));
-			_marker = _Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(_filtro.getPunto(), 15));
+			marker = map.addMarker(mo);
+			map.moveCamera(CameraUpdateFactory.newLatLngZoom(filtro.getPunto(), 15));
 		}
 		catch(Exception e){Log.e(TAG, String.format("ActBuscar:setMarker:e:%s",e), e);}
 	}
 	private void setRadio()
 	{
-		if(_circle != null)_circle.remove();
-		if(_filtro.getPunto() == null || _filtro.getRadio() < 1)return;
-		_circle = _Map.addCircle(new CircleOptions().center(_filtro.getPunto())
-				.radius(_filtro.getRadio()).strokeColor(Color.TRANSPARENT)
+		if(circle != null) circle.remove();
+		if(filtro.getPunto() == null || filtro.getRadio() < 1)return;
+		circle = map.addCircle(new CircleOptions().center(filtro.getPunto())
+				.radius(filtro.getRadio()).strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
 
@@ -293,7 +303,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		_util.setLocation(location);
+		util.setLocation(location);
 	}
 
 
@@ -304,7 +314,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_buscar, menu);
-		if(!_filtro.isOn())menu.findItem(R.id.menu_eliminar).setVisible(false);
+		if(!filtro.isOn())menu.findItem(R.id.menu_eliminar).setVisible(false);
 		return true;
 	}
 	@Override
@@ -318,16 +328,16 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	}
 	private void eliminar()
 	{
-		_filtro.turnOff();
-		_util.return2Main(this, _filtro);
+		filtro.turnOff();
+		util.return2Main(this, filtro);
 	}
 	private void buscar()
 	{
-		_filtro.setNombre(_txtNombre.getText().toString());
-		if(_filtro.isValid())
+		filtro.setNombre(txtNombre.getText().toString());
+		if(filtro.isValid())
 		{
-			_filtro.turnOn();
-			_util.return2Main(this, _filtro);
+			filtro.turnOn();
+			util.return2Main(this, filtro);
 		}
 		else
 		{

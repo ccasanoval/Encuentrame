@@ -32,6 +32,7 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 public class ActConfig extends ActConfigBase
 {
 	private static final String TAG = ActConfig.class.getSimpleName();
@@ -49,8 +50,6 @@ public class ActConfig extends ActConfigBase
 		super.onHeaderClick(header, position);
 		if(header.id == R.id.pref_logout)
 		{
-			//Util.logout();		//int pid = android.os.Process.myPid();   	//android.os.Process.killProcess(pid);
-			//Util.return2Main(ActConfig.this, true, getString(R.string.ok_guardar));
 			setResult(Activity.RESULT_OK, new Intent());
 			finish();
 		}

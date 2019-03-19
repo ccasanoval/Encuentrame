@@ -37,18 +37,18 @@ public class PreRuta extends PresenterBase
 	{
 		void moveCamara(LatLng pos);
 	}
-	public String getId(){return _o.getId();}
+	public String getId(){return o.getId();}
 
 	//----------------------------------------------------------------------------------------------
-	private Application _app;
-	private Util _util;
-	private Preferencias _pref;
+	private Application app;
+	private Util util;
+	private Preferencias pref;
 	@Inject PreRuta(Application app, Util util, Preferencias pref)
 	{
 		super(app);
-		_app = app;
-		_util = util;
-		_pref = pref;
+		this.app = app;
+		this.util = util;
+		this.pref = pref;
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -57,63 +57,61 @@ public class PreRuta extends PresenterBase
 	{
 		super.subscribe(view);
 		newListeners();
-		if(_bEstadisticas)estadisticas();
+		if(bEstadisticas)estadisticas();
 	}
 	@Override
 	public void unsubscribe()
 	{
 		super.unsubscribe();
 		delListeners();
-		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
-		if(_dlgEstadisticas != null)_dlgEstadisticas.dismiss();
-		_dlgEstadisticas = null;
+		//Como dlg tienen referencia a view, debemos destruir referencia para evitar MemoryLeak!
+		if(dlgEstadisticas != null) dlgEstadisticas.dismiss();
+		dlgEstadisticas = null;
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
 		if(isErrorEnCampos())return;
 
-		if(!_bGuardar)return;
-		_bGuardar = false;
-		_view.iniEspera();
+		if(!bGuardar)return;
+		bGuardar = false;
+		view.iniEspera();
 
 		guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			public void onDatos(String id)
 			{
-				_bGuardar = true;
-				_view.finEspera();
-				//Log.w(TAG, "guardar:---(synchronized)-----------------------------------------------------------"+data);
-				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_ruta));
+				bGuardar = true;
+				view.finEspera();
+				util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
 			}
 			@Override
 			public void onError(String err, int code)
 			{
-				_bGuardar = true;
-				_view.finEspera();
+				bGuardar = true;
+				view.finEspera();
 				Log.e(TAG, "guardar:handleFault:f:--------------------------------------------------"+err);
-				_view.toast(R.string.error_guardar, err);
+				view.toast(R.string.error_guardar, err);
 			}
 		});
 	}
 	public void guardar(Fire.CompletadoListener res)
 	{
-		_o.setNombre(_view.getTextNombre());
-		_o.setDescripcion(_view.getTextDescripcion());
-		((Ruta)_o).guardar(res);
+		o.setNombre(view.getTextNombre());
+		o.setDescripcion(view.getTextDescripcion());
+		((Ruta) o).guardar(res);
         // Start tracking
-		GeoTrackingJobService.start(_view.getAct().getApplicationContext(), _pref.getTrackingDelay());
+		GeoTrackingJobService.start(view.getAct().getApplicationContext(), pref.getTrackingDelay());
 	}
 	//----------------------------------------------------------------------------------------------
 	private boolean isErrorEnCampos()
 	{
-		if(_view.getTextNombre().isEmpty())
+		if(view.getTextNombre().isEmpty())
 		{
-			_view.toast(R.string.sin_nombre);
-			_view.requestFocusNombre();
+			view.toast(R.string.sin_nombre);
+			view.requestFocusNombre();
 			return true;
 		}
 		return false;
@@ -122,26 +120,26 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	public synchronized void eliminar()
 	{
-		_view.iniEspera();
+		view.iniEspera();
 
-		if(_o.getId().equals(_util.getTrackingRoute()))
-			_util.setTrackingRoute("");
-		((Ruta)_o).eliminar(new Fire.CompletadoListener()
+		if(o.getId().equals(util.getTrackingRoute()))
+			util.setTrackingRoute("");
+		((Ruta) o).eliminar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				_bEliminar = true;
-				_view.finEspera();
-				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_eliminar_ruta));
+				bEliminar = true;
+				view.finEspera();
+				util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				_bEliminar = true;
-				_view.finEspera();
+				bEliminar = true;
+				view.finEspera();
 				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
-				_view.toast(R.string.error_eliminar, err);
+				view.toast(R.string.error_eliminar, err);
 			}
 		});
 	}
@@ -150,27 +148,26 @@ public class PreRuta extends PresenterBase
 	public boolean startTrackingRecord()
 	{
 		if(isErrorEnCampos())return false;
-		_view.iniEspera();
+		view.iniEspera();
 		guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			public void onDatos(String id)
 			{
-				_view.finEspera();
-				_util.setTrackingRoute(_o.getId());
+				view.finEspera();
+				util.setTrackingRoute(o.getId());
 				//
-				//_servicio._restartDelayRuta();
-                GeoTrackingJobService.start(_view.getAct().getApplicationContext(), _pref.getTrackingDelay());
-				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_ruta));
+                GeoTrackingJobService.start(view.getAct().getApplicationContext(), pref.getTrackingDelay());
+				util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
 			}
 			@Override
 			public void onError(String err, int code)
 			{
-				_view.finEspera();
-				_util.setTrackingRoute("");
+				view.finEspera();
+				util.setTrackingRoute("");
 				//
 				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------------"+err);
-				_view.toast(R.string.error_guardar,err);
+				view.toast(R.string.error_guardar,err);
 			}
 		});
 		return true;
@@ -178,14 +175,13 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	public void stopTrackingRecord()
 	{
-		_util.setTrackingRoute("");
-		//_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_stop_tracking));
+		util.setTrackingRoute("");
 	}
 
 	//----------------------------------------------------------------------------------------------
 	public void estadisticas()
 	{
-		((Ruta)_o).getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
+		((Ruta) o).getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
 		{
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
@@ -212,7 +208,7 @@ public class PreRuta extends PresenterBase
 				if(aData.length > 0)
 				{
 					long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
-					sTiempo = _util.formatDiffTimes(
+					sTiempo = util.formatDiffTimes(
 							new DateTime(aData[0].getFecha().getTime()),		//Time Ini
 							new DateTime(aData[aData.length-1].getFecha()));	//Time End
 
@@ -261,41 +257,40 @@ public class PreRuta extends PresenterBase
 				else
 					sVelMax = String.format(loc, "%.1f m/s", fMaxVel);
 
-				estadisticasShow(String.format(_app.getString(R.string.estadisticas_format),
+				estadisticasShow(String.format(app.getString(R.string.estadisticas_format),
 						sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
 			}
 			@Override
 			public void onError(String err)
 			{
 				Log.e(TAG, String.format("estadisticas:onCancelled:-------------------------------:%s",err));
-				//Toast.makeText(this, "Error al obtener los puntos de la ruta", Toast.LENGTH_LONG).show();
 			}
 		});
 	}
-	private AlertDialog _dlgEstadisticas = null;
-	private boolean _bEstadisticas = false;
+	private AlertDialog dlgEstadisticas = null;
+	private boolean bEstadisticas = false;
 	private void estadisticasShow(String s)
 	{
-		_bEstadisticas = true;
-		_dlgEstadisticas = new AlertDialog.Builder(_view.getAct()).create();
-		_dlgEstadisticas.setTitle(_app.getString(R.string.estadisticas));
-		_dlgEstadisticas.setMessage(s);
-		_dlgEstadisticas.setOnDismissListener(dialog ->	_bEstadisticas = false);
-		_dlgEstadisticas.show();
+		bEstadisticas = true;
+		dlgEstadisticas = new AlertDialog.Builder(view.getAct()).create();
+		dlgEstadisticas.setTitle(app.getString(R.string.estadisticas));
+		dlgEstadisticas.setMessage(s);
+		dlgEstadisticas.setOnDismissListener(dialog ->	bEstadisticas = false);
+		dlgEstadisticas.show();
 	}
 
 
 	//----------------------------------------------------------------------------------------------
-	private Fire.DatosListener<Ruta.RutaPunto> _lisRuta;
+	private Fire.DatosListener<Ruta.RutaPunto> lisRuta;
 	private void delListeners()
 	{
-		if(_lisRuta != null)_lisRuta.setListener(null);
-		_lisRuta = null;
+		if(lisRuta != null) lisRuta.setListener(null);
+		lisRuta = null;
 	}
 	private void newListeners()
 	{
 		delListeners();
-		_lisRuta = new Fire.DatosListener<Ruta.RutaPunto>()
+		lisRuta = new Fire.DatosListener<Ruta.RutaPunto>()
 		{
 			@Override public void onDatos(Ruta.RutaPunto[] aData)
 			{
@@ -304,14 +299,15 @@ public class PreRuta extends PresenterBase
 			@Override public void onError(String err)
 			{
 				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------------"+err);
-				_view.toast(R.string.err_get_ruta_pts);
+				view.toast(R.string.err_get_ruta_pts);
 			}
 		};
 	}
 	//----------------------------------------------------------------------------------------------
 	public void showRuta()
 	{
-		Ruta.RutaPunto.getListaRep(_o.getId(), _lisRuta);
+		Log.e(TAG, "showRuta:--------------------------------------------"+o.getId());
+		Ruta.RutaPunto.getListaRep(o.getId(), lisRuta);
 	}
 	//----------------------------------------------------------------------------------------------
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
@@ -320,14 +316,14 @@ public class PreRuta extends PresenterBase
 			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- n pts = "+aPts.length);
 			return;
 		}
-		if(_view.getMap()==null) {
+		if(view.getMap()==null) {
 			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- MAP = NULL");
 			return;
 		}
-		_view.getMap().clear();
+		view.getMap().clear();
 
-		String INI = _app.getString(R.string.ini);
-		String FIN = _app.getString(R.string.fin);
+		String INI = app.getString(R.string.ini);
+		String FIN = app.getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
 
 		Ruta.RutaPunto gpAnt = null;
@@ -337,57 +333,55 @@ public class PreRuta extends PresenterBase
 		{
 			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 			MarkerOptions mo = new MarkerOptions();
-			mo.title(_o.getNombre());
+			mo.title(o.getNombre());
 
 			String snippet;
 			if(pto == gpIni)snippet = INI;
 			else if(pto == gpFin)snippet = FIN;
-			else snippet = _app.getString(R.string.info_time);
+			else snippet = app.getString(R.string.info_time);
 
 			Date date = pto.getFecha();
-			if(date != null)snippet += _util.formatFechaTiempo(date);
-			snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_prec), pto.getPrecision());
+			if(date != null)snippet += util.formatFechaTiempo(date);
+			snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_prec), pto.getPrecision());
 			if(gpAnt != null)
 			{
 				float d = pto.distanciaReal(gpAnt);
 				String sDist;
-				if(d > 3000)	sDist = String.format(Locale.ENGLISH, _app.getString(R.string.info_dist2), d/1000);
-				else			sDist = String.format(Locale.ENGLISH, _app.getString(R.string.info_dist), d);
+				if(d > 3000)	sDist = String.format(Locale.ENGLISH, app.getString(R.string.info_dist2), d/1000);
+				else			sDist = String.format(Locale.ENGLISH, app.getString(R.string.info_dist), d);
 				snippet += sDist;
-				//snippet += String.format(Locale.ENGLISH, getString(R.string.info_dist), pto.distanciaReal(gpAnt));
 			}
 			if(pto.getVelocidad() > 3)
-				snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
+				snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
 			else if(pto.getVelocidad() > 0)
-				snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_speed), pto.getVelocidad());
-			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_nor), pto.getDireccion());
-			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, _app.getString(R.string.info_alt), pto.getAltura());
-			snippet += String.format(_app.getString(R.string.info_activity), _util.getActivityString(pto.getActividad()));
+				snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_speed), pto.getVelocidad());
+			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_nor), pto.getDireccion());
+			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_alt), pto.getAltura());
+			snippet += String.format(app.getString(R.string.info_activity), util.getActivityString(pto.getActividad()));
 			mo.snippet(snippet);
 
-			if(pto == gpIni)//if(pto.equalTo(gpIni)) //getLat() == gpIni.getLat() && pto.getLon() == gpIni.getLon())//It's not possible to establish the z order for the marker...
+			if(pto == gpIni)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.rotation(45);
-				_view.getMap().addMarker(mo.position(pos));
+				view.getMap().addMarker(mo.position(pos));
 			}
-			else if(pto == gpFin)//else if(pto.equalTo(gpFin))//(pto.getLat() == gpFin.getLat() && pto.getLon() == gpFin.getLon())
+			else if(pto == gpFin)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mo.rotation(-45);
-				_view.getMap().addMarker(mo.position(pos));
+				view.getMap().addMarker(mo.position(pos));
 			}
-			//if(pto.distanciaReal(gpIni) > 5 && pto.distanciaReal(gpFin) > 5)//0.000000005 || pto.distancia2(gpFin) > 0.000000005)
 			else if(gpAnt != null && pto.distanciaReal(gpAnt) > 5)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-				_view.getMap().addMarker(mo.position(pos));
+				view.getMap().addMarker(mo.position(pos));
 			}
 			gpAnt = pto;
 			po.add(pos);
 		}
 		po.width(5).color(Color.BLUE);
-		_view.getMap().addPolyline(po);
-		((IVistaRuta)_view).moveCamara(new LatLng(gpFin.getLatitud(), gpFin.getLongitud()));
+		view.getMap().addPolyline(po);
+		((IVistaRuta) view).moveCamara(new LatLng(gpFin.getLatitud(), gpFin.getLongitud()));
 	}
 }

@@ -37,6 +37,8 @@ import javax.inject.Inject;
 
 import static android.app.Activity.RESULT_OK;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the {@link MainIterface} interface to handle interaction events.
@@ -47,16 +49,17 @@ public class FrgMain extends Fragment implements IListaItemClick
 	private static final String TAG = FrgMain.class.getSimpleName();
 	private static final String ARG_SECTION_NUMBER = "section_number";
 
-	private Filtro _filtro;
-		public Filtro getFiltro(){return _filtro;}
+	private Filtro filtro;
+		public Filtro getFiltro(){return filtro;}
 
-	@Inject	Util _util;
+	@Inject	Util util;
 
-	public int _sectionNumber = Constantes.LUGARES;//Util.NADA;
-	private View _rootView;
-	private ListView _listView;			//Lista de Lugares, Rutas, Avisos
-	private Parcelable _scroll = null;	//Recuerda posicion del scroll de la lista
-	private MainIterface _main;
+	private View rootView;
+	private ListView listView;			//Lista de Lugares, Rutas, Avisos
+	private Parcelable scroll = null;	//Recuerda posicion del scroll de la lista
+	private MainIterface main;
+	private int sectionNumber = Constantes.LUGARES;
+	public int getSectionNumber() { return sectionNumber; }
 
 	//----------------------------------------------------------------------------------------------
 	public FrgMain() {
@@ -75,36 +78,38 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		if(App.getComponent(getContext()) != null)
-		App.getComponent(getContext()).inject(this);
+			App.getComponent(getContext()).inject(this);
 
 		Bundle args = getArguments();
 		if(args != null)
-		_sectionNumber = args.getInt(ARG_SECTION_NUMBER);
-		_filtro = new Filtro(_sectionNumber);
+			sectionNumber = args.getInt(ARG_SECTION_NUMBER);
 
-		_rootView = inflater.inflate(R.layout.act_main_frag, container, false);
-		_listView = _rootView.findViewById(R.id.listView);
+		filtro = new Filtro(sectionNumber);
 
-		if(_sectionNumber < 0)
+		rootView = inflater.inflate(R.layout.act_main_frag, container, false);
+		listView = rootView.findViewById(R.id.listView);
+
+		if(sectionNumber < 0)
 		{
-			Log.e(TAG, "onCreateView:-----------------------------------------_sectionNumber="+_sectionNumber);
-			_main.gotoLogin();
+			Log.e(TAG, "onCreateView:-----------------------------------------sectionNumber="+ sectionNumber);
+			main.gotoLogin();
 			return null;
 		}
 
-		FloatingActionButton fab = _rootView.findViewById(R.id.fabNuevo);
+		FloatingActionButton fab = rootView.findViewById(R.id.fabNuevo);
 		fab.setOnClickListener(view ->
 		{
-			switch(_sectionNumber)
+			switch(sectionNumber)
 			{
-				case Constantes.LUGARES:	_main.onLugar();	break;
-				case Constantes.RUTAS:		_main.onRuta();		break;
-				case Constantes.AVISOS:		_main.onAviso();	break;
+				case Constantes.LUGARES:	main.onLugar();	break;
+				case Constantes.RUTAS:		main.onRuta();	break;
+				case Constantes.AVISOS:		main.onAviso();	break;
+				default:break;
 			}
 		});
 
-		TextView textView = new TextView(_rootView.getContext());
-		switch(_sectionNumber)
+		TextView textView = new TextView(rootView.getContext());
+		switch(sectionNumber)
 		{
 			case Constantes.LUGARES:
 				textView.setText(getString(R.string.lugares));
@@ -115,18 +120,19 @@ public class FrgMain extends Fragment implements IListaItemClick
 			case Constantes.AVISOS:
 				textView.setText(getString(R.string.avisos));
 				break;
+			default:break;
 		}
-		_listView.addHeaderView(textView);
+		listView.addHeaderView(textView);
 
-		return _rootView;
+		return rootView;
 	}
 	@Override
 	public void onDestroyView()
 	{
 		super.onDestroyView();
-		((ViewGroup)_rootView.getParent()).removeView(_rootView);
-		_rootView = null;
-		_listView = null;
+		((ViewGroup) rootView.getParent()).removeView(rootView);
+		rootView = null;
+		listView = null;
 	}
 
 	//______________________________________________________________________________________________
@@ -136,18 +142,19 @@ public class FrgMain extends Fragment implements IListaItemClick
 		super.onStart();
 		newListeners();
 
-		switch(_sectionNumber)
+		switch(sectionNumber)
 		{
 			case Constantes.LUGARES:refreshLugares();	break;
 			case Constantes.RUTAS:	refreshRutas();		break;
 			case Constantes.AVISOS:	refreshAvisos();	break;
+			default:break;
 		}
 
 		/// Actualizar lista de rutas
-		if(_sectionNumber == Constantes.RUTAS)
+		if(sectionNumber == Constantes.RUTAS)
 		{
-			Util.setRefreshCallback(this);
-			_MessageReceiver = new BroadcastReceiver() {
+			util.setRefreshCallback(this);
+			messageReceiver = new BroadcastReceiver() {
 				@Override public void onReceive(Context context, Intent intent) {
 					refreshRutas();
 				}
@@ -159,9 +166,9 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onStop()
 	{
 		super.onStop();
-		_MessageReceiver = null;
-		if(_sectionNumber == Constantes.RUTAS)
-			Util.setRefreshCallback(null);
+		messageReceiver = null;
+		if(sectionNumber == Constantes.RUTAS)
+			util.setRefreshCallback(null);
 		delListeners();
 	}
 	//______________________________________________________________________________________________
@@ -169,12 +176,12 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onResume()
 	{
 		super.onResume();
-		if(_sectionNumber == Constantes.RUTAS)
+		if(sectionNumber == Constantes.RUTAS)
 		{
 			if(getContext() != null)
 				LocalBroadcastManager
 						.getInstance(getContext())
-						.registerReceiver(_MessageReceiver, new IntentFilter(RUTA_REFRESH));
+						.registerReceiver(messageReceiver, new IntentFilter(RUTA_REFRESH));
 			refreshRutas();
 		}
 	}
@@ -182,9 +189,9 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onPause()
 	{
 		super.onPause();
-		_scroll = _listView.onSaveInstanceState();
-		if(_sectionNumber == Constantes.RUTAS && getContext() != null)
-			LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(_MessageReceiver);
+		scroll = listView.onSaveInstanceState();
+		if(sectionNumber == Constantes.RUTAS && getContext() != null)
+			LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(messageReceiver);
 	}
 
 
@@ -213,7 +220,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		super.onAttach(context);
 		if(context instanceof MainIterface) {
-			_main = (MainIterface)context;
+			main = (MainIterface)context;
 		}
 		else {
 			throw new RuntimeException(context.toString() + " must implement MainIterface");
@@ -223,7 +230,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onDetach()
 	{
 		super.onDetach();
-		_main = null;
+		main = null;
 	}
 
 
@@ -234,9 +241,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		switch(tipo)
 		{
-			case Constantes.LUGARES:_main.goLugar(obj);	break;
-			case Constantes.AVISOS:	_main.goAviso(obj);	break;
-			case Constantes.RUTAS:	_main.goRuta(obj);	break;
+			case Constantes.LUGARES:main.goLugar(obj);	break;
+			case Constantes.AVISOS:	main.goAviso(obj);	break;
+			case Constantes.RUTAS:	main.goRuta(obj);	break;
+			default:break;
 		}
 	}
 	@Override
@@ -244,18 +252,19 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		switch(tipo)
 		{
-			case Constantes.LUGARES:_main.goLugarMap(obj);	break;
-			case Constantes.AVISOS:	_main.goAvisoMap(obj);	break;
-			case Constantes.RUTAS:	_main.goRutaMap(obj);	break;
+			case Constantes.LUGARES:main.goLugarMap(obj);	break;
+			case Constantes.AVISOS:	main.goAvisoMap(obj);	break;
+			case Constantes.RUTAS:	main.goRutaMap(obj);	break;
+			default:break;
 		}
 	}
 	public void buscar()
 	{
-		_main.buscar(this);
+		main.buscar(this);
 	}
 
 		// 4 IListaItemClick
-	private BroadcastReceiver _MessageReceiver;
+	private BroadcastReceiver messageReceiver;
 	private static final String RUTA_REFRESH = "ces";
 
 	public void onRefreshListaRutas() {
@@ -265,21 +274,21 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 
 	//______________________________________________________________________________________________
-	private Fire.DatosListener<Lugar> _lisLugar;
-	private Fire.DatosListener<Aviso> _lisAviso;
-	private Fire.DatosListener<Ruta> _lisRuta;
+	private Fire.DatosListener<Lugar> lisLugar;
+	private Fire.DatosListener<Aviso> lisAviso;
+	private Fire.DatosListener<Ruta> lisRuta;
 	//----------------------------------------------------------------------------------------------
 	private void delListeners()
 	{
-		if(_lisLugar!=null)_lisLugar.setListener(null);
-		if(_lisAviso!=null)_lisAviso.setListener(null);
-		if(_lisRuta!=null)_lisRuta.setListener(null);
+		if(lisLugar !=null) lisLugar.setListener(null);
+		if(lisAviso !=null) lisAviso.setListener(null);
+		if(lisRuta !=null) lisRuta.setListener(null);
 	}
 	private void newListeners()
 	{
 		delListeners();
 		//--- LUGARES
-		_lisLugar = new Fire.DatosListener<Lugar>()
+		lisLugar = new Fire.DatosListener<Lugar>()
 		{
 			@Override
 			public void onDatos(Lugar[] aLugares)
@@ -289,18 +298,18 @@ public class FrgMain extends Fragment implements IListaItemClick
 				{
 					try
 					{
-						if(_main.getCurrentItem() == Constantes.LUGARES)
+						if(main.getCurrentItem() == Constantes.LUGARES)
 							try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 							catch(Exception e){Log.e(TAG, String.format("LUGARES:handleResponse:e:%s",e),e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
 					}
 					catch(Exception e){Log.e(TAG, String.format("_acLugar:%s",e), e);}
 				}
-				if(_listView != null && _rootView != null)
+				if(listView != null && rootView != null)
 				{
-					_scroll = _listView.onSaveInstanceState();
-					_listView.setAdapter(new LugarArrayAdapter(_rootView.getContext(), aLugares, FrgMain.this));
-					_listView.setContentDescription(getString(R.string.lugares));//Para Espresso
-					_listView.onRestoreInstanceState(_scroll);
+					scroll = listView.onSaveInstanceState();
+					listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), aLugares, FrgMain.this));
+					listView.setContentDescription(getString(R.string.lugares));//Para Espresso
+					listView.onRestoreInstanceState(scroll);
 				}
 			}
 			@Override
@@ -310,7 +319,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			}
 		};
 		//--- RUTAS
-		_lisRuta = new Fire.DatosListener<Ruta>()
+		lisRuta = new Fire.DatosListener<Ruta>()
 		{
 			@Override
 			public void onDatos(Ruta[] aRutas)
@@ -320,20 +329,19 @@ public class FrgMain extends Fragment implements IListaItemClick
 				{
 					try
 					{
-						if(_main.getCurrentItem() == Constantes.RUTAS)
+						if(main.getCurrentItem() == Constantes.RUTAS)
 							try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 							catch(Exception e){Log.e(TAG, "RUTAS:handleResponse:e:----------------------", e);}
 					}catch(Exception e){Log.e(TAG, "_acRuta:e:------------------------------------------", e);}
 				}
-				if(_rootView != null)
+				if(rootView != null)
 				{
-					_scroll = _listView.onSaveInstanceState();
-					RutaArrayAdapter r = new RutaArrayAdapter(_rootView.getContext(), aRutas, FrgMain.this);
-					_listView.setAdapter(r);
-					_listView.setContentDescription(getString(R.string.rutas));//Para Espresso
+					scroll = listView.onSaveInstanceState();
+					RutaArrayAdapter r = new RutaArrayAdapter(rootView.getContext(), aRutas, FrgMain.this);
+					listView.setAdapter(r);
+					listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
-                    //Log.e(TAG, "newListeners:_lisRuta---B----"+_sectionNumber+":"+_scroll);
-                    _listView.onRestoreInstanceState(_scroll);
+                    listView.onRestoreInstanceState(scroll);
 				}
 			}
 			@Override public void onError(String err) {
@@ -341,7 +349,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			}
 		};
 		//--- AVISO
-		_lisAviso = new Fire.DatosListener<Aviso>()
+		lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override
 			public void onDatos(Aviso[] aAvisos)
@@ -349,16 +357,16 @@ public class FrgMain extends Fragment implements IListaItemClick
 				long n = aAvisos.length;
 				if(n < 1)
 				{
-					if(_main.getCurrentItem() == Constantes.AVISOS)//if(_sectionNumber == Util.AVISOS)
+					if(main.getCurrentItem() == Constantes.AVISOS)
 						try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
 						catch(Exception e){Log.e(TAG, String.format("AVISOS:handleResponse:e:%s",e), e);}
 				}
-				if(_listView != null && _rootView != null)
+				if(listView != null && rootView != null)
 				{
-					_scroll = _listView.onSaveInstanceState();
-					_listView.setAdapter(new AvisoArrayAdapter(_rootView.getContext(), aAvisos, FrgMain.this));
-					_listView.setContentDescription(getString(R.string.avisos));//Para Espresso
-					_listView.onRestoreInstanceState(_scroll);
+					scroll = listView.onSaveInstanceState();
+					listView.setAdapter(new AvisoArrayAdapter(rootView.getContext(), aAvisos, FrgMain.this));
+					listView.setContentDescription(getString(R.string.avisos));//Para Espresso
+					listView.onRestoreInstanceState(scroll);
 				}
 			}
 			@Override public void onError(String err) { Log.e(TAG, "AVISOS2:GET:e:------------------"+err); }
@@ -368,53 +376,53 @@ public class FrgMain extends Fragment implements IListaItemClick
 	//______________________________________________________________________________________________
 	public void refreshLugares()
 	{
-		if(_filtro == null)
+		if(filtro == null)
 		{
-			Log.e(TAG, "refreshLugares:------------------------- FILTRO = NULL   "+_sectionNumber);
-			_filtro = new Filtro(_sectionNumber);
+			Log.e(TAG, "refreshLugares:------------------------- FILTRO = NULL   "+ sectionNumber);
+			filtro = new Filtro(sectionNumber);
 		}
-		if(_filtro.isOn())
+		if(filtro.isOn())
 		{
 			checkFechas();
-			Lugar.getLista(_lisLugar, _filtro);
+			Lugar.getLista(lisLugar, filtro);
 		}
 		else
-			Lugar.getLista(_lisLugar);
+			Lugar.getLista(lisLugar);
 	}
 
 	//__________________________________________________________________________________________
 	public void refreshRutas()
 	{
-		if(_filtro.isOn())
+		if(filtro.isOn())
 		{
 			checkFechas();
-			Ruta.getLista(_lisRuta, _filtro, _util.getTrackingRoute());
+			Ruta.getLista(lisRuta, filtro, util.getTrackingRoute());
 		}
 		else
-			Ruta.getLista(_lisRuta);
+			Ruta.getLista(lisRuta);
 	}
 
 	//__________________________________________________________________________________________
 	public void refreshAvisos()
 	{
-		if(_filtro.isOn())
+		if(filtro.isOn())
 		{
 			checkFechas();
-			Aviso.getLista(_lisAviso, _filtro);
+			Aviso.getLista(lisAviso, filtro);
 		}
 		else
-			Aviso.getLista(_lisAviso);
+			Aviso.getLista(lisAviso);
 	}
 
 	//__________________________________________________________________________________________
 	private void checkFechas()
 	{
-		Date ini = _filtro.getFechaIni();
-		Date fin = _filtro.getFechaFin();
+		Date ini = filtro.getFechaIni();
+		Date fin = filtro.getFechaFin();
 		if(ini!=null && fin!=null && ini.getTime() > fin.getTime())
 		{
-			_filtro.setFechaIni(fin);
-			_filtro.setFechaFin(ini);
+			filtro.setFechaIni(fin);
+			filtro.setFechaFin(ini);
 		}
 	}
 
@@ -436,22 +444,23 @@ public class FrgMain extends Fragment implements IListaItemClick
 			}
 			catch(Exception e){Log.e(TAG, "onActivityResult:e:--------------------------------------",e);}
 			if( ! data.getBooleanExtra(DIRTY, true))return;
-			Filtro filtro = data.getParcelableExtra(Filtro.FILTRO);
+			Filtro filtro0 = data.getParcelableExtra(Filtro.FILTRO);
 
 			if(filtro != null && filtro.getTipo() != Constantes.NADA)
 			{
-				_filtro = filtro;
+				this.filtro = filtro0;
 				if( ! filtro.isOn())
 					Toast.makeText(getContext(), getString(R.string.sin_filtro), Toast.LENGTH_SHORT).show();
 			}
 		}
 
-		if(requestCode == Constantes.BUSCAR)requestCode = _filtro.getTipo();
+		if(requestCode == Constantes.BUSCAR && filtro != null)requestCode = filtro.getTipo();
 		switch(requestCode)
 		{
 			case Constantes.LUGARES:refreshLugares(); break;
 			case Constantes.RUTAS:	refreshRutas(); break;
 			case Constantes.AVISOS:	refreshAvisos(); break;
+			default:break;
 		}
 	}
 

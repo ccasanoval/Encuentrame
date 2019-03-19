@@ -40,30 +40,30 @@ public class ActMaps
 {
 	private static final String TAG = ActMaps.class.getSimpleName();
 
-	private Marker _marker;
-	private Circle _circle;
+	private Marker marker;
+	private Circle circle;
 
-	@Inject Util _util;
-	@Inject PreMaps _presenter;
+	@Inject Util util;
+	@Inject PreMaps presenter;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		((App)getApplication()).getGlobalComponent().inject(this);
-		super.ini(_presenter, _util, new Lugar(), R.layout.act_maps);
+		super.ini(presenter, util, new Lugar(), R.layout.act_maps);
 		super.onCreate(savedInstanceState);
 
 		FloatingActionButton fabGuardar = findViewById(R.id.btnGuardar);
-		if( ! _presenter.isAviso() && ! _presenter.isLugar())
+		if( ! presenter.isAviso() && ! presenter.isLugar())
 			fabGuardar.hide();
-		fabGuardar.setOnClickListener(view -> _presenter.guardar());
+		fabGuardar.setOnClickListener(view -> presenter.guardar());
 	}
 
 	//----------------------------------------------------------------------------------------------
 	@Override public void animateCamera()
 	{
-		_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
+		map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -71,12 +71,12 @@ public class ActMaps
 	// If Google Play services is not installed on the device, the user will be prompted to install it inside the SupportMapFragment.
 	// This method will only be triggered once the user has installed Google Play services and returned to the app.
 	@Override
-	public void onMapReady(GoogleMap Map)
+	public void onMapReady(GoogleMap map)
 	{
-		super.onMapReady(Map);
+		super.onMapReady(map);
 
 		//MARCADOR MULTILINEA --------------------------------------------
-		_Map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
+		this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
 		{
 			@Override public View getInfoWindow(Marker arg0){return null;}
 			@Override public View getInfoContents(Marker marker)
@@ -100,9 +100,9 @@ public class ActMaps
 			}
 		});
 
-		_Map.setOnMapClickListener(latLng -> _presenter.setPosicion(latLng.latitude, latLng.longitude));
+		this.map.setOnMapClickListener(latLng -> presenter.setPosicion(latLng.latitude, latLng.longitude));
 
-		_presenter.dibujar();
+		presenter.dibujar();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -110,24 +110,24 @@ public class ActMaps
 	{
 		try
 		{
-			if(_marker != null)_marker.remove();
-			_Map.clear();
+			if(marker != null) marker.remove();
+			map.clear();
 			MarkerOptions mo = new MarkerOptions()
 					.position(pos)
 					.title(sTitulo)
 					.snippet(sDescripcion);
-			_marker = _Map.addMarker(mo);
-			_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-			_Map.animateCamera(CameraUpdateFactory.zoomTo(_fMapZoom));
+			marker = map.addMarker(mo);
+			map.moveCamera(CameraUpdateFactory.newLatLng(pos));
+			map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
 		}
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
 	@Override public void setMarkerRadius(LatLng pos)
 	{
-		if(_circle != null)_circle.remove();
-		_circle = _Map.addCircle(new CircleOptions()
+		if(circle != null) circle.remove();
+		circle = map.addCircle(new CircleOptions()
 				.center(pos)
-				.radius(_presenter.getRadioAviso())
+				.radius(presenter.getRadioAviso())
 				.strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE
 	}
@@ -180,8 +180,8 @@ public class ActMaps
 				.icon(getNextIcon())
 				.title(l.getNombre())
 				.snippet(l.getDescripcion());
-		_marker = _Map.addMarker(mo);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
+		marker = map.addMarker(mo);
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, mapZoom));
 	}
 	//----------------------------------------------------------------------------------------------
 	public void showAviso(Aviso a)
@@ -192,9 +192,9 @@ public class ActMaps
 				.icon(getNextIcon())
 				.title(a.getNombre())
 				.snippet(a.getDescripcion());
-		_marker = _Map.addMarker(mo);
-		_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, _fMapZoom));
-		_circle = _Map.addCircle(new CircleOptions()
+		marker = map.addMarker(mo);
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, mapZoom));
+		circle = map.addCircle(new CircleOptions()
 				.center(pos)
 				.radius(a.getRadio())
 				.strokeColor(Color.TRANSPARENT)
@@ -232,30 +232,30 @@ public class ActMaps
 				LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 				if(pto == gpIni)
 				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, _util.formatFechaTiempo(date)));
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, util.formatFechaTiempo(date)));
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 					mo.rotation(45);
-					_Map.addMarker(mo.position(pos));
+					map.addMarker(mo.position(pos));
 				}
 				else if(pto == gpFin)
 				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, _util.formatFechaTiempo(date), sDist));
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, util.formatFechaTiempo(date), sDist));
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mo.rotation(-45);
-					_Map.addMarker(mo.position(pos));
+					map.addMarker(mo.position(pos));
 				}
 				else
 				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), _util.formatFechaTiempo(date), sDist));
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), util.formatFechaTiempo(date), sDist));
 					mo.icon(bm);
-					_Map.addMarker(mo.position(pos));
+					map.addMarker(mo.position(pos));
 				}
 				po.add(pos);
 			}
 
 			po.width(5).color(_iColor);
-			_Map.addPolyline(po);//Polyline line =
-			_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), _fMapZoom));
+			map.addPolyline(po);//Polyline line =
+			map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), mapZoom));
 		}
 		catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
 	}

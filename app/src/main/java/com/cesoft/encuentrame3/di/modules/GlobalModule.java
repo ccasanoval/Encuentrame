@@ -20,43 +20,37 @@ import dagger.Provides;
 @Module
 public class GlobalModule
 {
-	private final Application _app;
+	private final Application app;
 
-	public GlobalModule(Application application) { _app = application; }
+	public GlobalModule(Application application) { app = application; }
 
 	@Singleton
 	@Provides
-	Application provideApplication() { return _app; }
+	Application provideApplication() { return app; }
 
 	@Singleton
 	@Provides
 	SharedPreferences providePreferenceManager() {
-		return PreferenceManager.getDefaultSharedPreferences(_app);
+		return PreferenceManager.getDefaultSharedPreferences(app);
 	}
 
 	@Singleton
 	@Provides
 	LocationManager provideLocationManager() {
-		return (LocationManager)_app.getSystemService(Context.LOCATION_SERVICE);
+		return (LocationManager)app.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	@Singleton
 	@Provides
 	NotificationManager provideNotificationManager() {
-		return (NotificationManager)_app.getSystemService(Context.NOTIFICATION_SERVICE);
+		return (NotificationManager)app.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	@Singleton
 	@Provides
 	PowerManager providePowerManager() {
-		return (PowerManager)_app.getSystemService(Context.POWER_SERVICE);
+		return (PowerManager)app.getSystemService(Context.POWER_SERVICE);
 	}
-
-	/*@Singleton
-	@Provides
-	ConnectivityManager provideConnectivityManager() {
-	return (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
-	}*/
 
 	@Singleton
 	@Provides

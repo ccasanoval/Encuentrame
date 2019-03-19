@@ -26,17 +26,17 @@ import javax.inject.Inject;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 {
-	private final Ruta[] _rutas;
-	private IListaItemClick _inter;
+	private final Ruta[] rutas;
+	private IListaItemClick inter;
 
-	@Inject	Util _util;
+	@Inject	Util util;
 
 	public RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
 	{
 		super(context, -1, rutas);
-		_rutas = rutas;
-		_inter = inter;
-		_util = App.getComponent(getContext()).util();
+		this.rutas = rutas;
+		this.inter = inter;
+		util = App.getComponent(getContext()).util();
 	}
 
 
@@ -65,12 +65,12 @@ public class RutaArrayAdapter extends ArrayAdapter<Ruta>
 		{
 			holder = (ViewHolder)convertView.getTag();
 		}
-		holder.txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", _rutas[position].getNombre(), _rutas[position].getPuntosCount()));
-		holder.txtFecha.setText(Ruta.DATE_FORMAT2.format(_rutas[position].getFecha()));
-		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.RUTAS, _rutas[position]));
-		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.RUTAS, _rutas[position]));
+		holder.txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", rutas[position].getNombre(), rutas[position].getPuntosCount()));
+		holder.txtFecha.setText(Ruta.DATE_FORMAT2.format(rutas[position].getFecha()));
+		holder.btnEditar.setOnClickListener(v -> inter.onItemEdit(Constantes.RUTAS, rutas[position]));
+		holder.btnMapa.setOnClickListener(v -> inter.onItemMap(Constantes.RUTAS, rutas[position]));
 		// Si la ruta se está grabando, resaltar
-		if(_rutas[position].getId() != null && _rutas[position].getId().equals(_util.getTrackingRoute()))
+		if(rutas[position].getId() != null && rutas[position].getId().equals(util.getTrackingRoute()))
 		{
 			holder.txtNombre.setTextColor(Color.RED);
 			convertView.setBackgroundColor(Color.YELLOW);

@@ -38,45 +38,34 @@ public class Aviso extends Objeto
 	private static GeoFire newGeoFire() {
 		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
 	}
-	@Exclude private DatabaseReference _datos;
+	@Exclude private DatabaseReference datos;
 
+	//
 	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
+	//
 
 	//______________________________________________________________________________________________
-	private final static String ACTIVO = "activo";
-	protected boolean activo = true;
-		public boolean isActivo(){return activo;}
-		public void setActivo(boolean v){activo=v;}
+	private static final String ACTIVO = "activo";
+	private boolean isActivo = true;
+		public boolean isActivo(){return isActivo;}
+		public void setActivo(boolean v){isActivo=v;}
 
-	private double radio;//TODO: quiza aumentar radio (transparente para user) para que google pille antes la geofence ¿COMO MEJORAR GOOGLE GEOFENCE? Probar backendless geofences?????
+	private double radio;
 		public double getRadio(){return radio;}
 		public void setRadio(double v){if(v >= 0 && v < 10000)radio=v;}
 
-	//TODO: Desactivar por hoy, tambien desactivar todos los avisos... incluso: modo avion para app completa
-	/*protected Date fechaActivo;
-		public void desactivarPorHoy()
-		{
-			fechaActivo = Calendar.getInstance().getTime();
-			//Backendless.Persistence.save(this, ac);
-		}
-		public void reactivarPorHoy()
-		{
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.DATE, -2);
-			fechaActivo = cal.getTime();
-			//Backendless.Persistence.save(this, ac);
-		}*/
-
 	//______________________________________________________________________________________________
 	public Aviso() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
+	@NonNull
 	@Override public String toString()
 	{
-		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s', latitud='%f', longitud='%f', radio='%f', activo='%b'}",
-				getId(), nombre, descripcion, DATE_FORMAT.format(fecha), latitud, longitud, radio, activo);
+		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s', latitud='%f', longitud='%f', radio='%f', isActivo='%b'}",
+				getId(), nombre, descripcion, DATE_FORMAT.format(fecha), latitud, longitud, radio, isActivo);
 	}
 
 	//______________________________________________________________________________________________
-	@Override public boolean equals(Object o)
+	@Override
+	public boolean equals(Object o)
 	{
 		if(this == o)return true;
 		if(!(o instanceof Aviso))return false;
@@ -84,6 +73,10 @@ public class Aviso extends Objeto
 		return getId().equals(a.getId())
 			&& getLatitud() == a.getLatitud() && getLongitud() == a.getLongitud() && getRadio() == a.getRadio()
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
+	}
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 	//// PARCELABLE
@@ -93,8 +86,6 @@ public class Aviso extends Objeto
 		super(in);
 		//
 		setActivo(in.readByte() > 0);
-		//setId(in.readString());
-		//setLatLon(in.readDouble(), in.readDouble());
 		setRadio(in.readDouble());
 	}
 	@Override
@@ -103,12 +94,8 @@ public class Aviso extends Objeto
 		super.writeToParcel(dest, flags);
 		//
 		dest.writeByte(isActivo()?(byte)1:0);
-		//dest.writeString(getId());
-		//dest.writeDouble(getLatitud());
-		//dest.writeDouble(getLongitud());
 		dest.writeDouble(getRadio());
 	}
-	//@Override public int describeContents(){return 0;}
 	public static final Creator<Aviso> CREATOR = new Creator<Aviso>()
 	{
 		@Override public Aviso createFromParcel(Parcel in){return new Aviso(in);}
@@ -120,35 +107,35 @@ public class Aviso extends Objeto
 	//
 	public void eliminar(Fire.CompletadoListener listener)//DatabaseReference.CompletionListener listener)
 	{
-		if(_datos != null)
+		if(datos != null)
 		{
-			_datos.setValue(null, listener);
+			datos.setValue(null, listener);
 		}
 		else if(getId() != null)
 		{
-			_datos = newFirebase().child(getId());
-			_datos.setValue(null, listener);
+			datos = newFirebase().child(getId());
+			datos.setValue(null, listener);
 		}
 		delGeo();
 	}
 	public void guardar(Fire.CompletadoListener listener)//DatabaseReference.CompletionListener listener)
 	{
-		if(_datos != null)
+		if(datos != null)
 		{
-			_datos.setValue(this, listener);
+			datos.setValue(this, listener);
 		}
 		else
 		{
 			if(getId() != null)
 			{
-				_datos = newFirebase().child(getId());
+				datos = newFirebase().child(getId());
 			}
 			else
 			{
-				_datos = newFirebase().push();
-				setId(_datos.getKey());
+				datos = newFirebase().push();
+				setId(datos.getKey());
 			}
-			_datos.setValue(this, listener);
+			datos.setValue(this, listener);
 		}
 		saveGeo();
 	}
@@ -178,17 +165,14 @@ public class Aviso extends Objeto
 			Log.e(TAG, "getActivos:e:-------------------------------------------------------------- LISTENER == NULL");
 			return;
 		}
-		Query queryRef = newFirebase().orderByChild(ACTIVO).equalTo(true);	//Query queryRef = ref.equalTo(true, ACTIVO);//NO PIRULA
-		//queryRef.addListenerForSingleValueEvent(listener);
+		Query queryRef = newFirebase().orderByChild(ACTIVO).equalTo(true);	//Query queryRef = ref.equalTo(true, ACTIVO);//Doesn't work...
 		ValueEventListener vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(DataSnapshot data)
 			{
-				//Aviso[] aAvisos = new Aviso[(int)data.getChildrenCount()];
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)data.getChildrenCount());
 				for(DataSnapshot o : data.getChildren()) {
-					//aAvisos[i++] = l.getValue(Aviso.class);
 					aAvisos.add(o.getValue(Aviso.class));
 				}
 				listener.onDatos(reverse(aAvisos));
@@ -200,16 +184,13 @@ public class Aviso extends Objeto
 			}
 		};
 		listener.setRef(queryRef.getRef());
-		//listener.delListener();
 		listener.setListener(vel);
     	queryRef.addValueEventListener(vel);
 	}
 	public static void getLista(final Fire.DatosListener<Aviso> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
-		ValueEventListener vel;//= listener.getListener();
-		//if(vel != null)ddbb.removeEventListener(vel);
-		vel = new ValueEventListener()
+		ValueEventListener vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(@NonNull DataSnapshot data)
@@ -228,9 +209,8 @@ public class Aviso extends Objeto
 			}
 		};
 		listener.setRef(ddbb);
-		//listener.delListener();
 		listener.setListener(vel);
-		ddbb.addValueEventListener(vel);//.addListenerForSingleValueEvent
+		ddbb.addValueEventListener(vel);
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -250,9 +230,7 @@ public class Aviso extends Objeto
 	private static void buscarPorFiltro(final Fire.DatosListener<Aviso> listener, final Filtro filtro)
 	{
 		DatabaseReference ddbb = newFirebase();
-		ValueEventListener vel;// = listener.getListener();
-		//if(vel != null)ddbb.removeEventListener(vel);
-		vel = new ValueEventListener()//AJAX
+		ValueEventListener vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(@NonNull DataSnapshot data)
@@ -275,9 +253,8 @@ public class Aviso extends Objeto
 			}
 		};
 		listener.setRef(ddbb);
-		//listener.delListener();
 		listener.setListener(vel);
-		ddbb.addValueEventListener(vel);//.addListenerForSingleValueEvent
+		ddbb.addValueEventListener(vel);
 	}
 	//----
 	private static void buscarPorGeoFiltro(final Fire.SimpleListener<Aviso> listener, final Filtro filtro)
@@ -294,8 +271,7 @@ public class Aviso extends Objeto
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				nCount++;
-				//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
-				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
+				newFirebase().child(key).addValueEventListener(new ValueEventListener()
 				{
 					@Override
 					public void onDataChange(@NonNull DataSnapshot data)
@@ -320,7 +296,7 @@ public class Aviso extends Objeto
 			@Override
 			public void onGeoQueryReady()
 			{
-				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
+				geoQuery.removeGeoQueryEventListener(this);
 			}
 
 			@Override public void onGeoQueryError(DatabaseError err){Log.e(TAG, "buscarPorGeoFiltro:onGeoQueryError:"+err);}
@@ -334,38 +310,38 @@ public class Aviso extends Objeto
 
 	//----------------------------------------------------------------------------------------------
 	// GEOFIRE
-	private GeoFire _datGeo;
+	private GeoFire datGeo;
 	private void saveGeo()
 	{
-		if(_datos.getKey() == null)
+		if(datos.getKey() == null)
 		{
 			Log.e(TAG, "saveGeo:id==null");
 			return;
 		}
-		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
+		if(datGeo == null) datGeo = newGeoFire();
+		datGeo.setLocation(datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
 		{
 			if(error != null)
-				Log.e(TAG, "saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+				Log.e(TAG, "saveGeo:There was an error saving the location to GeoFire: "+error+" : "+key+" : "+ datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
 			else
 				Log.w(TAG, "saveGeo:Location saved on server successfully!");
 		});
 	}
 	private void delGeo()
 	{
-		if(_datos.getKey() == null)
+		if(datos.getKey() == null)
 		{
 			Log.e(TAG, "delGeo:id==null");
 			return;
 		}
-		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.removeLocation(_datos.getKey());
+		if(datGeo == null) datGeo = newGeoFire();
+		datGeo.removeLocation(datos.getKey());
 	}
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------
 
 	private static Aviso[] reverse(ArrayList<Aviso> aAvisos) {
 		Collections.reverse(aAvisos);
-		return aAvisos.toArray(new Aviso[aAvisos.size()]);
+		return aAvisos.toArray(new Aviso[0]);
 	}
 }

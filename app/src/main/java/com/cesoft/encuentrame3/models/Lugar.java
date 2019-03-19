@@ -48,20 +48,20 @@ import com.cesoft.encuentrame3.util.Log;
 public class Lugar extends Objeto
 {
 	private static final String TAG = Lugar.class.getSimpleName();
-	public static final String NOMBRE = "lugar";//TODO: transaccion, si no guarda en firebase, no guardar en geofire
+	public static final String NOMBRE = "lugar";
 	private static DatabaseReference newFirebase() {
 		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
 	}
 	private static GeoFire newGeoFire() {
 		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
 	}
-	@Exclude private DatabaseReference _datos;
-
-	//TODO: ADD	Altitud, velocidad, bearing ...
+	@Exclude private DatabaseReference datos;
 
 	//______________________________________________________________________________________________
 	public Lugar() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
-	@Override public String toString()
+	@NonNull
+	@Override
+	public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
@@ -71,38 +71,38 @@ public class Lugar extends Objeto
 	//______________________________________________________________________________________________
 	public void eliminar(Fire.CompletadoListener listener)
 	{
-		if(_datos != null)
+		if(datos != null)
 		{
-			_datos.setValue(null, listener);
+			datos.setValue(null, listener);
 		}
 		else if(getId() != null)
 		{
-			_datos = newFirebase().child(getId());
-			_datos.setValue(null, listener);
+			datos = newFirebase().child(getId());
+			datos.setValue(null, listener);
 		}
 		delGeo();
 		delImg();
 	}
 	public void guardar(Fire.CompletadoListener listener)
 	{
-		if(_datos != null)
+		if(datos != null)
 		{
-			_datos.setValue(this, listener);
+			datos.setValue(this, listener);
 		}
 		else
 		{
 			if(getId() != null)
 			{
-				_datos = newFirebase().child(getId());
+				datos = newFirebase().child(getId());
 			}
 			else
 			{
-				_datos = newFirebase().push();
-				setId(_datos.getKey());
+				datos = newFirebase().push();
+				setId(datos.getKey());
 			}
-			_datos.setValue(this, listener);
+			datos.setValue(this, listener);
 		}
-		saveGeo();//TODO: transaccion fire->geo mediante listener... o _datos.runTransaction???
+		saveGeo();
 	}
 
 	//______________________________________________________________________________________________
@@ -186,7 +186,6 @@ public class Lugar extends Objeto
 	private static void buscarPorGeoFiltro(final Fire.SimpleListener<Lugar> listener, final Filtro filtro)
 	{
 		GeoFire geoFire = newGeoFire();
-		//listener.setGeoFire(geoFire);
 
 		if(filtro.getRadio() < 1)filtro.setRadio(100);
 		final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(filtro.getPunto().latitude, filtro.getPunto().longitude), filtro.getRadio()/1000.0);
@@ -200,7 +199,6 @@ public class Lugar extends Objeto
 			public void onKeyEntered(String key, GeoLocation location)
 			{
 				nCount++;
-				//newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
 				newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
@@ -228,7 +226,7 @@ public class Lugar extends Objeto
 			{
 				if(nCount==0)
 					listener.onDatos(reverse(aLugares));
-				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
+				geoQuery.removeGeoQueryEventListener(this);
 			}
 			@Override public void onKeyExited(String key){Log.w(TAG, "getLista:onKeyExited");}
 			@Override public void onKeyMoved(String key, GeoLocation location){Log.w(TAG, "getLista:onKeyMoved"+key+", "+location);}
@@ -241,12 +239,6 @@ public class Lugar extends Objeto
 	// PARCELABLE
 	//______________________________________________________________________________________________
 	private Lugar(Parcel in) { super(in); }
-	@Override
-	public void writeToParcel(Parcel dest, int flags)
-	{
-		super.writeToParcel(dest, flags);
-	}
-
 	public static final Parcelable.Creator<Lugar> CREATOR = new Parcelable.Creator<Lugar>()
 	{
 		@Override public Lugar createFromParcel(Parcel in) { return new Lugar(in); }
@@ -256,32 +248,30 @@ public class Lugar extends Objeto
 	//----------------------------------------------------------------------------------------------
 	// GEOFIRE
 	@Exclude
-	private GeoFire _datGeo;
+	private GeoFire datGeo;
 	private void saveGeo()
 	{
-		if(_datos.getKey() == null)
+		if(datos.getKey() == null)
 		{
 			Log.e(TAG, "saveGeo:id==null");
 			return;
 		}
-		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
+		if(datGeo == null) datGeo = newGeoFire();
+		datGeo.setLocation(datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
 		{
 			if(error != null)
-				Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
-			//else
-			//	Log.i(TAG, "Location saved on server successfully!");
+				Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+ datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
 		});
 	}
 	private void delGeo()
 	{
-		if(_datos.getKey() == null)
+		if(datos.getKey() == null)
 		{
 			Log.e(TAG, "delGeo:id==null-------------------------------------------------------------");
 			return;
 		}
-		if(_datGeo == null)_datGeo = newGeoFire();
-		_datGeo.removeLocation(_datos.getKey());
+		if(datGeo == null) datGeo = newGeoFire();
+		datGeo.removeLocation(datos.getKey());
 	}
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------
@@ -292,18 +282,18 @@ public class Lugar extends Objeto
 	//https://firebase.google.com/docs/storage/android/upload-files?hl=es
 	public void uploadImg(String path)
 	{
-		if(_datos == null)
+		if(datos == null)
 		{
 			if(getId() == null)
 			{
 				Log.e(TAG, "delImg: getId() == null");
 				return;//Es un nuevo objeto, no puede tener imagen en store...
 			}
-			_datos = newFirebase().child(getId());
+			datos = newFirebase().child(getId());
 		}
-		if(_datos.getKey() == null)return;
+		if(datos.getKey() == null)return;
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+				.child(Login.getCurrentUserID()).child(NOMBRE).child(datos.getKey());
 		storageRef.delete().addOnCompleteListener(task ->
 				Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString()));
 
@@ -328,18 +318,18 @@ public class Lugar extends Objeto
 	//______________________________________________________________________________________________
 	public void downloadImg(final ImageView iv, final Activity act, final Fire.SimpleListener<String> listener)
 	{
-		if(_datos == null)
+		if(datos == null)
 		{
 			if(getId() == null)
 			{
 				Log.e(TAG, "delImg: getId() == null");
 				return;//Es un nuevo objeto, no puede tener imagen en store...
 			}
-			_datos = newFirebase().child(getId());
+			datos = newFirebase().child(getId());
 		}
-		if(_datos.getKey() == null)return;
+		if(datos.getKey() == null)return;
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+				.child(Login.getCurrentUserID()).child(NOMBRE).child(datos.getKey());
 
 		OnSuccessListener<Uri> lisOk = uri ->
 		{
@@ -369,18 +359,18 @@ public class Lugar extends Objeto
 	//______________________________________________________________________________________________
 	public void delImg()
 	{
-		if(_datos == null)
+		if(datos == null)
 		{
 			if(getId() == null)
 			{
 				Log.e(TAG, "delImg: getId() == null");
 				return;//Es un nuevo objeto, no puede tener imagen en store...
 			}
-			_datos = newFirebase().child(getId());
+			datos = newFirebase().child(getId());
 		}
-		if(_datos.getKey() == null)return;
+		if(datos.getKey() == null)return;
 		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-				.child(Login.getCurrentUserID()).child(NOMBRE).child(_datos.getKey());
+				.child(Login.getCurrentUserID()).child(NOMBRE).child(datos.getKey());
 		storageRef.delete().addOnCompleteListener(task -> Log.e(TAG, "delImg:addOnCompleteListener:"+task.toString()));
 	}
 	// IMAGEN
@@ -389,6 +379,6 @@ public class Lugar extends Objeto
 
 	private static Lugar[] reverse(ArrayList<Lugar> aLugares) {
 		Collections.reverse(aLugares);
-		return aLugares.toArray(new Lugar[aLugares.size()]);
+		return aLugares.toArray(new Lugar[0]);
 	}
 }

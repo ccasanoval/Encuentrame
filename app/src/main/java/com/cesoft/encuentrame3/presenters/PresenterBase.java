@@ -36,58 +36,58 @@ public abstract class PresenterBase
 		void requestFocusNombre();
 		GoogleMap getMap();
 	}
-	IVista _view;
+	IVista view;
 	////////////////////////////////////////////////////
-	Objeto _o;
-		public String getNombre(){return _o.getNombre();}
-		public String getDescripcion(){return _o.getDescripcion();}
+	Objeto o;
+		public String getNombre(){return o.getNombre();}
+		public String getDescripcion(){return o.getDescripcion();}
 		//
-		public double getLatitud(){return _o.getLatitud();}
-		public double getLongitud(){return _o.getLongitud();}
-		public void setLatLon(double lat, double lon){_o.setLatLon(lat, lon);}
-		//public void setLatitud(double v){_o.setLatitud(v);}
-		//public void setLongitud(double v){_o.setLongitud(v);}
+		public double getLatitud(){return o.getLatitud();}
+		public double getLongitud(){return o.getLongitud();}
+		public void setLatLon(double lat, double lon){
+			o.setLatLon(lat, lon);}
 
-	boolean _bSucio = false;
-		public void setSucio(){_bSucio=true;}
-	private boolean _bNuevo = false;
-		public boolean isNuevo(){return _bNuevo;}
-	boolean _bDesdeNotificacion = false;
+	boolean bSucio = false;
+		public void setSucio(){
+			bSucio =true;}
+	private boolean bNuevo = false;
+		public boolean isNuevo(){return bNuevo;}
+	boolean bDesdeNotificacion = false;
 	////////////////////////////////////////////////////
-	Application _app;
-	PresenterBase(Application app) { _app = app; }
+	protected Application app;
+	PresenterBase(Application app) { this.app = app; }
 
 	//----------------------------------------------------------------------------------------------
 	public void ini(IVista view)
 	{
-		_view = view;
-		_bSucio = false;
+		this.view = view;
+		bSucio = false;
 	}
 	public void subscribe(IVista view)
 	{
-		_view = view;
-		if( ! _bEliminar)
+		this.view = view;
+		if( !bEliminar)
 		{
-			_bEliminar=true;
+			bEliminar =true;
 			onEliminar();
 		}
 	}
 	public void unsubscribe()
 	{
 		Log.e(TAG, "-------------------------------unsubscribe------1--------------------------------");
-		//Como dlg tienen referencia a _view, debemos destruir referencia para evitar MemoryLeak!
-		if(_dlgEliminar != null)
+		//Como dlg tienen referencia a view, debemos destruir referencia para evitar MemoryLeak!
+		if(dlgEliminar != null)
 		{
-			boolean b = _bEliminar;
-			_dlgEliminar.dismiss();
-			_dlgEliminar = null;
-			_bEliminar = b;//Para recordar si estabamos mostrarndo dlg, porque dismiss borra flag
+			boolean b = bEliminar;
+			dlgEliminar.dismiss();
+			dlgEliminar = null;
+			bEliminar = b;//Para recordar si estabamos mostrarndo dlg, porque dismiss borra flag
 		}
 		//
-		if(_dlgSucio != null)_dlgSucio.dismiss();
-		_dlgSucio = null;
+		if(dlgSucio != null) dlgSucio.dismiss();
+		dlgSucio = null;
 		//
-		_view = null;
+		view = null;
 		Log.e(TAG, "-------------------------------unsubscribe------2--------------------------------");
 	}
 
@@ -97,14 +97,14 @@ public abstract class PresenterBase
 	{
 		if(savedInstanceState != null)
 		{
-			_bSucio = savedInstanceState.getBoolean(SUCIO);
-			_bEliminar = savedInstanceState.getBoolean(ELIMINAR);
+			bSucio = savedInstanceState.getBoolean(SUCIO);
+			bEliminar = savedInstanceState.getBoolean(ELIMINAR);
 		}
 	}
 	public void onSaveInstanceState(Bundle outState)
 	{
-		outState.putBoolean(SUCIO, _bSucio);
-		outState.putBoolean(ELIMINAR, _bEliminar);
+		outState.putBoolean(SUCIO, bSucio);
+		outState.putBoolean(ELIMINAR, bEliminar);
 	}
 
 	//______________________________________________________________________________________________
@@ -112,76 +112,71 @@ public abstract class PresenterBase
 	{
 		try
 		{
-			_o = _view.getAct().getIntent().getParcelableExtra(Objeto.NOMBRE);
-			if(_o == null)throw new Exception();
-            _bNuevo = false;
-			//Log.e(TAG, "loadObjeto:-----------------------------------------------------------"+_o);
+			o = view.getAct().getIntent().getParcelableExtra(Objeto.NOMBRE);
+			if(o == null)throw new Exception();
+            bNuevo = false;
 		}
 		catch(Exception e)
 		{
-			//Log.e(TAG, "loadObjeto:e:---------------------------------------------------------",e);
-			_bNuevo = true;
-			_o = objDefault;
+			bNuevo = true;
+			o = objDefault;
 		}
 	}
 
 	//______________________________________________________________________________________________
-	private AlertDialog _dlgSucio = null;
+	private AlertDialog dlgSucio = null;
 	public void onSalir()
 	{
-		if(_bSucio)
+		if(bSucio)
 		{
-			AlertDialog.Builder dialog = new AlertDialog.Builder(_view.getAct());
-			dialog.setPositiveButton(_app.getString(R.string.guardar), (dlg, which) -> guardar());
-			dialog.setNegativeButton(_app.getString(R.string.salir), (dlg, which) -> _view.finish());
-			_dlgSucio = dialog.create();
-			_dlgSucio.setCancelable(true);
-			_dlgSucio.setTitle(_o.getNombre());
-			_dlgSucio.setMessage(_app.getString(R.string.seguro_salir));
-			_dlgSucio.show();
+			AlertDialog.Builder dialog = new AlertDialog.Builder(view.getAct());
+			dialog.setPositiveButton(app.getString(R.string.guardar), (dlg, which) -> guardar());
+			dialog.setNegativeButton(app.getString(R.string.salir), (dlg, which) -> view.finish());
+			dlgSucio = dialog.create();
+			dlgSucio.setCancelable(true);
+			dlgSucio.setTitle(o.getNombre());
+			dlgSucio.setMessage(app.getString(R.string.seguro_salir));
+			dlgSucio.show();
 		}
 		else
-			_view.finish();
+			view.finish();
 	}
-	boolean _bGuardar = true;
+	boolean bGuardar = true;
 	protected abstract void guardar();
 
 	//______________________________________________________________________________________________
-	private AlertDialog _dlgEliminar = null;
-	boolean _bEliminar = true;
+	private AlertDialog dlgEliminar = null;
+	boolean bEliminar = true;
 	public void onEliminar()
 	{
-		if(!_bEliminar)return;
-		_bEliminar=false;
+		if(!bEliminar)return;
+		bEliminar =false;
 
-		AlertDialog.Builder dialog = new AlertDialog.Builder(_view.getAct());
-		//dialog.setTitle(_o.getNombre());//getString(R.string.eliminar));
-		//dialog.setMessage(_app.getString(R.string.seguro_eliminar));
-		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)dialog.setOnDismissListener(dlg -> _bEliminar = true);
-		dialog.setNegativeButton(_app.getString(R.string.cancelar), (dlg, which) -> _bEliminar = true);
-		dialog.setPositiveButton(_app.getString(R.string.eliminar), (dialog1, which) -> eliminar());
-		_dlgEliminar = dialog.create();
-		_dlgEliminar.setTitle(_o.getNombre());//getString(R.string.eliminar));
-		_dlgEliminar.setMessage(_app.getString(R.string.seguro_eliminar));
-		_dlgEliminar.setOnDismissListener(dlg -> _bEliminar = _dlgEliminar==null || !_dlgEliminar.isShowing());//_bEliminar=true no funcionaria, se llama con retraso
-		_dlgEliminar.show();
+		AlertDialog.Builder dialog = new AlertDialog.Builder(view.getAct());
+		dialog.setNegativeButton(app.getString(R.string.cancelar), (dlg, which) -> bEliminar = true);
+		dialog.setPositiveButton(app.getString(R.string.eliminar), (dialog1, which) -> eliminar());
+		dlgEliminar = dialog.create();
+		dlgEliminar.setTitle(o.getNombre());
+		dlgEliminar.setMessage(app.getString(R.string.seguro_eliminar));
+		dlgEliminar.setOnDismissListener(dlg -> bEliminar = dlgEliminar ==null || !dlgEliminar.isShowing());//bEliminar=true no funcionaria, se llama con retraso
+		dlgEliminar.show();
 	}
 	protected abstract void eliminar();
 
-	// TODO : to vistaBase ?
 	private static class CesTextWatcher implements TextWatcher
 	{
-		private TextView _tv;
-		private String _str;
-		private PresenterBase _presenter;
-		CesTextWatcher(TextView tv, String str, PresenterBase presenter){_tv = tv; _str = str; _presenter = presenter;}
+		private TextView tv;
+		private String str;
+		private PresenterBase presenter;
+		CesTextWatcher(TextView tv, String str, PresenterBase presenter){
+			this.tv = tv; this.str = str; this.presenter = presenter;}
 		@Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
 		@Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2){}
 		@Override
 		public void afterTextChanged(Editable editable)
 		{
-			if(_str == null && _tv.getText().length() > 0)_presenter.setSucio();
-			if(_str != null && _tv.getText().toString().compareTo(_str) != 0)_presenter.setSucio();
+			if(str == null && tv.getText().length() > 0) presenter.setSucio();
+			if(str != null && tv.getText().toString().compareTo(str) != 0) presenter.setSucio();
 		}
 	}
 	public void setOnTextChange(EditText nom, EditText desc)

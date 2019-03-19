@@ -14,12 +14,17 @@ import android.os.Bundle;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
 {
-	//private static final String TAG = ActLogin.class.getSimpleName();
-	protected static final int ENTER=0, REGISTER=1, RECOVER=2;
+	protected static final int ENTER=0;
+	protected static final int REGISTER=1;
+	protected static final int RECOVER=2;
 
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
-	public TabLayout _tabLayout;
+	private TabLayout tabLayout;
+	public void selectTabEnter() {
+		TabLayout.Tab tab = tabLayout.getTabAt(ENTER);
+		if(tab != null) tab.select();
+	}
 
 
 	@Override
@@ -29,23 +34,23 @@ public class ActLogin extends AppCompatActivity
 		setContentView(R.layout.act_login);
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
-		SectionsPagerAdapter SectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		// Set up the ViewPager with the sections adapter.
 		ViewPager viewPager = findViewById(R.id.container);
 		if(viewPager != null)
-		viewPager.setAdapter(SectionsPagerAdapter);
-		_tabLayout = findViewById(R.id.tabs);
-		if(_tabLayout != null)
+			viewPager.setAdapter(sectionsPagerAdapter);
+		tabLayout = findViewById(R.id.tabs);
+		if(tabLayout != null)
 		{
-			_tabLayout.setupWithViewPager(viewPager);
-			_tabLayout.setSelectedTabIndicatorHeight(10);
+			tabLayout.setupWithViewPager(viewPager);
 		}
 	}
 
+	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
-		_tabLayout = null;
+		tabLayout = null;
 	}
 
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
@@ -73,8 +78,8 @@ public class ActLogin extends AppCompatActivity
 			case ENTER:		return getString(R.string.enter_lbl);
 			case REGISTER:	return getString(R.string.register_lbl);
 			case RECOVER:	return getString(R.string.recover_lbl);
+			default:		return null;
 			}
-			return null;
 		}
 	}
 
@@ -86,14 +91,14 @@ public class ActLogin extends AppCompatActivity
 		finish();
 	}
 
-	private ProgressDialog _progressDialog;
+	private ProgressDialog progressDialog;
 	public void iniEsperaLogin()
 	{
-		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+		progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
 	}
 	public void finEsperaLogin()
 	{
-		if(_progressDialog!=null)_progressDialog.dismiss();
+		if(progressDialog!=null)progressDialog.dismiss();
 	}
 
 }

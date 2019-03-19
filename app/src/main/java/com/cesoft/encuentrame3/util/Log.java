@@ -7,17 +7,18 @@ import com.cesoft.encuentrame3.BuildConfig;
 //^(?!.*(No setter)).*$
 public class Log
 {
-	private static final String DOMINIO = "CESoft:";
-	public static void d(String TAG, String msg) {
-		if(BuildConfig.DEBUG) android.util.Log.d(TAG, DOMINIO+msg);
+	private Log(){}
+	private static final String DOMAIN = "CESoft:";
+	public static void d(String tag, String msg) {
+		if(BuildConfig.DEBUG) android.util.Log.d(tag, DOMAIN+msg);
 	}
-	public static void w(String TAG, String msg) {
-		if(BuildConfig.DEBUG) android.util.Log.w(TAG, DOMINIO+msg);
+	public static void w(String tag, String msg) {
+		if(BuildConfig.DEBUG) android.util.Log.w(tag, DOMAIN+msg);
 	}
-	public static void e(String TAG, String msg) {
-		if(BuildConfig.DEBUG) android.util.Log.e(TAG, DOMINIO+msg);
+	public static void e(String tag, String msg) {
+		if(BuildConfig.DEBUG) android.util.Log.e(tag, DOMAIN+msg);
 	}
-	public static void e(String TAG, String msg, Throwable t) {
-		if(BuildConfig.DEBUG) android.util.Log.e(TAG, DOMINIO+msg, t);
+	public static void e(String tag, String msg, Throwable t) {
+		if(BuildConfig.DEBUG) android.util.Log.e(tag, DOMAIN+msg, t);
 	}
 }

@@ -79,9 +79,9 @@ public class ActTest2
 		view = new VistaBase()
 		{
 			@Override
-			void ini(PresenterBase presenter, Util util, Objeto objDefecto, int id_layout)
+			void ini(PresenterBase presenter, Util util, Objeto objDefecto, int idLayout)
 			{
-				super.ini(presenter, util, objDefecto, id_layout);
+				super.ini(presenter, util, objDefecto, idLayout);
 			}
 		};
 		view.ini(presenter, util, new Lugar(), R.layout.act_lugar);
@@ -91,7 +91,7 @@ public class ActTest2
 	public void testEmpty() throws Exception
 	{
 		verify(presenter).ini(any());
-		org.junit.Assert.assertTrue(view._txtNombre.getText().toString().isEmpty());
+		org.junit.Assert.assertTrue(view.txtNombre.getText().toString().isEmpty());
 	}
 
 	/*@Test

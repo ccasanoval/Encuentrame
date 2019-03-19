@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.firebase.database.Exclude;
 
@@ -19,7 +20,9 @@ public class Objeto implements Parcelable
 	static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
 	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 
+	//
 	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
+	//
 
 	//General
 	public String id = null;
@@ -46,15 +49,13 @@ public class Objeto implements Parcelable
 	public double latitud, longitud;
         @Exclude public double getLatitud(){return latitud;}
         @Exclude public double getLongitud(){return longitud;}
-        @Exclude public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}//TODO: validacion
-		//public void setLatitud(double v){latitud=v;}
-		//public void setLongitud(double v){longitud=v;}
+        @Exclude public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}
 
 
 	//______________________________________________________________________________________________
 	Objeto() { fecha = new Date(); }
-	//Objeto() { fecha = new Date().getTime(); }
 	//______________________________________________________________________________________________
+	@NonNull
 	@Override public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",

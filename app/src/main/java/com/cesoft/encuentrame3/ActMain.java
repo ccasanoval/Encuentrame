@@ -22,34 +22,6 @@ import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
-
-//https://guides.codepath.com/android/Handling-Scrolls-with-CoordinatorLayout
-//https://developer.android.com/training/permissions/requesting.html
-//MOCK LOCATIONS ON DEVICE : http://stackoverflow.com/questions/2531317/android-mock-location-on-device
-
-//https://www.smashingmagazine.com/tag/android/
-
-// *** Dagger
-//http://www.vogella.com/tutorials/Dagger/article.html
-//https://www.future-processing.pl/blog/dependency-injection-with-dagger-2/
-
-// *** Rx
-//https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
-//https://github.com/nmoskalenko/rxFirebase
-//https://github.com/patloew/RxLocation
-//
-//http://sglora.com/android-tutorial-sobre-retrolambda/
-
-// *** Charles, Fiddle
-//https://jaanus.com/debugging-http-on-an-android-phone-or-tablet-with-charles-proxy-for-fun-and-profit/
-
-// *** DEX
-//I run the ./gradlew assembleRelease and use DEX decompiler tools https://github.com/skylot/jadx to decompile the APK. It’s like looking into code in Github...
-
-// *** BATTERY
-//https://developer.android.com/training/monitoring-device-state/doze-standby?hl=es-419
-//https://developer.zebra.com/community/home/blog/2017/05/04/keeping-your-application-running-when-the-device-wants-to-sleep
-
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
@@ -62,21 +34,16 @@ import com.cesoft.encuentrame3.util.Util;
 //http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
 // small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
 
-//TODO:---------------------------------------------------------------------------------------------
-// Guardar actividad de cada punto, desactivar servicios si esta parado, etc
-// https://developers.google.com/location-context/activity-recognition/
-// https://github.com/googlesamples/android-play-location
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 {
 	private static final String TAG = ActMain.class.getSimpleName();
 
-	private FrgMain[] _aFrg = new FrgMain[3];
-	private ViewPager _viewPager;
-	private Login _login;
-	private Util _util;
+	private FrgMain[] frmMain = new FrgMain[3];
+	private ViewPager viewPager;
+	private Login login;
+	private Util util;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -84,9 +51,9 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
-		_login = ((App)getApplication()).getGlobalComponent().login();
-		_util = ((App)getApplication()).getGlobalComponent().util();
-		if(!_login.isLogged())gotoLogin();
+		login = ((App)getApplication()).getGlobalComponent().login();
+		util = ((App)getApplication()).getGlobalComponent().util();
+		if(!login.isLogged())gotoLogin();
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -107,20 +74,20 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public void onDestroy()
 	{
 		super.onDestroy();
-		_viewPager = null;
+		viewPager = null;
 	}
 	//----------------------------------------------------------------------------------------------
-	private static boolean oncePideBateria = true;
+	private boolean oncePideBateria = true;
 	@Override
 	public void onStart()
 	{
 		super.onStart();
-		if(!_login.isLogged())gotoLogin();
+		if(!login.isLogged())gotoLogin();
 		if(oncePideBateria) {
-			_util.pideBateria(this);
+			util.pideBateria(this);
 			oncePideBateria = false;
 		}
-		_util.pideGPS(this, 6969);
+		util.pideGPS(this, 6969);
 	}
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -132,17 +99,16 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	private void createViews()
 	{
 		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-		_viewPager = findViewById(R.id.container);
-		_viewPager.setAdapter(sectionsPagerAdapter);
+		viewPager = findViewById(R.id.container);
+		viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = findViewById(R.id.tabs);
-		tabLayout.setupWithViewPager(_viewPager);
-		tabLayout.setSelectedTabIndicatorHeight(10);//TODO
+		tabLayout.setupWithViewPager(viewPager);
 	}
 	private void gotoPage(Intent intent)
 	{
 		int nPagina = intent.getIntExtra(Constantes.WIN_TAB, Constantes.NADA);
 		if(nPagina == Constantes.LUGARES || nPagina == Constantes.RUTAS || nPagina == Constantes.AVISOS)
-			_viewPager.setCurrentItem(nPagina);
+			viewPager.setCurrentItem(nPagina);
 	}
 	private void showMensaje(Intent intent)
 	{
@@ -172,13 +138,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				return true;
 			case R.id.action_mapa:
 				i = new Intent(this, ActMaps.class);
-				i.putExtra(Util.TIPO, _viewPager.getCurrentItem());
+				i.putExtra(Util.TIPO, viewPager.getCurrentItem());
 				startActivity(i);
 				return true;
 			case R.id.action_buscar:
-				FrgMain frg = _aFrg[_viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
-				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager()).getItem(_viewPager.getCurrentItem());
-				buscar(_aFrg[_viewPager.getCurrentItem()]);
+				FrgMain frg = frmMain[viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
+				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager()).getItem(viewPager.getCurrentItem());
+				buscar(frmMain[viewPager.getCurrentItem()]);
 				return true;
 			case R.id.action_privacy_policy:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
@@ -199,7 +165,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	/// FrgMain : MainIterface
 	public void gotoLogin()
 	{
-		_login.logout();
+		login.logout();
 		Intent intent = new Intent(getBaseContext(), ActLogin.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
@@ -275,8 +241,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			if( ! frg.isAdded())
 			{
 				Log.e(TAG, "buscar: *************** frg is not ADDED *****************");
-				getSupportFragmentManager().beginTransaction().add(frg, String.valueOf(frg._sectionNumber)).commit();
-				Util.exeDelayed(100, () -> buscar(frg));
+				getSupportFragmentManager().beginTransaction().add(frg, String.valueOf(frg.getSectionNumber())).commit();
+				util.exeDelayed(100, () -> buscar(frg));
 				return;
 			}
 
@@ -290,8 +256,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	//---
 	public int getCurrentItem()
 	{
-		if(_viewPager == null)return Constantes.NADA;
-		return _viewPager.getCurrentItem();
+		if(viewPager == null)return Constantes.NADA;
+		return viewPager.getCurrentItem();
 	}
 
 
@@ -311,8 +277,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		@Override
 		public Fragment getItem(int position)
 		{
-			_aFrg[position] = FrgMain.newInstance(position);
-			return _aFrg[position];
+			frmMain[position] = FrgMain.newInstance(position);
+			return frmMain[position];
 		}
 		@Override
 		public int getCount()
@@ -327,51 +293,17 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			case Constantes.LUGARES:return getString(R.string.lugares);
 			case Constantes.RUTAS:	return getString(R.string.rutas);
 			case Constantes.AVISOS:	return getString(R.string.avisos);
+			default:break;
 			}
 			return null;
 		}
 	}
 
-
-	//----------------------------------------------------------------------------------------------
-	/*@SuppressLint("BatteryLife")
-	private void pideBateria() {
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
-			if(pm != null) {
-				if(pm.isIgnoringBatteryOptimizations(getPackageName())) {
-					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ----*******************************************************************----------------AAA:"+getPackageName());
-				}
-				else {
-
-					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-					// But by including this Google may delete the app from the store...
-					Intent intent = new Intent();
-					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-					intent.setData(Uri.parse("package:"+getApplicationContext().getPackageName()));
-					startActivity(intent);
-
-					// CHECK:
-					//  turn off the screen and:
-					//adb shell dumpsys battery unplug
-					//adb shell dumpsys deviceidle step --> Till status =  IDLE_PENDING, SENSING, (LOCATING), IDLE_MAINTENANCE, IDLE
-
-					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: ------**********************************************--------------BBB"+getPackageName());
-				}
-			}
-		}
-	}
-	private void pideGPS() {
-		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
-		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
-		if(permissionCheck == PackageManager.PERMISSION_DENIED)
-			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 6969);
-	}*/
-	@Override
+	/*@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 		try {
 			Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
 					+ requestCode + " : " + permissions[0] + " = " + grantResults[0]);
 		}catch(Exception ignore){}
-	}
+	}*/
 }

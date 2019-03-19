@@ -20,14 +20,14 @@ import com.cesoft.encuentrame3.util.Constantes;
 //http://www.vogella.com/tutorials/AndroidListView/article.html
 public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 {
-	private final Aviso[] _avisos;
-	private IListaItemClick _inter;
+	private final Aviso[] avisos;
+	private IListaItemClick inter;
 
 	public AvisoArrayAdapter(Context context, Aviso[] avisos, IListaItemClick inter)
 	{
 		super(context, -1, avisos);
-		_avisos = avisos;
-		_inter = inter;
+		this.avisos = avisos;
+		this.inter = inter;
 	}
 
 	private class ViewHolder
@@ -56,23 +56,22 @@ public class AvisoArrayAdapter extends ArrayAdapter<Aviso>
 			holder = (ViewHolder)convertView.getTag();
 		}
 
-		holder.txtNombre.setText(_avisos[position].getNombre());
-		if(_avisos[position].getFecha()!=null)holder.txtFecha.setText(Aviso.DATE_FORMAT2.format(_avisos[position].getFecha()));
-		if(!_avisos[position].isActivo())
+		holder.txtNombre.setText(avisos[position].getNombre());
+		if(avisos[position].getFecha()!=null)holder.txtFecha.setText(Aviso.DATE_FORMAT2.format(avisos[position].getFecha()));
+		if(!avisos[position].isActivo())
 		{
 			holder.txtNombre.setTextColor(Color.GRAY);
 		}
 		else
 		{
-			//holder.txtNombre.setTextColor(Color.GREEN);
 			if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
 				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem, convertView.getContext().getTheme()));
 			else
 				//noinspection deprecation
 				holder.txtNombre.setTextColor(convertView.getResources().getColor(R.color.colorItem));
 		}
-		holder.btnEditar.setOnClickListener(v -> _inter.onItemEdit(Constantes.AVISOS, _avisos[position]));
-		holder.btnMapa.setOnClickListener(v -> _inter.onItemMap(Constantes.AVISOS, _avisos[position]));
+		holder.btnEditar.setOnClickListener(v -> inter.onItemEdit(Constantes.AVISOS, avisos[position]));
+		holder.btnMapa.setOnClickListener(v -> inter.onItemMap(Constantes.AVISOS, avisos[position]));
 
 		return convertView;
 	}

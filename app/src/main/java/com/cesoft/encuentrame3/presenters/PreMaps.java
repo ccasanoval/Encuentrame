@@ -22,7 +22,7 @@ import javax.inject.Inject;
 // PRESENTER MAPS
 public class PreMaps extends PresenterBase
 {
-	private final String TAG = PreMaps.class.getSimpleName();
+	private static final String TAG = PreMaps.class.getSimpleName();
 
 	////////////////////////////////////////////////////
 	public interface IMapsView extends IVista
@@ -34,13 +34,9 @@ public class PreMaps extends PresenterBase
 		void animateCamera();
 		void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts);
 	}
-	//private MapsView _view;
 	////////////////////////////////////////////////////
 
-	/*private Lugar _l;
-	private Aviso _a;
-	private Ruta _r;*/
-	private int _iTipo = Constantes.NADA;
+	private int iTipo = Constantes.NADA;
 
 	@Inject PreMaps(Application app) { super(app);}
 
@@ -61,18 +57,16 @@ public class PreMaps extends PresenterBase
 	@Override
 	public void loadObjeto(Objeto o)
 	{
-		//_o = o;
 		super.loadObjeto(o);
 		//------------------------------------------------------------------------------------------
-		/*try{_l = _view.getAct().getIntent().getParcelableExtra(Lugar.NOMBRE);	_o=_l;}catch(Exception e){_l=null;}
-		try{_r = _view.getAct().getIntent().getParcelableExtra(Ruta.NOMBRE);	_o=_r;}catch(Exception e){_r=null;}
-		try{_a = _view.getAct().getIntent().getParcelableExtra(Aviso.NOMBRE);	_o=_a;}catch(Exception e){_a=null;}*/
-		try{_iTipo = _view.getAct().getIntent().getIntExtra(Util.TIPO, Constantes.NADA);}catch(Exception e){_iTipo=Constantes.NADA;}
+		try{
+			iTipo = view.getAct().getIntent().getIntExtra(Util.TIPO, Constantes.NADA);}catch(Exception e){
+			iTipo =Constantes.NADA;}
 		//------------------------------------------------------------------------------------------
 	}
-	public boolean isLugar(){return _iTipo == Constantes.LUGARES && !isNuevo();}
-	public boolean isAviso(){return _iTipo == Constantes.AVISOS && !isNuevo();}
-	public boolean isRuta(){return _iTipo == Constantes.RUTAS && !isNuevo();}
+	public boolean isLugar(){return iTipo == Constantes.LUGARES && !isNuevo();}
+	public boolean isAviso(){return iTipo == Constantes.AVISOS && !isNuevo();}
+	public boolean isRuta(){return iTipo == Constantes.RUTAS && !isNuevo();}
 
 	@Override protected void eliminar(){}
 	//______________________________________________________________________________________________
@@ -80,67 +74,67 @@ public class PreMaps extends PresenterBase
 	{
 		if(isLugar())
 		{
-			((Lugar)_o).guardar(new Fire.CompletadoListener()
+			((Lugar) o).guardar(new Fire.CompletadoListener()
 			{
 				@Override
 				protected void onDatos(String id)
 				{
-					_view.toast(R.string.ok_guardar_lugar);
+					view.toast(R.string.ok_guardar_lugar);
 					Intent data = new Intent();
-					data.putExtra(Lugar.NOMBRE, _o);
-					_view.getAct().setResult(Activity.RESULT_OK, data);
-					_view.finish();
+					data.putExtra(Lugar.NOMBRE, o);
+					view.getAct().setResult(Activity.RESULT_OK, data);
+					view.finish();
 				}
 				@Override
 				protected void onError(String err, int code)
 				{
 					Log.e(TAG, "guardar:handleFault:e:----------------------------------------------"+err);
-					_view.toast(R.string.error_guardar, err);
+					view.toast(R.string.error_guardar, err);
 				}
 			});
 		}
 		if(isAviso())
 		{
-			((Aviso)_o).guardar(new Fire.CompletadoListener()
+			((Aviso) o).guardar(new Fire.CompletadoListener()
 			{
 				@Override
 				protected void onDatos(String id)
 				{
-					_view.toast(R.string.ok_guardar_aviso);
+					view.toast(R.string.ok_guardar_aviso);
 					Intent data = new Intent();
-					data.putExtra(Aviso.NOMBRE, _o);
-					_view.getAct().setResult(Activity.RESULT_OK, data);
-					_view.finish();
+					data.putExtra(Aviso.NOMBRE, o);
+					view.getAct().setResult(Activity.RESULT_OK, data);
+					view.finish();
 				}
 				@Override
 				protected void onError(String err, int code)
 				{
 					Log.e(TAG, "guardar:handleFault:e:----------------------------------------------"+err);
-					_view.toast(R.string.error_guardar, err);
+					view.toast(R.string.error_guardar, err);
 				}
 			});
 		}
 	}
 
 	//______________________________________________________________________________________________
-	private Fire.DatosListener<Lugar> _lisLugar;
-	private Fire.DatosListener<Aviso> _lisAviso;
-	private Fire.DatosListener<Ruta> _lisRuta;
+	private Fire.DatosListener<Lugar> lisLugar;
+	private Fire.DatosListener<Aviso> lisAviso;
+	private Fire.DatosListener<Ruta> lisRuta;
 	//----------------------------------------------------------------------------------------------
 	private void delListeners()
 	{
-		if(_lisLugar!=null)_lisLugar.setListener(null);
-		if(_lisAviso!=null)_lisAviso.setListener(null);
-		if(_lisRuta!=null)_lisRuta.setListener(null);
+		if(lisLugar !=null) lisLugar.setListener(null);
+		if(lisAviso !=null) lisAviso.setListener(null);
+		if(lisRuta !=null) lisRuta.setListener(null);
 	}
 	private void newListeners()
 	{
 		delListeners();
-		_lisLugar = new Fire.DatosListener<Lugar>()
+		lisLugar = new Fire.DatosListener<Lugar>()
 		{
 			@Override public void onDatos(Lugar[] aData)
 			{
-				for(Lugar o : aData)((IMapsView)_view).showLugar(o);
+				for(Lugar o : aData)((IMapsView) view).showLugar(o);
 			}
 			@Override
 			public void onError(String err)
@@ -148,11 +142,11 @@ public class PreMaps extends PresenterBase
 				Log.e(TAG, String.format("showLugares:e:--------------------------------------------LUGARES:GET:ERROR:%s",err));
 			}
 		};
-		_lisAviso = new Fire.DatosListener<Aviso>()
+		lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override public void onDatos(Aviso[] aData)
 			{
-				for(Aviso o : aData)((IMapsView)_view).showAviso(o);
+				for(Aviso o : aData)((IMapsView) view).showAviso(o);
 			}
 			@Override
 			public void onError(String err)
@@ -160,7 +154,7 @@ public class PreMaps extends PresenterBase
 				Log.e(TAG, String.format("showAvisos:e:---------------------------------------------AVISOS:GET:ERROR:%s",err));
 			}
 		};
-		_lisRuta = new Fire.DatosListener<Ruta>()
+		lisRuta = new Fire.DatosListener<Ruta>()
 		{
 			@Override public void onDatos(Ruta[] aData)
 			{
@@ -177,11 +171,11 @@ public class PreMaps extends PresenterBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private void showLugares() { Lugar.getLista(_lisLugar); }
-	private void showAvisos() { Aviso.getLista(_lisAviso); }
-	private void showRutas() { Ruta.getLista(_lisRuta); }
+	private void showLugares() { Lugar.getLista(lisLugar); }
+	private void showAvisos() { Aviso.getLista(lisAviso); }
+	private void showRutas() { Ruta.getLista(lisRuta); }
 	//----------------------------------------------------------------------------------------------
-	private void showRuta() { showRuta((Ruta)_o); }
+	private void showRuta() { showRuta((Ruta) o); }
 	private synchronized void showRuta(Ruta r)
 	{
 		if(r == null)
@@ -194,7 +188,7 @@ public class PreMaps extends PresenterBase
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
-				((IMapsView)_view).showRutaHelper(r, aData);
+				((IMapsView) view).showRutaHelper(r, aData);
 			}
 			@Override
 			public void onError(String err)
@@ -204,49 +198,47 @@ public class PreMaps extends PresenterBase
 		});
 	}
 
-	public double getRadioAviso(){return ((Aviso)_o).getRadio();}
+	public double getRadioAviso(){return ((Aviso) o).getRadio();}
 
 	public void setPosicion(double lat, double lon)
 	{
-		//if(_loc == null)_loc = new Location("dummyprovider");
-		//_loc.setLatitude(lat);_loc.setLongitude(lon);
 		if(isLugar())
 		{
-			if(_o.getLatitud() != lat || _o.getLongitud() != lon)
+			if(o.getLatitud() != lat || o.getLongitud() != lon)
 			{
 				Log.e(TAG, "++++++++++++++++++++++++++++++++++++++++++++++++++ SUCIO ");
-				_bSucio = true;
-				_o.setLatLon(lat, lon);
+				bSucio = true;
+				o.setLatLon(lat, lon);
 			}
-			((IMapsView)_view).setMarker(_o.getNombre(), _o.getDescripcion(), new LatLng(lat, lon));
+			((IMapsView) view).setMarker(o.getNombre(), o.getDescripcion(), new LatLng(lat, lon));
 		}
 		else if(isAviso())
 		{
-			if(_o.getLatitud() != lat || _o.getLongitud() != lon)
+			if(o.getLatitud() != lat || o.getLongitud() != lon)
 			{
-				_bSucio = true;
-				_o.setLatLon(lat, lon);
+				bSucio = true;
+				o.setLatLon(lat, lon);
 			}
 			LatLng pos = new LatLng(lat, lon);
-			((IMapsView)_view).setMarker(_o.getNombre(), _o.getDescripcion(), pos);
-			((IMapsView)_view).setMarkerRadius(pos);
+			((IMapsView) view).setMarker(o.getNombre(), o.getDescripcion(), pos);
+			((IMapsView) view).setMarkerRadius(pos);
 		}
 		else if(isRuta())
 		{
-			((IMapsView)_view).animateCamera();
+			((IMapsView) view).animateCamera();
 		}
 	}
 	public void dibujar()
 	{
 		if(isLugar())
 		{
-			setPosicion(_o.getLatitud(), _o.getLongitud());
-			((IMapsView)_view).showLugar((Lugar)_o);
+			setPosicion(o.getLatitud(), o.getLongitud());
+			((IMapsView) view).showLugar((Lugar) o);
 		}
 		else if(isAviso())
 		{
-			setPosicion(_o.getLatitud(), _o.getLongitud());
-			((IMapsView)_view).showAviso((Aviso)_o);
+			setPosicion(o.getLatitud(), o.getLongitud());
+			((IMapsView) view).showAviso((Aviso) o);
 		}
 		else if(isRuta())
 		{
@@ -254,11 +246,12 @@ public class PreMaps extends PresenterBase
 		}
 		else
 		{
-			switch(_iTipo)
+			switch(iTipo)
 			{
 				case Constantes.LUGARES:	showLugares();break;
 				case Constantes.AVISOS:		showAvisos();break;
 				case Constantes.RUTAS:		showRutas();break;
+				default:break;
 			}
 		}
 	}

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -33,25 +32,26 @@ import static com.cesoft.encuentrame3.ActLogin.ENTER;
 import static com.cesoft.encuentrame3.ActLogin.RECOVER;
 import static com.cesoft.encuentrame3.ActLogin.REGISTER;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFailedListener
 {
     private static final String TAG = FrgLogin.class.getSimpleName();
     private static final String ARG_SECTION_NUMBER = "section_number";
-    private ActLogin _main;
-    private Login _login;
+    private ActLogin main;
+    private Login login;
 
     //------------------------------------------------------------------------------------------
     //GOOGLE LOG IN
     private static final int RC_SIGN_IN = 9001;
-    private GoogleApiClient _GoogleApiClient;
-    private FirebaseAuth _FirebaseAuth;
+    private GoogleApiClient googleApiClient;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     public void onPause() {
         super.onPause();
-        if(_GoogleApiClient != null && getActivity() != null)
-            _GoogleApiClient.stopAutoManage(getActivity());
-        //_GoogleApiClient.disconnect();
+        if(googleApiClient != null && getActivity() != null)
+            googleApiClient.stopAutoManage(getActivity());
     }
 
     @Override
@@ -87,10 +87,10 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
         final String usr = acct.getEmail();
         Log.e(TAG, "firebaseAuthWithGoogle:"+acct.getId()+" ::: "+acct.getEmail());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        _FirebaseAuth.signInWithCredential(credential).addOnCompleteListener(_main,
+        firebaseAuth.signInWithCredential(credential).addOnCompleteListener(main,
                 task -> {
                     if (!task.isSuccessful()) {
-                        Toast.makeText(FrgLogin.this._main, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FrgLogin.this.main, "Authentication failed.", Toast.LENGTH_SHORT).show();
                     }
                     else {
                         logginOk(usr);
@@ -99,10 +99,10 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
     }
 
     private void logginOk(String usr) {
-        ((App)_main.getApplication()).iniServicesDependantOnLogin();
-        _main.finEsperaLogin();
-        Toast.makeText(_main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
-        _main.goMain();
+        ((App) main.getApplication()).iniServicesDependantOnLogin();
+        main.finEsperaLogin();
+        Toast.makeText(main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
+        main.goMain();
     }
 
 
@@ -113,7 +113,7 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
-        fragment._main = main;
+        fragment.main = main;
 
         return fragment;
     }
@@ -124,13 +124,12 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
     public void onCreate(Bundle b)
     {
         super.onCreate(b);
-        //App.getInstance().getGlobalComponent().inject(this);
-        _login = App.getComponent(_main).login();
+        login = App.getComponent(main).login();
     }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        if(_login.isLogged())_main.goMain();
+        if(login.isLogged()) main.goMain();
 
         final int sectionNumber = getArguments()!=null ? getArguments().getInt(ARG_SECTION_NUMBER) : 0;
         final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
@@ -158,8 +157,8 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
                 });
                 //
                 btnSend.setOnClickListener(v -> {
-                    _main.iniEsperaLogin();
-                    _login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
+                    main.iniEsperaLogin();
+                    login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
                             new Fire.AuthListener()
                             {
                                 @Override
@@ -168,8 +167,8 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
                                 }
                                 @Override
                                 public void onFallo(Exception e) {
-                                    _main.finEsperaLogin();
-                                    Toast.makeText(_main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+                                    main.finEsperaLogin();
+                                    Toast.makeText(main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
                                 }
                             });
                 });
@@ -185,13 +184,13 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
                         .requestIdToken(getString(R.string.default_web_client_id))
                         .requestEmail()
                         .build();
-                _GoogleApiClient = new GoogleApiClient.Builder(_main)
-                        .enableAutoManage(_main/* FragmentActivity */, this/* OnConnectionFailedListener */)
+                googleApiClient = new GoogleApiClient.Builder(main)
+                        .enableAutoManage(main/* FragmentActivity */, this/* OnConnectionFailedListener */)
                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                         .build();
-                _FirebaseAuth = FirebaseAuth.getInstance();
+                firebaseAuth = FirebaseAuth.getInstance();
                 btnGoogle.setOnClickListener(view -> {
-                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(_GoogleApiClient);
+                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
                     startActivityForResult(signInIntent, RC_SIGN_IN);
                 });
                 break;
@@ -202,25 +201,25 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
                 btnSend.setOnClickListener(v -> {
                     if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
                     {
-                        Toast.makeText(_main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
+                        Toast.makeText(main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
                         return;
                     }
-                    _main.iniEsperaLogin();
+                    main.iniEsperaLogin();
                     Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
                             new Fire.AuthListener()
                             {
                                 @Override
                                 public void onExito(FirebaseUser usr)
                                 {
-                                    _main.finEsperaLogin();
+                                    main.finEsperaLogin();
                                     if(usr != null)
-                                        Toast.makeText(_main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
                                 }
                                 @Override
                                 public void onFallo(Exception e)
                                 {
-                                    _main.finEsperaLogin();//TODO: Añadir %s en la cadena
-                                    Toast.makeText(_main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
+                                    main.finEsperaLogin();//TODO: Añadir %s en la cadena
+                                    Toast.makeText(main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
                                 }
                             });
                 });
@@ -237,10 +236,8 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
                             @Override
                             public void onExito(FirebaseUser usr)
                             {
-                                //System.err.println("ActLogin:RECOVER:"+usr);
                                 Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-                                TabLayout.Tab t = _main._tabLayout.getTabAt(ENTER);
-                                if(t!=null)t.select();
+                                main.selectTabEnter();
                             }
                             @Override
                             public void onFallo(Exception e)

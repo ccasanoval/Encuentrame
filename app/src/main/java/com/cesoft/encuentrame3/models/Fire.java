@@ -21,23 +21,24 @@ public class Fire
 	@Inject public Fire(){}
 
 	//----------------------------------------------------------------------------------------------
-	//-----
 	public interface AuthListener
 	{
 		void onExito(FirebaseUser usr);
 		void onFallo(Exception e);
 	}
 	//----------------------------------------------------------------------------------------------
-	public static abstract class DatosListener<T> implements SimpleListener<T>
+	public abstract static class DatosListener<T> implements SimpleListener<T>
 	{
-		private DatabaseReference _ref;
-			void setRef(DatabaseReference ref){_ref=ref;}
+		private DatabaseReference ref;
+			void setRef(DatabaseReference ref){this.ref=ref;}
 
-		private ValueEventListener _vel = null;
-			public void setListener(ValueEventListener vel){delListener();_vel = vel;}
-			private void delListener()
-			{
-				if(_ref!=null && _vel!=null)_ref.removeEventListener(_vel);
+		private ValueEventListener vel = null;
+			public void setListener(ValueEventListener vel) {
+				delListener(); this.vel = vel;
+			}
+			private void delListener() {
+				if(ref!=null && vel!=null)
+					ref.removeEventListener(vel);
 			}
 	}
 	//----------------------------------------------------------------------------------------------
@@ -48,7 +49,7 @@ public class Fire
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public static abstract class CompletadoListener implements DatabaseReference.CompletionListener
+	public abstract static class CompletadoListener implements DatabaseReference.CompletionListener
 	{
 		protected abstract void onDatos(String id);
 		protected abstract void onError(String err, int code);

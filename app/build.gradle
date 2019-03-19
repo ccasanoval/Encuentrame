@@ -4,14 +4,14 @@ apply plugin: 'io.fabric'
 android {
     signingConfigs {
         config {
-            keyAlias 'keyAlias'
-            keyPassword 'keyPassword'
-            storeFile file('C:/zUSR/zCES/ks.jks')
-            storePassword 'keyPassword'
+            keyAlias 'ces'
+            keyPassword 'sig550'
+            storePassword 'sig550'
+            storeFile file('/home/cesar/usr/tests/CesDoom2/cesks.jks')
         }
     }
     compileSdkVersion 28
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId 'com.cesoft.encuentrame3'
         minSdkVersion 21
@@ -29,19 +29,20 @@ android {
         }
     }
     compileOptions    //RetroLambda
-            {
-                sourceCompatibility JavaVersion.VERSION_1_8
-                targetCompatibility JavaVersion.VERSION_1_8
-            }
+    {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     return true
 }
 
-def VER_ANDROID = '28.0.0-rc01'
-def VER_GOOGLE = '15.0.1'
-def VER_GOOGLE_AUTH = '16.0.0'
+def VER_ANDROID = '28.0.0'
+def VER_GOOGLE_LOCATION = '16.0.0'
+def VER_GOOGLE = '16.1.0'
+def VER_GOOGLE_AUTH = '16.0.1'
 def VER_FIREBASE = '16+'
 def VER_DAGGER_TEST = '2.8'
-def VER_DAGGER = '2.15'
+def VER_DAGGER = '2.19'
 def VER_RUNNER = '0.5'
 def VER_ESPRESSO = '2.2.2'
 def VER_JUNIT = '4.12'
@@ -59,7 +60,7 @@ dependencies {
     implementation "com.android.support:support-v4:${VER_ANDROID}"
 
     // Google
-    implementation "com.google.android.gms:play-services-location:${VER_GOOGLE}"
+    implementation "com.google.android.gms:play-services-location:${VER_GOOGLE_LOCATION}"
     implementation "com.google.android.gms:play-services-auth:${VER_GOOGLE_AUTH}"
     implementation "com.google.android.gms:play-services-maps:${VER_GOOGLE}"
     implementation "com.google.android.gms:play-services-gcm:${VER_GOOGLE}"

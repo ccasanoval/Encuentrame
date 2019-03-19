@@ -2,9 +2,13 @@ package com.cesoft.encuentrame3.util;
 
 import android.content.SharedPreferences;
 
+import com.cesoft.encuentrame3.BuildConfig;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 @Singleton
 public class Preferencias {
 
@@ -20,49 +24,53 @@ public class Preferencias {
     private static final String AUTOARRANQUE = "is_auto_arranque";
 
 
-    private SharedPreferences _sp;
+    private SharedPreferences sp;
     @Inject
     public Preferencias(SharedPreferences sp) {
-        _sp = sp;
+        this.sp = sp;
     }
 
 
     //----------------------------------------------------------------------------------------------
     public boolean isSaveAllPoints() {
-        return _sp.getBoolean(SAVE_ALL_POINTS, false);
+        if(BuildConfig.DEBUG)
+            return true;//TODO:DEBUG
+        else
+            return sp.getBoolean(SAVE_ALL_POINTS, false);
     }
     public long getTrackingDelay() {
         long delay = Constantes.DELAY_TRACK_MIN;
-        String s = _sp.getString(TRACKING_DELAY, "");
+        String s = sp.getString(TRACKING_DELAY, "30");
+        if(s == null) s = "30";
         try { delay = Long.parseLong(s) * 1000; } catch (Exception ignore) {}
         if(delay < Constantes.DELAY_TRACK_MIN / 2)///TODO:RELEASE: delay min = 30s  &&&  save all -> only op2501!!!
             delay = Constantes.DELAY_TRACK_MIN / 2;
         if(delay > 60*60*1000)
-            delay = 60*60*1000;
+            delay = 60*60*1000L;
         return delay;
     }
     //----------------------------------------------------------------------------------------------
     public String getNotificationRingtone() {
-        return _sp.getString(NOTIFICATION_RINGTONE, "");
+        return sp.getString(NOTIFICATION_RINGTONE, "");
     }
     public boolean isNotificationVibrate() {
-        return _sp.getBoolean(NOTIFICATION_VIBRATE, false);
+        return sp.getBoolean(NOTIFICATION_VIBRATE, false);
     }
     public boolean isNotificationLights() {
-        return _sp.getBoolean(NOTIFICATION_LIGHTS, false);
+        return sp.getBoolean(NOTIFICATION_LIGHTS, false);
     }
     //----------------------------------------------------------------------------------------------
     public boolean isAutoArranque() {
-        return _sp.getBoolean(AUTOARRANQUE, true);
+        return sp.getBoolean(AUTOARRANQUE, true);
     }
     //----------------------------------------------------------------------------------------------
     public void setTrackingRoute(String sIdRoute) {
-        SharedPreferences.Editor editor = _sp.edit();
+        SharedPreferences.Editor editor = sp.edit();
         editor.putString(ID_TRACKING, sIdRoute);
         editor.apply();//editor.commit(); Apply does it in background
     }
     public String getTrackingRoute() {
-        return _sp.getString(ID_TRACKING, "");
+        return sp.getString(ID_TRACKING, "");
     }
 
 }

@@ -31,8 +31,6 @@ import java.util.TreeSet;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//TODO: Config : max number of points per rute => cuando alcanza el limite corta...
-//TODO: config : Radious of geofence (si se utilizase ruta por geofence)....
 @IgnoreExtraProperties
 public class Ruta extends Objeto implements Parcelable
 {
@@ -42,14 +40,13 @@ public class Ruta extends Objeto implements Parcelable
 	private static DatabaseReference newFirebase() {
 		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
 	}
-	//protected static GeoFire newGeoFire(){return new GeoFire(FirebaseDatabase.getInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));}
-	@Exclude private DatabaseReference _datos;
-
-	//TODO: añadir info: DELAY, ALL_POINTS, IGNORING_BATTERY_OPTIMIZATION ? y mostrarlo en estadisticas
+	@Exclude private DatabaseReference datos;
 
 	//______________________________________________________________________________________________
 	public Ruta() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
-	@Override public String toString()
+	@NonNull
+	@Override
+	public String toString()
 	{
 		return String.format(Locale.ENGLISH, "Ruta{id='%s', nombre='%s', descripcion='%s', fecha='%s', puntosCount='%d'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha), puntosCount);
@@ -59,17 +56,14 @@ public class Ruta extends Objeto implements Parcelable
 	protected Ruta(Parcel in)
 	{
 		super(in);
-		//setId(in.readString());
 		puntosCount = in.readLong();
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
-		//dest.writeString(getId());
 		dest.writeLong(puntosCount);
 	}
-	//@Override public int describeContents(){return 0;}
 	public static final Creator<Ruta> CREATOR = new Creator<Ruta>()
 	{
 		@Override public Ruta createFromParcel(Parcel in){return new Ruta(in);}
@@ -82,42 +76,42 @@ public class Ruta extends Objeto implements Parcelable
 	public void eliminar(Fire.CompletadoListener listener)
 	{
 		RutaPunto.eliminar(getId());
-		if(_datos != null)
+		if(datos != null)
 		{
-			_datos.setValue(null, listener);
+			datos.setValue(null, listener);
 		}
 		else if(getId() != null)
 		{
-			_datos = newFirebase().child(getId());
-			_datos.setValue(null, listener);
+			datos = newFirebase().child(getId());
+			datos.setValue(null, listener);
 		}
-		_datos.removeValue();
+		datos.removeValue();
 		puntosCount = 0;
 	}
 
 	public void guardar(final Fire.CompletadoListener listener)
 	{
-		if(_datos != null)
+		if(datos != null)
 		{
-			_datos.setValue(this, listener);
+			datos.setValue(this, listener);
 		}
 		else
 		{
 			if(getId() != null)
 			{
-				_datos = newFirebase().child(getId());
+				datos = newFirebase().child(getId());
 			}
 			else
 			{
-				_datos = newFirebase().push();
-				setId(_datos.getKey());
+				datos = newFirebase().push();
+				setId(datos.getKey());
 			}
-			_datos.setValue(this, listener);
+			datos.setValue(this, listener);
 		}
 	}
 	public static void getById(String sId, final Fire.SimpleListener<Ruta> listener)
 	{
-		Query queryRef = newFirebase().orderByKey().equalTo(sId);//.limitToFirst(1);
+		Query queryRef = newFirebase().orderByKey().equalTo(sId);
 		queryRef.addListenerForSingleValueEvent(new ValueEventListener()
 		{
 			@Override
@@ -131,15 +125,13 @@ public class Ruta extends Objeto implements Parcelable
 			{
 				listener.onError(err.toString());
 			}
-		});//queryRef.addChildEventListener(listener);
+		});
 	}
 
 	public static void getLista(final Fire.DatosListener<Ruta> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
-		ValueEventListener vel;// = listener.getListener();
-		//if(vel != null)ddbb.removeEventListener(vel);
-		vel = new ValueEventListener()//AJAX
+		ValueEventListener vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(@NonNull DataSnapshot data)
@@ -150,8 +142,7 @@ public class Ruta extends Objeto implements Parcelable
 					ArrayList<Ruta> aRutas = new ArrayList<>(n);
 					for(DataSnapshot o : data.getChildren())
 						aRutas.add(o.getValue(Ruta.class));
-					//Collections.reverse(aRutas);
-					listener.onDatos(reverse(aRutas));//aRutas.toArray(new Ruta[n]));
+					listener.onDatos(reverse(aRutas));
 				}
 				else
 				{
@@ -166,9 +157,8 @@ public class Ruta extends Objeto implements Parcelable
 			}
 		};
 		listener.setRef(ddbb);
-		//listener.delListener();
 		listener.setListener(vel);
-		ddbb.addValueEventListener(vel);	//.addListenerForSingleValueEvent(new ValueEventListener()
+		ddbb.addValueEventListener(vel);
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -191,10 +181,7 @@ public class Ruta extends Objeto implements Parcelable
 	private static void buscarPorFiltro(final Fire.DatosListener<Ruta> listener, final Filtro filtro, final String idRutaAct)
 	{
 		DatabaseReference ddbb = newFirebase();
-		ValueEventListener vel;// = listener.getListener();
-		//if(vel != null)ddbb.removeEventListener(vel);
-		//newFirebase().addListenerForSingleValueEvent(new ValueEventListener()
-		vel = new ValueEventListener()//AJAX
+		ValueEventListener vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(@NonNull DataSnapshot data)
@@ -238,7 +225,6 @@ public class Ruta extends Objeto implements Parcelable
 				for(String idRuta : aData)
 				{
 					Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
-					//Ruta.newFirebase().child(idRuta).addValueEventListener(new ValueEventListener()//AJAX
 					{
 						@Override
 						public void onDataChange(@NonNull DataSnapshot data)
@@ -266,7 +252,7 @@ public class Ruta extends Objeto implements Parcelable
 			@Override
 			public void onError(String err)
 			{
-				listener.onError(err);	//System.err.println("Ruta:buscarPorGeoFiltro:onError:e:"+err);
+				listener.onError(err);
 			}
 		};
 
@@ -281,7 +267,6 @@ public class Ruta extends Objeto implements Parcelable
 			{
 				nCount++;
 				RutaPunto.newFirebase().child(key).addListenerForSingleValueEvent(new ValueEventListener()
-				//RutaPunto.newFirebase().child(key).addValueEventListener(new ValueEventListener()//AJAX
 				{
 					@Override
 					public void onDataChange(@NonNull DataSnapshot data)
@@ -289,7 +274,7 @@ public class Ruta extends Objeto implements Parcelable
 						nCount--;
 						RutaPunto rp = data.getValue(RutaPunto.class);
 						if(rp != null)
-						asRutas.add(rp.getIdRuta());
+							asRutas.add(rp.getIdRuta());
 						if(nCount < 1)
 							lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
 					}
@@ -299,7 +284,7 @@ public class Ruta extends Objeto implements Parcelable
 						nCount--;
 						Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:e:%s",err));
 						if(nCount < 1)
-							lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
+							lis.onDatos(asRutas.toArray(new String[0]));
 					}
 				});
 			}
@@ -308,7 +293,7 @@ public class Ruta extends Objeto implements Parcelable
 			{
 				if(nCount == 0)
 					lis.onDatos(new String[0]);
-				geoQuery.removeGeoQueryEventListener(this);//geoQuery.removeAllListeners();
+				geoQuery.removeGeoQueryEventListener(this);
 			}
 
 			@Override public void onKeyExited(String key){}
@@ -348,7 +333,6 @@ public class Ruta extends Objeto implements Parcelable
 	                            float precision, double altura, float velocidad, float direccion,
 								int actividad,
 								final Fire.SimpleListener<Long> listener)
-	                            //final Fire.Transaccion listener)
 	{
 		RutaPunto pto = new RutaPunto(idRuta, lat, lon, precision, altura, velocidad, direccion, actividad);
 		pto.guardar((err, databaseReference) ->
@@ -398,7 +382,7 @@ public class Ruta extends Objeto implements Parcelable
 			return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
 		}
 		@Exclude
-		private DatabaseReference _datos;
+		private DatabaseReference datos;
 
 		protected String id = null;
 			public String getId(){return id;}
@@ -409,7 +393,8 @@ public class Ruta extends Objeto implements Parcelable
 			String getIdRuta(){return idRuta;}
 			void setIdRuta(String v){idRuta = v;}
 
-		private double latitud, longitud;
+		private double latitud;
+		private double longitud;
 			public double getLatitud(){return latitud;}
 			public double getLongitud(){return longitud;}
 			void setLat(double v){latitud=v;}
@@ -421,16 +406,12 @@ public class Ruta extends Objeto implements Parcelable
 
 		private float precision;
 			public float getPrecision(){return precision;}
-			//public void setPrecision(float v){precision = v;}
 		private double altura;
 			public double getAltura(){return altura;}
-			//public void setAltura(double v){altura = v;}
 		private float velocidad;
 			public float getVelocidad(){return velocidad;}
-			//public void setVelocidad(float v){velocidad = v;}
 		private float direccion;
 			public float getDireccion(){return direccion;}
-			//public void setDireccion(float v){direccion = v;}
 
 //		DetectedActivity.STILL,
 //		DetectedActivity.ON_FOOT,
@@ -444,6 +425,7 @@ public class Ruta extends Objeto implements Parcelable
 			public int getActividad(){return actividad;}
 
 		//__________________________________________________________________________________________
+		@NonNull
 		@Override public String toString()
 		{
 			return String.format(Locale.ENGLISH, "RutaPunto{id='%s', fecha='%s', latitud='%f', longitud='%f', idRuta='%s'}",
@@ -495,17 +477,14 @@ public class Ruta extends Objeto implements Parcelable
 
 		//----------------------------------------------------------------------------------------------
 		// FIREBASE
-		//Ruta.RutaPunto.eliminar(null);//Limpiar puntos sin id ruta
 		public static void eliminar(final String idRuta)
 		{
-			//RutaPunto.getLista(idRuta, new ValueEventListener()
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(idRuta);
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
 			{
 				@Override
 				public void onDataChange(@NonNull DataSnapshot ds)
 				{
-					//Log.w(TAG, "RutaPunto:eliminar:**************** ELIMINANDO PTOS DE RUTA "+idRuta+" *************** N pts:"+ds.getChildrenCount());
 					for(DataSnapshot o : ds.getChildren())
 					{
 						RutaPunto rp = o.getValue(RutaPunto.class);
@@ -524,29 +503,28 @@ public class Ruta extends Objeto implements Parcelable
 		}
 		public void guardar(DatabaseReference.CompletionListener listener)
 		{
-			if(_datos != null)
+			if(datos != null)
 			{
-				_datos.setValue(this, listener);
+				datos.setValue(this, listener);
 			}
 			else
 			{
 				if(getId() != null)
 				{
-					_datos = newFirebase().child(getId());
+					datos = newFirebase().child(getId());
 				}
 				else
 				{
-					_datos = newFirebase().push();
-					setId(_datos.getKey());
+					datos = newFirebase().push();
+					setId(datos.getKey());
 				}
-				_datos.setValue(this, listener);
+				datos.setValue(this, listener);
 			}
 			saveGeo();
 		}
 		public static void getLista(String sIdRuta, final Fire.SimpleListener<Ruta.RutaPunto> listener)
 		{
-			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
-			//queryRef.addValueEventListener(listener);//AJAX//TODO: No marear al usuario con cambio de colores, etc
+			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
 				@Override
 				public void onDataChange(@NonNull DataSnapshot ds)
@@ -567,13 +545,10 @@ public class Ruta extends Objeto implements Parcelable
 				}
 			});
 		}
-		public static void getListaRep(String sIdRuta, final Fire.DatosListener<Ruta.RutaPunto> listener) //final ValueEventListener listener)
+		public static void getListaRep(String sIdRuta, final Fire.DatosListener<Ruta.RutaPunto> listener)
 		{
-			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);//Query queryRef = newFirebase().equalTo("idRuta", sIdRuta);//No funciona
-			//listener.setRef(queryRef.getRef());
-			ValueEventListener vel;// = listener.getListener();
-			//if(vel != null)queryRef.getRef().removeEventListener(vel);
-			vel = new ValueEventListener()//AJAX
+			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(sIdRuta);
+			ValueEventListener vel = new ValueEventListener()
 			{
 				@Override
 				public void onDataChange(@NonNull DataSnapshot data)
@@ -582,20 +557,19 @@ public class Ruta extends Objeto implements Parcelable
 					ArrayList<Ruta.RutaPunto> a = new ArrayList<>((int)n);
 					for(DataSnapshot o : data.getChildren())
 						a.add(o.getValue(Ruta.RutaPunto.class));
-					listener.onDatos(a.toArray(new Ruta.RutaPunto[a.size()]));
+					listener.onDatos(a.toArray(new RutaPunto[0]));
+Log.e(TAG, "getListaRep:onDataChange:----------------------------------------n="+a.size());
 				}
 				@Override
 				public void onCancelled(@NonNull DatabaseError err)
 				{
 					Log.e(TAG, "getListaAsync:onCancelled:"+err);
 					listener.onError("Ruta:getListaAsync:onCancelled:"+err);
-					//ddbb.removeEventListener(this);
 				}
 			};
 			listener.setRef(queryRef.getRef());
-			//listener.delListener();
 			listener.setListener(vel);
-			queryRef.addValueEventListener(vel);//AJAX
+			queryRef.addValueEventListener(vel);
 		}
 		// FIREBASE
 		//----------------------------------------------------------------------------------------------
@@ -605,7 +579,7 @@ public class Ruta extends Objeto implements Parcelable
 		private void saveGeo()
 		{
 			final double DISTANCIA_MIN = 10/1000.0;//Km
-			if(_datos.getKey() == null)
+			if(datos.getKey() == null)
 			{
 				Log.e(TAG, "RutaPunto:saveGeo:id==null");
 				return;
@@ -634,16 +608,14 @@ public class Ruta extends Objeto implements Parcelable
 		}
 		private void saveGeo2()
 		{
-			if(_datos.getKey() != null)
-			newGeoFire().setLocation(_datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
-			{
-				if(error != null)
-					Log.e(TAG, "RutaPunto:saveGeo2:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+_datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
-				//else
-				//	Log.w(TAG, "RutaPunto:saveGeo: Location saved on server successfully! "+idRuta);
-			});
+			if(datos.getKey() != null)
+				newGeoFire().setLocation(datos.getKey(), new GeoLocation(getLatitud(), getLongitud()), (key, error) ->
+				{
+					if(error != null)
+						Log.e(TAG, "RutaPunto:saveGeo2:e: There was an error saving the location to GeoFire: "+error+" : "+key+" : "+ datos.getKey()+" : "+getLatitud()+"/"+getLongitud()+" : "+idRuta);
+				});
 		}
-		private static void delGeo(final String idRutaPunto)//TODO: Aqui estas borrando tambien -> mueve a RutaPunto delete
+		private static void delGeo(final String idRutaPunto)
 		{
 			final GeoFire datGeo = newGeoFire();
 			datGeo.removeLocation(idRutaPunto);
@@ -654,13 +626,6 @@ public class Ruta extends Objeto implements Parcelable
 
 		//----------------------------------------------------------------------------------------------
 		//----------- HELPING FUNC
-		/*
-		public double distanciaSimple(RutaPunto v)
-		{
-			double dLat = getLatitud() - v.getLatitud();
-			double dLon = getLongitud() - v.getLongitud();
-			return dLat*dLat + dLon*dLon;
-		}*/
 		public float distanciaReal(RutaPunto v)
 		{
 			if(v == null)return 0;
@@ -689,7 +654,6 @@ public class Ruta extends Objeto implements Parcelable
 
 			float[] dist = new float[1];
 			android.location.Location.distanceBetween(lat1, lon1, lat2, lon2, dist);
-			//Log.e(TAG, "-----------2-----"+dist[0]);
 			return dist[0];
 		}
 	}
@@ -697,7 +661,7 @@ public class Ruta extends Objeto implements Parcelable
 
 	private static Ruta[] reverse(ArrayList<Ruta> aRutas) {
 		Collections.reverse(aRutas);
-		return aRutas.toArray(new Ruta[aRutas.size()]);
+		return aRutas.toArray(new Ruta[0]);
 	}
 
 }

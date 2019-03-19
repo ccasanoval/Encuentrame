@@ -33,7 +33,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		//_util = ((App)getApplication()).getGlobalComponent().util();
+		//util = ((App)getApplication()).getGlobalComponent().util();
 		((App)getApplication()).getGlobalComponent().inject(this);
 	}
 	@Override

@@ -22,8 +22,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.cesoft.encuentrame3.util.Constantes.DELAY_TRACK_MIN;
-
 @Singleton
 public class ActividadIntentService extends IntentService {
     protected static final String TAG = ActividadIntentService.class.getSimpleName();
@@ -41,7 +39,6 @@ public class ActividadIntentService extends IntentService {
         Task<Void> task = activityRecognitionClient.requestActivityUpdates(
                 Constantes.DELAY_ACTIVITY_DETECTION,
                 getPendingIntent(context));
-        //task.addOnSuccessListener(new OnSuccessListener<Void>() { @Override public void onSuccess(Void result) {
         task.addOnFailureListener(e -> Log.e(TAG, "start:e:-----------------------------------",e));
     }
     public static void stop(Context context) {
@@ -51,7 +48,7 @@ public class ActividadIntentService extends IntentService {
     }
 
 
-    @Inject Login _login;
+    @Inject Login login;
     @Inject public ActividadIntentService() { super(TAG); }
 
     @Override
@@ -59,7 +56,7 @@ public class ActividadIntentService extends IntentService {
         super.onCreate();
         Context appContext = getApplicationContext();
         App.getComponent(appContext).inject(this);
-        if( ! _login.isLogged()) {
+        if( ! login.isLogged()) {
             Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
             stop(appContext);
         }
@@ -75,13 +72,10 @@ public class ActividadIntentService extends IntentService {
         ArrayList<DetectedActivity> detectedActivities = (ArrayList)result.getProbableActivities();
 
         // Comunicar la nueva actividad a los observers
-        //EventBus.getDefault().post(new ActividadEvent(detectedActivities));
         DetectedActivity act = getMostProbableAct(detectedActivities);
-        //DetectedActivity act2 = getNextMostProbableAct(detectedActivities, act);
         if(act != null && act.getConfidence() >= 30) {
             EventBus.getDefault().post(new ActividadEvent(act));
         }
-        //else if(act2 != null && act2.getConfidence() >= 30){
 
         //Log.e(TAG, "--------------------------------------------------------------------");
         //Log.e(TAG, "---IN_VEHICLE = 0;   ON_BICYCLE = 1;   ON_FOOT = 2;     STILL   = 3;");

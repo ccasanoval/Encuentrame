@@ -28,91 +28,88 @@ public class PreAviso extends PresenterBase
 		boolean isActivo();
 	}
 
-	private Util _util;
-	private LoadGeofenceJobService _servicio;
+	private Util util;
+	private LoadGeofenceJobService servicio;
 	@Inject PreAviso(Application app, Util util, LoadGeofenceJobService servicio)
 	{
 		super(app);
-		_util = util;
-		_servicio = servicio;
+		this.util = util;
+		this.servicio = servicio;
 	}
 
 	@Override public void setLatLon(double lat, double lon)
 	{
-		_o.setLatLon(lat, lon);
+		o.setLatLon(lat, lon);
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public boolean isActivo() { return ((Aviso)_o).isActivo(); }
-	public double getRadio() { return ((Aviso)_o).getRadio(); }
+	public boolean isActivo() { return ((Aviso) o).isActivo(); }
+	public double getRadio() { return ((Aviso) o).getRadio(); }
 	public void setRadio(int radio)
 	{
-		_bSucio = ((Aviso)_o).getRadio() != radio;
-		((Aviso)_o).setRadio(radio);
+		bSucio = ((Aviso) o).getRadio() != radio;
+		((Aviso) o).setRadio(radio);
 	}
 	public void setActivo(boolean isChecked)
 	{
-		_bSucio = isChecked != ((Aviso)_o).isActivo();
+		bSucio = isChecked != ((Aviso) o).isActivo();
 	}
 	@Override
 	public void loadObjeto(Objeto objDefault)
 	{
 		super.loadObjeto(objDefault);
-		try { _bDesdeNotificacion = _view.getAct().getIntent().getBooleanExtra(Constantes.NOTIF, false); }
-		catch(Exception e){ _bDesdeNotificacion=false; }
+		try { bDesdeNotificacion = view.getAct().getIntent().getBooleanExtra(Constantes.NOTIF, false); }
+		catch(Exception e){ bDesdeNotificacion =false; }
 	}
 
 	//______________________________________________________________________________________________
 	// GET BACK TO MAIN
 	private void openMain(String sMensaje)
 	{
-		if(_bDesdeNotificacion)
-			_util.openMain(_view.getAct(), true, sMensaje, Constantes.AVISOS);
+		if(bDesdeNotificacion)
+			util.openMain(view.getAct(), true, sMensaje, Constantes.AVISOS);
 		else
-			_util.return2Main(_view.getAct(), true, sMensaje);
+			util.return2Main(view.getAct(), true, sMensaje);
 	}
 
 	//______________________________________________________________________________________________
-	private boolean _bGuardar = true;
 	public synchronized void guardar()
 	{
-		if(_o.getLatitud()==0 && _o.getLongitud()==0)
+		if(o.getLatitud()==0 && o.getLongitud()==0)
 		{
-			_view.toast(R.string.sin_lugar);
+			view.toast(R.string.sin_lugar);
 			return;
 		}
-		if(_view.getTextNombre().isEmpty())
+		if(view.getTextNombre().isEmpty())
 		{
-			_view.requestFocusNombre();
-			_view.toast(R.string.sin_nombre);
+			view.requestFocusNombre();
+			view.toast(R.string.sin_nombre);
 			return;
 		}
-		if(!_bGuardar)return;
-		_bGuardar = false;
-		_view.iniEspera();
+		if(!bGuardar)return;
+		bGuardar = false;
+		view.iniEspera();
 
-		_o.setNombre(_view.getTextNombre());
-		_o.setDescripcion(_view.getTextDescripcion());
-		((Aviso)_o).setActivo(((IVistaAviso)_view).isActivo());
-		//_a.reactivarPorHoy();
-		//_a.setLugar(new GeoPoint(_loc.getLatitude(), _loc.getLongitude()), _radio);
-		((Aviso)_o).guardar(new Fire.CompletadoListener()
+		o.setNombre(view.getTextNombre());
+		o.setDescripcion(view.getTextDescripcion());
+		((Aviso) o).setActivo(((IVistaAviso) view).isActivo());
+		((Aviso) o).guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				_view.finEspera();
-				_bGuardar = true;
-				_servicio.cargarListaGeoAvisos();//System.err.println("ActAviso:guardar:handleResponse:" + a);
-				openMain(_app.getString(R.string.ok_guardar_aviso));//return2Main(true, getString(R.string.ok_guardar));
+				view.finEspera();
+				bGuardar = true;
+				servicio.cargarListaGeoAvisos();
+				openMain(app.getString(R.string.ok_guardar_aviso));
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				_view.finEspera();
-				_bGuardar = true;
+				view.finEspera();
+				bGuardar = true;
 				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------------"+err);
-				_view.toast(R.string.error_guardar, err);
+				view.toast(R.string.error_guardar, err);
 			}
 		});
 	}
@@ -121,23 +118,23 @@ public class PreAviso extends PresenterBase
 	@Override
 	public synchronized void eliminar()
 	{
-		_view.iniEspera();
-		((Aviso)_o).eliminar(new Fire.CompletadoListener()
+		view.iniEspera();
+		((Aviso) o).eliminar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				_view.finEspera();
-				_bEliminar=true;
-				openMain(_app.getString(R.string.ok_eliminar_aviso));
+				view.finEspera();
+				bEliminar =true;
+				openMain(app.getString(R.string.ok_eliminar_aviso));
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				_view.finEspera();
-				_bEliminar=true;
+				view.finEspera();
+				bEliminar =true;
 				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
-				_view.toast(R.string.error_eliminar, err);
+				view.toast(R.string.error_eliminar, err);
 			}
 		});
 	}

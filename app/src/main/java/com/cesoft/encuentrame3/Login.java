@@ -22,11 +22,11 @@ public class Login
 	private static final String PREF_SAVE_LOGIN = "save_login";
 
 	//______________________________________________________________________________________________
-	private SharedPreferences _sp;
+	private SharedPreferences sp;
 	@Inject
 	public Login(SharedPreferences sp)
 	{
-		_sp = sp;
+		this.sp = sp;
 	}
 
 	private static FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
@@ -41,21 +41,19 @@ public class Login
 		FirebaseAuth a = FirebaseAuth.getInstance();
 		if(a == null || a.getCurrentUser() == null)return "";
 		return a.getCurrentUser().getEmail();
-		//return a.getCurrentUser().getDisplayName();
 	}
 
-	// TODO: Sync data: https://firebase.google.com/docs/database/android/offline-capabilities?hl=es
-	private static FirebaseDatabase _fbdb=null;
-	public synchronized static FirebaseDatabase getDBInstance()
+	private static FirebaseDatabase fbdb =null;
+	public static synchronized FirebaseDatabase getDBInstance()
 	{
-		if(_fbdb == null)
+		if(fbdb == null)
 		{
-			_fbdb = FirebaseDatabase.getInstance();
+			fbdb = FirebaseDatabase.getInstance();
 			try{
-			_fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
-			}catch(Exception e){Log.e("CESoft:Login", String.format("getDBInstance:e:%s",e), e);}
+			fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
+			}catch(Exception e){Log.e("Login", String.format("getDBInstance:e:%s",e), e);}
 		}
-		return _fbdb;
+		return fbdb;
 	}
 
 
@@ -67,10 +65,11 @@ public class Login
 		getAuth().createUserWithEmailAndPassword(email, password)
 			.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
 			.addOnFailureListener(listener::onFallo)
-			.addOnCompleteListener(task ->
-			{
-				//System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
-			});
+//			.addOnCompleteListener(task ->
+//			{
+//				System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
+//			})
+			;
 	}
 
 	private static void login2(String email, String password, final Fire.AuthListener listener)
@@ -78,40 +77,41 @@ public class Login
 		getAuth().signInWithEmailAndPassword(email, password)
 			.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
 			.addOnFailureListener(listener::onFallo)
-			.addOnCompleteListener(task ->
-			{
-				//System.err.println("Login:login2:task:"+task);
-			});
+//			.addOnCompleteListener(task ->
+//			{
+//				//System.err.println("Login:login2:task:"+task);
+//			})
+			;
 	}
 
 
 	private String getUsuario()
 	{
-		return _sp.getString(PREF_LOGIN, "");
+		return sp.getString(PREF_LOGIN, "");
 	}
 	private String getClave()
 	{
-		return _sp.getString(PREF_PWD, "");
+		return sp.getString(PREF_PWD, "");
 	}
 	private void saveLogin(String usr, String pwd)
 	{
 		if(usr == null || usr.isEmpty())return;
-		if(!_sp.getBoolean(PREF_SAVE_LOGIN, true))return;
-		SharedPreferences.Editor e = _sp.edit();
+		if(!sp.getBoolean(PREF_SAVE_LOGIN, true))return;
+		SharedPreferences.Editor e = sp.edit();
 		e.putString(PREF_LOGIN, usr);
 		e.putString(PREF_PWD, pwd);
 		e.apply();
 	}
 	private void delLogin()
 	{
-		SharedPreferences.Editor e = _sp.edit();
+		SharedPreferences.Editor e = sp.edit();
 		e.putString(PREF_LOGIN, "");
 		e.putString(PREF_PWD, "");
 		e.apply();
 	}
 	private void delPasswordOnly()
 	{
-		SharedPreferences.Editor e = _sp.edit();
+		SharedPreferences.Editor e = sp.edit();
 		e.putString(PREF_PWD, "");
 		e.apply();
 	}
@@ -121,7 +121,7 @@ public class Login
 	{
 		try
 		{
-			if( ! _sp.getBoolean(PREF_SAVE_LOGIN, true))
+			if( ! sp.getBoolean(PREF_SAVE_LOGIN, true))
 			{
 				delLogin();
 				return false;
@@ -136,10 +136,10 @@ public class Login
 	public void login(String email, String password, final Fire.AuthListener listener)
 	{
 		login2(email, password, listener);
-		if(_sp.getBoolean(PREF_SAVE_LOGIN, true))
+		if(sp.getBoolean(PREF_SAVE_LOGIN, true))
 		{
 			if(!email.isEmpty())
-			saveLogin(email, password);
+				saveLogin(email, password);
 		}
 		else
 			delLogin();
@@ -155,17 +155,17 @@ public class Login
 	void logout()
 	{
 		getAuth().signOut();
-		delPasswordOnly();//delLogin();
+		delPasswordOnly();
 	}
 
 	//-------
 	static void restoreUser(final String email, final Fire.AuthListener listener)
 	{
 		getAuth().sendPasswordResetEmail(email)
-			.addOnCompleteListener(task ->
-			{
-				//Log.e();
-			})
+//			.addOnCompleteListener(task ->
+//			{
+//				//Log.e();
+//			})
 			.addOnSuccessListener(aVoid -> listener.onExito(getAuth().getCurrentUser()))
 			.addOnFailureListener(listener::onFallo);
 	}

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.opengl.GLES10;
@@ -25,9 +24,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -46,6 +42,7 @@ public class ActImagen extends AppCompatActivity
 	private static final String TAG = ActImagen.class.getSimpleName();
 	public static final String PARAM_LUGAR = "lugar";
 	public static final String PARAM_IMG_PATH = "img_path";
+	public static final String FILE_STR = "file:";
 
 	public static final int IMAGE_CAPTURE = 6969;
 
@@ -53,12 +50,12 @@ public class ActImagen extends AppCompatActivity
 	private static final int REQUEST_PERMISSION_EXTERNAL_STORAGE = 6971;
 	private static final int REQUEST_PERMISSION_CAMERA = 6972;
 
-	private Lugar _l;
-	private ImageView _iv;
-	private String _imgURLnew;
+	private Lugar lugar;
+	private ImageView imageView;
+	private String imgURLnew;
 
 	private enum ESTADO {SIN_IMG, OLD_IMG, NEW_IMG}
-	private ESTADO _estado;
+	private ESTADO estado;
 
 
 	// * Whether or not the system UI should be auto-hidden after
@@ -93,9 +90,7 @@ public class ActImagen extends AppCompatActivity
 			// Delayed display of UI elements
 			ActionBar actionBar = getSupportActionBar();
 			if(actionBar != null)
-			{
 				actionBar.show();
-			}
 			mControlsView.setVisibility(View.VISIBLE);
 		}
 	};
@@ -105,7 +100,7 @@ public class ActImagen extends AppCompatActivity
 	 * Touch listener to use for in-layout UI controls to delay hiding the system UI.
 	 * This is to prevent the jarring behavior of controls going away while interacting with activity UI.
 	 */
-	private final View.OnClickListener mHideClickListener = (view) ->
+	private final View.OnClickListener mHideClickListener = view ->
 	{
 		if(AUTO_HIDE) delayedHide(AUTO_HIDE_DELAY_MILLIS);
 	};
@@ -121,14 +116,13 @@ public class ActImagen extends AppCompatActivity
 		mVisible = true;
 		mControlsView = findViewById(R.id.fullscreen_content_controls);
 		mContentView = findViewById(R.id.imagen);
-		_iv = (ImageView)mContentView;
+		imageView = (ImageView)mContentView;
 
 		// Set up the user interaction to manually show or hide the system UI.
 		mContentView.setOnClickListener(v -> toggle());
 
 		// Upon interacting with UI controls, delay any scheduled hide() operations
 		// to prevent the jarring behavior of controls going away while interacting with the UI.
-		//findViewById(R.id.tomar_foto).setOnTouchListener(mDelayHideTouchListener);
 		findViewById(R.id.tomar_foto).setOnClickListener(mHideClickListener);
 		Button b = findViewById(R.id.tomar_foto);
 		b.setOnClickListener(view -> dispatchTakePictureIntent());
@@ -139,16 +133,16 @@ public class ActImagen extends AppCompatActivity
 		//------------------------------------------------------------------------------------------
 		try
 		{
-			_imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
-			_l = getIntent().getParcelableExtra(PARAM_LUGAR);
-			if(_imgURLnew != null)
+			imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
+			lugar = getIntent().getParcelableExtra(PARAM_LUGAR);
+			if(imgURLnew != null)
 			{
-				File file = new File(_imgURLnew);
+				File file = new File(imgURLnew);
 				if(file.exists())
 				{
 					try{
-					Glide.with(this).load(_imgURLnew).into(_iv);
-					refreshMenu(ESTADO.NEW_IMG);
+						Glide.with(this).load(imgURLnew).into(imageView);
+						refreshMenu(ESTADO.NEW_IMG);
 					}
 					catch(OutOfMemoryError e)
 					{
@@ -158,13 +152,13 @@ public class ActImagen extends AppCompatActivity
 					}
 				}
 				else
-					_imgURLnew = null;
+					imgURLnew = null;
 			}
-			if(_imgURLnew == null)
+			if(imgURLnew == null)
 			{
-				if(_l != null && _l.getId() != null)
+				if(lugar != null && lugar.getId() != null)
 				{
-					_l.downloadImg(_iv, this, new Fire.SimpleListener<String>()
+					lugar.downloadImg(imageView, this, new Fire.SimpleListener<String>()
 					{
 						@Override
 						public void onDatos(String[] aData)
@@ -181,7 +175,7 @@ public class ActImagen extends AppCompatActivity
 						}
 					});
 				}
-				else if(_l == null || _l.getId() == null)
+				else
 				{
 					Log.e(TAG, "onCreate: no existe url ni Lugar -----------------------------------");
 					refreshMenu(ESTADO.SIN_IMG);
@@ -244,34 +238,34 @@ public class ActImagen extends AppCompatActivity
 	//____________________________________________________________________________________________________________________________________________________
 	/// MENU
 	//______________________________________________________________________________________________
-	private Menu _menu = null;
+	private Menu menu = null;
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_img, menu);
-		_menu = menu;
-		refreshMenu(_estado);
+		this.menu = menu;
+		refreshMenu(estado);
 		return true;
 	}
 	private void refreshMenu(ESTADO v)
 	{
-		_estado = v;
-		if(_menu == null)return;
-		if(_estado == ESTADO.SIN_IMG)
+		estado = v;
+		if(menu == null)return;
+		if(estado == ESTADO.SIN_IMG)
 		{
-			_menu.findItem(R.id.menu_eliminar).setVisible(false);
-			_menu.findItem(R.id.menu_guardar).setVisible(false);
+			menu.findItem(R.id.menu_eliminar).setVisible(false);
+			menu.findItem(R.id.menu_guardar).setVisible(false);
 			show();
 		}
-		else if(_estado == ESTADO.NEW_IMG)
+		else if(estado == ESTADO.NEW_IMG)
 		{
-			_menu.findItem(R.id.menu_eliminar).setVisible(true);
-			_menu.findItem(R.id.menu_guardar).setVisible(true);
+			menu.findItem(R.id.menu_eliminar).setVisible(true);
+			menu.findItem(R.id.menu_guardar).setVisible(true);
 		}
-		else if(_estado == ESTADO.OLD_IMG)
+		else if(estado == ESTADO.OLD_IMG)
 		{
-			_menu.findItem(R.id.menu_eliminar).setVisible(true);
-			_menu.findItem(R.id.menu_guardar).setVisible(false);
+			menu.findItem(R.id.menu_eliminar).setVisible(true);
+			menu.findItem(R.id.menu_guardar).setVisible(false);
 		}
 	}
 	@Override
@@ -285,54 +279,40 @@ public class ActImagen extends AppCompatActivity
 	}
 	/// MENU
 
-	//______________________________________________________________________________________________
-	/*private final static String _imgPath = getImgPath();
-	private static String getImgPath()
-	{
-		//File privateDir = getExternalFilesDir(null);
-		File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-		Log.e(TAG, "getImgPath---------------------"+dir);
-		return (new File(dir, "CESoftEncuentrame.jpg")).getPath();
-/*
-		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CESoft");
-		Log.e(TAG, "getImgPath---------------------"+mediaStorageDir);
-		if( ! mediaStorageDir.exists())
-		{
-			if( ! mediaStorageDir.mkdirs())
-				return (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Encuentrame.jpg")).getPath();
-		}
-		return (new File(mediaStorageDir, "CESoftEncuentrame.jpg")).getPath();*/
-	//}
-
 	private String currentPhotoPath;
-	private File createImageFile() throws Exception {
+	private File createImageFile() {
 		// Create an image file name
 		@SuppressLint("SimpleDateFormat")
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = "JPEG_" + timeStamp + "_";
-		File storageDir = new File(
-				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
-		File image = File.createTempFile(imageFileName,".jpg", storageDir);
-		// Save a file: path for use with ACTION_VIEW intents
-		currentPhotoPath = "file:" + image.getAbsolutePath();
-		return image;
+		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+		///File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+		try {
+			path.mkdirs();// Make sure the Pictures directory exists.
+			File image = File.createTempFile(imageFileName,".jpg", path);
+			currentPhotoPath = FILE_STR + image.getAbsolutePath();
+			Log.e(TAG, "createImageFile:----------------------------currentPhotoPath="+currentPhotoPath);
+			return image;
+		}
+		catch (Exception e) {
+			Log.e(TAG, "createImageFile:e:---------------------------- ",e);
+			return null;
+		}
 	}
 
 	//______________________________________________________________________________________________
 	private void dispatchTakePictureIntent() {
 		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		// Ensure that there's a camera activity to handle the intent
-		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+		if(takePictureIntent.resolveActivity(getPackageManager()) != null) {
 			// Create the File where the photo should go
-			File photoFile;
 			try {
-				photoFile = createImageFile();
+				File photoFile = createImageFile();
 				if(photoFile != null) {
-					//Uri photoURI = Uri.fromFile(createImageFile());//targetSdkVersion < 24
 					Uri photoURI = FileProvider.getUriForFile(
 							this,
 							BuildConfig.APPLICATION_ID + ".provider",
-							createImageFile());
+							photoFile);
 					takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 					startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
 				}
@@ -342,69 +322,36 @@ public class ActImagen extends AppCompatActivity
 			}
 		}
 	}
-	/*private void dispatchTakePictureIntent()
-	{
-		if(isNoCamaraPermission())
-		{
-			Toast.makeText(this, getString(R.string.sin_permiso_camara), Toast.LENGTH_LONG).show();
-			return;
-		}
-		if( ! getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
-		{
-			Toast.makeText(this, getString(R.string.sin_camara), Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
-		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 
-
-//TODO: Por que necesitamos esto para que no pete abrir la camara?--------------------
-		//StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-		//StrictMode.setVmPolicy(builder.build());
-
-		//Uri.fromFile(new File(_imgPath));
-		Uri photoURI = FileProvider.getUriForFile(this,
-				BuildConfig.APPLICATION_ID + ".provider",
-				createImageFile());
-
-		Log.e(TAG, "dispatchTakePictureIntent------------------------------"+_imgPath);
-		i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-		if(i.resolveActivity(getPackageManager()) != null)
-			startActivityForResult(i, REQUEST_ACTION_IMAGE_CAPTURE);
-	}*/
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		//super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == REQUEST_ACTION_IMAGE_CAPTURE && resultCode == RESULT_OK)
 		{
 			refreshMenu(ESTADO.NEW_IMG);
 			show();
 
+			// Variable to store the img
+			if(currentPhotoPath.contains(FILE_STR))
+				imgURLnew = currentPhotoPath.substring(FILE_STR.length());
+
 			// Show the thumbnail on ImageView
-			Uri imageUri = Uri.parse(currentPhotoPath);
-			File file = new File(imageUri.getPath());
 			try {
-				InputStream ims = new FileInputStream(file);
-				_iv.setImageBitmap(BitmapFactory.decodeStream(ims));
+				Glide.with(this).load(imgURLnew).into(imageView);
+				refreshMenu(ESTADO.NEW_IMG);
 			}
-			catch(FileNotFoundException e) {
-				Log.e(TAG, "onActivityResult:FileNotFoundException:e:-------------------------",e);
+			catch(Exception e) {
+				Log.e(TAG, "onActivityResult:e:----------------------------------",e);
 				Toast.makeText(this, R.string.error_img_path, Toast.LENGTH_LONG).show();
 				return;
 			}
 
 			// ScanFile so it will be appeared on Gallery
+			Uri imageUri = Uri.parse(currentPhotoPath);
 			MediaScannerConnection.scanFile(this,
 					new String[]{imageUri.getPath()},
 					null,
 					(path, uri) -> { });
-
-			// Variable to store the img
-			if(currentPhotoPath.contains("file:"))
-				_imgURLnew = currentPhotoPath.substring("file:".length());
-			Log.e(TAG, "onActivityResult:--------------------- IMG:"+_imgURLnew);
 		}
 		else
 		{
@@ -419,24 +366,22 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 	private void guardar()
 	{
 		Intent i = new Intent();
-		i.putExtra(PARAM_IMG_PATH, _imgURLnew);
+		i.putExtra(PARAM_IMG_PATH, imgURLnew);
 		setResult(RESULT_OK, i);
 		finish();
 	}
 	private void eliminar()
 	{
-		switch(_estado)
+		switch(estado)
 		{
 		case SIN_IMG:
 			break;
 		case NEW_IMG:
-			_imgURLnew = null;
-			//refreshMenu(ESTADO.SIN_IMG);
+			imgURLnew = null;
 			guardar();
 			break;
 		case OLD_IMG:
-			_l.delImg();
-			//refreshMenu(ESTADO.SIN_IMG);
+			lugar.delImg();
 			finish();
 			break;
 		}
@@ -473,6 +418,7 @@ Log.e(TAG, "dispatchTakePictureIntent222---------------------");
 				if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
 					takePhoto();
 				break;
+			default:break;
 		}
 	}
 

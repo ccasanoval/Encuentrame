@@ -3,8 +3,6 @@ package com.cesoft.encuentrame3;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.cesoft.encuentrame3.presenters.PreLugar;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +25,7 @@ public class PresentersTest
 
 		ActLugar activity = ruleLugar.getActivity();
 		//activity.
-		activity._presenter.onSalir();
+		activity.presenter.onSalir();
 
 		assertTrue(activity.isFinishing());
 	}

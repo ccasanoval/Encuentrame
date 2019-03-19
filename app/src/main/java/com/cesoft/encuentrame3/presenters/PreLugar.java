@@ -19,63 +19,60 @@ import javax.inject.Singleton;
 @Singleton
 public class PreLugar extends PresenterBase
 {
-	private final String TAG = PreLugar.class.getSimpleName();
+	private static final String TAG = PreLugar.class.getSimpleName();
 
-	private String _imgURLnew = null;
+	private String imgURLnew = null;
 
-	private Util _util;
+	private Util util;
 	public @Inject PreLugar(Application app, Util util)
 	{
 		super(app);
-		_util = util;
+		this.util = util;
 	}
 
 	//______________________________________________________________________________________________
 	@Override
 	public synchronized void guardar()
 	{
-		if(!_bGuardar)return;
-		_bGuardar = false;
-		_view.iniEspera();
+		if(!bGuardar)return;
+		bGuardar = false;
+		view.iniEspera();
 
-		if(_o.getLatitud() == 0 && _o.getLongitud() == 0)
+		if(o.getLatitud() == 0 && o.getLongitud() == 0)
 		{
-			//O escondes el teclado o el snackbar no se ve.....
-			//Snackbar.make(_coordinatorLayout, getString(R.string.sin_lugar), Snackbar.LENGTH_LONG).show();
-			_bGuardar = true;
-			_view.toast(R.string.sin_lugar);
-			_view.finEspera();
+			bGuardar = true;
+			view.toast(R.string.sin_lugar);
+			view.finEspera();
 			return;
 		}
-		if(_view.getTextNombre().isEmpty())
+		if(view.getTextNombre().isEmpty())
 		{
-			_bGuardar = true;
-			_view.toast(R.string.sin_nombre);
-			_view.requestFocusNombre();
-			_view.finEspera();
+			bGuardar = true;
+			view.toast(R.string.sin_nombre);
+			view.requestFocusNombre();
+			view.finEspera();
 			return;
 		}
-		_o.setNombre(_view.getTextNombre());
-		_o.setDescripcion(_view.getTextDescripcion());
-		//if(_imgURLnew != null)_l.setImagen(_imgURLnew);
-		((Lugar)_o).guardar(new Fire.CompletadoListener()
+		o.setNombre(view.getTextNombre());
+		o.setDescripcion(view.getTextDescripcion());
+		((Lugar) o).guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				Log.w(TAG, "guardar-----------------------------------------------------------------"+ _imgURLnew);
-				_bGuardar = true;
-				if(_imgURLnew != null)((Lugar)_o).uploadImg(_imgURLnew);
-				_imgURLnew = null;
-				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_guardar_lugar));
-				_view.finEspera();
+				Log.w(TAG, "guardar-----------------------------------------------------------------"+ imgURLnew);
+				bGuardar = true;
+				if(imgURLnew != null)((Lugar) o).uploadImg(imgURLnew);
+				imgURLnew = null;
+				util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_lugar));
+				view.finEspera();
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				_bGuardar = true;
-				_view.finEspera();
-				_view.toast(R.string.error_guardar, err);
+				bGuardar = true;
+				view.finEspera();
+				view.toast(R.string.error_guardar, err);
 				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------------"+err);
 			}
 		});
@@ -85,22 +82,22 @@ public class PreLugar extends PresenterBase
 	@Override
 	protected synchronized void eliminar()
 	{
-		_view.iniEspera();
-		((Lugar)_o).eliminar(new Fire.CompletadoListener()
+		view.iniEspera();
+		((Lugar) o).eliminar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				_bEliminar = true;
-				_view.finEspera();
-				_util.return2Main(_view.getAct(), true, _app.getString(R.string.ok_eliminar_lugar));
+				bEliminar = true;
+				view.finEspera();
+				util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_lugar));
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				_bEliminar = true;
-				_view.finEspera();
-				_view.toast(R.string.error_eliminar, err);
+				bEliminar = true;
+				view.finEspera();
+				view.toast(R.string.error_eliminar, err);
 				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
 			}
 		});
@@ -109,15 +106,15 @@ public class PreLugar extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	public void setImg(Intent data)
 	{
-		_imgURLnew = data.getStringExtra(ActImagen.PARAM_IMG_PATH);
-		_bSucio = true;
+		imgURLnew = data.getStringExtra(ActImagen.PARAM_IMG_PATH);
+		bSucio = true;
 	}
 	public void imagen()
 	{
-		Intent i = new Intent(_view.getAct(), ActImagen.class);
-		Log.e(TAG, "onActivityResult-----------------LUGAR---2---------------------- "+ _imgURLnew);
-		i.putExtra(ActImagen.PARAM_IMG_PATH, _imgURLnew);
-		i.putExtra(ActImagen.PARAM_LUGAR, _o);
-		_view.getAct().startActivityForResult(i, ActImagen.IMAGE_CAPTURE);
+		Intent i = new Intent(view.getAct(), ActImagen.class);
+		Log.e(TAG, "onActivityResult-----------------LUGAR---2---------------------- "+ imgURLnew);
+		i.putExtra(ActImagen.PARAM_IMG_PATH, imgURLnew);
+		i.putExtra(ActImagen.PARAM_LUGAR, o);
+		view.getAct().startActivityForResult(i, ActImagen.IMAGE_CAPTURE);
 	}
 }

@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.cesoft.encuentrame3.util.Constantes;
 import com.google.android.gms.maps.model.LatLng;
@@ -20,29 +21,32 @@ public class Filtro implements Parcelable
 	public static final int INACTIVO = 0;
 	public static final int ACTIVO = 1;
 
-	private boolean _onOff = false;
-		public boolean isOn(){return _onOff;}
-		public void turnOn(){_onOff = true;}
-		public void turnOff(){_onOff = false;}
+	private boolean onOff = false;
+		public boolean isOn(){return onOff;}
+		public void turnOn(){
+			onOff = true;}
+		public void turnOff(){
+			onOff = false;}
 		public boolean isValid()
 		{
-			return !(_activo == TODOS && _nombre.isEmpty() && _fechaIni == null && _fechaFin == null && _punto.latitude == 0 && _punto.longitude == 0);
+			return !(activo == TODOS && nombre.isEmpty() && fechaIni == null && fechaFin == null && punto.latitude == 0 && punto.longitude == 0);
 		}
 
-	private int		_tipo = Constantes.NADA;
-	private int 	_activo = Filtro.TODOS;
-	private String	_nombre = "";
-	private Date	_fechaIni, _fechaFin;
-	private LatLng	_punto = new LatLng(0,0);
-	private int		_radio = Constantes.NADA;
+	private int		tipo = Constantes.NADA;
+	private int 	activo = Filtro.TODOS;
+	private String	nombre = "";
+	private Date	fechaIni;
+	private Date	fechaFin;
+	private LatLng	punto = new LatLng(0,0);
+	private int		radio = Constantes.NADA;
 
-	public int getTipo(){return _tipo;}
-	public int getActivo(){return _activo;}
-	public String getNombre(){return _nombre;}
-	public Date getFechaIni(){return _fechaIni;}
-	public Date getFechaFin(){return _fechaFin;}
-	public LatLng getPunto(){return _punto;}
-	public int getRadio(){return _radio;}
+	public int getTipo(){return tipo;}
+	public int getActivo(){return activo;}
+	public String getNombre(){return nombre;}
+	public Date getFechaIni(){return fechaIni;}
+	public Date getFechaFin(){return fechaFin;}
+	public LatLng getPunto(){return punto;}
+	public int getRadio(){return radio;}
 
 	private void setTipo(int v)
 	{
@@ -51,10 +55,10 @@ public class Filtro implements Parcelable
 		case Constantes.LUGARES:
 		case Constantes.RUTAS:
 		case Constantes.AVISOS:
-			_tipo = v;
+			tipo = v;
 			break;
 		default:
-			_tipo = Constantes.NADA;
+			tipo = Constantes.NADA;
 			break;
 		}
 	}
@@ -64,21 +68,21 @@ public class Filtro implements Parcelable
 		{
 		case Filtro.ACTIVO:
 		case Filtro.INACTIVO:
-			_activo = v;
+			activo = v;
 			break;
 		default:
-			_activo = Filtro.TODOS;
+			activo = Filtro.TODOS;
 			break;
 		}
 	}
 	public void setNombre(String v)//.replace("'", "\\'");//Wanna stop sql injection : they say there's no need
 	{
-		_nombre = v!=null ? v : "";
+		nombre = v!=null ? v : "";
 	}
-	public void setFechaIni(Date v) { _fechaIni=v; }
-	public void setFechaFin(Date v) { _fechaFin=v; }
-	public void setPunto(LatLng v) { _punto = v!=null ? v : new LatLng(0,0); }
-	public void setRadio(int v) { _radio = v>0 ? v : Constantes.NADA; }
+	public void setFechaIni(Date v) { fechaIni =v; }
+	public void setFechaFin(Date v) { fechaFin =v; }
+	public void setPunto(LatLng v) { punto = v!=null ? v : new LatLng(0,0); }
+	public void setRadio(int v) { radio = v>0 ? v : Constantes.NADA; }
 
 	//______________________________________________________________________________________________
 	public Filtro(int tipo)
@@ -88,43 +92,45 @@ public class Filtro implements Parcelable
 	}
 
 	//______________________________________________________________________________________________
-	@Override public String toString()
+	@NonNull
+	@Override
+	public String toString()
 	{
 		DateFormat df = java.text.DateFormat.getDateTimeInstance();
 		return String.format(Locale.ENGLISH, "{%b, %d, %d, '%s', %.5f/%.5f %d, %s - %s}",
-				_onOff, _tipo, _activo, _nombre, _punto.latitude, _punto.longitude, _radio,
-				_fechaIni==null?"null":df.format(_fechaIni), _fechaFin==null?"null":df.format(_fechaFin));
+				onOff, tipo, activo, nombre, punto.latitude, punto.longitude, radio,
+				fechaIni ==null?"null":df.format(fechaIni), fechaFin ==null?"null":df.format(fechaFin));
 	}
 
 	//______________________________________________________________________________________________
 	// 4 PARCELABLE
 	private Filtro(Parcel in)
 	{
-		_onOff = in.readInt() > 0;
-		_tipo = in.readInt();
-		_activo = in.readInt();
-		_nombre = in.readString();
-		_punto = new LatLng(in.readDouble(), in.readDouble());
-		_radio = in.readInt();
+		onOff = in.readInt() > 0;
+		tipo = in.readInt();
+		activo = in.readInt();
+		nombre = in.readString();
+		punto = new LatLng(in.readDouble(), in.readDouble());
+		radio = in.readInt();
 		long fi = in.readLong();
-		if(fi > 0)	_fechaIni = new Date(fi);
-		else		_fechaIni = null;
+		if(fi > 0)	fechaIni = new Date(fi);
+		else		fechaIni = null;
 		long ff = in.readLong();
-		if(ff > 0)	_fechaFin = new Date(ff);
-		else		_fechaFin = null;
+		if(ff > 0)	fechaFin = new Date(ff);
+		else		fechaFin = null;
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
-		dest.writeInt(_onOff?1:0);
-		dest.writeInt(_tipo);
-		dest.writeInt(_activo);
-		dest.writeString(_nombre);
-		dest.writeDouble(_punto.latitude);
-		dest.writeDouble(_punto.longitude);
-		dest.writeInt(_radio);
-		dest.writeLong(_fechaIni == null ? 0 : _fechaIni.getTime());
-		dest.writeLong(_fechaFin == null ? 0 : _fechaFin.getTime());
+		dest.writeInt(onOff ?1:0);
+		dest.writeInt(tipo);
+		dest.writeInt(activo);
+		dest.writeString(nombre);
+		dest.writeDouble(punto.latitude);
+		dest.writeDouble(punto.longitude);
+		dest.writeInt(radio);
+		dest.writeLong(fechaIni == null ? 0 : fechaIni.getTime());
+		dest.writeLong(fechaFin == null ? 0 : fechaFin.getTime());
 	}
 	@Override public int describeContents() { return 0; }
 	public static final Creator<Filtro> CREATOR = new Creator<Filtro>()

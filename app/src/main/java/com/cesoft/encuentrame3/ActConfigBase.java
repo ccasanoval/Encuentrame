@@ -11,6 +11,8 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // A {@link android.preference.PreferenceActivity} which implements and proxies the necessary calls to be used with AppCompat.
 public abstract class ActConfigBase extends PreferenceActivity
 {
@@ -35,11 +37,6 @@ public abstract class ActConfigBase extends PreferenceActivity
 	{
 		return getDelegate().getSupportActionBar();
 	}
-
-	/*public void setSupportActionBar(@Nullable Toolbar toolbar)
-	{
-		getDelegate().setSupportActionBar(toolbar);
-	}*/
 
 	@NonNull
 	@Override
