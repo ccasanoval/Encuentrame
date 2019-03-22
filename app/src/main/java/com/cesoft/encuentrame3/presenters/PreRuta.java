@@ -31,6 +31,10 @@ import javax.inject.Singleton;
 public class PreRuta extends PresenterBase
 {
 	private static final String TAG = PreRuta.class.getSimpleName();
+	private static final String KMH = "%.1f Km/h";
+	private static final String MS = "%.1f m/s";
+	private static final String METROS = "%.0f m";
+	private static final String KILOMETROS = "%.1f Km";
 
 	////////////////////////////////////////////////////
 	public interface IVistaRuta extends IVista
@@ -40,13 +44,11 @@ public class PreRuta extends PresenterBase
 	public String getId(){return o.getId();}
 
 	//----------------------------------------------------------------------------------------------
-	private Application app;
 	private Util util;
 	private Preferencias pref;
 	@Inject PreRuta(Application app, Util util, Preferencias pref)
 	{
 		super(app);
-		this.app = app;
 		this.util = util;
 		this.pref = pref;
 	}
@@ -84,16 +86,20 @@ public class PreRuta extends PresenterBase
 			public void onDatos(String id)
 			{
 				bGuardar = true;
-				view.finEspera();
-				util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
+				if(view != null) {
+					view.finEspera();
+					util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
+				}
 			}
 			@Override
 			public void onError(String err, int code)
 			{
 				bGuardar = true;
-				view.finEspera();
 				Log.e(TAG, "guardar:handleFault:f:--------------------------------------------------"+err);
-				view.toast(R.string.error_guardar, err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_guardar, err);
+				}
 			}
 		});
 	}
@@ -108,7 +114,7 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	private boolean isErrorEnCampos()
 	{
-		if(view.getTextNombre().isEmpty())
+		if(view != null && view.getTextNombre().isEmpty())
 		{
 			view.toast(R.string.sin_nombre);
 			view.requestFocusNombre();
@@ -130,16 +136,20 @@ public class PreRuta extends PresenterBase
 			protected void onDatos(String id)
 			{
 				bEliminar = true;
-				view.finEspera();
-				util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
+				if(view != null) {
+					view.finEspera();
+					util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
+				}
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
 				bEliminar = true;
-				view.finEspera();
 				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
-				view.toast(R.string.error_eliminar, err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_eliminar, err);
+				}
 			}
 		});
 	}
@@ -154,20 +164,22 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onDatos(String id)
 			{
-				view.finEspera();
 				util.setTrackingRoute(o.getId());
-				//
-                GeoTrackingJobService.start(view.getAct().getApplicationContext(), pref.getTrackingDelay());
-				util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
+                GeoTrackingJobService.start(app.getApplicationContext(), pref.getTrackingDelay());
+				if(view != null) {
+					view.finEspera();
+					util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
+				}
 			}
 			@Override
 			public void onError(String err, int code)
 			{
-				view.finEspera();
 				util.setTrackingRoute("");
-				//
 				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------------"+err);
-				view.toast(R.string.error_guardar,err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_guardar, err);
+				}
 			}
 		});
 		return true;
@@ -179,6 +191,51 @@ public class PreRuta extends PresenterBase
 	}
 
 	//----------------------------------------------------------------------------------------------
+	private String getDistancia(double fDistancia) {
+		Locale loc = Locale.getDefault();
+		if(fDistancia < 2000)   return String.format(loc, METROS, fDistancia);
+		else					return String.format(loc, KILOMETROS, fDistancia/1000);
+	}
+	private String getMinAltura(double fMinAlt) {
+		Locale loc = Locale.getDefault();
+		if(fMinAlt==Double.MAX_VALUE)	return "-";
+		else							return String.format(loc, METROS, fMinAlt);
+	}
+	private String getMaxAltura(double fMaxAlt) {
+		Locale loc = Locale.getDefault();
+		if(fMaxAlt==Double.MIN_VALUE)	return "-";
+		else							return String.format(loc, METROS, fMaxAlt);
+	}
+	private String getMinVelociodad(double fMinVel) {
+		if(fMinVel==Double.MAX_VALUE)
+			return "-";
+		else
+		{
+			Locale loc = Locale.getDefault();
+			if(fMinVel > 3)
+			{
+				fMinVel = fMinVel*3600/1000;
+				return String.format(loc, KMH, fMinVel);
+			}
+			else
+				return String.format(loc, MS, fMinVel);
+		}
+	}
+	private String getMaxVelociodad(double fMaxVel) {
+		if(fMaxVel == Double.MIN_VALUE)
+			return "-";
+		else
+		{
+			Locale loc = Locale.getDefault();
+			if (fMaxVel > 3)
+			{
+				fMaxVel = fMaxVel * 3600 / 1000;
+				return String.format(loc, KMH, fMaxVel);
+			}
+			else
+				return String.format(loc, MS, fMaxVel);
+		}
+	}
 	public void estadisticas()
 	{
 		((Ruta) o).getPuntos(new Fire.SimpleListener<Ruta.RutaPunto>()
@@ -186,8 +243,10 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
-				double fMaxAlt = 0, fMinAlt = 99999;
-				double fMaxVel = 0, fMinVel = 99999;
+				double fMaxAlt = Double.MIN_VALUE;
+				double fMinAlt = Double.MAX_VALUE;
+				double fMaxVel = Double.MIN_VALUE;
+				double fMinVel = Double.MAX_VALUE;
 				double fDistancia = 0;
 
 				for(int i=0; i < aData.length; i++)
@@ -199,12 +258,15 @@ public class PreRuta extends PresenterBase
 					if(pto.getVelocidad() != 0.0 && fMinVel > pto.getVelocidad())fMinVel = pto.getVelocidad();
 					if(i>0)fDistancia += pto.distanciaReal(aData[i-1]);
 				}
-				Locale loc = Locale.getDefault();
-				String sDistancia;
-				if(fDistancia < 2000)   sDistancia = String.format(loc, "%.0f m", fDistancia);
-				else					sDistancia = String.format(loc, "%.1f Km", fDistancia/1000);
 
-				String sTiempo = "", sVelMed = "";
+				String sDistancia = getDistancia(fDistancia);
+				String sAltMin = getMinAltura(fMinAlt);
+				String sAltMax = getMaxAltura(fMaxAlt);
+				String sVelMin = getMinVelociodad(fMinVel);
+				String sVelMax = getMaxVelociodad(fMaxVel);
+
+				String sTiempo = "";
+				String sVelMed = "";
 				if(aData.length > 0)
 				{
 					long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
@@ -214,48 +276,18 @@ public class PreRuta extends PresenterBase
 
 					if(t > 1000)//No calcular velocidad media si tiempo < 1s
 					{
+						Locale loc = Locale.getDefault();
 						double d = fDistancia*1000/t;
 						if(d > 3)
 						{
 							d = d*3600/1000;
-							sVelMed = String.format(loc, "%.1f Km/h", d);
+							sVelMed = String.format(loc, KMH, d);
 						}
 						else
-							sVelMed = String.format(loc, "%.1f m/s", d);
+							sVelMed = String.format(loc, MS, d);
 					}
 					else sVelMed = "-";
 				}
-
-				String sAltMin;
-				if(fMinAlt==99999)sAltMin = "-";
-				else sAltMin = String.format(loc, "%.0f m",fMinAlt);
-
-				String sAltMax;
-				if(fMaxAlt==0)sAltMax = "-";
-				else sAltMax = String.format(loc, "%.0f m",fMaxAlt);
-
-				String sVelMin;
-				if(fMinVel==99999)sVelMin = "-";
-				else
-				{
-					if(fMinVel > 3)
-					{
-						fMinVel = fMinVel*3600/1000;
-						sVelMin = String.format(loc, "%.1f Km/h", fMinVel);
-					}
-					else
-						sVelMin = String.format(loc, "%.1f m/s", fMinVel);
-				}
-
-				String sVelMax;
-				if(fMaxVel == 0)sVelMax = "-";
-				else if(fMaxVel > 3)
-				{
-					fMaxVel = fMaxVel*3600/1000;
-					sVelMax = String.format(loc, "%.1f Km/h", fMaxVel);
-				}
-				else
-					sVelMax = String.format(loc, "%.1f m/s", fMaxVel);
 
 				estadisticasShow(String.format(app.getString(R.string.estadisticas_format),
 						sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
@@ -299,7 +331,8 @@ public class PreRuta extends PresenterBase
 			@Override public void onError(String err)
 			{
 				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------------"+err);
-				view.toast(R.string.err_get_ruta_pts);
+				if(view != null)
+					view.toast(R.string.err_get_ruta_pts);
 			}
 		};
 	}
@@ -316,14 +349,14 @@ public class PreRuta extends PresenterBase
 			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- n pts = "+aPts.length);
 			return;
 		}
-		if(view.getMap()==null) {
+		if(view == null || view.getMap()==null) {
 			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- MAP = NULL");
 			return;
 		}
 		view.getMap().clear();
 
-		String INI = app.getString(R.string.ini);
-		String FIN = app.getString(R.string.fin);
+		String ini = app.getString(R.string.ini);
+		String fin = app.getString(R.string.fin);
 		PolylineOptions po = new PolylineOptions();
 
 		Ruta.RutaPunto gpAnt = null;
@@ -336,8 +369,8 @@ public class PreRuta extends PresenterBase
 			mo.title(o.getNombre());
 
 			String snippet;
-			if(pto == gpIni)snippet = INI;
-			else if(pto == gpFin)snippet = FIN;
+			if(pto == gpIni)snippet = ini;
+			else if(pto == gpFin)snippet = fin;
 			else snippet = app.getString(R.string.info_time);
 
 			Date date = pto.getFecha();
