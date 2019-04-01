@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3.di.modules;
 
 import android.app.Application;
 import android.app.NotificationManager;
+import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
@@ -50,6 +51,12 @@ public class GlobalModule
 	@Provides
 	PowerManager providePowerManager() {
 		return (PowerManager)app.getSystemService(Context.POWER_SERVICE);
+	}
+
+	@Singleton
+	@Provides
+	JobScheduler provideJobScheduler() {
+		return (JobScheduler)app.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 	}
 
 	@Singleton

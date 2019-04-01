@@ -128,9 +128,9 @@ public class Util
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	private static void vibrate(Context context)
+	private void vibrate()
 	{
-        Vibrator vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator vibrator = (Vibrator)app.getSystemService(Context.VIBRATOR_SERVICE);
 		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
 		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
 		if(vibrator != null)vibrator.vibrate(1000);//1seg
@@ -149,7 +149,6 @@ public class Util
 		String sSound = pref.getNotificationRingtone();
 		boolean bVibrate = pref.isNotificationVibrate();
 		boolean bLights = pref.isNotificationLights();
-		/// android.media.Ringtone ring = RingtoneManager.getRingtone(c, Uri.parse("content://media/internal/audio/media/122"));//.play();
 
 		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame:Util");
 		wakeLock.acquire(2000);
@@ -176,7 +175,7 @@ public class Util
 
 		//notificationBuilder.setVibrate(new long[]{1000L});//no funciona, llamar directamente a vibrar
 		if(bVibrate)
-			vibrate(app);
+			vibrate();
 		else
 			notificationBuilder.setVibrate(null);
 
@@ -231,7 +230,7 @@ public class Util
 		}
 
 		if(bVibrate)
-			vibrate(app);
+			vibrate();
 		else
 			notificationBuilder.setVibrate(null);
 
@@ -354,17 +353,17 @@ public class Util
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public void onBuscar(final Context c, final GoogleMap map, final float zoom)
+	public void onBuscar(final Context context, final GoogleMap map, final float zoom)
 	{
-		View viewBuscarCalle = View.inflate(c, R.layout.dialog_buscar_calle, null);
+		View viewBuscarCalle = View.inflate(app, R.layout.dialog_buscar_calle, null);
 		final EditText direccion = viewBuscarCalle.findViewById(R.id.direccion);
-		AlertDialog dlg = new AlertDialog.Builder(c).create();
+		AlertDialog dlg = new AlertDialog.Builder(context).create();
 		dlg.setView(viewBuscarCalle);
 		dlg.setCancelable(true);
-		dlg.setButton(AlertDialog.BUTTON_NEGATIVE, c.getString(R.string.cancelar), (dialog, which) -> { });
-		dlg.setButton(AlertDialog.BUTTON_POSITIVE, c.getString(R.string.buscar), (dialog, which) ->
+		dlg.setButton(AlertDialog.BUTTON_NEGATIVE, app.getString(R.string.cancelar), (dialog, which) -> { });
+		dlg.setButton(AlertDialog.BUTTON_POSITIVE, app.getString(R.string.buscar), (dialog, which) ->
 		{
-			Geocoder geocoder = new Geocoder(c);
+			Geocoder geocoder = new Geocoder(app);
 			List<Address> addresses;
 			try
 			{
@@ -390,10 +389,10 @@ public class Util
 
 
 	@SuppressLint("BatteryLife")
-	public boolean pideBateria(Context context) {
+	public boolean pideBateria() {
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if(pm != null) {
-				if(pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
+				if(pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
 					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: TRUE");
 					return false;
 				}
@@ -401,8 +400,8 @@ public class Util
 					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 					Intent intent = new Intent();
 					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-					intent.setData(Uri.parse("package:"+context.getPackageName()));
-					context.startActivity(intent);
+					intent.setData(Uri.parse("package:"+app.getPackageName()));
+					app.startActivity(intent);
 					// CHECK:
 					//  turn off the screen and:
 					//adb shell dumpsys battery unplug
@@ -416,12 +415,12 @@ public class Util
 	}
 	public boolean pideBateriaDeNuevoSiEsNecesario(Context context) {
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if(pm != null && !pm.isIgnoringBatteryOptimizations(context.getPackageName())) {
+			if(pm != null && !pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
 				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
 						.setCancelable(false)
-						.setPositiveButton(R.string.no, (dialog, id) -> pideBateria(context))
-						.setNegativeButton(R.string.yes, (dialog, id) -> dialog.cancel())
+						.setPositiveButton(android.R.string.no, (dialog, id) -> pideBateria())
+						.setNegativeButton(android.R.string.yes, (dialog, id) -> dialog.cancel())
 				;
 				final AlertDialog alert = builder.create();
 				alert.show();
@@ -442,13 +441,12 @@ public class Util
 	}
 	//______________________________________________________________________________________________
 	public boolean pideActivarGPS(Context context) {
-		final LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-		if(manager != null && ! manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+		if(lm != null && ! lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setMessage(R.string.ask_to_enable_gps)
 					.setCancelable(false)
 					.setPositiveButton(R.string.ok, (dialog, id) ->
-							context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+							app.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
 					.setNegativeButton(R.string.cancelar, (dialog, id) ->dialog.cancel())
 				;
 			final AlertDialog alert = builder.create();

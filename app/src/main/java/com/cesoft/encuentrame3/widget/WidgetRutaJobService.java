@@ -32,6 +32,7 @@ import static com.cesoft.encuentrame3.util.Constantes.WIDGET_DELAY_SHORT;
 public class WidgetRutaJobService extends JobService {
     private static final String TAG = WidgetRutaJobService.class.getSimpleName();
 
+    //TODO: not static!!!
     public static void start(Context context) {
         start(context, WIDGET_DELAY_SHORT, true);
     }
@@ -52,8 +53,9 @@ public class WidgetRutaJobService extends JobService {
             jobScheduler.schedule(builder.build());
     }
 
-    @Inject Login _login;
-    @Inject Util _util;
+    @Inject Login login;
+    @Inject Util util;
+    //@Inject JobScheduler jobScheduler;
     @Inject public WidgetRutaJobService() { }
 
     @Override
@@ -63,7 +65,7 @@ public class WidgetRutaJobService extends JobService {
         App.getComponent(context).inject(this);
 
         new Thread(() -> {
-            if( ! _login.isLogged()) {
+            if( ! login.isLogged()) {
                 Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
                 stopSelf();
                 WidgetRutaJobService.this.jobFinished(jobParameters, false);
@@ -91,16 +93,14 @@ public class WidgetRutaJobService extends JobService {
 
     private long payLoad()
     {
-        String idRuta = _util.getTrackingRoute();
+        String idRuta = util.getTrackingRoute();
         if(idRuta.isEmpty()) {
             borrarRuta();
             return WIDGET_DELAY_LONG;
-            //_h.postDelayed(_r, Constantes.WIDGET_DELAY_LONG);
         }
         else {
             setRuta();
             return WIDGET_DELAY_SHORT;
-            //_h.postDelayed(_r, WIDGET_DELAY_SHORT);
         }
     }
 
@@ -117,7 +117,7 @@ public class WidgetRutaJobService extends JobService {
     {
         try
         {
-            String idRuta = _util.getTrackingRoute();
+            String idRuta = util.getTrackingRoute();
             Ruta.getById(idRuta, new Fire.SimpleListener<Ruta>()
             {
                 @Override
@@ -143,7 +143,6 @@ public class WidgetRutaJobService extends JobService {
 
     private void setWidget(String sRuta, boolean bRuta)
     {
-        //Log.e(TAG, "setWidget:--------------------------------- sTarea = "+sTarea);
         Context context = getApplicationContext();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] allWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(getApplication(), WidgetRuta.class));

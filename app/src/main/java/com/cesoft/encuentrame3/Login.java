@@ -65,8 +65,7 @@ public class Login
 		getAuth().createUserWithEmailAndPassword(email, password)
 			.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
 			.addOnFailureListener(listener::onFallo)
-//			.addOnCompleteListener(task ->
-//			{
+//			.addOnCompleteListener(task -> {
 //				System.err.println("Login: createUserWithEmail:onComplete:" + task.isSuccessful());
 //			})
 			;
@@ -74,14 +73,19 @@ public class Login
 
 	private static void login2(String email, String password, final Fire.AuthListener listener)
 	{
-		getAuth().signInWithEmailAndPassword(email, password)
-			.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
-			.addOnFailureListener(listener::onFallo)
-//			.addOnCompleteListener(task ->
-//			{
+		if(email == null || password == null)return;
+		try {
+			getAuth().signInWithEmailAndPassword(email, password)
+					.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
+					.addOnFailureListener(listener::onFallo)
+//			.addOnCompleteListener(task -> {
 //				//System.err.println("Login:login2:task:"+task);
 //			})
 			;
+		}
+		catch(Exception e) {
+			Log.e(TAG, "login2:e:-------------------------------------------------------------",e);
+		}
 	}
 
 
@@ -162,10 +166,7 @@ public class Login
 	static void restoreUser(final String email, final Fire.AuthListener listener)
 	{
 		getAuth().sendPasswordResetEmail(email)
-//			.addOnCompleteListener(task ->
-//			{
-//				//Log.e();
-//			})
+//			.addOnCompleteListener(task -> { Log.e(); })
 			.addOnSuccessListener(aVoid -> listener.onExito(getAuth().getCurrentUser()))
 			.addOnFailureListener(listener::onFallo);
 	}

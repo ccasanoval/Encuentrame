@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3;
 
+import android.app.AlertDialog;
 import android.graphics.Typeface;
 
 import android.graphics.Color;
@@ -65,7 +66,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			btnStart.setEnabled(true);
 			btnStart.setOnClickListener(v ->
 			{
-				if(oncePideActivarBateria && util.pideBateria(this)) {
+				if(oncePideActivarBateria && util.pideBateria()) {
 					oncePideActivarBateria = false;
 					return;
 				}
@@ -177,10 +178,12 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		//MARCADOR MULTILINEA --------------------------------------------
 		map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
 		{
-			@Override public View getInfoWindow(Marker arg0){return null;}
+			@Override
+			public View getInfoWindow(Marker arg0){return null;}
 			@Override
 			public View getInfoContents(Marker marker)
 			{
+Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"-----------------------------------------------");
 				LinearLayout info = new LinearLayout(ActRuta.this);
 				info.setOrientation(LinearLayout.VERTICAL);
 
@@ -194,10 +197,31 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 				snippet.setTextColor(Color.GRAY);
 				snippet.setText(marker.getSnippet());
 
+				ImageButton button = new ImageButton(ActRuta.this);
+				button.setImageDrawable(getDrawable(android.R.drawable.ic_menu_delete));
+				//Info window is an image, so it's not woriking. Instead use onInfoWindowClick
+				//button.setOnClickListener(v -> ActRuta.this.askToDelete(marker));
+
 				info.addView(title);
 				info.addView(snippet);
+				info.addView(button);
 				return info;
 			}
 		});
+		map.setOnInfoWindowClickListener(this::askToDelete);
 	}
+
+	private void askToDelete(Marker marker) {
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ActRuta.this);
+		dialogBuilder.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> {});
+		dialogBuilder.setPositiveButton(getString(R.string.eliminar), (dialog1, which) -> {
+            String id = (String)marker.getTag();
+			presenter.eliminarPto(id);
+		});
+		final AlertDialog dlgEliminar = dialogBuilder.create();
+		dlgEliminar.setTitle(marker.getTitle());
+		dlgEliminar.setMessage(getString(R.string.seguro_eliminar));
+		dlgEliminar.show();
+	}
+
 }

@@ -133,39 +133,41 @@ public class ActMaps
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private int _iColor = Color.LTGRAY;
+	private int iColor = Color.LTGRAY;
 	public BitmapDescriptor getNextIcon()
 	{
-		BitmapDescriptor bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
-		switch(_iColor)
+		BitmapDescriptor bm;
+		switch(iColor)
 		{
-		case Color.MAGENTA:
-			_iColor = Color.BLUE;
-			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
-			break;
 		case Color.BLUE:
-			_iColor = Color.BLACK;
+			iColor = Color.BLACK;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
 			break;
 		case Color.BLACK:
-			_iColor = Color.DKGRAY;
+			iColor = Color.DKGRAY;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE);
 			break;
 		case Color.DKGRAY:
-			_iColor = Color.YELLOW;
+			iColor = Color.YELLOW;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW);
 			break;
 		case Color.YELLOW:
-			_iColor = Color.CYAN;
+			iColor = Color.CYAN;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN);
 			break;
 		case Color.CYAN:
-			_iColor = Color.LTGRAY;
+			iColor = Color.LTGRAY;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
 			break;
+
 		case Color.LTGRAY:
-			_iColor = Color.MAGENTA;
+			iColor = Color.MAGENTA;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
+			break;
+		default:
+		case Color.MAGENTA:
+			iColor = Color.BLUE;
+			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
 			break;
 		}
 		return bm;
@@ -198,7 +200,7 @@ public class ActMaps
 				.center(pos)
 				.radius(a.getRadio())
 				.strokeColor(Color.TRANSPARENT)
-				.fillColor(0x55000000 + _iColor));
+				.fillColor(0x55000000 + iColor));
 	}
 	@Override public void showRutaHelper(Ruta r, Ruta.RutaPunto[] aPts)
 	{
@@ -207,10 +209,10 @@ public class ActMaps
 			if(aPts.length < 1)return;
 			float distancia = 0;
 			Ruta.RutaPunto ptoAnt = null;
-			BitmapDescriptor bm = getNextIcon();
+			//BitmapDescriptor bm = getNextIcon();
 
-			String INI = getString(R.string.ini);
-			String FIN = getString(R.string.fin);
+			String ini = getString(R.string.ini);
+			String fin = getString(R.string.fin);
 			PolylineOptions po = new PolylineOptions();
 
 			Ruta.RutaPunto gpIni = aPts[0];
@@ -232,28 +234,28 @@ public class ActMaps
 				LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
 				if(pto == gpIni)
 				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s", INI, util.formatFechaTiempo(date)));
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s", ini, util.formatFechaTiempo(date)));
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 					mo.rotation(45);
 					map.addMarker(mo.position(pos));
 				}
 				else if(pto == gpFin)
 				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", FIN, util.formatFechaTiempo(date), sDist));
+					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", fin, util.formatFechaTiempo(date), sDist));
 					mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mo.rotation(-45);
 					map.addMarker(mo.position(pos));
 				}
-				else
+				/*else
 				{
 					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), util.formatFechaTiempo(date), sDist));
 					mo.icon(bm);
 					map.addMarker(mo.position(pos));
-				}
+				}*/
 				po.add(pos);
 			}
 
-			po.width(5).color(_iColor);
+			po.width(5).color(iColor);
 			map.addPolyline(po);//Polyline line =
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), mapZoom));
 		}

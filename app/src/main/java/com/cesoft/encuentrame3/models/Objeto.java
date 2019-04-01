@@ -69,9 +69,8 @@ public class Objeto implements Parcelable
 		String n2 = getNombre().toLowerCase();
 		if(!n1.isEmpty() && !n2.contains(n1))return false;
 		if(filtro.getFechaIni() != null && getFecha().getTime() < filtro.getFechaIni().getTime())return false;
-		if(filtro.getFechaFin() != null && getFecha().getTime() > filtro.getFechaFin().getTime())return false;
-		return true;
-	}
+        return filtro.getFechaFin() == null || getFecha().getTime() <= filtro.getFechaFin().getTime();
+    }
 
 	// PARCELABLE
 	//______________________________________________________________________________________________

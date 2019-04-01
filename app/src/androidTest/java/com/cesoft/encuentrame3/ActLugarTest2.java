@@ -54,8 +54,7 @@ public class ActLugarTest2
 	//----------------------------------------------------------------------------------------------
 	@Test
 	//@UiThreadTest
-	public void testActLugar1() throws Exception
-	{
+	public void testActLugar1() {
 		ActLugar act = ruleActLugar.getActivity();
 		View txtNombre = act.findViewById(R.id.txtNombre);
 		assertThat(txtNombre, notNullValue());
@@ -63,10 +62,10 @@ public class ActLugarTest2
 		EditText textView = (EditText)txtNombre;
 		assertThat(textView.getText().toString(), is("nombre lugar 69"));
 
-		EditText txtDes = (EditText)act.findViewById(R.id.txtDescripcion);
+		EditText txtDes = act.findViewById(R.id.txtDescripcion);
 		assertThat(txtDes.getText().toString(), is("desc lugar 69"));
 
-		TextView lblPos = (TextView) act.findViewById(R.id.lblPosicion);
+		TextView lblPos = act.findViewById(R.id.lblPosicion);
 		assertThat(lblPos.getText().toString(), is("40.69000/-3.69000"));
 
 		act.runOnUiThread(act::onBackPressed);

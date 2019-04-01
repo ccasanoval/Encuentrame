@@ -84,7 +84,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		super.onStart();
 		if(!login.isLogged())gotoLogin();
 		if(oncePideBateria) {
-			util.pideBateria(this);
+			util.pideBateria();
 			oncePideBateria = false;
 		}
 		util.pideGPS(this, 6969);

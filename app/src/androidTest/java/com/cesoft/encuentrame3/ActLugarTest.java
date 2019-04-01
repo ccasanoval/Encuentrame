@@ -35,7 +35,7 @@ public class ActLugarTest
 	//----------------------------------------------------------------------------------------------
 	@Test
 	//@UiThreadTest
-	public void testActLugarEditar() throws Exception	// ESPRESSO
+	public void testActLugarEditar()    // ESPRESSO
 	{
 		// No hay una manera de NO utilizar un valor actual real (Park) ??
 		//onView(allOf(withId(R.id.btnEditar), hasSibling(allOf(withId(R.id.txtNombre), withText("Park"))))).perform(click());//scrollTo(),

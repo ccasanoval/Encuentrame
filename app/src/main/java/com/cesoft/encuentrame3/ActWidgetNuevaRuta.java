@@ -3,11 +3,8 @@ package com.cesoft.encuentrame3;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -23,7 +20,6 @@ import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
-//import com.cesoft.encuentrame3.widget.WidgetRutaService;
 
 import com.cesoft.encuentrame3.widget.WidgetRutaJobService;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,12 +32,12 @@ public class ActWidgetNuevaRuta extends Activity
 {
 	private static final String TAG = ActWidgetNuevaRuta.class.getSimpleName();
 
-	@Inject	Util _util;
-	@Inject Login _login;
-	@Inject Preferencias _pref;
+	@Inject	Util util;
+	@Inject Login login;
+	@Inject Preferencias pref;
 
-	private ProgressDialog _progressDialog;
-	private EditText _txtNombre;
+	private ProgressDialog progressDialog;
+	private EditText txtNombre;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -49,34 +45,33 @@ public class ActWidgetNuevaRuta extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		_txtNombre = findViewById(R.id.txtNombre);
-		_txtNombre.setHint(R.string.nueva_ruta);
-		_txtNombre.setOnEditorActionListener((v, actionId, event) -> {
+		txtNombre = findViewById(R.id.txtNombre);
+		txtNombre.setHint(R.string.nueva_ruta);
+		txtNombre.setOnEditorActionListener((v, actionId, event) -> {
             if(actionId == EditorInfo.IME_ACTION_DONE) {
                 save();
                 return true;
             }
             return false;
         });
-		//util = ((App)getApplication()).getGlobalComponent().util();
 		((App)getApplication()).getGlobalComponent().inject(this);
 	}
 	@Override
 	public void onPause()
 	{
 		super.onPause();
-		_progressDialog.dismiss();
+		progressDialog.dismiss();
 	}
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
-		_progressDialog.hide();
+		progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
+		progressDialog.hide();
 		//
-		if( ! _login.isLogged())
+		if( ! login.isLogged())
 		{
-			_login.login(new Fire.AuthListener() {
+			login.login(new Fire.AuthListener() {
 				@Override
 				public void onExito(FirebaseUser usr) {
 					Log.w(TAG, "ActWidgetNuevRuta:Login:OK:usr="+usr.getEmail());
@@ -97,16 +92,15 @@ public class ActWidgetNuevaRuta extends Activity
 		btnSave.setOnClickListener(v -> save());
 	}
 
-	//private boolean oncePermisos = false;
 	private boolean oncePideActivarGPS = true;
 	private boolean oncePideActivarBateria = true;
 	private boolean oncePideActivarBateria2 = true;
 	private void save() {
-		if(oncePideActivarBateria && _util.pideBateria(this)) {
+		if(oncePideActivarBateria && util.pideBateria()) {
 			oncePideActivarBateria = false;
 			return;
 		}
-		if(oncePideActivarBateria2 && _util.pideBateriaDeNuevoSiEsNecesario(this)) {
+		if(oncePideActivarBateria2 && util.pideBateriaDeNuevoSiEsNecesario(this)) {
 			oncePideActivarBateria2 = false;
 			return;
 		}
@@ -114,17 +108,17 @@ public class ActWidgetNuevaRuta extends Activity
         if(pidePermisosGPS()) {
             return;
         }
-		if(oncePideActivarGPS && _util.pideActivarGPS(this)) {
+		if(oncePideActivarGPS && util.pideActivarGPS(this)) {
 			oncePideActivarGPS = false;
 			return;
 		}
 
-		if(_txtNombre.getText().length() < 1) {
+		if(txtNombre.getText().length() < 1) {
 			Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.sin_nombre), Toast.LENGTH_SHORT).show();
 			return;
 		}
 
-		_progressDialog.show();
+		progressDialog.show();
 
 		// if(ruta_activa)"quiere parar la ruta actual y crear una nueva?"
 		//TODO: ruta_activa = true
@@ -133,21 +127,20 @@ public class ActWidgetNuevaRuta extends Activity
 		//TODO:añadir flags: ignore_battery_optimization, delay, etc
 		final int[] flag = new int[]{0};
 		final Ruta r = new Ruta();
-		r.setNombre(_txtNombre.getText().toString());
+		r.setNombre(txtNombre.getText().toString());
 		r.setDescripcion("Widget");
 		r.guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				_util.setTrackingRoute(id);
-				_progressDialog.dismiss();
+				util.setTrackingRoute(id);
+				progressDialog.dismiss();
 				Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 				ActWidgetNuevaRuta.this.finish();
 				//
-				GeoTrackingJobService.start(getApplicationContext(), _pref.getTrackingDelay());
+				GeoTrackingJobService.start(getApplicationContext(), pref.getTrackingDelay());
 				WidgetRutaJobService.start(getApplicationContext());
-				//ActWidgetNuevaRuta.this.finish();
 			}
 			@Override
 			protected void onError(String err, int code)
@@ -159,7 +152,7 @@ public class ActWidgetNuevaRuta extends Activity
 					return;
 				}
 				Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:e:----------------------------------"+err);
-				_progressDialog.hide();
+				progressDialog.hide();
 				Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 				//
 				WidgetRutaJobService.start(getApplicationContext());
@@ -171,7 +164,6 @@ public class ActWidgetNuevaRuta extends Activity
 	// Permisos de GPS
 	private boolean pidePermisosGPS()
 	{
-		//if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ! ha.canAccessLocation())activarGPS(true);
 		int pFine = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
 		int pCoarse = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
 		if(pFine == PackageManager.PERMISSION_DENIED && pCoarse == PackageManager.PERMISSION_DENIED) {
@@ -190,6 +182,6 @@ public class ActWidgetNuevaRuta extends Activity
 			for(int i=0; i < permissions.length; i++)
 				Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
 					+ requestCode + " : " + permissions[i] + " = " + grantResults[i]);
-		}catch(Exception ignore){}
+		}catch(Exception ignore) { }
 	}
 }

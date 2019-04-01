@@ -13,6 +13,7 @@ import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -121,6 +122,13 @@ public class PreRuta extends PresenterBase
 			return true;
 		}
 		return false;
+	}
+
+	//----------------------------------------------------------------------------------------------
+	public synchronized void eliminarPto(String idRutaPunto) {
+		//view.iniEspera();
+		Ruta.RutaPunto.eliminarPto(idRutaPunto);
+        //listener -> view.finEspera();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -397,18 +405,21 @@ public class PreRuta extends PresenterBase
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mo.rotation(45);
-				view.getMap().addMarker(mo.position(pos));
+				Marker m = view.getMap().addMarker(mo.position(pos));
+				m.setTag(pto.getId());
 			}
 			else if(pto == gpFin)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mo.rotation(-45);
-				view.getMap().addMarker(mo.position(pos));
+				Marker m = view.getMap().addMarker(mo.position(pos));
+				m.setTag(pto.getId());
 			}
 			else if(gpAnt != null && pto.distanciaReal(gpAnt) > 5)
 			{
 				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-				view.getMap().addMarker(mo.position(pos));
+				Marker m = view.getMap().addMarker(mo.position(pos));
+				m.setTag(pto.getId());
 			}
 			gpAnt = pto;
 			po.add(pos);

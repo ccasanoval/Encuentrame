@@ -33,10 +33,7 @@ public class Preferencias {
 
     //----------------------------------------------------------------------------------------------
     public boolean isSaveAllPoints() {
-        if(BuildConfig.DEBUG)
-            return true;//TODO:DEBUG
-        else
-            return sp.getBoolean(SAVE_ALL_POINTS, false);
+        return sp.getBoolean(SAVE_ALL_POINTS, false);
     }
     public long getTrackingDelay() {
         long delay = Constantes.DELAY_TRACK_MIN;

@@ -222,31 +222,30 @@ public class Ruta extends Objeto implements Parcelable
 				if(aData.length < 1)
 					listener.onDatos(new Ruta[0]);
 				else
-				for(String idRuta : aData)
 				{
-					Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener()
-					{
-						@Override
-						public void onDataChange(@NonNull DataSnapshot data)
-						{
-							Ruta r = data.getValue(Ruta.class);
-							if(r != null && r.pasaFiltro(filtro, r.getId(), idRutaAct))
-								aRutas.add(r);
-							else
-								aIgnorados.add(r);
-							if(aRutas.size()+aIgnorados.size() == aData.length) {
-								listener.onDatos(reverse(aRutas));
+					for (String idRuta : aData) {
+						Ruta.newFirebase().child(idRuta).addListenerForSingleValueEvent(new ValueEventListener() {
+							@Override
+							public void onDataChange(@NonNull DataSnapshot data) {
+								Ruta r = data.getValue(Ruta.class);
+								if (r != null && r.pasaFiltro(filtro, r.getId(), idRutaAct))
+									aRutas.add(r);
+								else
+									aIgnorados.add(r);
+								if (aRutas.size() + aIgnorados.size() == aData.length) {
+									listener.onDatos(reverse(aRutas));
+								}
 							}
-						}
-						@Override
-						public void onCancelled(@NonNull DatabaseError err)
-						{
-							Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:%s",err));
-							if(aRutas.size() == aData.length) {
-								listener.onDatos(reverse(aRutas));
+
+							@Override
+							public void onCancelled(@NonNull DatabaseError err) {
+								Log.e(TAG, String.format("buscarPorGeoFiltro:onKeyEntered:onCancelled:2:e:%s", err));
+								if (aRutas.size() == aData.length) {
+									listener.onDatos(reverse(aRutas));
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 			}
 			@Override
@@ -276,7 +275,7 @@ public class Ruta extends Objeto implements Parcelable
 						if(rp != null)
 							asRutas.add(rp.getIdRuta());
 						if(nCount < 1)
-							lis.onDatos(asRutas.toArray(new String[asRutas.size()]));
+							lis.onDatos(asRutas.toArray(new String[0]));
 					}
 					@Override
 					public void onCancelled(@NonNull DatabaseError err)
@@ -319,6 +318,22 @@ public class Ruta extends Objeto implements Parcelable
 			{
 				puntosCount = aData.length;
 				listener.onDatos(aData);
+				//
+				Ruta.getById(getId(), new Fire.SimpleListener<Ruta>() {
+					@Override
+					public void onDatos(Ruta[] aData) {
+						if(aData.length > 0) {
+							aData[0].puntosCount = puntosCount;
+							//...
+							//TODO: salvar ruta...
+						}
+					}
+
+					@Override
+					public void onError(String err) {
+
+					}
+				});
 			}
 			@Override
 			public void onError(String err)
@@ -368,9 +383,10 @@ public class Ruta extends Objeto implements Parcelable
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	// RUTA PUNTO
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	@IgnoreExtraProperties
 	public static class RutaPunto implements Parcelable
 	{
@@ -477,6 +493,26 @@ public class Ruta extends Objeto implements Parcelable
 
 		//----------------------------------------------------------------------------------------------
 		// FIREBASE
+		public static void eliminarPto(final String idRutaPunto) {
+			Query queryRef = RutaPunto.newFirebase().child(idRutaPunto);
+			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
+			{
+				@Override
+				public void onDataChange(@NonNull DataSnapshot ds) {
+					RutaPunto rp = ds.getValue(RutaPunto.class);
+					if(rp != null) {
+						newFirebase().child(rp.getId()).setValue(null, null);
+						delGeo(rp.getId());
+					}
+				}
+				@Override
+				public void onCancelled(@NonNull DatabaseError err)
+				{
+					Log.e(TAG, "RutaPunto:eliminar:e:"+err+", idRuta:");
+				}
+			});
+		}
+
 		public static void eliminar(final String idRuta)
 		{
 			Query queryRef = RutaPunto.newFirebase().orderByChild(IDRUTA).equalTo(idRuta);
@@ -559,6 +595,7 @@ public class Ruta extends Objeto implements Parcelable
 						a.add(o.getValue(Ruta.RutaPunto.class));
 					listener.onDatos(a.toArray(new RutaPunto[0]));
 Log.e(TAG, "getListaRep:onDataChange:----------------------------------------n="+a.size());
+					//if(a.size() < ptos en Ruta)update Ruta(a.size())
 				}
 				@Override
 				public void onCancelled(@NonNull DatabaseError err)
