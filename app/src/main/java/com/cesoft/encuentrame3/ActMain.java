@@ -84,7 +84,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		super.onStart();
 		if(!login.isLogged())gotoLogin();
 		if(oncePideBateria) {
-			util.pideBateria();
+			util.pideBateria(this);
 			oncePideBateria = false;
 		}
 		util.pideGPS(this, 6969);
@@ -298,12 +298,4 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			return null;
 		}
 	}
-
-	/*@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-		try {
-			Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
-					+ requestCode + " : " + permissions[0] + " = " + grantResults[0]);
-		}catch(Exception ignore){}
-	}*/
 }

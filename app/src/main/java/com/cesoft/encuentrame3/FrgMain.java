@@ -130,7 +130,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onDestroyView()
 	{
 		super.onDestroyView();
-		((ViewGroup) rootView.getParent()).removeView(rootView);
+		ViewGroup view = ((ViewGroup) rootView.getParent());
+		if(view != null) view.removeView(rootView);
 		rootView = null;
 		listView = null;
 	}
@@ -258,12 +259,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 			default:break;
 		}
 	}
-	public void buscar()
-	{
-		main.buscar(this);
-	}
 
-		// 4 IListaItemClick
+	// 4 IListaItemClick
 	private BroadcastReceiver messageReceiver;
 	private static final String RUTA_REFRESH = "ces";
 
@@ -284,10 +281,13 @@ public class FrgMain extends Fragment implements IListaItemClick
 		if(lisAviso !=null) lisAviso.setListener(null);
 		if(lisRuta !=null) lisRuta.setListener(null);
 	}
-	private void newListeners()
-	{
-		delListeners();
-		//--- LUGARES
+
+	///(@StringRes int idString) {
+	private void showMsgListaVacia() {
+		try{Toast.makeText(getContext(), R.string.lista_vacia, Toast.LENGTH_SHORT).show();}
+		catch(Exception e){Log.e(TAG, "showToast:e:%s", e);}
+	}
+	private void setLugaresListener() {
 		lisLugar = new Fire.DatosListener<Lugar>()
 		{
 			@Override
@@ -296,12 +296,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 				long n = aLugares.length;
 				if(n < 1)
 				{
-					try
-					{
-						if(main.getCurrentItem() == Constantes.LUGARES)
-							try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
-							catch(Exception e){Log.e(TAG, String.format("LUGARES:handleResponse:e:%s",e),e);}//java.lang.IllegalStateException: Fragment PlaceholderFragment{41e3b090} not attached to Activity
-					}
+					try { if(main.getCurrentItem() == Constantes.LUGARES) showMsgListaVacia(); }
 					catch(Exception e){Log.e(TAG, String.format("_acLugar:%s",e), e);}
 				}
 				if(listView != null && rootView != null)
@@ -318,7 +313,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 				Log.e(TAG, "LUGARES2:GET:e:---------------------------------------------------------"+err);
 			}
 		};
-		//--- RUTAS
+	}
+	private void setRutasListener() {
 		lisRuta = new Fire.DatosListener<Ruta>()
 		{
 			@Override
@@ -327,12 +323,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 				long n = aRutas.length;
 				if(n < 1)
 				{
-					try
-					{
-						if(main.getCurrentItem() == Constantes.RUTAS)
-							try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
-							catch(Exception e){Log.e(TAG, "RUTAS:handleResponse:e:----------------------", e);}
-					}catch(Exception e){Log.e(TAG, "_acRuta:e:------------------------------------------", e);}
+					try { if(main.getCurrentItem() == Constantes.RUTAS) showMsgListaVacia(); }
+					catch(Exception e){Log.e(TAG, "_acRuta:e:------------------------------------------", e);}
 				}
 				if(rootView != null)
 				{
@@ -341,25 +333,24 @@ public class FrgMain extends Fragment implements IListaItemClick
 					listView.setAdapter(r);
 					listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
-                    listView.onRestoreInstanceState(scroll);
+					listView.onRestoreInstanceState(scroll);
 				}
 			}
 			@Override public void onError(String err) {
 				Log.e(TAG, "RUTAS2:GET:e:-----------------------------------------------------------"+err);
 			}
 		};
-		//--- AVISO
+	}
+	private void setAvisoListener() {
 		lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override
 			public void onDatos(Aviso[] aAvisos)
 			{
 				long n = aAvisos.length;
-				if(n < 1)
+				if(n < 1 && main.getCurrentItem() == Constantes.AVISOS)
 				{
-					if(main.getCurrentItem() == Constantes.AVISOS)
-						try{Toast.makeText(getContext(), getString(R.string.lista_vacia), Toast.LENGTH_SHORT).show();}
-						catch(Exception e){Log.e(TAG, String.format("AVISOS:handleResponse:e:%s",e), e);}
+					showMsgListaVacia();
 				}
 				if(listView != null && rootView != null)
 				{
@@ -371,6 +362,16 @@ public class FrgMain extends Fragment implements IListaItemClick
 			}
 			@Override public void onError(String err) { Log.e(TAG, "AVISOS2:GET:e:------------------"+err); }
 		};
+	}
+	private void newListeners()
+	{
+		delListeners();
+		//--- LUGARES
+		setLugaresListener();
+		//--- RUTAS
+		setRutasListener();
+		//--- AVISO
+		setAvisoListener();
 	}
 
 	//______________________________________________________________________________________________
@@ -429,11 +430,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 	//----------------------------------------------------------------------------------------------
 	// Recoge el resultado de startActivityForResult : buscar
-	public static final String MENSAJE = "mensaje", DIRTY = "dirty";//TODO?! mensaje tambien en main...
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		if(resultCode != RESULT_OK)return;
+	public static final String MENSAJE = "mensaje";
+	public static final String DIRTY = "dirty";
+
+	private void processDataResult(Intent data) {
 		if(data != null)
 		{
 			try
@@ -442,7 +442,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 				if(sMensaje != null && !sMensaje.isEmpty())
 					Toast.makeText(getContext(), sMensaje, Toast.LENGTH_LONG).show();
 			}
-			catch(Exception e){Log.e(TAG, "onActivityResult:e:--------------------------------------",e);}
+			catch(Exception e){Log.e(TAG, "processDataResult:e:--------------------------------------",e);}
 			if( ! data.getBooleanExtra(DIRTY, true))return;
 			Filtro filtro0 = data.getParcelableExtra(Filtro.FILTRO);
 
@@ -453,6 +453,14 @@ public class FrgMain extends Fragment implements IListaItemClick
 					Toast.makeText(getContext(), getString(R.string.sin_filtro), Toast.LENGTH_SHORT).show();
 			}
 		}
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(resultCode != RESULT_OK)return;
+
+		processDataResult(data);
 
 		if(requestCode == Constantes.BUSCAR && filtro != null)requestCode = filtro.getTipo();
 		switch(requestCode)

@@ -96,7 +96,7 @@ public class ActWidgetNuevaRuta extends Activity
 	private boolean oncePideActivarBateria = true;
 	private boolean oncePideActivarBateria2 = true;
 	private void save() {
-		if(oncePideActivarBateria && util.pideBateria()) {
+		if(oncePideActivarBateria && util.pideBateria(this)) {
 			oncePideActivarBateria = false;
 			return;
 		}

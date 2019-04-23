@@ -124,9 +124,7 @@ public abstract class VistaBase
 		setContentView(idLayout);
 
 		//----------------------------
-		try {
-			setSupportActionBar(findViewById(R.id.toolbar));
-		} catch (Exception ignore) { }//ActMaps no tiene toolbar
+		try { setSupportActionBar(findViewById(R.id.toolbar)); } catch(Exception ignore){}//ActMaps no tiene toolbar
 		//
 		FloatingActionButton fab = findViewById(R.id.fabVolver);
 		if (fab != null) fab.setOnClickListener(view -> presenter.onSalir());
@@ -141,7 +139,7 @@ public abstract class VistaBase
 			txtNombre.setText(presenter.getNombre());
 			txtDescripcion.setText(presenter.getDescripcion());
 			presenter.setOnTextChange(txtNombre, txtDescripcion);
-		} catch (Exception ignore) { }//ActMaps no tiene campos
+		} catch(Exception ignore){}//ActMaps no tiene campos
 
 		//----------------------------
 		if (savedInstanceState != null) {
@@ -285,7 +283,10 @@ public abstract class VistaBase
 		try { map.setMyLocationEnabled(true);} catch(SecurityException ignored){}
 		//https://developers.google.com/maps/documentation/android-api/map?hl=es-419
 		//map.setMapType(GoogleMap.MAP_TYPE_NORMAL y GoogleMap.MAP_TYPE_SATELLITE
-		map.setOnCameraMoveListener(() -> mapZoom = map.getCameraPosition().zoom);
+		map.setOnCameraMoveListener(() -> {
+			if(map != null)
+				mapZoom = map.getCameraPosition().zoom;
+		});
 		map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
 		if(presenter.getLatitud() == 0 && presenter.getLongitud() == 0)
 		{

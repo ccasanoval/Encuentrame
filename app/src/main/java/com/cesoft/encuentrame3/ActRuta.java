@@ -66,15 +66,15 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			btnStart.setEnabled(true);
 			btnStart.setOnClickListener(v ->
 			{
-				if(oncePideActivarBateria && util.pideBateria()) {
+				if(oncePideActivarBateria && util.pideBateria(ActRuta.this)) {
 					oncePideActivarBateria = false;
 					return;
 				}
-				if(oncePideActivarBateria2 && util.pideBateriaDeNuevoSiEsNecesario(this)) {
+				if(oncePideActivarBateria2 && util.pideBateriaDeNuevoSiEsNecesario(ActRuta.this)) {
 					oncePideActivarBateria2 = false;
 					return;
 				}
-				if(oncePideActivarGPS && util.pideActivarGPS(this)) {
+				if(oncePideActivarGPS && util.pideActivarGPS(ActRuta.this)) {
 					oncePideActivarGPS = false;
 					return;
 				}

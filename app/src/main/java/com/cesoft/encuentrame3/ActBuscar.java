@@ -292,7 +292,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private void setRadio()
 	{
 		if(circle != null) circle.remove();
-		if(filtro.getPunto() == null || filtro.getRadio() < 1)return;
+		if(filtro == null || filtro.getPunto() == null || filtro.getRadio() < 1)return;
 		circle = map.addCircle(new CircleOptions().center(filtro.getPunto())
 				.radius(filtro.getRadio()).strokeColor(Color.TRANSPARENT)
 				.fillColor(0x55AA0000));//Color.BLUE

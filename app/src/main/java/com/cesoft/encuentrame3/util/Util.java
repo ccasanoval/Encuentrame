@@ -52,6 +52,8 @@ import java.util.Locale;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/03/2016.
@@ -389,7 +391,7 @@ public class Util
 
 
 	@SuppressLint("BatteryLife")
-	public boolean pideBateria() {
+	public boolean pideBateria(Context context) {
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if(pm != null) {
 				if(pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
@@ -401,7 +403,13 @@ public class Util
 					Intent intent = new Intent();
 					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 					intent.setData(Uri.parse("package:"+app.getPackageName()));
-					app.startActivity(intent);
+					if(context == null) {
+						intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+						app.startActivity(intent);
+					}
+					else {
+						context.startActivity(intent);
+					}
 					// CHECK:
 					//  turn off the screen and:
 					//adb shell dumpsys battery unplug
@@ -419,7 +427,7 @@ public class Util
 				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
 						.setCancelable(false)
-						.setPositiveButton(android.R.string.no, (dialog, id) -> pideBateria())
+						.setPositiveButton(android.R.string.no, (dialog, id) -> pideBateria(context))
 						.setNegativeButton(android.R.string.yes, (dialog, id) -> dialog.cancel())
 				;
 				final AlertDialog alert = builder.create();
@@ -441,7 +449,7 @@ public class Util
 	}
 	//______________________________________________________________________________________________
 	public boolean pideActivarGPS(Context context) {
-		if(lm != null && ! lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+		if(context != null && lm != null && ! lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setMessage(R.string.ask_to_enable_gps)
 					.setCancelable(false)

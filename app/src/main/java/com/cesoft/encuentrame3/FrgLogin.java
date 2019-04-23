@@ -57,9 +57,14 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
     {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
-        Log.e(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this.getActivity(), "Google Play Services Error", Toast.LENGTH_SHORT).show();
+        try {
+            // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
+            Log.e(TAG, "onConnectionFailed:" + connectionResult);
+            Toast.makeText(this.getActivity(), "Google Play Services Error", Toast.LENGTH_SHORT).show();
+        }
+        catch(Exception e) {
+            Log.e(TAG, "onConnectionFailed:e:", e);
+        }
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
