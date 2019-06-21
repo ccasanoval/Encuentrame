@@ -2,7 +2,8 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Log;

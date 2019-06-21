@@ -4,7 +4,6 @@ import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
-import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +25,7 @@ import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Date;
 import java.util.Locale;
@@ -35,8 +35,7 @@ import javax.inject.Inject;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-public class ActMaps
-	extends VistaBase implements PreMaps.IMapsView
+public class ActMaps extends VistaBase implements PreMaps.IMapsView
 {
 	private static final String TAG = ActMaps.class.getSimpleName();
 
@@ -133,7 +132,7 @@ public class ActMaps
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private int iColor = Color.LTGRAY;
+	private int iColor = Color.BLUE;
 	public BitmapDescriptor getNextIcon()
 	{
 		BitmapDescriptor bm;
@@ -156,14 +155,13 @@ public class ActMaps
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN);
 			break;
 		case Color.CYAN:
-			iColor = Color.LTGRAY;
+			iColor = Color.MAGENTA;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
 			break;
-
-		case Color.LTGRAY:
-			iColor = Color.MAGENTA;
-			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
-			break;
+//		case Color.LTGRAY:
+//			iColor = Color.MAGENTA;
+//			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
+//			break;
 		default:
 		case Color.MAGENTA:
 			iColor = Color.BLUE;
@@ -209,7 +207,6 @@ public class ActMaps
 			if(aPts.length < 1)return;
 			float distancia = 0;
 			Ruta.RutaPunto ptoAnt = null;
-			//BitmapDescriptor bm = getNextIcon();
 
 			String ini = getString(R.string.ini);
 			String fin = getString(R.string.fin);
@@ -246,12 +243,6 @@ public class ActMaps
 					mo.rotation(-45);
 					map.addMarker(mo.position(pos));
 				}
-				/*else
-				{
-					mo.snippet(String.format(Locale.ENGLISH, "%s %s %s", getString(R.string.info_time), util.formatFechaTiempo(date), sDist));
-					mo.icon(bm);
-					map.addMarker(mo.position(pos));
-				}*/
 				po.add(pos);
 			}
 
@@ -261,4 +252,20 @@ public class ActMaps
 		}
 		catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
 	}
+
+	/*public void showMap(Uri geoLocation) {
+		Intent intent = getIntent();
+    	Uri data = intent.getData();
+    	do something with uri... got to the lat/lon indicated...
+
+		<activity
+			android:name=".ActMaps"
+			android:label="@string/title_activity_act_maps">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<data android:scheme="geo" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+	}*/
 }

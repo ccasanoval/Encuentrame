@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,6 +12,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.fragment.app.FragmentTransaction;
 
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreRuta;
@@ -43,6 +44,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	private boolean oncePideActivarGPS = true;
 	private boolean oncePideActivarBateria = true;
 	private boolean oncePideActivarBateria2 = true;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -64,40 +66,42 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		if(btnStart != null)
 		{
 			btnStart.setEnabled(true);
-			btnStart.setOnClickListener(v ->
-			{
-				if(oncePideActivarBateria && util.pideBateria(ActRuta.this)) {
-					oncePideActivarBateria = false;
-					return;
-				}
-				if(oncePideActivarBateria2 && util.pideBateriaDeNuevoSiEsNecesario(ActRuta.this)) {
-					oncePideActivarBateria2 = false;
-					return;
-				}
-				if(oncePideActivarGPS && util.pideActivarGPS(ActRuta.this)) {
-					oncePideActivarGPS = false;
-					return;
-				}
-				if(presenter.startTrackingRecord()) {
-					btnStart.setEnabled(false);
-					btnStart.setAlpha(0.5f);
-				}
-			});
+			btnStart.setOnClickListener(v -> startButtonListener(btnStart));
 		}
 	}
+	private void startButtonListener(ImageButton btnStart) {
+		if(oncePideActivarBateria && util.pideBateria(ActRuta.this)) {
+			oncePideActivarBateria = false;
+			return;
+		}
+		if(oncePideActivarBateria2 && util.pideBateriaDeNuevoSiEsNecesario(ActRuta.this)) {
+			oncePideActivarBateria2 = false;
+			return;
+		}
+		if(oncePideActivarGPS && util.pideActivarGPS(ActRuta.this)) {
+			oncePideActivarGPS = false;
+			return;
+		}
+		if(presenter.startTrackingRecord()) {
+			btnStart.setEnabled(false);
+			btnStart.setAlpha(0.5f);
+		}
+	}
+
 	private void initStopButton() {
 		final ImageButton btnStop = findViewById(R.id.btnStop);
 		if(btnStop != null)
 		{
 			btnStop.setEnabled(true);
-			btnStop.setOnClickListener(v ->
-			{
-				btnStop.setEnabled(false);
-				btnStop.setAlpha(0.5f);
-				presenter.stopTrackingRecord();
-			});
+			btnStop.setOnClickListener(v -> stopButtonListener(btnStop));
 		}
 	}
+	private void stopButtonListener(ImageButton btnStop) {
+		btnStop.setEnabled(false);
+		btnStop.setAlpha(0.5f);
+		presenter.stopTrackingRecord();
+	}
+
 	private void initUI() {
 		if(presenter.isNuevo())
 			initUINewRoute();
@@ -199,8 +203,6 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 
 				ImageButton button = new ImageButton(ActRuta.this);
 				button.setImageDrawable(getDrawable(android.R.drawable.ic_menu_delete));
-				//Info window is an image, so it's not woriking. Instead use onInfoWindowClick
-				//button.setOnClickListener(v -> ActRuta.this.askToDelete(marker));
 
 				info.addView(title);
 				info.addView(snippet);

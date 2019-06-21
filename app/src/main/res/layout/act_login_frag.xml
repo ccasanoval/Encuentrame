@@ -20,7 +20,7 @@
 		style="@android:style/TextAppearance.Large"
 		/>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/lblEmail"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -33,9 +33,9 @@
 			android:hint="@string/email"
 			android:inputType="textEmailAddress"
 			android:maxLines="1"/>
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/lblPassword"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -48,9 +48,9 @@
 			android:hint="@string/clave"
 			android:inputType="textPassword"
 			android:maxLines="1"/>
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/lblPassword2"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -63,9 +63,9 @@
 			android:hint="@string/clave_confirmar"
 			android:inputType="textPassword"
 			android:maxLines="1"/>
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-	<android.support.v7.widget.LinearLayoutCompat
+	<androidx.appcompat.widget.LinearLayoutCompat
 		android:id="@+id/layBoton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -78,9 +78,9 @@
 			android:layout_height="wrap_content"
 			style="@style/btnStyle"
 			android:text="@string/login"/>
-	</android.support.v7.widget.LinearLayoutCompat>
+	</androidx.appcompat.widget.LinearLayoutCompat >
 
-	<android.support.v7.widget.LinearLayoutCompat
+	<androidx.appcompat.widget.LinearLayoutCompat
 		android:id="@+id/layBotonGoogle"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -93,9 +93,9 @@
 			android:layout_height="wrap_content"
 			android:visibility="visible"
 			android:layout_gravity="center"/>
-	</android.support.v7.widget.LinearLayoutCompat>
+	</androidx.appcompat.widget.LinearLayoutCompat >
 
-	<android.support.v7.widget.LinearLayoutCompat
+	<androidx.appcompat.widget.LinearLayoutCompat
 		android:id="@+id/layPrivacyPolicy"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -108,6 +108,6 @@
 			android:layout_height="wrap_content"
 			style="@style/btnStyle"
 			android:text="@string/privacy_policy"/>
-	</android.support.v7.widget.LinearLayoutCompat>
+	</androidx.appcompat.widget.LinearLayoutCompat >
 
 </RelativeLayout>

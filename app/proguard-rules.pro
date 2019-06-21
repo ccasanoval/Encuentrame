@@ -77,3 +77,11 @@
 -dontwarn org.joda.time.**
 -dontwarn org.shaded.apache.**
 -dontwarn org.ietf.jgss.**
+
+# Get deobfuscated crash reports -----------------------------
+-keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+# For faster builds with ProGuard, exclude Crashlytics -------
+-keep class com.crashlytics.** { *; }
+-dontwarn com.crashlytics.**

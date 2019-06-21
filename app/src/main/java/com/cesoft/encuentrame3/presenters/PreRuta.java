@@ -257,44 +257,56 @@ public class PreRuta extends PresenterBase
 				double fMinVel = Double.MAX_VALUE;
 				double fDistancia = 0;
 
-				for(int i=0; i < aData.length; i++)
-				{
-					Ruta.RutaPunto pto = aData[i];
-					if(fMaxAlt < pto.getAltura())fMaxAlt = pto.getAltura();
-					if(pto.getAltura() != 0.0 && fMinAlt > pto.getAltura())fMinAlt = pto.getAltura();
-					if(fMaxVel < pto.getVelocidad())fMaxVel = pto.getVelocidad();
-					if(pto.getVelocidad() != 0.0 && fMinVel > pto.getVelocidad())fMinVel = pto.getVelocidad();
-					if(i>0)fDistancia += pto.distanciaReal(aData[i-1]);
-				}
-
-				String sDistancia = getDistancia(fDistancia);
-				String sAltMin = getMinAltura(fMinAlt);
-				String sAltMax = getMaxAltura(fMaxAlt);
-				String sVelMin = getMinVelociodad(fMinVel);
-				String sVelMax = getMaxVelociodad(fMaxVel);
-
+				String sDistancia = "";
+				String sAltMin = "";
+				String sAltMax = "";
+				String sVelMin = "";
+				String sVelMax = "";
 				String sTiempo = "";
 				String sVelMed = "";
-				if(aData.length > 0)
-				{
-					long t = aData[aData.length-1].getFecha().getTime() - aData[0].getFecha().getTime();
-					sTiempo = util.formatDiffTimes(
-							new DateTime(aData[0].getFecha().getTime()),		//Time Ini
-							new DateTime(aData[aData.length-1].getFecha()));	//Time End
 
-					if(t > 1000)//No calcular velocidad media si tiempo < 1s
-					{
-						Locale loc = Locale.getDefault();
-						double d = fDistancia*1000/t;
-						if(d > 3)
-						{
-							d = d*3600/1000;
-							sVelMed = String.format(loc, KMH, d);
-						}
-						else
-							sVelMed = String.format(loc, MS, d);
+				try {
+					for(int i = 0; i < aData.length; i++) {
+						Ruta.RutaPunto pto = aData[i];
+						if(fMaxAlt < pto.getAltura()) fMaxAlt = pto.getAltura();
+						if(pto.getAltura() != 0.0 && fMinAlt > pto.getAltura())
+							fMinAlt = pto.getAltura();
+						if(fMaxVel < pto.getVelocidad()) fMaxVel = pto.getVelocidad();
+						if(pto.getVelocidad() != 0.0 && fMinVel > pto.getVelocidad())
+							fMinVel = pto.getVelocidad();
+						if(i > 0) fDistancia += pto.distanciaReal(aData[i - 1]);
 					}
-					else sVelMed = "-";
+
+					sDistancia = getDistancia(fDistancia);
+					sAltMin = getMinAltura(fMinAlt);
+					sAltMax = getMaxAltura(fMaxAlt);
+					sVelMin = getMinVelociodad(fMinVel);
+					sVelMax = getMaxVelociodad(fMaxVel);
+
+
+					if(aData.length > 0) {
+						long t = aData[aData.length - 1].getFecha().getTime() - aData[0].getFecha().getTime();
+						sTiempo = util.formatDiffTimes(
+								new DateTime(aData[0].getFecha().getTime()),        //Time Ini
+								new DateTime(aData[aData.length - 1].getFecha()));    //Time End
+
+						if(t > 1000)//No calcular velocidad media si tiempo < 1s
+						{
+							Locale loc = Locale.getDefault();
+							double d = fDistancia * 1000 / t;
+							if(d > 3) {
+								d = d * 3600 / 1000;
+								sVelMed = String.format(loc, KMH, d);
+							}
+							else {
+								sVelMed = String.format(loc, MS, d);
+							}
+						}
+						else sVelMed = "-";
+					}
+				}
+				catch(Exception e) {
+					Log.e(TAG, "estadisticas:onDatos:e:---------------------------------------",e);
 				}
 
 				estadisticasShow(String.format(app.getString(R.string.estadisticas_format),
@@ -303,7 +315,7 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("estadisticas:onCancelled:-------------------------------:%s",err));
+				Log.e(TAG, "estadisticas:onCancelled:-------------------------------:"+err);
 			}
 		});
 	}

@@ -12,29 +12,17 @@ import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
-import com.squareup.leakcanary.LeakCanary;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 15/09/2016
+//TODO: sin conexion debería poder empezar una nueva ruta!!!!!!
 public class App extends Application //implements ActivityCompat.OnRequestPermissionsResultCallback
 {
 	private GlobalComponent globalComponent;
-	private static App instance;
-		public static App getInstance() { return instance; }
 
 	@Override public void onCreate()
 	{
 		super.onCreate();
-		instance = this;
-
-		if(LeakCanary.isInAnalyzerProcess(this))
-		{
-			// This process is dedicated to LeakCanary for heap analysis.
-			// You should not init your app in this process.
-			return;
-		}
-		LeakCanary.install(this);
 
 		Fabric.with(this, new Crashlytics());
 
@@ -65,14 +53,4 @@ public class App extends Application //implements ActivityCompat.OnRequestPermis
 		//WidgetRutaService.startSvc(this);//It's already started by GeoTrackingJobService
 	}
 
-	// Implements ActivityCompat.OnRequestPermissionsResultCallback
-	/*@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-		try {
-			for(int i=0; i < permissions.length; i++)
-				Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
-						+ requestCode + " : " + permissions[i] + " = " + grantResults[i]);
-		}
-		catch(Exception ignore){}
-	}*/
 }

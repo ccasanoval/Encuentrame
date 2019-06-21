@@ -6,19 +6,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.cesoft.encuentrame3.adapters.AvisoArrayAdapter;
 import com.cesoft.encuentrame3.adapters.IListaItemClick;
+import com.cesoft.encuentrame3.adapters.ShadowItemDecorator;
+import com.cesoft.encuentrame3.adapters.SpaceItemDecorator;
 import com.cesoft.encuentrame3.adapters.LugarArrayAdapter;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.models.Aviso;
@@ -30,6 +33,7 @@ import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Date;
 
@@ -48,18 +52,20 @@ public class FrgMain extends Fragment implements IListaItemClick
 {
 	private static final String TAG = FrgMain.class.getSimpleName();
 	private static final String ARG_SECTION_NUMBER = "section_number";
+	private static final String LIST_SCROLL_STATE = "LIST_SCROLL_STATE";
 
 	private Filtro filtro;
-		public Filtro getFiltro(){return filtro;}
+		Filtro getFiltro(){return filtro;}
 
 	@Inject	Util util;
 
 	private View rootView;
-	private ListView listView;			//Lista de Lugares, Rutas, Avisos
-	private Parcelable scroll = null;	//Recuerda posicion del scroll de la lista
+	private RecyclerView.LayoutManager layoutManager;
+	private RecyclerView listView;		//Lista de Lugares, Rutas, Avisos
+	private Parcelable scrollState = null;	//Recuerda posicion del scroll de la lista
 	private MainIterface main;
 	private int sectionNumber = Constantes.LUGARES;
-	public int getSectionNumber() { return sectionNumber; }
+	int getSectionNumber() { return sectionNumber; }
 
 	//----------------------------------------------------------------------------------------------
 	public FrgMain() {
@@ -72,6 +78,13 @@ public class FrgMain extends Fragment implements IListaItemClick
 		fragment.setArguments(args);
 		fragment.setRetainInstance(true);
 		return fragment;
+	}
+
+	@Override
+	public void onSaveInstanceState(@NonNull Bundle state) {
+		super.onSaveInstanceState(state);
+		scrollState = layoutManager.onSaveInstanceState();
+		state.putParcelable(LIST_SCROLL_STATE, scrollState);
 	}
 
 	@Override
@@ -88,6 +101,14 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 		rootView = inflater.inflate(R.layout.act_main_frag, container, false);
 		listView = rootView.findViewById(R.id.listView);
+		layoutManager = new LinearLayoutManager(getContext());
+		listView.setLayoutManager(layoutManager);
+		// Decorators
+		int verticalSpacing = 20;
+		SpaceItemDecorator itemDecorator = new SpaceItemDecorator(verticalSpacing);
+		listView.addItemDecoration(itemDecorator);
+		ShadowItemDecorator shadowItemDecorator = new ShadowItemDecorator(getContext(), R.drawable.drop_shadow);
+		listView.addItemDecoration(shadowItemDecorator);
 
 		if(sectionNumber < 0)
 		{
@@ -122,7 +143,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 				break;
 			default:break;
 		}
-		listView.addHeaderView(textView);
+		//listView.addHeaderView(textView);//TODO
 
 		return rootView;
 	}
@@ -190,7 +211,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	public void onPause()
 	{
 		super.onPause();
-		scroll = listView.onSaveInstanceState();
+		scrollState = layoutManager.onSaveInstanceState();
 		if(sectionNumber == Constantes.RUTAS && getContext() != null)
 			LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(messageReceiver);
 	}
@@ -217,7 +238,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 		int getCurrentItem();
 	}
 	@Override
-	public void onAttach(Context context)
+	public void onAttach(@NonNull Context context)
 	{
 		super.onAttach(context);
 		if(context instanceof MainIterface) {
@@ -282,7 +303,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 		if(lisRuta !=null) lisRuta.setListener(null);
 	}
 
-	///(@StringRes int idString) {
 	private void showMsgListaVacia() {
 		try{Toast.makeText(getContext(), R.string.lista_vacia, Toast.LENGTH_SHORT).show();}
 		catch(Exception e){Log.e(TAG, "showToast:e:%s", e);}
@@ -301,10 +321,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 				}
 				if(listView != null && rootView != null)
 				{
-					scroll = listView.onSaveInstanceState();
-					listView.setAdapter(new LugarArrayAdapter(rootView.getContext(), aLugares, FrgMain.this));
+					scrollState = layoutManager.onSaveInstanceState();
+					layoutManager.onRestoreInstanceState(scrollState);
+					listView.setAdapter(new LugarArrayAdapter(aLugares, FrgMain.this));
 					listView.setContentDescription(getString(R.string.lugares));//Para Espresso
-					listView.onRestoreInstanceState(scroll);
 				}
 			}
 			@Override
@@ -328,12 +348,13 @@ public class FrgMain extends Fragment implements IListaItemClick
 				}
 				if(rootView != null)
 				{
-					scroll = listView.onSaveInstanceState();
-					RutaArrayAdapter r = new RutaArrayAdapter(rootView.getContext(), aRutas, FrgMain.this);
+					scrollState = layoutManager.onSaveInstanceState();
+					layoutManager.onRestoreInstanceState(scrollState);
+					RutaArrayAdapter r = new RutaArrayAdapter(rootView.getContext(), aRutas,FrgMain.this);
 					listView.setAdapter(r);
 					listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
-					listView.onRestoreInstanceState(scroll);
+
 				}
 			}
 			@Override public void onError(String err) {
@@ -354,10 +375,10 @@ public class FrgMain extends Fragment implements IListaItemClick
 				}
 				if(listView != null && rootView != null)
 				{
-					scroll = listView.onSaveInstanceState();
-					listView.setAdapter(new AvisoArrayAdapter(rootView.getContext(), aAvisos, FrgMain.this));
+					scrollState = layoutManager.onSaveInstanceState();
+					layoutManager.onRestoreInstanceState(scrollState);
+					listView.setAdapter(new AvisoArrayAdapter(aAvisos, FrgMain.this));
 					listView.setContentDescription(getString(R.string.avisos));//Para Espresso
-					listView.onRestoreInstanceState(scroll);
 				}
 			}
 			@Override public void onError(String err) { Log.e(TAG, "AVISOS2:GET:e:------------------"+err); }
@@ -375,7 +396,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	}
 
 	//______________________________________________________________________________________________
-	public void refreshLugares()
+	private void refreshLugares()
 	{
 		if(filtro == null)
 		{
@@ -392,7 +413,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	}
 
 	//__________________________________________________________________________________________
-	public void refreshRutas()
+	private void refreshRutas()
 	{
 		if(filtro.isOn())
 		{
@@ -404,7 +425,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 	}
 
 	//__________________________________________________________________________________________
-	public void refreshAvisos()
+	private void refreshAvisos()
 	{
 		if(filtro.isOn())
 		{
@@ -430,8 +451,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 	//----------------------------------------------------------------------------------------------
 	// Recoge el resultado de startActivityForResult : buscar
-	public static final String MENSAJE = "mensaje";
-	public static final String DIRTY = "dirty";
+	private static final String MENSAJE = "mensaje";
+	private static final String DIRTY = "dirty";
 
 	private void processDataResult(Intent data) {
 		if(data != null)

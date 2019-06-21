@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Keep;
 import android.widget.ImageView;
+
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,8 +34,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-
-import android.support.annotation.NonNull;
 
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Log;
@@ -65,6 +66,10 @@ public class Lugar extends Objeto
 	{
 		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
+	}
+
+	public void bind(Lugar lugar) {
+		super.bind(lugar);
 	}
 
 	//// FIREBASE

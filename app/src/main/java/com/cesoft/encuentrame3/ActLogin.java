@@ -2,13 +2,18 @@ package com.cesoft.encuentrame3;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
+
+import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +39,7 @@ public class ActLogin extends AppCompatActivity
 		setContentView(R.layout.act_login);
 
 		// Create the adapter that will return a fragment for each of the three primary sections of the activity.
-		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 		// Set up the ViewPager with the sections adapter.
 		ViewPager viewPager = findViewById(R.id.container);
 		if(viewPager != null)
@@ -56,10 +61,11 @@ public class ActLogin extends AppCompatActivity
 	// A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
 	private class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
-		SectionsPagerAdapter(FragmentManager fm)
-		{
-			super(fm);
+
+		public SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
+			super(fm, behavior);
 		}
+
 		@Override
 		public Fragment getItem(int position)
 		{

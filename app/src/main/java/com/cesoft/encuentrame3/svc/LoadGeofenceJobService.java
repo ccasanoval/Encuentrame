@@ -67,7 +67,7 @@ public class LoadGeofenceJobService extends JobService {
                 cargarListaGeoAvisos();//PAYLOAD
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    start(getApplicationContext(), false);
+                    start(getApplication(), false);
                 LoadGeofenceJobService.this.jobFinished(jobParameters, true);
             }
         }).start();
@@ -131,13 +131,12 @@ public class LoadGeofenceJobService extends JobService {
                     if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))
                     {
                         bDirty = true;
-                        //i++;
                     }
                 }
                 if(bDirty)
                 {
                     listaGeoAvisos = aAvisos;
-                    geofenceStoreAvisos = new CesGeofenceStore(aGeofences);//Se puede añadir en lugar de crear desde cero?
+                    geofenceStoreAvisos = new CesGeofenceStore(getApplication(), aGeofences);//Se puede añadir en lugar de crear desde cero?
                 }
                 Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------aGeofences:"+aGeofences.size()+"-----------------------------------");
             }

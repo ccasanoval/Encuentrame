@@ -3,9 +3,6 @@ package com.cesoft.encuentrame3;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +11,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
+import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.auth.api.Auth;
@@ -23,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -129,131 +131,157 @@ public class FrgLogin extends Fragment implements GoogleApiClient.OnConnectionFa
     public void onCreate(Bundle b)
     {
         super.onCreate(b);
-        login = App.getComponent(main).login();
+        GlobalComponent c = App.getComponent(main);
+        if(c != null) login = c.login();
     }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        if(login.isLogged()) main.goMain();
+        if(login == null || login.isLogged()) main.goMain();
 
         final int sectionNumber = getArguments()!=null ? getArguments().getInt(ARG_SECTION_NUMBER) : 0;
         final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
+
+        switch(sectionNumber)
+        {
+            default:
+            case ENTER:
+                enter(rootView);
+                break;
+            case REGISTER:
+                register(rootView);
+                break;
+            case RECOVER:
+                recover(rootView);
+                break;
+        }
+
+        return rootView;
+    }
+
+    private void enter(View rootView) {
+        final TextView lblTitulo = rootView.findViewById(R.id.lblTitulo);
+        final EditText txtPassword = rootView.findViewById(R.id.txtPassword);
+        final EditText txtEmail = rootView.findViewById(R.id.txtEmail);
+        final Button btnSend = rootView.findViewById(R.id.btnSend);
+        final Button btnPrivacyPolicy = rootView.findViewById(R.id.btnPrivacyPolicy);
+        final SignInButton btnGoogle = rootView.findViewById(R.id.btnGoogle);
+        final TextInputLayout lblPassword2 = rootView.findViewById(R.id.lblPassword2);
+
+        lblPassword2.setVisibility(View.GONE);
+        lblTitulo.setText(getString(R.string.enter_lbl));
+        //
+        btnPrivacyPolicy.setOnClickListener(v -> {
+            Intent browserIntent = new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
+            startActivity(browserIntent);
+        });
+        //
+        btnSend.setOnClickListener(v -> {
+            main.iniEsperaLogin();
+            login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
+                    new Fire.AuthListener()
+                    {
+                        @Override
+                        public void onExito(FirebaseUser usr) {
+                            logginOk(usr.getEmail());
+                        }
+                        @Override
+                        public void onFallo(Exception e) {
+                            main.finEsperaLogin();
+                            Toast.makeText(main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+                        }
+                    });
+        });
+        txtPassword.setOnEditorActionListener((v, actionId, event) -> {
+            if((event != null && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER))
+                    || (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE))
+            {
+                btnSend.callOnClick();
+            }
+            return false;
+        });
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        googleApiClient = new GoogleApiClient.Builder(main)
+                .enableAutoManage(main/* FragmentActivity */, this/* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+        firebaseAuth = FirebaseAuth.getInstance();
+        btnGoogle.setOnClickListener(view -> {
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
+    }
+
+
+    private void register(View rootView) {
         final TextView lblTitulo = rootView.findViewById(R.id.lblTitulo);
         final EditText txtPassword = rootView.findViewById(R.id.txtPassword);
         final EditText txtPassword2 = rootView.findViewById(R.id.txtPassword2);
         final EditText txtEmail = rootView.findViewById(R.id.txtEmail);
         final Button btnSend = rootView.findViewById(R.id.btnSend);
-        final Button btnPrivacyPolicy = rootView.findViewById(R.id.btnPrivacyPolicy);
+        final SignInButton btnGoogle = rootView.findViewById(R.id.btnGoogle);
+
+        btnGoogle.setVisibility(View.GONE);
+        lblTitulo.setText(getString(R.string.register_lbl));
+        btnSend.setOnClickListener(v -> {
+            if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
+            {
+                Toast.makeText(main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
+                return;
+            }
+            main.iniEsperaLogin();
+            Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
+                    new Fire.AuthListener()
+                    {
+                        @Override
+                        public void onExito(FirebaseUser usr)
+                        {
+                            main.finEsperaLogin();
+                            if(usr != null)
+                                Toast.makeText(main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
+                        }
+                        @Override
+                        public void onFallo(Exception e)
+                        {
+                            main.finEsperaLogin();//TODO: Añadir %s en la cadena
+                            Toast.makeText(main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
+                        }
+                    });
+        });
+    }
+
+    private void recover(View rootView) {
+        final TextView lblTitulo = rootView.findViewById(R.id.lblTitulo);
+        final EditText txtEmail = rootView.findViewById(R.id.txtEmail);
+        final Button btnSend = rootView.findViewById(R.id.btnSend);
         final SignInButton btnGoogle = rootView.findViewById(R.id.btnGoogle);
         final TextInputLayout lblPassword = rootView.findViewById(R.id.lblPassword);
         final TextInputLayout lblPassword2 = rootView.findViewById(R.id.lblPassword2);
 
-        switch(sectionNumber)
-        {
-            case ENTER://----------------------- ----------------------------------------------------
-                lblPassword2.setVisibility(View.GONE);
-                lblTitulo.setText(getString(R.string.enter_lbl));
-                //
-                btnPrivacyPolicy.setOnClickListener(v -> {
-                    Intent browserIntent = new Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
-                    startActivity(browserIntent);
-                });
-                //
-                btnSend.setOnClickListener(v -> {
-                    main.iniEsperaLogin();
-                    login.login(txtEmail.getText().toString(), txtPassword.getText().toString(),
-                            new Fire.AuthListener()
-                            {
-                                @Override
-                                public void onExito(FirebaseUser usr) {
-                                    logginOk(usr.getEmail());
-                                }
-                                @Override
-                                public void onFallo(Exception e) {
-                                    main.finEsperaLogin();
-                                    Toast.makeText(main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                });
-                txtPassword.setOnEditorActionListener((v, actionId, event) -> {
-                    if((event != null && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER))
-                            || (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE))
+        btnGoogle.setVisibility(View.GONE);
+        lblPassword.setVisibility(View.GONE);
+        lblPassword2.setVisibility(View.GONE);
+        lblTitulo.setText(getString(R.string.recover_lbl));
+        btnSend.setOnClickListener(v -> Login.restoreUser(txtEmail.getText().toString(),
+                new Fire.AuthListener()
+                {
+                    @Override
+                    public void onExito(FirebaseUser usr)
                     {
-                        btnSend.callOnClick();
+                        Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
+                        main.selectTabEnter();
                     }
-                    return false;
-                });
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build();
-                googleApiClient = new GoogleApiClient.Builder(main)
-                        .enableAutoManage(main/* FragmentActivity */, this/* OnConnectionFailedListener */)
-                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                        .build();
-                firebaseAuth = FirebaseAuth.getInstance();
-                btnGoogle.setOnClickListener(view -> {
-                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-                    startActivityForResult(signInIntent, RC_SIGN_IN);
-                });
-                break;
-
-            case REGISTER://------------------------------------------------------------------------
-                btnGoogle.setVisibility(View.GONE);
-                lblTitulo.setText(getString(R.string.register_lbl));
-                btnSend.setOnClickListener(v -> {
-                    if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
+                    @Override
+                    public void onFallo(Exception e)
                     {
-                        Toast.makeText(main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
-                        return;
+                        Log.e(TAG, String.format("RECOVER:e:%s",e), e);
+                        Toast.makeText(rootView.getContext(), R.string.recover_ko +"  "+ e.toString(), Toast.LENGTH_LONG).show();
                     }
-                    main.iniEsperaLogin();
-                    Login.addUser(txtEmail.getText().toString(), txtPassword.getText().toString(),
-                            new Fire.AuthListener()
-                            {
-                                @Override
-                                public void onExito(FirebaseUser usr)
-                                {
-                                    main.finEsperaLogin();
-                                    if(usr != null)
-                                        Toast.makeText(main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
-                                }
-                                @Override
-                                public void onFallo(Exception e)
-                                {
-                                    main.finEsperaLogin();//TODO: Añadir %s en la cadena
-                                    Toast.makeText(main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
-                                }
-                            });
-                });
-                break;
-
-            case RECOVER://-------------------------------------------------------------------------
-                btnGoogle.setVisibility(View.GONE);
-                lblPassword.setVisibility(View.GONE);
-                lblPassword2.setVisibility(View.GONE);
-                lblTitulo.setText(getString(R.string.recover_lbl));
-                btnSend.setOnClickListener(v -> Login.restoreUser(txtEmail.getText().toString(),
-                        new Fire.AuthListener()
-                        {
-                            @Override
-                            public void onExito(FirebaseUser usr)
-                            {
-                                Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-                                main.selectTabEnter();
-                            }
-                            @Override
-                            public void onFallo(Exception e)
-                            {
-                                Log.e(TAG, String.format("RECOVER:e:%s",e), e);
-                                Toast.makeText(rootView.getContext(), R.string.recover_ko +"  "+ e.toString(), Toast.LENGTH_LONG).show();
-                            }
-                        }));
-                break;
-        }
-
-        return rootView;
+                }));
     }
 }

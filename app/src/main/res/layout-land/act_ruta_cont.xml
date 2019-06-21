@@ -13,8 +13,7 @@
 	android:paddingTop="@dimen/activity_vertical_margin"
 	app:layout_behavior="@string/appbar_scrolling_view_behavior"
 	tools:context="com.cesoft.encuentrame3.ActRuta"
-	tools:showIn="@layout/act_ruta"
-	>
+	tools:showIn="@layout/act_ruta">
 
 	<!-- *************************************************************************************** -->
 	<RelativeLayout
@@ -22,13 +21,11 @@
 		android:layout_height="wrap_content"
 		android:layout_weight="1">
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/txtNombre_"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
-		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true"
 		android:layout_alignParentTop="true"
 		>
@@ -40,17 +37,15 @@
 			android:hint="@string/nombre"
 			android:maxLines="1"
 			android:inputType="textCapWords"/>
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/txtDescripcion_"
 		android:layout_below="@+id/txtNombre_"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true"
-		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
 		>
 		<EditText
@@ -61,36 +56,7 @@
 			android:ems="10"
 			android:inputType="textMultiLine"
 			android:maxLines="3"/>
-	</android.support.design.widget.TextInputLayout>
-
-	<!--TextView
-		android:id="@+id/lblFecha"
-		android:layout_below="@+id/txtDescripcion_"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textAppearance="?android:attr/textAppearanceSmall"
-		/-->
-
-	<!--LinearLayout
-		android:id="@+id/layPeriodo"
-		android:layout_below="@+id/txtDescripcion_"
-		android:orientation="horizontal"
-		android:layout_centerHorizontal="true"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="10dp">
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceMedium"
-			android:text="@string/periodo"/>
-		<Spinner
-			android:id="@+id/spnTrackingDelay"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceLarge"
-			android:prompt="@string/periodo" />
-	</LinearLayout-->
+	</com.google.android.material.textfield.TextInputLayout>
 
 	<LinearLayout
 		android:id="@+id/layStartStop"
@@ -104,7 +70,6 @@
 			android:id="@+id/btnStart"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginRight="20dp"
 			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/start"
 			style="@style/btnStyle"
@@ -113,7 +78,6 @@
 			android:id="@+id/btnStop"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginRight="20dp"
 			android:layout_marginEnd="20dp"
 			android:contentDescription="@string/stop"
 			style="@style/btnStyle"
@@ -124,8 +88,6 @@
 
 	<!-- *************************************************************************************** -->
 	<fragment
-		xmlns:android="http://schemas.android.com/apk/res/android"
-    	xmlns:tools="http://schemas.android.com/tools"
 		class="com.google.android.gms.maps.SupportMapFragment"
 		tools:context=".ActRuta"
 		android:id="@+id/map"

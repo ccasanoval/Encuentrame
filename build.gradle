@@ -9,10 +9,10 @@ buildscript {
 		maven { url 'https://maven.fabric.io/public' }
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:3.4.0'
+		classpath 'com.android.tools.build:gradle:3.4.1'
 		classpath 'me.tatarka:gradle-retrolambda:3.7.0'		//RetroLambda
 		classpath 'com.google.gms:google-services:4.2.0'
-		classpath 'io.fabric.tools:gradle:1.28.0'
+		classpath 'io.fabric.tools:gradle:1.29.0'
 	}
 }
 

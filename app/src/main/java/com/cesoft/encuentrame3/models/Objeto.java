@@ -2,7 +2,8 @@ package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.firebase.database.Exclude;
 
@@ -51,6 +52,14 @@ public class Objeto implements Parcelable
         @Exclude public double getLongitud(){return longitud;}
         @Exclude public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}
 
+    public void bind(Objeto obj) {
+        this.descripcion = obj.descripcion;
+		this.fecha = obj.fecha;
+		this.id = obj.id;
+		this.latitud = obj.latitud;
+		this.longitud = obj.longitud;
+		this.nombre = obj.nombre;
+	}
 
 	//______________________________________________________________________________________________
 	Objeto() { fecha = new Date(); }

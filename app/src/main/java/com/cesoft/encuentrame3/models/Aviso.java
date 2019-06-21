@@ -1,7 +1,8 @@
 package com.cesoft.encuentrame3.models;
 
 import android.os.Parcel;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.cesoft.encuentrame3.util.Log;
 import com.firebase.geofire.GeoFire;

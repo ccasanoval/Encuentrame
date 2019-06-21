@@ -22,7 +22,7 @@
 		android:layout_height="wrap_content"
 		android:layout_weight="1">
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/txtNombre_"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -40,10 +40,10 @@
 			android:hint="@string/nombre"
 			android:maxLines="1"
 			android:inputType="textCapWords"/>
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/txtDescripcion_"
 		android:layout_below="@+id/txtNombre_"
 		android:layout_width="match_parent"
@@ -61,7 +61,7 @@
 			android:ems="10"
 			android:inputType="textMultiLine|textCapSentences"
 			android:maxLines="3"/>
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
 	<!-- DATE CREATED and MODIFIED ? -->
 

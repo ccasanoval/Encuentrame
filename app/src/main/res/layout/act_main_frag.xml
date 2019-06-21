@@ -10,15 +10,15 @@
 	android:paddingTop="2dp"
 	tools:context=".ActMain">
 
-	<ListView
+	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/listView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentTop="true"
 		android:layout_alignParentStart="true"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+		app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-	<android.support.design.widget.FloatingActionButton
+	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/fabNuevo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -26,6 +26,5 @@
 		android:layout_centerHorizontal="true"
 		android:layout_marginBottom="30dp"
 		android:src="@android:drawable/ic_input_add"/>
-	<!-- android:layout_margin="@dimen/fab_margin" -->
 
 </RelativeLayout>

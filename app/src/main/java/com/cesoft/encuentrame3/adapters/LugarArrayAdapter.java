@@ -1,42 +1,77 @@
 package com.cesoft.encuentrame3.adapters;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Lugar;
-import com.cesoft.encuentrame3.util.Constantes;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 12/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //http://www.vogella.com/tutorials/AndroidListView/article.html
-public class LugarArrayAdapter extends ArrayAdapter<Lugar>
+public class LugarArrayAdapter extends RecyclerView.Adapter<ItemViewHolder>
 {
-	private final Lugar[] lugares;
-	private IListaItemClick inter;
-
-	public LugarArrayAdapter(Context context, Lugar[] lugares, IListaItemClick inter)
-	{
-		super(context, -1, lugares);
-		this.lugares = lugares;
-		this.inter = inter;
-	}
-
-	private class ViewHolder
+	/*public class LugarViewHolder extends RecyclerView.ViewHolder
 	{
 		private TextView txtNombre;
 		private TextView txtFecha;
 		private ImageButton btnEditar;
 		private ImageButton btnMapa;
+
+		public LugarViewHolder(@NonNull View itemView) {
+			super(itemView);
+			txtNombre = itemView.findViewById(R.id.txtNombre);
+			txtFecha = itemView.findViewById(R.id.txtFecha);
+			btnEditar = itemView.findViewById(R.id.btnEditar);
+			btnMapa = itemView.findViewById(R.id.btnMapa);
+
+			btnEditar.setOnClickListener(v -> onEditarClick());
+			btnMapa.setOnClickListener(v -> onMapaClick());
+		}
+
+		public void bind(Lugar lugar) {
+			txtNombre.setText(lugar.nombre);
+			txtFecha.setText(lugar.fecha.toString());
+		}
+
+		private void onEditarClick() {}
+		private void onMapaClick() {}
+	}*/
+
+	private final Lugar[] lugares;
+	private IListaItemClick inter;
+
+	public LugarArrayAdapter(Lugar[] lugares, IListaItemClick inter)
+	{
+		this.lugares = lugares;
+		this.inter = inter;
 	}
+
+	@NonNull
 	@Override
+	public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.lista, parent, false);
+		return new ItemViewHolder(view, inter);
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+		holder.bind(lugares[position]);
+	}
+
+	@Override
+	public int getItemCount() {
+		return lugares.length;
+	}
+
+
+	/*@Override
 	public @NonNull View getView(final int position, View convertView, @NonNull ViewGroup parent)
 	{
 		final ViewHolder holder;
@@ -61,6 +96,6 @@ public class LugarArrayAdapter extends ArrayAdapter<Lugar>
 		holder.btnMapa.setOnClickListener(v -> inter.onItemMap(Constantes.LUGARES, lugares[position]));
 
 		return convertView;
-	}
+	}*/
 
 }

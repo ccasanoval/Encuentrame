@@ -4,23 +4,26 @@ package com.cesoft.encuentrame3;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+import com.google.android.material.tabs.TabLayout;
+
+import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
 
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
@@ -66,6 +69,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		super.onNewIntent(intent);
 		gotoPage(intent);
 		showMensaje(intent);
 	}
@@ -98,7 +102,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	//----------------------------------------------------------------------------------------------
 	private void createViews()
 	{
-		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 		viewPager = findViewById(R.id.container);
 		viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = findViewById(R.id.tabs);
@@ -129,7 +133,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	{
 		// Handle action bar item clicks here. The action bar will automatically handle clicks on the
 		// Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-		Intent i;
 		int id = item.getItemId();
 		switch(id)
 		{
@@ -137,21 +140,22 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				startActivityForResult(new Intent(this, ActConfig.class), Constantes.CONFIG);
 				return true;
 			case R.id.action_mapa:
-				i = new Intent(this, ActMaps.class);
+				Intent i = new Intent(this, ActMaps.class);
 				i.putExtra(Util.TIPO, viewPager.getCurrentItem());
 				startActivity(i);
 				return true;
 			case R.id.action_buscar:
 				FrgMain frg = frmMain[viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
-				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager()).getItem(viewPager.getCurrentItem());
+				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT).getItem(viewPager.getCurrentItem());
 				buscar(frmMain[viewPager.getCurrentItem()]);
 				return true;
 			case R.id.action_privacy_policy:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
 				startActivity(browserIntent);
 				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
 	}
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -270,11 +274,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	private class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
-		SectionsPagerAdapter(FragmentManager fm)
-		{
-			super(fm);
+
+		SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
+			super(fm, behavior);
 		}
+
 		@Override
+		@NonNull
 		public Fragment getItem(int position)
 		{
 			frmMain[position] = FrgMain.newInstance(position);
