@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3.models;
 
 import android.app.Activity;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
@@ -42,8 +43,6 @@ import com.cesoft.encuentrame3.util.Log;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//https://firebase.google.com/docs/database/android/save-data
-//https://stackoverflow.com/questions/37890025/classmapper-warnings-after-upgrading-firebase
 @Keep
 @IgnoreExtraProperties
 public class Lugar extends Objeto
@@ -58,6 +57,9 @@ public class Lugar extends Objeto
 	}
 	@Exclude private DatabaseReference datos;
 
+	private static final int DELAY = 5000;
+	private Handler handler = new Handler();
+
 	//______________________________________________________________________________________________
 	public Lugar() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
 	@NonNull
@@ -66,10 +68,6 @@ public class Lugar extends Objeto
 	{
 		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
 				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
-	}
-
-	public void bind(Lugar lugar) {
-		super.bind(lugar);
 	}
 
 	//// FIREBASE
@@ -87,6 +85,9 @@ public class Lugar extends Objeto
 		}
 		delGeo();
 		delImg();
+
+		/// Just in case there's no Internet connection...
+		handler.postDelayed(listener::onTimeout, DELAY);
 	}
 	public void guardar(Fire.CompletadoListener listener)
 	{
@@ -108,14 +109,18 @@ public class Lugar extends Objeto
 			datos.setValue(this, listener);
 		}
 		saveGeo();
+
+		/// Just in case there's no Internet connection...
+		handler.postDelayed(listener::onTimeout, DELAY);
 	}
+
 
 	//______________________________________________________________________________________________
 	public static void getLista(@NonNull final Fire.DatosListener<Lugar> listener)
 	{
 		DatabaseReference ddbb = newFirebase();
 		ValueEventListener vel;
-		vel = new ValueEventListener()//AJAX
+		vel = new ValueEventListener()
 		{
 			@Override
 			public void onDataChange(@NonNull DataSnapshot data)
@@ -256,6 +261,7 @@ public class Lugar extends Objeto
 	private GeoFire datGeo;
 	private void saveGeo()
 	{
+		Log.e(TAG, "saveGeo--------------------------------------------------- 0");
 		if(datos.getKey() == null)
 		{
 			Log.e(TAG, "saveGeo:id==null");
@@ -266,7 +272,10 @@ public class Lugar extends Objeto
 		{
 			if(error != null)
 				Log.e(TAG, "There was an error saving the location to GeoFire: "+error+" : "+key+" : "+ datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
+			else
+				Log.e(TAG, "GeoFire OK: "+key+" : "+ datos.getKey()+" : "+getLatitud()+"/"+getLongitud());
 		});
+		Log.e(TAG, "saveGeo--------------------------------------------------- 9");
 	}
 	private void delGeo()
 	{
@@ -275,8 +284,20 @@ public class Lugar extends Objeto
 			Log.e(TAG, "delGeo:id==null-------------------------------------------------------------");
 			return;
 		}
-		if(datGeo == null) datGeo = newGeoFire();
-		datGeo.removeLocation(datos.getKey());
+		try
+		{
+			if(datGeo == null) datGeo = newGeoFire();
+Log.e(TAG, "delGeo:-------------------------------------------------- "+datos.getKey()+" : "+datGeo.getDatabaseReference());
+			datGeo.removeLocation(datos.getKey(), (key, error) -> {
+				if(error != null)
+					Log.e(TAG, "delGeo:e:"+key+" - "+error);
+				else
+					Log.e(TAG, "delGeo:OK:"+key);
+				});
+		}
+		catch(Exception e) {
+			Log.e(TAG, "delGeo:e:", e);
+		}
 	}
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------

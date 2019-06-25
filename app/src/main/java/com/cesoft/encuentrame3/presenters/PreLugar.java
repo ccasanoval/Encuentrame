@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.presenters;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 
@@ -55,6 +56,7 @@ public class PreLugar extends PresenterBase
 		}
 		o.setNombre(view.getTextNombre());
 		o.setDescripcion(view.getTextDescripcion());
+Log.w(TAG, "guardar-----------------------------------------------------------------"+ view.getTextNombre()+" / "+view.getTextDescripcion());
 		((Lugar) o).guardar(new Fire.CompletadoListener()
 		{
 			@Override
@@ -64,8 +66,12 @@ public class PreLugar extends PresenterBase
 				bGuardar = true;
 				if(imgURLnew != null)((Lugar) o).uploadImg(imgURLnew);
 				imgURLnew = null;
-				util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_lugar));
-				view.finEspera();
+				if(view != null) {
+					Activity act = view.getAct();
+					if (act != null)
+						util.return2Main(act, true, app.getString(R.string.ok_guardar_lugar));
+					view.finEspera();
+				}
 			}
 			@Override
 			protected void onError(String err, int code)
@@ -74,6 +80,17 @@ public class PreLugar extends PresenterBase
 				view.finEspera();
 				view.toast(R.string.error_guardar, err);
 				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------------"+err);
+			}
+			@Override
+			protected void onTimeout()
+			{
+				Log.e(TAG, "guardar:timeout");
+				bGuardar = true;
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.on_timeout);
+					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+				}
 			}
 		});
 	}
@@ -89,16 +106,31 @@ public class PreLugar extends PresenterBase
 			protected void onDatos(String id)
 			{
 				bEliminar = true;
-				view.finEspera();
-				util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_lugar));
+				if(view != null) {
+					view.finEspera();
+					util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_lugar));
+				}
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
+				Log.e(TAG, "eliminar:handleFault:e: "+err);
 				bEliminar = true;
-				view.finEspera();
-				view.toast(R.string.error_eliminar, err);
-				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_eliminar, err);
+				}
+			}
+			@Override
+			protected void onTimeout()
+			{
+				Log.e(TAG, "eliminar:timeout");
+				bEliminar = true;
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.on_timeout);
+					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+				}
 			}
 		});
 	}

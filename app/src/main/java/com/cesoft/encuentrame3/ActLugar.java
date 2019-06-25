@@ -134,10 +134,9 @@ public class ActLugar extends VistaBase
 
 	//______________________________________________________________________________________________
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		if(requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK)
-		{
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK) {
 			presenter.setImg(data);
 			Log.e(TAG, "onActivityResult-----------------LUGAR----------- ");
 		}

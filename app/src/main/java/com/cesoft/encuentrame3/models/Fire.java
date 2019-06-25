@@ -1,5 +1,7 @@
 package com.cesoft.encuentrame3.models;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -16,8 +18,6 @@ import javax.inject.Singleton;
 @Singleton
 public class Fire
 {
-	//private static final String TAG = Fire.class.getSimpleName();
-
 	@Inject public Fire(){}
 
 	//----------------------------------------------------------------------------------------------
@@ -51,11 +51,17 @@ public class Fire
 	//----------------------------------------------------------------------------------------------
 	public abstract static class CompletadoListener implements DatabaseReference.CompletionListener
 	{
+		protected boolean isWorking = true;
 		protected abstract void onDatos(String id);
 		protected abstract void onError(String err, int code);
+		protected void onTimeout() {
+			isWorking = false;
+		}
 		@Override
 		public void onComplete(DatabaseError err, @NonNull DatabaseReference data)
 		{
+Log.e("Fire", "onComplete-----------------------------"+err+" : "+data);
+			isWorking = false;
 			if(err == null)	onDatos(data.getKey());
 			else			onError(err.getMessage(), err.getCode());
 		}

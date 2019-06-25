@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.models;
 
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,6 +43,9 @@ public class Ruta extends Objeto implements Parcelable
 		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
 	}
 	@Exclude private DatabaseReference datos;
+
+	private static final int DELAY = 5000;
+	private Handler handler = new Handler();
 
 	//______________________________________________________________________________________________
 	public Ruta() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
@@ -86,8 +90,12 @@ public class Ruta extends Objeto implements Parcelable
 			datos = newFirebase().child(getId());
 			datos.setValue(null, listener);
 		}
-		datos.removeValue();
+		if(datos != null)
+			datos.removeValue();
 		puntosCount = 0;
+
+		/// Just in case there's no Internet connection...
+		handler.postDelayed(() -> listener.onComplete(null, newFirebase()), DELAY);
 	}
 
 	public void guardar(final Fire.CompletadoListener listener)
@@ -109,6 +117,9 @@ public class Ruta extends Objeto implements Parcelable
 			}
 			datos.setValue(this, listener);
 		}
+		/// Just in case there's no Internet connection...
+		//DatabaseReference ref = newFirebase().child(new Date().toString());
+		handler.postDelayed(listener::onTimeout, DELAY);
 	}
 	public static void getById(String sId, final Fire.SimpleListener<Ruta> listener)
 	{
@@ -656,7 +667,12 @@ Log.e(TAG, "getListaRep:onDataChange:----------------------------------------n="
 		private static void delGeo(final String idRutaPunto)
 		{
 			final GeoFire datGeo = newGeoFire();
-			datGeo.removeLocation(idRutaPunto);
+			datGeo.removeLocation(idRutaPunto, (key, error) -> {
+				if(error != null)
+					Log.e(TAG, "delGeo:e:"+key+" - "+error);
+				else
+					Log.e(TAG, "delGeo:OK:"+key);
+			});
 		}
 		// GEOFIRE
 		//----------------------------------------------------------------------------------------------

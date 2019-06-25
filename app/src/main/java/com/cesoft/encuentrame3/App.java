@@ -16,6 +16,7 @@ import io.fabric.sdk.android.Fabric;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 15/09/2016
 //TODO: sin conexion debería poder empezar una nueva ruta!!!!!!
+//TODO: mediante ordenes de voz preguntar sobre ruta actual, empezar ruta, guardar punto...
 public class App extends Application //implements ActivityCompat.OnRequestPermissionsResultCallback
 {
 	private GlobalComponent globalComponent;

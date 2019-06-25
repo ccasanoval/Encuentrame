@@ -57,7 +57,7 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "CONSTRUCTOR:e:---------geofences:"+geofences.size()+"-----------------------------------------------------", e);
+			Log.e(TAG, "CONSTRUCTOR:e:---------geofences:"+geofences.size()+"---------------------", e);
 		}
 	}
 

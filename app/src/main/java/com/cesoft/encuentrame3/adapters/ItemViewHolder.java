@@ -14,17 +14,14 @@ import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Constantes;
 
-import java.text.SimpleDateFormat;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 21/06/2019
 public class ItemViewHolder extends RecyclerView.ViewHolder {
 
-    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    //private Objeto obj;
-    private TextView txtNombre;
-    private TextView txtFecha;
-    private IListaItemClick inter;
+    protected TextView txtNombre;
+    protected TextView txtFecha;
+    protected IListaItemClick inter;
 
     public ItemViewHolder(@NonNull View itemView, IListaItemClick inter) {
         super(itemView);
@@ -34,9 +31,8 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(Objeto obj) {
-        //this.obj = obj;
         txtNombre.setText(obj.nombre);
-        txtFecha.setText(simpleDateFormat.format(obj.fecha));
+        txtFecha.setText(Objeto.DATE_FORMAT.format(obj.fecha));
 
         final int type;
         if(obj instanceof Lugar) type = Constantes.LUGARES;

@@ -96,10 +96,20 @@ public class PreRuta extends PresenterBase
 			public void onError(String err, int code)
 			{
 				bGuardar = true;
-				Log.e(TAG, "guardar:handleFault:f:--------------------------------------------------"+err);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_guardar, err);
+				}
+			}
+			@Override public void onTimeout() {
+				if( ! isWorking)return;
+				isWorking = false;
+
+				bGuardar = true;
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.on_timeout);
+					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
 		});
@@ -126,9 +136,7 @@ public class PreRuta extends PresenterBase
 
 	//----------------------------------------------------------------------------------------------
 	public synchronized void eliminarPto(String idRutaPunto) {
-		//view.iniEspera();
 		Ruta.RutaPunto.eliminarPto(idRutaPunto);
-        //listener -> view.finEspera();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -136,7 +144,7 @@ public class PreRuta extends PresenterBase
 	{
 		view.iniEspera();
 
-		if(o.getId().equals(util.getTrackingRoute()))
+		if(o.getId() != null && o.getId().equals(util.getTrackingRoute()))
 			util.setTrackingRoute("");
 		((Ruta) o).eliminar(new Fire.CompletadoListener()
 		{
@@ -153,10 +161,21 @@ public class PreRuta extends PresenterBase
 			protected void onError(String err, int code)
 			{
 				bEliminar = true;
-				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
+				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_eliminar, err);
+				}
+			}
+			@Override
+			public void onTimeout() {
+				if( ! isWorking)return;
+				isWorking = false;
+
+				bEliminar = true;
+				if(view != null) {
+					view.finEspera();
+					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
 		});
@@ -183,10 +202,22 @@ public class PreRuta extends PresenterBase
 			public void onError(String err, int code)
 			{
 				util.setTrackingRoute("");
-				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------------"+err);
+				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------- "+err);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_guardar, err);
+				}
+			}
+			@Override
+			public void onTimeout() {
+				if( ! isWorking)return;
+				isWorking = false;
+
+				util.setTrackingRoute(o.getId());
+				GeoTrackingJobService.start(app.getApplicationContext(), pref.getTrackingDelay());
+				if(view != null) {
+					view.finEspera();
+					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
 		});
@@ -283,7 +314,6 @@ public class PreRuta extends PresenterBase
 					sVelMin = getMinVelociodad(fMinVel);
 					sVelMax = getMaxVelociodad(fMaxVel);
 
-
 					if(aData.length > 0) {
 						long t = aData[aData.length - 1].getFecha().getTime() - aData[0].getFecha().getTime();
 						sTiempo = util.formatDiffTimes(
@@ -315,7 +345,7 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "estadisticas:onCancelled:-------------------------------:"+err);
+				Log.e(TAG, "estadisticas:onCancelled:------------------------------------------ "+err);
 			}
 		});
 	}
@@ -350,7 +380,7 @@ public class PreRuta extends PresenterBase
 			}
 			@Override public void onError(String err)
 			{
-				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------------"+err);
+				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------- "+err);
 				if(view != null)
 					view.toast(R.string.err_get_ruta_pts);
 			}
@@ -359,18 +389,17 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	public void showRuta()
 	{
-		Log.e(TAG, "showRuta:--------------------------------------------"+o.getId());
 		Ruta.RutaPunto.getListaRep(o.getId(), lisRuta);
 	}
 	//----------------------------------------------------------------------------------------------
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1) {
-			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- n pts = "+aPts.length);
+			Log.e(TAG, "showRutaHelper:e:------------------------------------------------------ n pts = "+aPts.length);
 			return;
 		}
 		if(view == null || view.getMap()==null) {
-			Log.e(TAG, "showRutaHelper:e:----------------------------------------------------------- MAP = NULL");
+			Log.e(TAG, "showRutaHelper:e:------------------------------------------------------ MAP = NULL");
 			return;
 		}
 		view.getMap().clear();

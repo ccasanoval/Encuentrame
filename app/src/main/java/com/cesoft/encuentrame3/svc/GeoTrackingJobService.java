@@ -311,7 +311,7 @@ public class GeoTrackingJobService
     }
     private synchronized boolean guardarPunto(Location loc, Ruta ruta)
     {
-        Log.e(TAG, "guardarPunto:    A    ********************* \nLOC:"+loc+"\n : RUT:"+ruta.id+"\n :  ID:"+ sId);
+        Log.e(TAG, "guardarPunto:    A    ********************* \nLOC:"+loc+"\n : RUTA_ID:"+ruta.id+" <> OLD_RUTA_ID:"+ sId);
         if(isWrongPoint(loc, ruta))
             return false;
 

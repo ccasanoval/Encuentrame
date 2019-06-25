@@ -51,7 +51,7 @@ public class Login
 			fbdb = FirebaseDatabase.getInstance();
 			try{
 				fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
-			}catch(Exception e){Log.e("Login", String.format("getDBInstance:e:%s",e), e);}
+			}catch(Exception e){Log.e("Login", "getDBInstance:e:", e);}
 		}
 		return fbdb;
 	}
