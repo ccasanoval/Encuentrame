@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.models;
 
+import android.os.Handler;
 import android.os.Parcel;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,9 @@ public class Aviso extends Objeto
 		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
 	}
 	@Exclude private DatabaseReference datos;
+
+	private static final int DELAY = 5000;
+	private Handler handler = new Handler();
 
 	//
 	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
@@ -118,6 +122,9 @@ public class Aviso extends Objeto
 			datos.setValue(null, listener);
 		}
 		delGeo();
+
+		/// Just in case there's no Internet connection...
+		handler.postDelayed(listener::onTimeout, DELAY);
 	}
 	public void guardar(Fire.CompletadoListener listener)//DatabaseReference.CompletionListener listener)
 	{
@@ -139,6 +146,9 @@ public class Aviso extends Objeto
 			datos.setValue(this, listener);
 		}
 		saveGeo();
+
+		/// Just in case there's no Internet connection...
+		handler.postDelayed(listener::onTimeout, DELAY);
 	}
 
 	//______________________________________________________________________________________________
@@ -336,7 +346,12 @@ public class Aviso extends Objeto
 			return;
 		}
 		if(datGeo == null) datGeo = newGeoFire();
-		datGeo.removeLocation(datos.getKey());
+		datGeo.removeLocation(datos.getKey(), (key, error) -> {
+			if(error != null)
+				Log.e(TAG, "delGeo:e:"+key+" - "+error);
+			else
+				Log.e(TAG, "delGeo:OK:"+key);
+		});
 	}
 	// GEOFIRE
 	//----------------------------------------------------------------------------------------------

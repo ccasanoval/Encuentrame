@@ -137,6 +137,9 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	{
 		super.onMapReady(map);
 		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
+
+		Location loc = util.getLocation();
+		if(loc != null) setPosicion(loc.getLatitude(), loc.getLongitude());
 	}
 
 	//----------------------------------------------------------------------------------------------

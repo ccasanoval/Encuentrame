@@ -66,7 +66,7 @@ public class PreAviso extends PresenterBase
 	// GET BACK TO MAIN
 	private void openMain(String sMensaje)
 	{
-		if(bDesdeNotificacion)
+		if (bDesdeNotificacion)
 			util.openMain(view.getAct(), true, sMensaje, Constantes.AVISOS);
 		else
 			util.return2Main(view.getAct(), true, sMensaje);
@@ -98,18 +98,33 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onDatos(String id)
 			{
-				view.finEspera();
 				bGuardar = true;
 				servicio.cargarListaGeoAvisos();
-				openMain(app.getString(R.string.ok_guardar_aviso));
+				if(view != null) {
+					view.finEspera();
+					openMain(app.getString(R.string.ok_guardar_aviso));
+				}
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				view.finEspera();
+				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------- "+err);
 				bGuardar = true;
-				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------------"+err);
-				view.toast(R.string.error_guardar, err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_guardar, err);
+				}
+			}
+			@Override
+			protected void onTimeout()
+			{
+				Log.e(TAG, "eliminar:timeout");
+				bGuardar = true;
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.on_timeout);
+					openMain(app.getString(R.string.on_timeout));
+				}
 			}
 		});
 	}
@@ -124,17 +139,30 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onDatos(String id)
 			{
-				view.finEspera();
 				bEliminar =true;
+				if(view != null) view.finEspera();
 				openMain(app.getString(R.string.ok_eliminar_aviso));
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				view.finEspera();
+				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
 				bEliminar =true;
-				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------------"+err);
-				view.toast(R.string.error_eliminar, err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_eliminar, err);
+				}
+			}
+			@Override
+			protected void onTimeout()
+			{
+				Log.e(TAG, "eliminar:timeout");
+				bEliminar = true;
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.on_timeout);
+					openMain(app.getString(R.string.on_timeout));
+				}
 			}
 		});
 	}
