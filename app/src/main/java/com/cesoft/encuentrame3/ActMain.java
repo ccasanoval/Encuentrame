@@ -21,14 +21,18 @@ import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.material.tabs.TabLayout;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
 
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
 //TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
-//TODO: Cambiar ListView por recyclerview
 //TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
@@ -39,6 +43,7 @@ import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CU
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// Created by CESoft
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 {
 	private static final String TAG = ActMain.class.getSimpleName();
@@ -47,6 +52,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	private ViewPager viewPager;
 	private Login login;
 	private Util util;
+	private Voice voice;
+	private MenuItem vozMenuItem;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -55,8 +62,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
 		login = ((App)getApplication()).getGlobalComponent().login();
-		util = ((App)getApplication()).getGlobalComponent().util();
 		if(!login.isLogged())gotoLogin();
+		util = ((App)getApplication()).getGlobalComponent().util();
+		voice = ((App)getApplication()).getGlobalComponent().voice();
+		voice.setActivity(this);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -73,12 +82,22 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		gotoPage(intent);
 		showMensaje(intent);
 	}
+
+
+	//----------------------------------------------------------------------------------------------
+	@Override
+	public void onPause()
+	{
+		voice.stopListening();
+		super.onPause();
+	}
+
 	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onDestroy()
 	{
-		super.onDestroy();
 		viewPager = null;
+		super.onDestroy();
 	}
 	//----------------------------------------------------------------------------------------------
 	private boolean oncePideBateria = true;
@@ -92,10 +111,12 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			oncePideBateria = false;
 		}
 		util.pideGPS(this, 6969);
+		EventBus.getDefault().register(this);
 	}
 	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onStop() {
+		EventBus.getDefault().unregister(this);
 		super.onStop();
 	}
 
@@ -126,6 +147,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_act_main, menu);
+		vozMenuItem = menu.findItem(R.id.action_voz);
 		return true;
 	}
 	@Override
@@ -153,6 +175,9 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
 				startActivity(browserIntent);
 				return true;
+			case R.id.action_voz:
+				voice.toggleStatus();
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -163,6 +188,21 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		if(resultCode != RESULT_OK)return;
 		if(requestCode == Constantes.CONFIG)gotoLogin();
 		else super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onVoiceEvent(Voice.VoiceEvent event)
+	{
+		if(vozMenuItem != null)
+			vozMenuItem.setIcon(event.isListening() ? R.drawable.ic_mic_white_24dp : R.drawable.ic_mic_off_white_24dp);
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onCommandEvent(Voice.CommandEvent event)
+	{
+		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getDesc());
+		Toast.makeText(this, event.getDesc()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+		//TODO: Exe command
 	}
 
 	//----------------------------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 package com.cesoft.encuentrame3.di.components;
 
+import android.app.Activity;
+
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActBuscar;
 import com.cesoft.encuentrame3.ActLugar;
@@ -18,6 +20,7 @@ import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
 import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Voice;
 import com.cesoft.encuentrame3.widget.WidgetRutaJobService;
 
 import javax.inject.Singleton;
@@ -45,6 +48,7 @@ public interface GlobalComponent
 	void inject(RutaViewHolder v);
 
 	Util util();
+	Voice voice();
 	Login login();
 	Preferencias pref();
 }

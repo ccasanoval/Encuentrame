@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Voice;
 
 import javax.inject.Singleton;
 import dagger.Module;
@@ -64,15 +65,22 @@ public class GlobalModule
 	Preferencias providePreferencias(SharedPreferences sp) {
 		return new Preferencias(sp);
 	}
+
 	@Singleton
 	@Provides
 	Util provideUtil(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm) {
 		return new Util(app, pref, lm, nm, pm);
 	}
+
 	@Singleton
 	@Provides
 	Login provideLogin(SharedPreferences sp) {
 		return new Login(sp);
 	}
 
+	@Singleton
+	@Provides
+	Voice provideVoice(Application app) {
+		return new Voice(app);
+	}
 }

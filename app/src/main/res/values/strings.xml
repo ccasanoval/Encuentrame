@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="email" translatable="false">eMail</string>
-	<string name="lat_lon" translatable="false">Lat/Lon</string>
-
+	<!-- App -->
 	<string name="app_name">Find me! Fire</string>
-
 	<string name="app_lice" translatable="false">2016 Cesar Casanova \n(Creative Commons NC-SA)</string>
 	<string name="app_vers" translatable="false">2016 - Ver. %s</string>
 	<string name="app_lice_tit">Licence</string>
 	<string name="app_vers_tit">Version:</string>
 	<string name="app_desc">\nApp for the management of personal points of interest. It counts with geo-position alerts and geo-tracking. As the data is saved to the cloud, you can manage your geo-data easily.\n\n</string>
 
+	<string name="email" translatable="false">eMail</string>
+	<string name="lat_lon" translatable="false">Lat/Lon</string>
+
 	<string name="activo">Active</string>
-	<string name="actualizar_posicion">Refresh location</string>
 	<string name="aviso">Alert message</string>
-	<string name="avisos">Alerts</string>
-	<string name="buscar">Search</string>
 	<string name="cargando">Loading…</string>
-	<string name="sin_filtro">Search parameters removed</string>
 	<string name="categoria">Category</string>
 	<string name="clave">Password</string>
 	<string name="clave_confirmar">Repeat password</string>
@@ -26,72 +22,57 @@
 	<string name="configuracion">Settings</string>
 	<string name="cuenta">Login</string>
 	<string name="descripcion">Description</string>
+	<string name="direccion">Address…</string>
+	<string name="estadisticas">Statistics</string>
+	<string name="estadisticas_format" formatted="false">Length:\t\t\t\t\t\t%s\nTime:\t\t\t\t\t\t\t%s\nAvg Speed:\t\t\t\t%s\nMin Speed:\t\t\t\t%s\nMax Speed:\t\t\t%s\nMin Altitude:\t\t%s\nMax Altitude:\t\t%s\n</string>
+	<string name="en_zona_aviso">Inside Alert Zone</string>
+	<string name="enter_lbl">Input login</string>
+	<string name="nombre">Name</string>
+	<string name="periodo">Period</string>
+	<string name="radio">Radius</string>
+	<string name="lista_vacia">Empty list…</string>
+	<string name="voz_onoff">Voice</string>
+	<string name="activos">ACTIVE</string>
+	<string name="inactivos">INACTIVE</string>
+	<string name="on_timeout">Task timeout, check Internet connection</string>
+
+	<!-- Actions -->
+	<string name="enter">Enter</string>
+	<string name="guardar">Save</string>
+	<string name="eliminar">Remove</string>
+	<string name="cancelar">Cancel</string>
+	<string name="ver_mapa">Show map</string>
+	<string name="salir">Exit anyway</string>
+	<string name="start">Start</string>
+	<string name="stop">Stop</string>
+	<string name="buscar">Search</string>
+	<string name="actualizar_posicion">Refresh location</string>
+
+	<!-- Items -->
+	<string name="lugares">Points</string>
+	<string name="rutas">Routes</string>
+	<string name="avisos">Alerts</string>
+
+	<!-- Editar -->
 	<string name="editar">Edit</string>
 	<string name="editar_aviso">Edit Alert</string>
 	<string name="editar_lugar">Edit Point</string>
 	<string name="editar_ruta">Edit Route</string>
-	<string name="eliminar">Remove</string>
-	<string name="cancelar">Cancel</string>
-	<string name="ok">OK</string>
-	<string name="direccion">Address…</string>
-	<string name="estadisticas">Statistics</string>
-	<string name="imagen">Picture</string>
-	<string name="en_zona_aviso">Inside Alert Zone</string>
-	<string name="enter">Enter</string>
-	<string name="enter_lbl">Input login</string>
-	<string name="error_eliminar">Fault at deleting: %s</string>
-	<string name="error_guardar">There was a problem when saving the data: %s</string>
+
+	<!-- Fecha -->
 	<string name="fecha">Date</string>
 	<string name="fecha_desde">From</string>
 	<string name="fecha_hasta">to</string>
 	<string name="fin">End: </string>
 	<string name="ini">Ini: </string>
-	<string name="guardar">Save</string>
-	<string name="lugares">Points</string>
-	<string name="nombre">Name</string>
-	<string name="nueva_ruta">New Route</string>
+
+	<!-- Nuevo -->
 	<string name="nuevo">New</string>
+	<string name="nueva_ruta">New Route</string>
 	<string name="nuevo_aviso">New Alert</string>
 	<string name="nuevo_lugar">New Point</string>
-	<string name="salir">Exit anyway</string>
-	<!-- string name="ok_eliminar">The record was deleted</string -->
-	<!-- string name="ok_guardar">The record data was saved</string -->
-	<string name="ok_eliminar_lugar">The Point was deleted</string>
-	<string name="ok_eliminar_aviso">The Alert was deleted</string>
-	<string name="ok_eliminar_ruta">The Route was deleted</string>
-	<string name="ok_stop_tracking">The route ends here</string>
-	<string name="periodo">Period</string>
-	<string name="radio">Radius</string>
-	<string name="recover">Reset</string>
-	<string name="recover_ko">There was a fault while \n resetting the user\'s account</string>
-	<string name="recover_lbl">Reset your password</string>
-	<string name="login_error">Wrong user or password</string>
-	<string name="login_timeout">Login timeout</string>
-	<string name="login_fisrt">Log in first</string>
-	<string name="login_ok">Welcome %s</string>
-	<string name="recover_ok">An email to recover your \n password was sent to you</string>
-	<string name="register">Register</string>
-	<string name="register_bad_pass">Notice that both passwords must be equal!</string>
-	<string name="register_lbl">Create a new account</string>
-	<string name="register_ok">You have just registered! \n Now check your email</string>
-	<string name="register_ko">There was a fault while \n registering the user \n Try again, please.</string>
-	<string name="rutas">Routes</string>
-	<string name="seguro_eliminar">Are you sure you want to remove?</string>
-	<string name="seguro_salir">You made changes. Do you want to save?</string>
-	<string name="ask_to_enable_gps">The tracking service needs you to activate the GPS</string>
-	<string name="login">Log in</string>
-	<string name="sin_lugar">A location must be stablished…</string>
-	<string name="sin_nombre">A name must be stablished…</string>
-	<string name="sin_posicion">No location</string>
-	<string name="sin_camara">There is no camera on this device</string>
-	<string name="sin_permiso_camara">Camera permission not granted</string>
-	<string name="start">Start</string>
-	<string name="stop">Stop</string>
 
-	<string name="lista_vacia">Empty list…</string>
-
-	<string name="ver_mapa">Show map</string>
-
+	<!-- Title -->
 	<string name="title_activity_act_aviso">Alert</string>
 	<string name="title_activity_act_buscar">Search</string>
 	<string name="title_activity_act_config">Settings</string>
@@ -99,17 +80,90 @@
 	<string name="title_activity_act_main">Find me!</string>
 	<string name="title_activity_act_maps">Map</string>
 	<string name="title_activity_act_ruta">Route</string>
+	<string name="title_act_imagen">Picture</string>
 
+	<!-- Imagen -->
+	<string name="imagen">Picture</string>
+	<string name="tomar_imagen">Take a picture</string>
+	<string name="guardar_imagen">Save the picture</string>
+
+	<!-- Widget -->
+	<string name="widget_lugar">Points</string>
+	<string name="widget_ruta">Routes</string>
+
+	<!-- Recover -->
+	<string name="recover">Reset</string>
+	<string name="recover_ko">There was a fault while \n resetting the user\'s account</string>
+	<string name="recover_lbl">Reset your password</string>
+	<string name="recover_ok">An email to recover your \n password was sent to you</string>
+
+	<!-- Register -->
+	<string name="register">Register</string>
+	<string name="register_bad_pass">Notice that both passwords must be equal!</string>
+	<string name="register_lbl">Create a new account</string>
+	<string name="register_ok">You have just registered! \n Now check your email</string>
+	<string name="register_ko">There was a fault while \n registering the user \n Try again, please.</string>
+
+	<!-- Error -->
+	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
+	<string name="err_conn_google">Failed to connect to Google services: %s</string>
+	<string name="no_camera_hardware">There is no camera hardware in this device</string>
+	<string name="error_img_path">Failed trying to get the image path</string>
+	<string name="error_eliminar">Fault at deleting: %s</string>
+	<string name="error_guardar">There was a problem when saving the data: %s</string>
+
+	<!-- Ok -->
+	<string name="ok">OK</string>
+	<string name="ok_eliminar_lugar">The Point was deleted</string>
+	<string name="ok_eliminar_aviso">The Alert was deleted</string>
+	<string name="ok_eliminar_ruta">The Route was deleted</string>
+	<string name="ok_guardar_aviso">The Alert was saved</string>
+	<string name="ok_guardar_lugar">The Point was saved</string>
+	<string name="ok_guardar_ruta">The Route was saved</string>
+	<string name="ok_stop_tracking">The route ends here</string>
+
+	<!-- Ask -->
+	<string name="seguro_eliminar">Are you sure you want to remove?</string>
+	<string name="seguro_salir">You made changes. Do you want to save?</string>
+	<string name="ask_to_ignore_energy_saving_again">The tracking will stop in doze mode if battery optimizations are on. Are you sure?</string>
+	<string name="ask_to_enable_gps">The tracking service needs you to activate the GPS</string>
+
+	<!-- Sin -->
+	<string name="sin_lugar">A location must be stablished…</string>
+	<string name="sin_nombre">A name must be stablished…</string>
+	<string name="sin_posicion">No location</string>
+	<string name="sin_camara">There is no camera on this device</string>
+	<string name="sin_permiso_camara">Camera permission not granted</string>
+	<string name="sin_filtro">Search parameters removed</string>
+
+	<!-- Login -->
+	<string name="login">Log in</string>
+	<string name="login_error">Wrong user or password</string>
+	<string name="login_timeout">Login timeout</string>
+	<string name="login_fisrt">Log in first</string>
+	<string name="login_ok">Welcome %s</string>
+
+	<!-- Estado -->
+	<string name="in_vehicle">In a vehicle</string>
+	<string name="on_bicycle">On a bicycle</string>
+	<string name="on_foot">On foot</string>
+	<string name="running">Running</string>
+	<string name="still">Still</string>
+	<string name="tilting">Tilting</string>
+	<string name="unknown">Unknown activity</string>
+	<string name="walking">Walking</string>
+	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
+
+	<!-- Preferencias -->
+	<string name="pref_header_about">About this App…</string>
 	<string name="pref_header_logout">Logout</string>
 	<string name="pref_header_logout_sum">End current user session</string>
-
 	<string name="pref_header_opciones">Options</string>
 	<string name="pref_header_opciones_sum">Settings…</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
 	<string name="pref_save_login">Save login and password</string>
 	<string name="pref_save_all">Save also imprecise points</string>
 	<string name="pref_tracking_seconds">Tracking period (seconds)</string>
-
 	<string name="pref_header_notifications">Alerts</string>
 	<string name="pref_header_notifications_sum">Alerts settings…</string>
 	<string name="pref_ringtone">Ringtone</string>
@@ -118,17 +172,7 @@
 	<string name="pref_vibrate">Vibrate</string>
 	<string name="pref_lights">Lights</string>
 
-	<string name="pref_header_about">About this App…</string>
-
-	<string name="activos">ACTIVE</string>
-	<string name="inactivos">INACTIVE</string>
-	<string name="ok_guardar_aviso">The Alert was saved</string>
-	<string name="ok_guardar_lugar">The Point was saved</string>
-	<string name="ok_guardar_ruta">The Route was saved</string>
-	<string name="on_timeout">Task timeout, check Internet connection</string>
-
-	<string name="widget_lugar">Points</string>
-	<string name="widget_ruta">Routes</string>
+	<!-- Info -->
 	<string name="info_time">Time: </string>
 	<string name="info_prec">\nAccuracy: %.2f m\n</string>
 	<string name="info_dist">\nDistance: %.0f m</string>
@@ -139,27 +183,18 @@
 	<string name="info_speed2">\nSpeed: %.0f Km/h</string>
 	<string name="info_activity" translatable="false">\nActiv.: %s</string>
 
-	<string name="title_act_imagen">Picture</string>
-	<string name="tomar_imagen">Take a picture</string>
-	<string name="guardar_imagen">Save the picture</string>
+	<!-- Commands -->
+	<string name="voice_new_point">New point</string>
+	<string name="voice_new_route">New route</string>
+	<string name="voice_new_alert">New alert</string>
+	<string name="voice_start">Start</string>
+	<string name="voice_save">Save</string>
+	<string name="voice_cancel">Cancel</string>
+	<string name="voice_name">Name</string>
+	<string name="voice_description">Description</string>
+	<string name="voice_radious">Radious</string>
+	<string name="voice_metres">Meters</string>
+	<string name="voice_kilometers">Kilometers</string>
 
-	<string name="estadisticas_format" formatted="false">Length:\t\t\t\t\t\t%s\nTime:\t\t\t\t\t\t\t%s\nAvg Speed:\t\t\t\t%s\nMin Speed:\t\t\t\t%s\nMax Speed:\t\t\t%s\nMin Altitude:\t\t%s\nMax Altitude:\t\t%s\n</string>
-
-	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
-	<string name="err_conn_google">Failed to connect to Google services: %s</string>
-	<string name="no_camera_hardware">There is no camera hardware in this device</string>
-    <string name="error_img_path">Failed trying to get the image path</string>
-
-	<string name="ask_to_ignore_energy_saving_again">The tracking will stop in doze mode if battery optimizations are on. Are you sure?</string>
-
-	<string name="in_vehicle">In a vehicle</string>
-	<string name="on_bicycle">On a bicycle</string>
-	<string name="on_foot">On foot</string>
-	<string name="running">Running</string>
-	<string name="still">Still</string>
-	<string name="tilting">Tilting</string>
-	<string name="unknown">Unknown activity</string>
-	<string name="walking">Walking</string>
-	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
 
 </resources>
