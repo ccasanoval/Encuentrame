@@ -122,9 +122,9 @@ public class FrgMain extends Fragment implements IListaItemClick
 		{
 			switch(sectionNumber)
 			{
-				case Constantes.LUGARES:	main.onLugar();	break;
-				case Constantes.RUTAS:		main.onRuta();	break;
-				case Constantes.AVISOS:		main.onAviso();	break;
+				case Constantes.LUGARES:	main.onLugar(false);	break;
+				case Constantes.RUTAS:		main.onRuta(false);	break;
+				case Constantes.AVISOS:		main.onAviso(false);	break;
 				default:break;
 			}
 		});
@@ -222,9 +222,9 @@ public class FrgMain extends Fragment implements IListaItemClick
 	{
 		void gotoLogin();
 
-		void onLugar();
-		void onAviso();
-		void onRuta();
+		void onLugar(boolean isVoiceCommand);
+		void onAviso(boolean isVoiceCommand);
+		void onRuta(boolean isVoiceCommand);
 
 		void goLugar(Objeto obj);
 		void goAviso(Objeto obj);

@@ -14,12 +14,14 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.presenters.PreAviso;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Circle;
@@ -27,6 +29,10 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
@@ -48,6 +54,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	private Circle circle;
 	private Marker marker;
 
+	@Inject	Voice voice;
 	@Inject Util util;
 	@Inject PreAviso presenter;
 
@@ -69,7 +76,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 
 		//------------------------------------
 		lblPosicion = findViewById(R.id.lblPosicion);
-		setPosLabel(presenter.getLatitud(), presenter.getLongitud());
+		setPosLabel(presenter.getLatitud(), presenter.getLongitud());//TODO: no se ha creado aun el objeto??
 
 		swtActivo = findViewById(R.id.bActivo);
 		swtActivo.setChecked(presenter.isActivo());
@@ -173,5 +180,52 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 					.fillColor(0x55AA0000));//Color.BLUE
 		}
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
+	}
+
+
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		EventBus.getDefault().register(this);
+	}
+
+	@Override
+	public void onStop() {
+		EventBus.getDefault().unregister(this);
+		super.onStop();
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onCommandEvent(Voice.CommandEvent event)
+	{
+		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+
+		switch(event.getCommand()) {
+			case R.string.voice_cancel:
+				presenter.onSalir(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_save:
+			case R.string.voice_start:
+				presenter.guardar();
+				voice.speak(event.getText());
+				break;
+
+			case R.string.voice_name:
+				break;
+			case R.string.voice_description:
+				break;
+			case R.string.voice_radious:
+				break;
+			case R.string.voice_metres:
+				break;
+			case R.string.voice_kilometers:
+				break;
+
+			default:
+				break;
+		}
 	}
 }

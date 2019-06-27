@@ -9,9 +9,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.presenters.PreLugar;
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -20,6 +22,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
@@ -30,6 +36,7 @@ public class ActLugar extends VistaBase
 {
 	protected static final String TAG = ActLugar.class.getSimpleName();
 
+	@Inject	Voice voice;
 	@Inject	Util util;
 	@Inject	PreLugar presenter;
 
@@ -45,6 +52,10 @@ public class ActLugar extends VistaBase
 		((App)getApplication()).getGlobalComponent().inject(this);
 		super.ini(presenter, util, new Lugar(), R.layout.act_lugar);
 		super.onCreate(savedInstanceState);
+
+		voice = ((App)getApplication()).getGlobalComponent().voice();
+		voice.setActivity(this);
+
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
 		btnActPos.setOnClickListener(v -> setCurrentLocation());
@@ -84,13 +95,22 @@ public class ActLugar extends VistaBase
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if(item.getItemId() == R.id.menu_guardar)
-			presenter.guardar();
-		else if(item.getItemId() == R.id.menu_eliminar)
-			presenter.onEliminar();
-		else if(item.getItemId() == R.id.menu_img)
-			presenter.imagen();
-		return super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+			case R.id.menu_guardar:
+				presenter.guardar();
+				return true;
+			case R.id.action_voz:
+				voice.toggleStatus();
+				return true;
+			case R.id.menu_eliminar:
+				presenter.onEliminar();
+				return true;
+			case R.id.menu_img:
+				presenter.imagen();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 	//______________________________________________________________________________________________
 
@@ -142,5 +162,54 @@ public class ActLugar extends VistaBase
 		}
 		else
 			Log.e(TAG, "onActivityResult-----------------LUGAR ERROR----------- ");
+	}
+
+
+
+	@Override
+	public void onPause()
+	{
+		voice.stopListening();
+		super.onPause();
+	}
+
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		EventBus.getDefault().register(this);
+	}
+
+	@Override
+	public void onStop() {
+		EventBus.getDefault().unregister(this);
+		super.onStop();
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onCommandEvent(Voice.CommandEvent event)
+	{
+		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+
+		switch(event.getCommand()) {
+			case R.string.voice_cancel:
+				presenter.onSalir(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_save:
+			case R.string.voice_start:
+				presenter.guardar();
+				voice.speak(event.getText());
+				break;
+
+			case R.string.voice_name:
+				break;
+			case R.string.voice_description:
+				break;
+
+			default:
+				break;
+		}
 	}
 }

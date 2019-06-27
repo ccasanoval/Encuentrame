@@ -184,6 +184,7 @@
 
 
 	<!-- Commands -->
+	<string name="voice_generated">Generado x Voz</string>
 	<string name="voice_new_point">Nuevo punto</string>
 	<string name="voice_new_route">Nueva ruta</string>
 	<string name="voice_new_alert">Nueva alerta</string>

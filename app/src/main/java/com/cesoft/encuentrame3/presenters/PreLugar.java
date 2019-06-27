@@ -25,7 +25,8 @@ public class PreLugar extends PresenterBase
 	private String imgURLnew = null;
 
 	private Util util;
-	public @Inject PreLugar(Application app, Util util)
+	@Inject
+	public PreLugar(Application app, Util util)
 	{
 		super(app);
 		this.util = util;
@@ -56,13 +57,12 @@ public class PreLugar extends PresenterBase
 		}
 		o.setNombre(view.getTextNombre());
 		o.setDescripcion(view.getTextDescripcion());
-Log.w(TAG, "guardar-----------------------------------------------------------------"+ view.getTextNombre()+" / "+view.getTextDescripcion());
+
 		((Lugar) o).guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
-				Log.w(TAG, "guardar-----------------------------------------------------------------"+ imgURLnew);
 				bGuardar = true;
 				if(imgURLnew != null)((Lugar) o).uploadImg(imgURLnew);
 				imgURLnew = null;
@@ -79,7 +79,7 @@ Log.w(TAG, "guardar-------------------------------------------------------------
 				bGuardar = true;
 				view.finEspera();
 				view.toast(R.string.error_guardar, err);
-				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------------"+err);
+				Log.e(TAG, "guardar:handleFault:e: "+err);
 			}
 			@Override
 			protected void onTimeout()
@@ -105,7 +105,7 @@ Log.w(TAG, "guardar-------------------------------------------------------------
 			@Override
 			protected void onDatos(String id)
 			{
-				bEliminar = true;
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_lugar));
@@ -115,7 +115,7 @@ Log.w(TAG, "guardar-------------------------------------------------------------
 			protected void onError(String err, int code)
 			{
 				Log.e(TAG, "eliminar:handleFault:e: "+err);
-				bEliminar = true;
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_eliminar, err);
@@ -125,7 +125,7 @@ Log.w(TAG, "guardar-------------------------------------------------------------
 			protected void onTimeout()
 			{
 				Log.e(TAG, "eliminar:timeout");
-				bEliminar = true;
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);
@@ -139,12 +139,11 @@ Log.w(TAG, "guardar-------------------------------------------------------------
 	public void setImg(Intent data)
 	{
 		imgURLnew = data.getStringExtra(ActImagen.PARAM_IMG_PATH);
-		bSucio = true;
+		isSucio = true;
 	}
 	public void imagen()
 	{
 		Intent i = new Intent(view.getAct(), ActImagen.class);
-		Log.e(TAG, "onActivityResult-----------------LUGAR---2---------------------- "+ imgURLnew);
 		i.putExtra(ActImagen.PARAM_IMG_PATH, imgURLnew);
 		i.putExtra(ActImagen.PARAM_LUGAR, o);
 		view.getAct().startActivityForResult(i, ActImagen.IMAGE_CAPTURE);

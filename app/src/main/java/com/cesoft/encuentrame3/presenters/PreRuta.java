@@ -151,7 +151,7 @@ public class PreRuta extends PresenterBase
 			@Override
 			protected void onDatos(String id)
 			{
-				bEliminar = true;
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
@@ -160,7 +160,7 @@ public class PreRuta extends PresenterBase
 			@Override
 			protected void onError(String err, int code)
 			{
-				bEliminar = true;
+				isEliminar = true;
 				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
 				if(view != null) {
 					view.finEspera();
@@ -172,7 +172,7 @@ public class PreRuta extends PresenterBase
 				if( ! isWorking)return;
 				isWorking = false;
 
-				bEliminar = true;
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));

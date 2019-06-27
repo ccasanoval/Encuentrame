@@ -47,12 +47,12 @@ public class PreAviso extends PresenterBase
 	public double getRadio() { return ((Aviso) o).getRadio(); }
 	public void setRadio(int radio)
 	{
-		bSucio = ((Aviso) o).getRadio() != radio;
+		isSucio = ((Aviso) o).getRadio() != radio;
 		((Aviso) o).setRadio(radio);
 	}
 	public void setActivo(boolean isChecked)
 	{
-		bSucio = isChecked != ((Aviso) o).isActivo();
+		isSucio = isChecked != ((Aviso) o).isActivo();
 	}
 	@Override
 	public void loadObjeto(Objeto objDefault)
@@ -108,7 +108,7 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onError(String err, int code)
 			{
-				Log.e(TAG, "guardar:handleFault:e:--------------------------------------------- "+err);
+				Log.e(TAG, "guardar:handleFault:e: "+err);
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -139,15 +139,15 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onDatos(String id)
 			{
-				bEliminar =true;
+				isEliminar = true;
 				if(view != null) view.finEspera();
 				openMain(app.getString(R.string.ok_eliminar_aviso));
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
-				bEliminar =true;
+				Log.e(TAG, "eliminar:handleFault:e: "+err);
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_eliminar, err);
@@ -157,7 +157,7 @@ public class PreAviso extends PresenterBase
 			protected void onTimeout()
 			{
 				Log.e(TAG, "eliminar:timeout");
-				bEliminar = true;
+				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);

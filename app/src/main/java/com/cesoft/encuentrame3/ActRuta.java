@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentTransaction;
 
@@ -20,11 +21,16 @@ import com.cesoft.encuentrame3.presenters.PreRuta;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
@@ -33,6 +39,7 @@ import javax.inject.Inject;
 //
 public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 {
+	@Inject	Voice voice;
 	@Inject Util util;
 	@Inject PreRuta presenter;
 
@@ -226,4 +233,43 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 		dlgEliminar.show();
 	}
 
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		EventBus.getDefault().register(this);
+	}
+
+	@Override
+	public void onStop() {
+		EventBus.getDefault().unregister(this);
+		super.onStop();
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onCommandEvent(Voice.CommandEvent event)
+	{
+		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+
+		switch(event.getCommand()) {
+			case R.string.voice_cancel:
+				presenter.onSalir(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_save:
+			case R.string.voice_start:
+				presenter.guardar();
+				voice.speak(event.getText());
+				break;
+
+			case R.string.voice_name:
+				break;
+			case R.string.voice_description:
+				break;
+
+			default:
+				break;
+		}
+	}
 }

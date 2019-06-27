@@ -1,11 +1,12 @@
 package com.cesoft.encuentrame3.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Dameru is a class that allows an application to implement Levenshtein Distance algorithm to find the shortest distance between two words.
- * It can also help in comparing a word with a list of different words to find the nearest matching word.
+ * Class implementing Levenshtein Distance algorithm to find the shortest distance between two words.
+ * It can also help in comparing a word with a list of different words to find the nearest matching.
  *
  * A small example --
  *
@@ -50,16 +51,16 @@ public class Texto implements DistanceCalculator {
          */
         this.inputString=inputString;
         //this.compareStringList.add(compareString);
-        this.compareStringList=Arrays.asList(compareString);
+        this.compareStringList = Collections.singletonList(compareString);
     }
 
-    public Texto(String inputString,String compareString[])
+    public Texto(String inputString, String[] compareString)
     {
-        this.inputString=inputString;
-        compareStringList=Arrays.asList(compareString);
+        this.inputString = inputString;
+        compareStringList = Arrays.asList(compareString);
     }
 
-    public Texto(String inputString,List<String> compareList)
+    public Texto(String inputString, List<String> compareList)
     {
         this.inputString=inputString;
         this.compareStringList=compareList;

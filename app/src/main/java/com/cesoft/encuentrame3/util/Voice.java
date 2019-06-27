@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 
@@ -19,13 +20,14 @@ import com.cesoft.encuentrame3.R;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 26/06/2019
 public class Voice implements RecognitionListener {
     private static final String TAG = "Voice";
+    public static final String NAME = "Voice";
     private static final int REQUEST_RECORD_PERMISSION = 100;
     private static final int MAX_RESULTS = 10;
 
@@ -78,7 +80,7 @@ public class Voice implements RecognitionListener {
     }
 
 
-    //implements RecognitionListener
+    // implements RecognitionListener
     //----------------------------------------------------------------------------------------------
     @Override
     public void onReadyForSpeech(Bundle params) {
@@ -126,12 +128,13 @@ public class Voice implements RecognitionListener {
         StringBuilder text = new StringBuilder();
         if(matches != null) {
             processCommand(matches);
+
             for(String result : matches) {
                 text.append(result);
                 text.append("\n");
             }
         }
-        Log.e(TAG, "onResults="+text);
+        Log.e(TAG, "onResults=\n"+text);
         speech.startListening(recognizerIntent);
     }
 
@@ -145,9 +148,11 @@ public class Voice implements RecognitionListener {
         Log.e(TAG, "onEvent : "+eventType);
     }
     //----------------------------------------------------------------------------------------------
-    //implements RecognitionListener
+    // implements RecognitionListener
 
 
+    // Word Process
+    //----------------------------------------------------------------------------------------------
     private int[] commandId = new int[] {
         R.string.voice_new_point,
         R.string.voice_new_route,
@@ -162,13 +167,18 @@ public class Voice implements RecognitionListener {
         R.string.voice_kilometers,
     };
     private String[] commandStr = null;
-    private List commandList = new ArrayList();
+    //private List commandList = new ArrayList();
     private void processCommand(ArrayList<String> matches) {
+        int lengthDiff = 0;
+        int minDistance = Integer.MAX_VALUE;
+        int bestCommandId = Integer.MIN_VALUE;
+        String bestCommandStr = "";
+
         if(commandStr == null) {
             commandStr = new String[commandId.length];
             for (int i=0; i < commandId.length; i++) {
                 commandStr[i] = app.getString(commandId[i]);
-                commandList.add(commandStr[i]);
+                //commandList.add(commandStr[i]);
             }
         }
         for(int i=0; i < commandId.length; i++) {
@@ -176,23 +186,33 @@ public class Voice implements RecognitionListener {
             String cmd = commandStr[i];
             for(String match : matches) {
                 int dist = Texto.calculateDistance(cmd, match);
-                Log.e(TAG, "DIST: "+cmd+" -> "+match+" = "+dist);
+                Log.e(TAG, "\nA) CMD: "+cmd+" -> "+match+" = "+dist);
 
                 Texto t = new Texto(match, cmd);
-                Log.e(TAG, "NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
+                Log.e(TAG, "b) NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
+                if(minDistance > t.computeShortestDistance()) {
+                    minDistance = t.computeShortestDistance();
+                    bestCommandId = id;
+                    bestCommandStr = cmd;
+                    lengthDiff = Math.abs(cmd.length() - match.length());
+                }
             }
         }
-        //sendCommand(int command, String desc)
-        //TODO: dividir con espacios
-        //TODO: Comprobar si cada palabra se ajusta a la frase
+
+        if(minDistance < 4) {//&& minDistance < lengthDiff+2
+            sendCommand(bestCommandId, bestCommandStr);
+        }
     }
+    //----------------------------------------------------------------------------------------------
+    // Word Process
 
 
+    // Ask Sound Record Permissions
+    //----------------------------------------------------------------------------------------------
     private boolean checkPermissions() {
         ArrayList<String> permissionsList = new ArrayList<>();
         boolean isGranted = isPermissionGranted(permissionsList);
         if( !isGranted && !permissionsList.isEmpty()) {
-            Log.e(TAG, "checkPermissions-----------------5555");
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity != null)
                 activity.requestPermissions(permissionsList.toArray(new String[]{}), REQUEST_RECORD_PERMISSION);
             return false;
@@ -202,7 +222,6 @@ public class Voice implements RecognitionListener {
     @TargetApi(Build.VERSION_CODES.M)
     private boolean isPermissionGranted(ArrayList<String> permissionsList) {
         String permission = android.Manifest.permission.RECORD_AUDIO;
-        Log.e(TAG, "isPermissionGranted-----------------");
         if(app.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "isPermissionGranted----------------- NOT GRANTED "+activity);
             //if(activity != null && activity.shouldShowRequestPermissionRationale(permission))
@@ -212,9 +231,40 @@ public class Voice implements RecognitionListener {
             }
             return false;
         }
-        Log.e(TAG, "isPermissionGranted----------------- TRUE ????");
         return true;
     }
+    //----------------------------------------------------------------------------------------------
+    // Ask Sound Record Permissions
+
+
+    // Event Bus Messages
+    //----------------------------------------------------------------------------------------------
+    private void sendEvent() {
+        EventBus.getDefault().post(new VoiceEvent(isListening));
+    }
+    public class VoiceEvent {
+        private boolean isListening;
+        public boolean isListening() { return isListening; }
+        VoiceEvent(boolean isListening) { this.isListening = isListening; }
+    }
+
+    private void sendCommand(int command, String desc) {
+        EventBus.getDefault().post(new CommandEvent(command, desc));
+    }
+    public class CommandEvent {
+        private int command;
+        public int getCommand() { return command; }
+        private String text;
+        public String getText() { return text; }
+        CommandEvent(int command, String text) {
+            this.command = command;
+            this.text = text;
+        }
+
+    }
+    //----------------------------------------------------------------------------------------------
+    // Event Bus Messages
+
 
     private String getErrorText(int errorCode) {
         String message;
@@ -253,27 +303,36 @@ public class Voice implements RecognitionListener {
         return message;
     }
 
-    private void sendEvent() {
-        EventBus.getDefault().post(new VoiceEvent(isListening));
-    }
-    public class VoiceEvent {
-        private boolean isListening;
-        public boolean isListening() { return isListening; }
-        VoiceEvent(boolean isListening) { this.isListening = isListening; }
-    }
 
-    private void sendCommand(int command, String desc) {
-        EventBus.getDefault().post(new CommandEvent(command, desc));
+
+    private TextToSpeech textToSpeech = null;
+    public void speak(String message) {
+        //TODO: check options cos user can disable TTS
+        textToSpeech = new TextToSpeech(app, status -> {
+            android.util.Log.e(TAG, "*********************-------"+message);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ttsGreater20(message);
+            } else {
+                ttsUnder20(message);
+            }
+        });
+        textToSpeech.setLanguage(Locale.getDefault());
+        textToSpeech.setPitch(1f);
+        textToSpeech.setSpeechRate(1f);
     }
-    public class CommandEvent {
-        private int command;
-        public int getCommand() { return command; }
-        private String desc;
-        public String getDesc() { return desc; }
-        CommandEvent(int command, String desc) {
-            this.command = command;
-            this.desc = desc;
+    private void ttsUnder20(String text) {
+        HashMap map = new HashMap<String, String>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            map.putIfAbsent(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
         }
-
+        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, map);
     }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void ttsGreater20(String text) {
+        String utteranceId = hashCode() + "";
+        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+    }
+
+
 }

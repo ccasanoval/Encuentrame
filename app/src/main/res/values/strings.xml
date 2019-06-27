@@ -184,6 +184,7 @@
 	<string name="info_activity" translatable="false">\nActiv.: %s</string>
 
 	<!-- Commands -->
+	<string name="voice_generated">Voice Generated</string>
 	<string name="voice_new_point">New point</string>
 	<string name="voice_new_route">New route</string>
 	<string name="voice_new_alert">New alert</string>

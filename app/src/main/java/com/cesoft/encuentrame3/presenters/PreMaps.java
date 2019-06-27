@@ -59,9 +59,11 @@ public class PreMaps extends PresenterBase
 	{
 		super.loadObjeto(o);
 		//------------------------------------------------------------------------------------------
-		try{
-			iTipo = view.getAct().getIntent().getIntExtra(Util.TIPO, Constantes.NADA);}catch(Exception e){
-			iTipo =Constantes.NADA;}
+		try
+		{
+			iTipo = view.getAct().getIntent().getIntExtra(Util.TIPO, Constantes.NADA);
+		}
+		catch(Exception e) {iTipo = Constantes.NADA;}
 		//------------------------------------------------------------------------------------------
 	}
 	public boolean isLugar(){return iTipo == Constantes.LUGARES && !isNuevo();}
@@ -206,8 +208,7 @@ public class PreMaps extends PresenterBase
 		{
 			if(o.getLatitud() != lat || o.getLongitud() != lon)
 			{
-				Log.e(TAG, "++++++++++++++++++++++++++++++++++++++++++++++++++ SUCIO ");
-				bSucio = true;
+				isSucio = true;
 				o.setLatLon(lat, lon);
 			}
 			((IMapsView) view).setMarker(o.getNombre(), o.getDescripcion(), new LatLng(lat, lon));
@@ -216,7 +217,7 @@ public class PreMaps extends PresenterBase
 		{
 			if(o.getLatitud() != lat || o.getLongitud() != lon)
 			{
-				bSucio = true;
+				isSucio = true;
 				o.setLatLon(lat, lon);
 			}
 			LatLng pos = new LatLng(lat, lon);

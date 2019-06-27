@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3.presenters;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.GoogleMap;
 
 
@@ -47,11 +49,12 @@ public abstract class PresenterBase
 		public void setLatLon(double lat, double lon){
 			o.setLatLon(lat, lon);}
 
-	boolean bSucio = false;
-		public void setSucio(){
-			bSucio =true;}
-	private boolean bNuevo = false;
-		public boolean isNuevo(){return bNuevo;}
+	boolean isSucio = false;
+		public void setSucio(){ isSucio =true; }
+	private boolean isNuevo = false;
+		public boolean isNuevo(){return isNuevo;}
+	private boolean isVoiceCommand = false;
+		public boolean isVoiceCommand(){return isVoiceCommand;}
 	boolean bDesdeNotificacion = false;
 	////////////////////////////////////////////////////
 	protected Application app;
@@ -61,14 +64,14 @@ public abstract class PresenterBase
 	public void ini(IVista view)
 	{
 		this.view = view;
-		bSucio = false;
+		isSucio = false;
 	}
 	public void subscribe(IVista view)
 	{
 		this.view = view;
-		if( !bEliminar)
+		if( !isEliminar)
 		{
-			bEliminar =true;
+			isEliminar =true;
 			onEliminar();
 		}
 	}
@@ -78,10 +81,10 @@ public abstract class PresenterBase
 		//Como dlg tienen referencia a view, debemos destruir referencia para evitar MemoryLeak!
 		if(dlgEliminar != null)
 		{
-			boolean b = bEliminar;
+			boolean b = isEliminar;
 			dlgEliminar.dismiss();
 			dlgEliminar = null;
-			bEliminar = b;//Para recordar si estabamos mostrarndo dlg, porque dismiss borra flag
+			isEliminar = b;//Para recordar si estabamos mostrarndo dlg, porque dismiss borra flag //TODO: Cutre
 		}
 		//
 		if(dlgSucio != null) dlgSucio.dismiss();
@@ -97,14 +100,14 @@ public abstract class PresenterBase
 	{
 		if(savedInstanceState != null)
 		{
-			bSucio = savedInstanceState.getBoolean(SUCIO);
-			bEliminar = savedInstanceState.getBoolean(ELIMINAR);
+			isSucio = savedInstanceState.getBoolean(SUCIO);
+			isEliminar = savedInstanceState.getBoolean(ELIMINAR);
 		}
 	}
 	public void onSaveInstanceState(Bundle outState)
 	{
-		outState.putBoolean(SUCIO, bSucio);
-		outState.putBoolean(ELIMINAR, bEliminar);
+		outState.putBoolean(SUCIO, isSucio);
+		outState.putBoolean(ELIMINAR, isEliminar);
 	}
 
 	//______________________________________________________________________________________________
@@ -112,22 +115,26 @@ public abstract class PresenterBase
 	{
 		try
 		{
-			o = view.getAct().getIntent().getParcelableExtra(Objeto.NOMBRE);
-			if(o == null)throw new Exception();
-            bNuevo = false;
+			Intent intent = view.getAct().getIntent();
+			o = intent.getParcelableExtra(Objeto.NOMBRE);
+			isNuevo = (o == null);
+			if(isNuevo)
+				isVoiceCommand = intent.getBooleanExtra(Voice.NAME, false);
 		}
 		catch(Exception e)
 		{
-			bNuevo = true;
+			isNuevo = true;
+			isVoiceCommand = false;
 			o = objDefault;
 		}
 	}
 
 	//______________________________________________________________________________________________
 	private AlertDialog dlgSucio = null;
-	public void onSalir()
+	public void onSalir() { onSalir(false); }
+	public void onSalir(boolean force)
 	{
-		if(bSucio)
+		if(!force && isSucio)
 		{
 			AlertDialog.Builder dialog = new AlertDialog.Builder(view.getAct());
 			dialog.setPositiveButton(app.getString(R.string.guardar), (dlg, which) -> guardar());
@@ -146,19 +153,19 @@ public abstract class PresenterBase
 
 	//______________________________________________________________________________________________
 	private AlertDialog dlgEliminar = null;
-	boolean bEliminar = true;
+	boolean isEliminar = true;
 	public void onEliminar()
 	{
-		if(!bEliminar)return;
-		bEliminar =false;
+		if(!isEliminar)return;
+		isEliminar = false;
 
 		AlertDialog.Builder dialog = new AlertDialog.Builder(view.getAct());
-		dialog.setNegativeButton(app.getString(R.string.cancelar), (dlg, which) -> bEliminar = true);
+		dialog.setNegativeButton(app.getString(R.string.cancelar), (dlg, which) -> isEliminar = true);
 		dialog.setPositiveButton(app.getString(R.string.eliminar), (dialog1, which) -> eliminar());
 		dlgEliminar = dialog.create();
 		dlgEliminar.setTitle(o.getNombre());
 		dlgEliminar.setMessage(app.getString(R.string.seguro_eliminar));
-		dlgEliminar.setOnDismissListener(dlg -> bEliminar = dlgEliminar ==null || !dlgEliminar.isShowing());//bEliminar=true no funcionaria, se llama con retraso
+		dlgEliminar.setOnDismissListener(dlg -> isEliminar = dlgEliminar ==null || !dlgEliminar.isShowing());//bEliminar=true no funcionaria, se llama con retraso
 		dlgEliminar.show();
 	}
 	protected abstract void eliminar();

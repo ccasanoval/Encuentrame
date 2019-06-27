@@ -148,6 +148,8 @@ public abstract class VistaBase
 			presenter.loadSavedInstanceState(savedInstanceState);
 		}
 
+		if(presenter.isVoiceCommand())
+			txtNombre.setText(R.string.voice_generated);
 
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 	}
@@ -157,7 +159,7 @@ public abstract class VistaBase
 	protected float mapZoom = 15;
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
+	protected void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putFloat(MAP_ZOOM, mapZoom);
 		presenter.onSaveInstanceState(outState);
@@ -185,14 +187,12 @@ public abstract class VistaBase
 	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onPause() {
-		Log.e(TAG, "-------------onPause-----------------------");
 		super.onPause();
 		stopTracking();
 	}
 
 	@Override
 	protected void onResume() {
-		Log.e(TAG, "-------------onResume-----------------------");
 		super.onResume();
 		startTracking();
 	}

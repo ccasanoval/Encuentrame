@@ -32,7 +32,7 @@ import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CU
 
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
-//TODO: Avisar con TextToVoice y permitir no hacerlo mediante las opciones....
+//TODO: OPCIONES para habilitar o deshabilitar TextToVoice
 //TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
@@ -200,9 +200,46 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
-		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getDesc());
-		Toast.makeText(this, event.getDesc()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
-		//TODO: Exe command
+		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+
+		switch(event.getCommand()) {
+			case R.string.voice_new_point:
+				viewPager.setCurrentItem(Constantes.LUGARES);
+				onLugar(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_new_route:
+				viewPager.setCurrentItem(Constantes.RUTAS);
+				onRuta(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_new_alert:
+				viewPager.setCurrentItem(Constantes.AVISOS);
+				onAviso(true);
+				voice.speak(event.getText());
+				break;
+
+			case R.string.voice_cancel:
+				break;
+			case R.string.voice_save:
+			case R.string.voice_start:
+				break;
+
+			case R.string.voice_name:
+				break;
+			case R.string.voice_description:
+				break;
+			case R.string.voice_radious:
+				break;
+			case R.string.voice_metres:
+				break;
+			case R.string.voice_kilometers:
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -216,17 +253,23 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		finish();
 	}
 	//---
-	public void onLugar()
+	public void onLugar(boolean isVoiceCommand)
 	{
-		startActivityForResult(new Intent(this, ActLugar.class), Constantes.LUGARES);
+		Intent intent = new Intent(this, ActLugar.class);
+		intent.putExtra(Voice.NAME, isVoiceCommand);
+		startActivityForResult(intent, Constantes.LUGARES);
 	}
-	public void onAviso()
+	public void onAviso(boolean isVoiceCommand)
 	{
-		startActivityForResult(new Intent(this, ActAviso.class), Constantes.AVISOS);
+		Intent intent = new Intent(this, ActAviso.class);
+		intent.putExtra(Voice.NAME, isVoiceCommand);
+		startActivityForResult(intent, Constantes.AVISOS);
 	}
-	public void onRuta()
+	public void onRuta(boolean isVoiceCommand)
 	{
-		startActivityForResult(new Intent(this, ActRuta.class), Constantes.RUTAS);
+		Intent intent = new Intent(this, ActRuta.class);
+		intent.putExtra(Voice.NAME, isVoiceCommand);
+		startActivityForResult(intent, Constantes.RUTAS);
 	}
 	//---
 	public void goLugar(Objeto obj)
