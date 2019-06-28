@@ -40,7 +40,7 @@ public abstract class PresenterBase
 	}
 	IVista view;
 	////////////////////////////////////////////////////
-	Objeto o;
+	protected Objeto o;
 		public String getNombre(){return o.getNombre();}
 		public String getDescripcion(){return o.getDescripcion();}
 		//
@@ -113,19 +113,17 @@ public abstract class PresenterBase
 	//______________________________________________________________________________________________
 	public void loadObjeto(Objeto objDefault)
 	{
-		try
-		{
-			Intent intent = view.getAct().getIntent();
-			o = intent.getParcelableExtra(Objeto.NOMBRE);
-			isNuevo = (o == null);
-			if(isNuevo)
-				isVoiceCommand = intent.getBooleanExtra(Voice.NAME, false);
-		}
-		catch(Exception e)
-		{
+
+		Intent intent = view.getAct().getIntent();
+		o = intent.getParcelableExtra(Objeto.NOMBRE);
+		if(o == null) {
 			isNuevo = true;
-			isVoiceCommand = false;
 			o = objDefault;
+			isVoiceCommand = intent.getBooleanExtra(Voice.NAME, false);
+		}
+		else {
+			isNuevo = false;
+			isVoiceCommand = false;
 		}
 	}
 

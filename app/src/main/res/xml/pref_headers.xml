@@ -3,7 +3,7 @@
 	<header
 		android:id="@+id/pref_logout"
 		android:key="@string/pref_header_logout"
-		android:icon="@drawable/ic_exit"
+		android:icon="@drawable/ic_power_settings_new_black_24dp"
 		android:summary="@string/pref_header_logout_sum"
 		android:title="@string/pref_header_logout"/>
 
@@ -12,6 +12,12 @@
 		android:icon="@drawable/ic_sync_black_24dp"
 		android:summary="@string/pref_header_opciones_sum"
 		android:title="@string/pref_header_opciones"/>
+
+	<header
+		android:fragment="com.cesoft.encuentrame3.ActConfig$VoicePreferenceFragment"
+		android:icon="@drawable/ic_mic_black_24dp"
+		android:summary="@string/pref_header_voice_sum"
+		android:title="@string/pref_header_voice"/>
 
 	<header
 		android:fragment="com.cesoft.encuentrame3.ActConfig$NotificationPreferenceFragment"

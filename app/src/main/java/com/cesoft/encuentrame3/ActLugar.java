@@ -80,7 +80,6 @@ public class ActLugar extends VistaBase
 			setPosicion(loc.getLatitude(), loc.getLongitude());
 	}
 
-
 	//____________________________________________________________________________________________________________________________________________________
 	/// MENU
 	//______________________________________________________________________________________________
@@ -101,6 +100,7 @@ public class ActLugar extends VistaBase
 				return true;
 			case R.id.action_voz:
 				voice.toggleStatus();
+				voice.isListeningActive = !voice.isListeningActive;
 				return true;
 			case R.id.menu_eliminar:
 				presenter.onEliminar();
@@ -165,6 +165,16 @@ public class ActLugar extends VistaBase
 	}
 
 
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		if(voice.isListeningActive) {
+			Log.e(TAG, "voice.isListeningActive()----------------------------------------------------------------");
+			voice.toggleStatus();
+		}
+	}
 
 	@Override
 	public void onPause()

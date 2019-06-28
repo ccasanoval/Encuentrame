@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<SwitchPreference
+		android:key="speech_enabled"
+		android:defaultValue="true"
+		android:title="@string/pref_speech_on"/>
+
+	<SwitchPreference
+		android:key="voice_enabled"
+		android:defaultValue="false"
+		android:title="@string/pref_voice_on"/>
+
+	<SwitchPreference
+		android:defaultValue="false"
+		android:title="@string/pref_header_voice"
+		android:summary="@string/voice_comands_all"/>
+
+	<!-- MultiSelectListPreference
+		android:key="voice_commands"
+		android:title=" "
+		android:summary="@string/pref_header_voice"
+		android:entries="@array/voice_commands"
+		android:entryValues="@array/voice_commands"
+		/ -->
+
+</PreferenceScreen>

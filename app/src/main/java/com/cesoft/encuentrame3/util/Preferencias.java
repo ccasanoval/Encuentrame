@@ -2,8 +2,6 @@ package com.cesoft.encuentrame3.util;
 
 import android.content.SharedPreferences;
 
-import com.cesoft.encuentrame3.BuildConfig;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -22,6 +20,9 @@ public class Preferencias {
     // NO pref.xml
     private static final String ID_TRACKING = "id_tracking_route";
     private static final String AUTOARRANQUE = "is_auto_arranque";
+    // REFER TO  pref_voice.xml
+    private static final String SPEECH_ENABLED = "speech_enabled";
+    private static final String VOICE_ENABLED = "voice_enabled";
 
 
     private SharedPreferences sp;
@@ -70,4 +71,10 @@ public class Preferencias {
         return sp.getString(ID_TRACKING, "");
     }
 
+    public boolean isSpeechEnabled() {
+        return sp.getBoolean(SPEECH_ENABLED, true);
+    }
+    public boolean isVoiceEnabled() {
+        return sp.getBoolean(VOICE_ENABLED, false);
+    }
 }

@@ -154,24 +154,6 @@
 	<string name="walking">Caminando</string>
 	<string name="unidentifiable_activity">Actividad no identificada: %1$d</string>
 
-	<!-- Preferencias -->
-	<string name="pref_header_opciones">Opciones</string>
-	<string name="pref_save_login">Guardar usuario y contraseña</string>
-	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
-	<string name="pref_header_notifications">Avisos</string>
-	<string name="pref_msg_notif_type">Mostrar diálogos PopUp</string>
-	<string name="pref_ringtone">Tono</string>
-	<string name="pref_ringtone_silent">Silencio</string>
-	<string name="pref_vibrate">Vibrar</string>
-	<string name="pref_lights">Luces</string>
-	<string name="pref_header_logout">Salir</string>
-	<string name="pref_header_logout_sum">Cerrar la sesión actual</string>
-	<string name="pref_header_about">Sobre esta App..</string>
-	<string name="pref_header_notifications_sum">Configuración de avisos…</string>
-	<string name="pref_header_opciones_sum">Configuraciones…</string>
-    <string name="pref_save_all">Incluir puntos imprecisos</string>
-    <string name="pref_tracking_seconds">Periodo rastreo (segundos)</string>
-
 	<!-- Info -->
 	<string name="info_time">Fecha: </string>
 	<string name="info_prec">\nPrecisión: %.2f m\n</string>
@@ -183,11 +165,34 @@
 	<string name="info_speed2">\nVelocidad: %.0f km/h</string>
 
 
+	<!-- Preferencias -->
+	<string name="pref_header_opciones">Opciones</string>
+	<string name="pref_save_login">Guardar usuario y contraseña</string>
+	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
+	<string name="pref_header_logout">Salir</string>
+	<string name="pref_header_logout_sum">Cerrar la sesión actual</string>
+	<string name="pref_header_about">Sobre esta App..</string>
+	<string name="pref_header_opciones_sum">Configuraciones…</string>
+    <string name="pref_save_all">Incluir puntos imprecisos</string>
+    <string name="pref_tracking_seconds">Periodo rastreo (segundos)</string>
+	<string name="pref_header_notifications_sum">Configuración de avisos…</string>
+	<string name="pref_header_notifications">Avisos</string>
+	<string name="pref_msg_notif_type">Mostrar diálogos PopUp</string>
+	<string name="pref_ringtone">Tono</string>
+	<string name="pref_ringtone_silent">Silencio</string>
+	<string name="pref_vibrate">Vibrar</string>
+	<string name="pref_lights">Luces</string>
+	<string name="pref_header_voice">Comandos de voz</string>
+	<string name="pref_header_voice_sum">Reconocimiento de voz…</string>
+	<string name="pref_speech_on">Permir que la App hable</string>
+	<string name="pref_voice_on">Aceptar comandos desde inicio</string>
+
 	<!-- Commands -->
+	<!-- string name="voice_commands">Commandos de voz</string -->
 	<string name="voice_generated">Generado x Voz</string>
-	<string name="voice_new_point">Nuevo punto</string>
+	<string name="voice_new_point">Nuevo lugar</string>
 	<string name="voice_new_route">Nueva ruta</string>
-	<string name="voice_new_alert">Nueva alerta</string>
+	<string name="voice_new_alert">Nuevo aviso</string>
 	<string name="voice_start">Empezar</string>
 	<string name="voice_save">Guardar</string>
 	<string name="voice_cancel">Cancelar</string>
@@ -196,5 +201,6 @@
 	<string name="voice_radious">Radio</string>
 	<string name="voice_metres">Metro</string>
 	<string name="voice_kilometers">Kilometros</string>
+	<string name="voice_comands_all">Nuevo lugar, Nueva ruta, Nuevo aviso, Empezar, Guardar, Cancelar</string>
 
 </resources>

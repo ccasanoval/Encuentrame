@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3.util;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -14,7 +13,6 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
-
 import com.cesoft.encuentrame3.R;
 
 import org.greenrobot.eventbus.EventBus;
@@ -23,8 +21,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 26/06/2019
+@Singleton
 public class Voice implements RecognitionListener {
     private static final String TAG = "Voice";
     public static final String NAME = "Voice";
@@ -32,16 +34,23 @@ public class Voice implements RecognitionListener {
     private static final int MAX_RESULTS = 10;
 
     private Application app;
+    private Preferencias pref;
     private Activity activity;
     public void setActivity(Activity activity) { this.activity = activity; }
 
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private boolean isListening = false;
+    public boolean isListeningActive = false;
 
-    public Voice(Application app) {
+    @Inject
+    public Voice(Application app, Preferencias pref) {
         this.app = app;
+        this.pref = pref;
+        if(pref.isVoiceEnabled())
+            toggleStatus();
     }
+
 
     public void toggleStatus() {
         if(isListening)
@@ -80,8 +89,8 @@ public class Voice implements RecognitionListener {
     }
 
 
-    // implements RecognitionListener
     //----------------------------------------------------------------------------------------------
+    // implements RecognitionListener
     @Override
     public void onReadyForSpeech(Bundle params) {
         Log.e(TAG, "onReadyForSpeech: ");
@@ -147,12 +156,12 @@ public class Voice implements RecognitionListener {
     public void onEvent(int eventType, Bundle params) {
         Log.e(TAG, "onEvent : "+eventType);
     }
-    //----------------------------------------------------------------------------------------------
     // implements RecognitionListener
-
-
-    // Word Process
     //----------------------------------------------------------------------------------------------
+
+
+    //----------------------------------------------------------------------------------------------
+    // Word Process
     private int[] commandId = new int[] {
         R.string.voice_new_point,
         R.string.voice_new_route,
@@ -185,17 +194,24 @@ public class Voice implements RecognitionListener {
             int id = commandId[i];
             String cmd = commandStr[i];
             for(String match : matches) {
-                int dist = Texto.calculateDistance(cmd, match);
-                Log.e(TAG, "\nA) CMD: "+cmd+" -> "+match+" = "+dist);
 
-                Texto t = new Texto(match, cmd);
-                Log.e(TAG, "b) NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
-                if(minDistance > t.computeShortestDistance()) {
-                    minDistance = t.computeShortestDistance();
+                int distance = Texto.calculateDistance(cmd, match);
+                Log.e(TAG, "\nA) CMD: "+cmd+" -> "+match+" = "+distance);
+                if(minDistance > distance) {
+                    minDistance = distance;
                     bestCommandId = id;
                     bestCommandStr = cmd;
                     lengthDiff = Math.abs(cmd.length() - match.length());
                 }
+
+                Texto t = new Texto(match, cmd);
+                Log.e(TAG, "b) NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
+//                if(minDistance > t.computeShortestDistance()) {
+//                    minDistance = t.computeShortestDistance();
+//                    bestCommandId = id;
+//                    bestCommandStr = cmd;
+//                    lengthDiff = Math.abs(cmd.length() - match.length());
+//                }
             }
         }
 
@@ -203,12 +219,12 @@ public class Voice implements RecognitionListener {
             sendCommand(bestCommandId, bestCommandStr);
         }
     }
-    //----------------------------------------------------------------------------------------------
     // Word Process
-
-
-    // Ask Sound Record Permissions
     //----------------------------------------------------------------------------------------------
+
+
+    //----------------------------------------------------------------------------------------------
+    // Ask Sound Record Permissions
     private boolean checkPermissions() {
         ArrayList<String> permissionsList = new ArrayList<>();
         boolean isGranted = isPermissionGranted(permissionsList);
@@ -233,14 +249,14 @@ public class Voice implements RecognitionListener {
         }
         return true;
     }
-    //----------------------------------------------------------------------------------------------
     // Ask Sound Record Permissions
-
-
-    // Event Bus Messages
     //----------------------------------------------------------------------------------------------
+
+
+    //----------------------------------------------------------------------------------------------
+    // Event Bus Messages
     private void sendEvent() {
-        EventBus.getDefault().post(new VoiceEvent(isListening));
+        EventBus.getDefault().postSticky(new VoiceEvent(isListening));
     }
     public class VoiceEvent {
         private boolean isListening;
@@ -262,8 +278,8 @@ public class Voice implements RecognitionListener {
         }
 
     }
-    //----------------------------------------------------------------------------------------------
     // Event Bus Messages
+    //----------------------------------------------------------------------------------------------
 
 
     private String getErrorText(int errorCode) {
@@ -307,12 +323,13 @@ public class Voice implements RecognitionListener {
 
     private TextToSpeech textToSpeech = null;
     public void speak(String message) {
-        //TODO: check options cos user can disable TTS
+        if( !pref.isSpeechEnabled()) return;
         textToSpeech = new TextToSpeech(app, status -> {
             android.util.Log.e(TAG, "*********************-------"+message);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 ttsGreater20(message);
-            } else {
+            }
+            else {
                 ttsUnder20(message);
             }
         });

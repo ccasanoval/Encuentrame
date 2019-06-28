@@ -83,7 +83,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		showMensaje(intent);
 	}
 
-
 	//----------------------------------------------------------------------------------------------
 	@Override
 	public void onPause()
@@ -91,13 +90,15 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		voice.stopListening();
 		super.onPause();
 	}
-
 	//----------------------------------------------------------------------------------------------
 	@Override
-	public void onDestroy()
+	public void onResume()
 	{
-		viewPager = null;
-		super.onDestroy();
+		super.onResume();
+		if(voice.isListeningActive) {
+			Log.e(TAG, "voice.isListeningActive()----------------------------------------------------------------");
+			voice.toggleStatus();
+		}
 	}
 	//----------------------------------------------------------------------------------------------
 	private boolean oncePideBateria = true;
@@ -118,6 +119,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public void onStop() {
 		EventBus.getDefault().unregister(this);
 		super.onStop();
+	}
+	//----------------------------------------------------------------------------------------------
+	@Override
+	public void onDestroy()
+	{
+		viewPager = null;
+		super.onDestroy();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -177,6 +185,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				return true;
 			case R.id.action_voz:
 				voice.toggleStatus();
+				voice.isListeningActive = !voice.isListeningActive;
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -190,7 +199,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		else super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	@Subscribe(threadMode = ThreadMode.POSTING)
+	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
 	public void onVoiceEvent(Voice.VoiceEvent event)
 	{
 		if(vozMenuItem != null)
@@ -201,7 +210,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
 		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
-		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
 			case R.string.voice_new_point:
@@ -274,23 +283,23 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	//---
 	public void goLugar(Objeto obj)
 	{
-		Intent i = new Intent(this, ActLugar.class);
-		i.putExtra(Objeto.NOMBRE, obj);
-		startActivityForResult(i, Constantes.LUGARES);
+		Intent intent = new Intent(this, ActLugar.class);
+		intent.putExtra(Objeto.NOMBRE, obj);
+		startActivityForResult(intent, Constantes.LUGARES);
 	}
 	public void goAviso(Objeto obj)
 	{
-		Intent i = new Intent(this, ActAviso.class);
-		i.putExtra(Objeto.NOMBRE, obj);
-		startActivityForResult(i, Constantes.AVISOS);
+		Intent intent = new Intent(this, ActAviso.class);
+		intent.putExtra(Objeto.NOMBRE, obj);
+		startActivityForResult(intent, Constantes.AVISOS);
 	}
 	public void goRuta(Objeto obj)
 	{
 		try
 		{
-			Intent i = new Intent(this, ActRuta.class);
-			i.putExtra(Objeto.NOMBRE, obj);
-			startActivityForResult(i, Constantes.RUTAS);
+			Intent intent = new Intent(this, ActRuta.class);
+			intent.putExtra(Objeto.NOMBRE, obj);
+			startActivityForResult(intent, Constantes.RUTAS);
 		}
 		catch(Exception e){Log.e(TAG, "------------------goRuta:onItemEdit:e:-----------------------", e);}
 	}

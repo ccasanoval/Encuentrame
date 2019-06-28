@@ -80,7 +80,7 @@ public class GlobalModule
 
 	@Singleton
 	@Provides
-	Voice provideVoice(Application app) {
-		return new Voice(app);
+	Voice provideVoice(Application app, Preferencias pref) {
+		return new Voice(app, pref);
 	}
 }

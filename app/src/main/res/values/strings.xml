@@ -154,24 +154,6 @@
 	<string name="walking">Walking</string>
 	<string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
 
-	<!-- Preferencias -->
-	<string name="pref_header_about">About this App…</string>
-	<string name="pref_header_logout">Logout</string>
-	<string name="pref_header_logout_sum">End current user session</string>
-	<string name="pref_header_opciones">Options</string>
-	<string name="pref_header_opciones_sum">Settings…</string>
-	<string name="pref_auto_arranque">Start alert service at boot up</string>
-	<string name="pref_save_login">Save login and password</string>
-	<string name="pref_save_all">Save also imprecise points</string>
-	<string name="pref_tracking_seconds">Tracking period (seconds)</string>
-	<string name="pref_header_notifications">Alerts</string>
-	<string name="pref_header_notifications_sum">Alerts settings…</string>
-	<string name="pref_ringtone">Ringtone</string>
-	<string name="pref_ringtone_silent">Silent</string>
-	<string name="pref_msg_notif_type">Use PopUps Notif.</string>
-	<string name="pref_vibrate">Vibrate</string>
-	<string name="pref_lights">Lights</string>
-
 	<!-- Info -->
 	<string name="info_time">Time: </string>
 	<string name="info_prec">\nAccuracy: %.2f m\n</string>
@@ -182,6 +164,28 @@
 	<string name="info_speed">\nSpeed: %.2f m/s</string>
 	<string name="info_speed2">\nSpeed: %.0f Km/h</string>
 	<string name="info_activity" translatable="false">\nActiv.: %s</string>
+
+	<!-- Preferencias -->
+	<string name="pref_header_about">About this App…</string>
+	<string name="pref_header_logout">Logout</string>
+	<string name="pref_header_logout_sum">End current user session</string>
+	<string name="pref_header_opciones">Options</string>
+	<string name="pref_header_opciones_sum">App configuration…</string>
+	<string name="pref_auto_arranque">Start alert service at boot up</string>
+	<string name="pref_save_login">Save login and password</string>
+	<string name="pref_save_all">Save imprecise points also</string>
+	<string name="pref_tracking_seconds">Tracking period (seconds)</string>
+	<string name="pref_header_notifications">Alerts</string>
+	<string name="pref_header_notifications_sum">Alerts settings…</string>
+	<string name="pref_ringtone">Ringtone</string>
+	<string name="pref_ringtone_silent">Silent</string>
+	<string name="pref_msg_notif_type">Use PopUps Notif.</string>
+	<string name="pref_vibrate">Vibrate</string>
+	<string name="pref_lights">Lights</string>
+	<string name="pref_header_voice">Voice commands</string>
+	<string name="pref_header_voice_sum">Voice recognition settings…</string>
+	<string name="pref_speech_on">Let the App talk</string>
+	<string name="pref_voice_on">Accept voice commands from start</string>
 
 	<!-- Commands -->
 	<string name="voice_generated">Voice Generated</string>
@@ -196,6 +200,7 @@
 	<string name="voice_radious">Radious</string>
 	<string name="voice_metres">Meters</string>
 	<string name="voice_kilometers">Kilometers</string>
+	<string name="voice_comands_all">New point, New route, New alert, Start, Save, Cancel</string>
 
 
 </resources>

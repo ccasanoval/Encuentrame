@@ -128,10 +128,10 @@ public abstract class VistaBase
 		try { setSupportActionBar(findViewById(R.id.toolbar)); } catch(Exception ignore){}//ActMaps no tiene toolbar
 		//
 		FloatingActionButton fab = findViewById(R.id.fabVolver);
-		if (fab != null) fab.setOnClickListener(view -> presenter.onSalir());
+		if(fab != null) fab.setOnClickListener(view -> presenter.onSalir());
 		//
 		fab = findViewById(R.id.fabBuscar);
-		if (fab != null) fab.setOnClickListener(view -> util.onBuscar(this, map, mapZoom));
+		if(fab != null) fab.setOnClickListener(view -> util.onBuscar(this, map, mapZoom));
 
 		//----------------------------
 		try {
