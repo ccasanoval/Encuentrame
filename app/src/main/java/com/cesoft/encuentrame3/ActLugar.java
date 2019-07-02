@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -89,6 +88,7 @@ public class ActLugar extends VistaBase
 		if(presenter.isNuevo())
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
 		vozMenuItem = menu.findItem(R.id.action_voz);
+		refreshVoiceIcon();
 		return true;
 	}
 	@Override
@@ -106,6 +106,7 @@ public class ActLugar extends VistaBase
 				return true;
 			case R.id.action_voz:
 				voice.toggleListening();
+				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

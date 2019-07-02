@@ -61,32 +61,27 @@ public class Voice implements RecognitionListener {
         return isListeningActive;
     }
     public void turnOffListening() {
-        Log.e(TAG, "turnOffListening-------------------1--------- "+isListeningActive);
         stopListening();
         isListeningActive = false;
         sendEvent();
-        Log.e(TAG, "turnOffListening-------------------2--------- "+isListeningActive);
     }
     private void toggleFlag() {
-        Log.e(TAG, "toggleListening--------------------1-------- "+isListeningActive);
         isListeningActive = !isListeningActive;
         sendEvent();
-        Log.e(TAG, "toggleListening--------------------2-------- "+isListeningActive);
     }
 
     public void toggleListening() {
-        Log.e(TAG, "toggleStatus: --------------1------------------------");
         toggleFlag();
         if(isListeningActive)
-            stopListening();
-        else
             startListening();
-        Log.e(TAG, "toggleStatus: --------------2------------------------");
+        else
+            stopListening();
     }
 
     private void restartListening() {
-        Log.e(TAG, "restartListening: --------------------------------------");
-            //TODO: refactor, dont repeat code...
+        stopListening();
+        startListening();
+        /*//TODO: refactor, dont repeat code...
         isListening = false;
         if(speech != null) {
             speech.stopListening();
@@ -102,7 +97,7 @@ public class Voice implements RecognitionListener {
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_RESULTS);
         speech = SpeechRecognizer.createSpeechRecognizer(app);
         speech.setRecognitionListener(this);
-        speech.startListening(recognizerIntent);
+        speech.startListening(recognizerIntent);*/
     }
     public void startListening() {
         Log.e(TAG, "startListening: ------------------------------------");
@@ -128,13 +123,14 @@ public class Voice implements RecognitionListener {
     }
 
     public void stopListening() {
-        Log.e(TAG, "stopListening: -------------------");
+        Log.e(TAG, "stopListening: ----------------------------------------");
         isListening = false;
         if(speech != null) {
             speech.stopListening();
             speech.cancel();
             speech.destroy();
             speech = null;
+            System.gc();
         }
     }
 
@@ -304,11 +300,7 @@ public class Voice implements RecognitionListener {
     private void sendEvent() {
         EventBus.getDefault().postSticky(new VoiceStatusEvent());
     }
-    public class VoiceStatusEvent {
-//        private boolean isListening;
-//        public boolean isListening() { return isListening; }
-//        VoiceStatusEvent(boolean isListening) {  }
-    }
+    public class VoiceStatusEvent { }
 
     private void sendCommand(int command, String desc) {
         EventBus.getDefault().post(new CommandEvent(command, desc));

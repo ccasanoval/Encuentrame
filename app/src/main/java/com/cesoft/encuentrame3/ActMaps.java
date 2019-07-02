@@ -280,6 +280,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	{
 		getMenuInflater().inflate(R.menu.menu_mapa, menu);
 		vozMenuItem = menu.findItem(R.id.action_voz);
+		refreshVoiceIcon();
 		return true;
 	}
 	@Override
@@ -288,6 +289,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 		switch(item.getItemId()) {
 			case R.id.action_voz:
 				voice.toggleListening();
+				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

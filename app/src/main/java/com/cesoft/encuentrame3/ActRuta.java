@@ -28,7 +28,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -165,6 +164,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			menu.findItem(R.id.menu_estadisticas).setVisible(false);
 		}
 		vozMenuItem = menu.findItem(R.id.action_voz);
+		refreshVoiceIcon();
 		return true;
 	}
 	@Override
@@ -182,6 +182,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 				return true;
 			case R.id.action_voz:
 				voice.toggleListening();
+				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
