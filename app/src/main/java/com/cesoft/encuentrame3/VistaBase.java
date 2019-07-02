@@ -198,11 +198,11 @@ public abstract class VistaBase
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.e(TAG, "onResume----------------------------------------");
 		startTracking();
 		if(voice.isListening()) {
 			voice.startListening();
 		}
+		refreshVoiceIcon();
 	}
 
 	@Override
@@ -319,8 +319,7 @@ public abstract class VistaBase
     }
 
 	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
-	public void onVoiceEvent(Voice.VoiceEvent event)
-	{
+	public void onVoiceEvent(Voice.VoiceStatusEvent event) {
 		refreshVoiceIcon();
 	}
 }

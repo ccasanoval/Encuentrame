@@ -55,6 +55,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	private boolean oncePideActivarBateria2 = true;
 
 	private ImageButton btnStart;
+	private ImageButton btnStop;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -65,6 +66,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 
 		voice.setActivity(this);
 		btnStart = findViewById(R.id.btnStart);
+		btnStop = findViewById(R.id.btnStop);
 
 		//-----------------------------------
 		initStartButton();
@@ -102,7 +104,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	}
 
 	private void initStopButton() {
-		final ImageButton btnStop = findViewById(R.id.btnStop);
 		if(btnStop != null)
 		{
 			btnStop.setEnabled(true);
@@ -122,7 +123,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			initUIOldRoute();
 	}
 	private void initUINewRoute() {
-		final ImageButton btnStop = findViewById(R.id.btnStop);
 		setTitle(getString(R.string.nueva_ruta));
 		if(btnStop!=null)btnStop.setVisibility(View.GONE);
 		try
@@ -138,7 +138,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			Log.e(TAG, "onCreate:e:--------------------------------------------------------",e);}
 	}
 	private void initUIOldRoute() {
-		final ImageButton btnStart = findViewById(R.id.btnStart);
 		setTitle(getString(R.string.editar_ruta));
 		if(btnStart!=null)btnStart.setVisibility(View.GONE);
 		//si está isActivo muestra btnStop
@@ -182,7 +181,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 				presenter.estadisticas();
 				return true;
 			case R.id.action_voz:
-				voice.toggleStatus();
 				voice.toggleListening();
 				return true;
 			default:
@@ -265,6 +263,12 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 			case R.string.voice_start:
 				//presenter.guardar();
 				startButtonListener();
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_stop_route:
+				//String routeId = util.getTrackingRoute();//TODO: in presenter...?
+				//if( ! routeId.isEmpty())
+				util.setTrackingRoute("");
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_stop_listening:

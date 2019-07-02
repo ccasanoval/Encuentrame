@@ -287,7 +287,6 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	{
 		switch(item.getItemId()) {
 			case R.id.action_voz:
-				voice.toggleStatus();
 				voice.toggleListening();
 				return true;
 			default:

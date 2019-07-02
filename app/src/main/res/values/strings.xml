@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+	<!ENTITY voice_new_point "New point">
+	<!ENTITY voice_new_route "New route">
+	<!ENTITY voice_new_route2 "Start route">
+	<!ENTITY voice_new_alert "New alert">
+	<!ENTITY voice_start "Start">
+	<!ENTITY voice_save "Save">
+	<!ENTITY voice_cancel "Cancel">
+	<!ENTITY voice_stop_route "Stop route">
+	<!ENTITY voice_map "Map">
+	<!ENTITY voice_stop_listening "Stop listening">
+	]>
+<!-- not supported anymore DOCTYPE resources [
+	<!ENTITY % ents SYSTEM "./res/raw/voice_commands.ent">
+	%ents;
+	] -->
 <resources>
 	<!-- App -->
 	<string name="app_name">Find me! Fire</string>
@@ -185,23 +201,31 @@
 	<string name="pref_header_voice">Voice commands</string>
 	<string name="pref_header_voice_sum">Voice recognition settings…</string>
 	<string name="pref_speech_on">Let the App talk</string>
-	<string name="pref_voice_on">Accept voice commands from start</string>
+	<string name="pref_voice_on">Accept voice commands from the start</string>
 
 	<!-- Commands -->
 	<string name="voice_generated">Voice Generated</string>
-	<string name="voice_new_point">New point</string>
-	<string name="voice_new_route">New route</string>
-	<string name="voice_new_alert">New alert</string>
-	<string name="voice_start">Start</string>
-	<string name="voice_save">Save</string>
-	<string name="voice_cancel">Cancel</string>
-	<string name="voice_stop_listening">Stop listening</string>
-	<!-- string name="voice_name">Name</string>
-	<string name="voice_description">Description</string>
-	<string name="voice_radious">Radious</string>
-	<string name="voice_metres">Meters</string>
-	<string name="voice_kilometers">Kilometers</string -->
-	<string name="voice_comands_all">New point, New route, New alert, Start, Save, Cancel, Stop listening</string>
-
+	<string name="voice_new_point">&voice_new_point;</string>
+	<string name="voice_new_route">&voice_new_route;</string>
+	<string name="voice_new_route2">&voice_new_route2;</string>
+	<string name="voice_new_alert">&voice_new_alert;</string>
+	<string name="voice_start">&voice_start;</string>
+	<string name="voice_save">&voice_save;</string>
+	<string name="voice_cancel">&voice_cancel;</string>
+	<string name="voice_stop_route">&voice_stop_route;</string>
+	<string name="voice_map">&voice_map;</string>
+	<string name="voice_stop_listening">&voice_stop_listening;</string>
+	<string name="voice_comands_all">
+		&voice_new_point;,
+		&voice_new_route;,
+		&voice_new_route2;,
+		&voice_new_alert;,
+		&voice_start;,
+		&voice_save;,
+		&voice_cancel;,
+		&voice_stop_route;,
+		&voice_map;,
+		&voice_stop_listening;.
+	</string>
 
 </resources>

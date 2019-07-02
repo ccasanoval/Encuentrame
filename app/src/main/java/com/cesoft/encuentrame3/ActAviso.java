@@ -142,7 +142,6 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 				presenter.onEliminar();
 				return true;
 			case R.id.action_voz:
-				voice.toggleStatus();
 				voice.toggleListening();
 				return true;
 			default:

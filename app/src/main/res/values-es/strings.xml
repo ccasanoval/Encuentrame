@@ -1,10 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+	<!ENTITY voice_new_point "Nuevo lugar">
+	<!ENTITY voice_new_route "Nueva ruta">
+	<!ENTITY voice_new_route2 "Empezar ruta">
+	<!ENTITY voice_new_alert "Nuevo aviso">
+	<!ENTITY voice_start "Empezar">
+	<!ENTITY voice_save "Guardar">
+	<!ENTITY voice_cancel "Cancelar">
+	<!ENTITY voice_stop_route "Parar ruta">
+	<!ENTITY voice_map "Mapa">
+	<!ENTITY voice_stop_listening "Para de escuchar">
+	]>
+<!-- not supported anymore DOCTYPE resources [
+	<!ENTITY % ents SYSTEM "./res/raw/voice_commands.ent">
+	%ents;
+	] -->
 <resources>
 	<!-- App -->
 	<string name="app_name">Encuentrame! Fire</string>
 	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas. Podrás administrar  tus geo-datos fácilmente, pues serán almacenados en la nube.\n\n</string>
 	<string name="app_lice_tit">Licencia:</string>
 	<string name="app_vers_tit">Versión:</string>
-
 
 
 
@@ -185,23 +201,31 @@
 	<string name="pref_header_voice">Comandos de voz</string>
 	<string name="pref_header_voice_sum">Reconocimiento de voz…</string>
 	<string name="pref_speech_on">Permir que la App hable</string>
-	<string name="pref_voice_on">Aceptar comandos desde inicio</string>
+	<string name="pref_voice_on">Aceptar comandos al iniciar</string>
 
 	<!-- Commands -->
-	<!-- string name="voice_commands">Commandos de voz</string -->
 	<string name="voice_generated">Generado x Voz</string>
-	<string name="voice_new_point">Nuevo lugar</string>
-	<string name="voice_new_route">Nueva ruta</string>
-	<string name="voice_new_alert">Nuevo aviso</string>
-	<string name="voice_start">Empezar</string>
-	<string name="voice_save">Guardar</string>
-	<string name="voice_cancel">Cancelar</string>
-	<string name="voice_stop_listening">Para de escuchar</string>
-	<!-- string name="voice_name">Nombre</string>
-	<string name="voice_description">Descripcion</string>
-	<string name="voice_radious">Radio</string>
-	<string name="voice_metres">Metro</string>
-	<string name="voice_kilometers">Kilometros</string -->
-	<string name="voice_comands_all">Nuevo lugar, Nueva ruta, Nuevo aviso, Empezar, Guardar, Cancelar, Para de escuchar</string>
+	<string name="voice_new_point">&voice_new_point;</string>
+	<string name="voice_new_route">&voice_new_route;</string>
+	<string name="voice_new_route2">&voice_new_route2;</string>
+	<string name="voice_new_alert">&voice_new_alert;</string>
+	<string name="voice_start">&voice_start;</string>
+	<string name="voice_save">&voice_save;</string>
+	<string name="voice_cancel">&voice_cancel;</string>
+	<string name="voice_stop_route">&voice_stop_route;</string>
+	<string name="voice_map">&voice_map;</string>
+	<string name="voice_stop_listening">&voice_stop_listening;</string>
+	<string name="voice_comands_all">
+		&voice_new_point;,
+		&voice_new_route;,
+		&voice_new_route2;,
+		&voice_new_alert;,
+		&voice_start;,
+		&voice_save;,
+		&voice_cancel;,
+		&voice_stop_route;,
+		&voice_map;,
+		&voice_stop_listening;.
+	</string>
 
 </resources>

@@ -25,7 +25,6 @@ import javax.inject.Singleton;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 26/06/2019
-//TODO: Refactor, make names clearer...
 @Singleton
 public class Voice implements RecognitionListener {
     private static final String TAG = "Voice";
@@ -42,13 +41,6 @@ public class Voice implements RecognitionListener {
     private Intent recognizerIntent;
     private boolean isListening = false;
     private boolean isListeningActive = false;
-        public boolean isListening() { return isListeningActive; }
-        //public void setListening(boolean b) { isListeningActive = b; }
-        public void toggleListening() {
-            isListeningActive = !isListeningActive;
-            Log.e(TAG, "toggleListening---------------------------- "+isListeningActive);
-            sendEvent();
-        }//TODO: rename
 
     @Inject
     public Voice(Application app, Preferencias pref) {
@@ -58,14 +50,38 @@ public class Voice implements RecognitionListener {
             isListeningActive = true;
             startListening();
         }
+
+        commandStr = new String[commandId.length];
+        for(int i=0; i < commandId.length; i++) {
+            commandStr[i] = app.getString(commandId[i]);
+        }
     }
 
-    public void toggleStatus() {//TODO: rename
-        Log.e(TAG, "toggleStatus: --------------------------------------");
-        if(isListening)
+    public boolean isListening() {
+        return isListeningActive;
+    }
+    public void turnOffListening() {
+        Log.e(TAG, "turnOffListening-------------------1--------- "+isListeningActive);
+        stopListening();
+        isListeningActive = false;
+        sendEvent();
+        Log.e(TAG, "turnOffListening-------------------2--------- "+isListeningActive);
+    }
+    private void toggleFlag() {
+        Log.e(TAG, "toggleListening--------------------1-------- "+isListeningActive);
+        isListeningActive = !isListeningActive;
+        sendEvent();
+        Log.e(TAG, "toggleListening--------------------2-------- "+isListeningActive);
+    }
+
+    public void toggleListening() {
+        Log.e(TAG, "toggleStatus: --------------1------------------------");
+        toggleFlag();
+        if(isListeningActive)
             stopListening();
         else
             startListening();
+        Log.e(TAG, "toggleStatus: --------------2------------------------");
     }
 
     private void restartListening() {
@@ -206,34 +222,30 @@ public class Voice implements RecognitionListener {
     //----------------------------------------------------------------------------------------------
     // Word Process
     private int[] commandId = new int[] {
-        R.string.voice_new_point,
-        R.string.voice_new_route,
-        R.string.voice_new_alert,
-        R.string.voice_start,
-        R.string.voice_save,
-        R.string.voice_cancel,
-        R.string.voice_stop_listening,
-        //R.string.voice_name,
-        //R.string.voice_description,
-        //R.string.voice_radious,
-        //R.string.voice_metres,
-        //R.string.voice_kilometers,
+            R.string.voice_new_point,
+            R.string.voice_new_route,
+            R.string.voice_new_route2,
+            R.string.voice_new_alert,
+            R.string.voice_start,
+            R.string.voice_save,
+            R.string.voice_cancel,
+            R.string.voice_stop_route,
+            R.string.voice_map,
+            R.string.voice_stop_listening,
     };
-    private String[] commandStr = null;
-    //private List commandList = new ArrayList();
+    private String[] commandStr;
+
     private void processCommand(ArrayList<String> matches) {
-        //int lengthDiff = 0;
         int minDistance = Integer.MAX_VALUE;
         int bestCommandId = Integer.MIN_VALUE;
         String bestCommandStr = "";
 
-        if(commandStr == null) {
+        /*if(commandStr == null) {
             commandStr = new String[commandId.length];
             for(int i=0; i < commandId.length; i++) {
                 commandStr[i] = app.getString(commandId[i]);
-                //commandList.add(commandStr[i]);
             }
-        }
+        }*/
         for(int i=0; i < commandId.length; i++) {
             int id = commandId[i];
             String cmd = commandStr[i];
@@ -245,22 +257,11 @@ public class Voice implements RecognitionListener {
                     minDistance = distance;
                     bestCommandId = id;
                     bestCommandStr = cmd;
-                    //lengthDiff = Math.abs(cmd.length() - match.length());
                 }
-
-                //TODO: CLEAN
-                //Texto t = new Texto(match, cmd);
-                //Log.e(TAG, "b) NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
-//                if(minDistance > t.computeShortestDistance()) {
-//                    minDistance = t.computeShortestDistance();
-//                    bestCommandId = id;
-//                    bestCommandStr = cmd;
-//                    lengthDiff = Math.abs(cmd.length() - match.length());
-//                }
             }
         }
 
-        if(minDistance < 4) {//&& minDistance < lengthDiff+2
+        if(minDistance < 4) {
             sendCommand(bestCommandId, bestCommandStr);
         }
     }
@@ -301,12 +302,12 @@ public class Voice implements RecognitionListener {
     //----------------------------------------------------------------------------------------------
     // Event Bus Messages
     private void sendEvent() {
-        EventBus.getDefault().postSticky(new VoiceEvent(isListening));
+        EventBus.getDefault().postSticky(new VoiceStatusEvent());
     }
-    public class VoiceEvent {
-        private boolean isListening;
-        public boolean isListening() { return isListening; }
-        VoiceEvent(boolean isListening) { this.isListening = isListening; }
+    public class VoiceStatusEvent {
+//        private boolean isListening;
+//        public boolean isListening() { return isListening; }
+//        VoiceStatusEvent(boolean isListening) {  }
     }
 
     private void sendCommand(int command, String desc) {

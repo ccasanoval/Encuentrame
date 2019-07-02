@@ -176,9 +176,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				startActivityForResult(new Intent(this, ActConfig.class), Constantes.CONFIG);
 				return true;
 			case R.id.action_mapa:
-				Intent i = new Intent(this, ActMaps.class);
-				i.putExtra(Util.TIPO, viewPager.getCurrentItem());
-				startActivity(i);
+				goMap();
 				return true;
 			case R.id.action_buscar:
 				FrgMain frg = frmMain[viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
@@ -190,7 +188,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				startActivity(browserIntent);
 				return true;
 			case R.id.action_voz:
-				voice.toggleStatus();
 				voice.toggleListening();
 				refreshVoiceIcon();
 				return true;
@@ -207,9 +204,9 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	}
 
 	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
-	public void onVoiceEvent(Voice.VoiceEvent event)
+	public void onVoiceEvent(Voice.VoiceStatusEvent event)
 	{
-		Log.e(TAG, "--------------------------------------------event.isListening()="+event.isListening()+" : "+voice.isListening());
+		Log.e(TAG, "-------------------------------------------- voice.isListening()="+voice.isListening());
 		refreshVoiceIcon();
 	}
 
@@ -226,8 +223,15 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_new_route:
+			case R.string.voice_new_route2:
 				viewPager.setCurrentItem(Constantes.RUTAS);
 				onRuta(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_stop_route:
+				//String routeId = util.getTrackingRoute();//TODO: in presenter...?
+				//if( ! routeId.isEmpty())
+				util.setTrackingRoute("");
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_new_alert:
@@ -235,10 +239,12 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				onAviso(true);
 				voice.speak(event.getText());
 				break;
+			case R.string.voice_map:
+				goMap();
+				voice.speak(event.getText());
+				break;
 			case R.string.voice_stop_listening:
-				voice.stopListening();
-				if(voice.isListening())
-					voice.toggleListening();
+				voice.turnOffListening();
 				voice.speak(event.getText());
 				break;
 
@@ -312,6 +318,11 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		catch(Exception e){Log.e(TAG, "goRuta:onItemEdit:e:------------------------------------", e);}
 	}
 	//---
+	public void goMap() {
+		Intent i = new Intent(this, ActMaps.class);
+		i.putExtra(Util.TIPO, viewPager.getCurrentItem());
+		startActivity(i);
+	}
 	public void goLugarMap(Objeto obj)
 	{
 		Intent i = new Intent(this, ActMaps.class);

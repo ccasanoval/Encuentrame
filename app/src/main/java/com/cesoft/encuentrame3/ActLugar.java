@@ -105,7 +105,6 @@ public class ActLugar extends VistaBase
 				presenter.imagen();
 				return true;
 			case R.id.action_voz:
-				voice.toggleStatus();
 				voice.toggleListening();
 				return true;
 			default:
