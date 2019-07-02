@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.presenters.PresenterBase;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,6 +35,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.common.api.Status;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.List;
 
 
@@ -43,12 +49,14 @@ public abstract class VistaBase
 		extends AppCompatActivity
 		implements PresenterBase.IVista, OnMapReadyCallback,
 		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
-	protected static final String TAG = VistaBase.class.getSimpleName();
+	private static final String TAG = VistaBase.class.getSimpleName();
 	private static final int DELAY_LOCATION = 30 * 1000;
 
 	private PresenterBase presenter;
 	private Util util;
+	private Voice voice;
 
+    protected MenuItem vozMenuItem;
 	protected EditText txtNombre;
 	protected EditText txtDescripcion;
 
@@ -60,8 +68,9 @@ public abstract class VistaBase
 	protected FusedLocationProviderClient fusedLocationClient;
 
 	//----------------------------------------------------------------------------------------------
-	void ini(PresenterBase presenter, Util util, Objeto objDefecto, int idLayout) {
+	void ini(PresenterBase presenter, Util util, Voice voice, Objeto objDefecto, int idLayout) {
 		this.util = util;
+		this.voice = voice;
 		this.presenter = presenter;
 		this.presenter.ini(this);
 		this.presenter.loadObjeto(objDefecto);
@@ -169,6 +178,7 @@ public abstract class VistaBase
 	@Override
 	public void onStart() {
 		super.onStart();
+		EventBus.getDefault().register(this);
 		presenter.subscribe(this);
 		if(checkPlayServices()) buildGoogleApiClient();
 		buildLocationRequest();
@@ -179,23 +189,29 @@ public abstract class VistaBase
 
 	@Override
 	public void onStop() {
-		super.onStop();
+		EventBus.getDefault().unregister(this);
 		presenter.unsubscribe();
 		clean();
-	}
-
-	//----------------------------------------------------------------------------------------------
-	@Override
-	protected void onPause() {
-		super.onPause();
-		stopTracking();
+		super.onStop();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.e(TAG, "onResume----------------------------------------");
 		startTracking();
+		if(voice.isListening()) {
+			voice.startListening();
+		}
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		stopTracking();
+		voice.stopListening();
+	}
+
 
 	private void startTracking() {
         if (googleApiClient == null || !googleApiClient.isConnected())return;
@@ -297,4 +313,14 @@ public abstract class VistaBase
 		setPosLugar(presenter.getLatitud(), presenter.getLongitud());
 	}
 
+    protected void refreshVoiceIcon() {
+        if(vozMenuItem != null)
+            vozMenuItem.setIcon(voice.isListening() ? R.drawable.ic_mic_white_24dp : R.drawable.ic_mic_off_white_24dp);
+    }
+
+	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
+	public void onVoiceEvent(Voice.VoiceEvent event)
+	{
+		refreshVoiceIcon();
+	}
 }

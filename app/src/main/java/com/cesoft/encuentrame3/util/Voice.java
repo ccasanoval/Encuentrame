@@ -11,7 +11,6 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 
 import com.cesoft.encuentrame3.R;
 
@@ -26,12 +25,13 @@ import javax.inject.Singleton;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 26/06/2019
+//TODO: Refactor, make names clearer...
 @Singleton
 public class Voice implements RecognitionListener {
     private static final String TAG = "Voice";
     public static final String NAME = "Voice";
     private static final int REQUEST_RECORD_PERMISSION = 100;
-    private static final int MAX_RESULTS = 10;
+    private static final int MAX_RESULTS = 5;
 
     private Application app;
     private Preferencias pref;
@@ -41,25 +41,60 @@ public class Voice implements RecognitionListener {
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private boolean isListening = false;
-    public boolean isListeningActive = false;
+    private boolean isListeningActive = false;
+        public boolean isListening() { return isListeningActive; }
+        //public void setListening(boolean b) { isListeningActive = b; }
+        public void toggleListening() {
+            isListeningActive = !isListeningActive;
+            Log.e(TAG, "toggleListening---------------------------- "+isListeningActive);
+            sendEvent();
+        }//TODO: rename
 
     @Inject
     public Voice(Application app, Preferencias pref) {
         this.app = app;
         this.pref = pref;
-        if(pref.isVoiceEnabled())
-            toggleStatus();
+        if(pref.isVoiceEnabled()) {
+            isListeningActive = true;
+            startListening();
+        }
     }
 
-
-    public void toggleStatus() {
+    public void toggleStatus() {//TODO: rename
+        Log.e(TAG, "toggleStatus: --------------------------------------");
         if(isListening)
             stopListening();
         else
             startListening();
     }
 
-    private void startListening() {
+    private void restartListening() {
+        Log.e(TAG, "restartListening: --------------------------------------");
+            //TODO: refactor, dont repeat code...
+        isListening = false;
+        if(speech != null) {
+            speech.stopListening();
+            speech.cancel();
+            speech.destroy();
+            speech = null;
+            System.gc();
+        }
+        isListening = true;
+        recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_RESULTS);
+        speech = SpeechRecognizer.createSpeechRecognizer(app);
+        speech.setRecognitionListener(this);
+        speech.startListening(recognizerIntent);
+    }
+    public void startListening() {
+        Log.e(TAG, "startListening: ------------------------------------");
+        if(isListening) {
+            Log.e(TAG, "startListening: ------------------------------------ RETURN");
+            return;
+            //stopListening();
+        }
         if( ! checkPermissions())return;
         isListening = true;
         Log.e(TAG, "isRecognitionAvailable: -------------------" + SpeechRecognizer.isRecognitionAvailable(app));
@@ -74,10 +109,10 @@ public class Voice implements RecognitionListener {
         speech = SpeechRecognizer.createSpeechRecognizer(app);
         speech.setRecognitionListener(this);
         speech.startListening(recognizerIntent);
-        sendEvent();
     }
 
-    public void stopListening(){
+    public void stopListening() {
+        Log.e(TAG, "stopListening: -------------------");
         isListening = false;
         if(speech != null) {
             speech.stopListening();
@@ -85,8 +120,8 @@ public class Voice implements RecognitionListener {
             speech.destroy();
             speech = null;
         }
-        sendEvent();
     }
+
 
 
     //----------------------------------------------------------------------------------------------
@@ -101,7 +136,10 @@ public class Voice implements RecognitionListener {
     }
     @Override
     public void onRmsChanged(float rmsdB) {
-        if(!isListening)stopListening();
+        if( !isListeningActive) {
+            Log.e(TAG, "onRmsChanged------------------------------isListeningActive="+isListeningActive+" / isListening="+isListening);
+            stopListening();
+        }
     }
     @Override
     public void onBufferReceived(byte[] buffer) {
@@ -114,16 +152,17 @@ public class Voice implements RecognitionListener {
 
     @Override
     public void onError(int error) {
-        Log.e(TAG, "onError: "+getErrorText(error));
+        Log.e(TAG, "onError: ------------------------------------------------------------------ "+getErrorText(error));
 
         switch(error) {
             case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                Log.e(TAG, "onError: ERROR_RECOGNIZER_BUSY------------------------------------------------------------------ DID YOU CALL startListening twice ???");
                 stopListening();
+                //restartListening();
                 break;
             case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
             case SpeechRecognizer.ERROR_NO_MATCH:
-                stopListening();
-                startListening();
+                restartListening();
                 break;
             default:
                 break;
@@ -144,6 +183,10 @@ public class Voice implements RecognitionListener {
             }
         }
         Log.e(TAG, "onResults=\n"+text);
+        Log.e(TAG, "speech.startListening(recognizerIntent)---------------------------------------------------------------------"+speech+"/"+recognizerIntent);
+        if(speech == null) {
+            restartListening();
+        }
         speech.startListening(recognizerIntent);
     }
 
@@ -169,23 +212,24 @@ public class Voice implements RecognitionListener {
         R.string.voice_start,
         R.string.voice_save,
         R.string.voice_cancel,
-        R.string.voice_name,
-        R.string.voice_description,
-        R.string.voice_radious,
-        R.string.voice_metres,
-        R.string.voice_kilometers,
+        R.string.voice_stop_listening,
+        //R.string.voice_name,
+        //R.string.voice_description,
+        //R.string.voice_radious,
+        //R.string.voice_metres,
+        //R.string.voice_kilometers,
     };
     private String[] commandStr = null;
     //private List commandList = new ArrayList();
     private void processCommand(ArrayList<String> matches) {
-        int lengthDiff = 0;
+        //int lengthDiff = 0;
         int minDistance = Integer.MAX_VALUE;
         int bestCommandId = Integer.MIN_VALUE;
         String bestCommandStr = "";
 
         if(commandStr == null) {
             commandStr = new String[commandId.length];
-            for (int i=0; i < commandId.length; i++) {
+            for(int i=0; i < commandId.length; i++) {
                 commandStr[i] = app.getString(commandId[i]);
                 //commandList.add(commandStr[i]);
             }
@@ -201,11 +245,12 @@ public class Voice implements RecognitionListener {
                     minDistance = distance;
                     bestCommandId = id;
                     bestCommandStr = cmd;
-                    lengthDiff = Math.abs(cmd.length() - match.length());
+                    //lengthDiff = Math.abs(cmd.length() - match.length());
                 }
 
-                Texto t = new Texto(match, cmd);
-                Log.e(TAG, "b) NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
+                //TODO: CLEAN
+                //Texto t = new Texto(match, cmd);
+                //Log.e(TAG, "b) NEARER: "+t.computeNearestWord()+" : DIST: "+t.computeShortestDistance());
 //                if(minDistance > t.computeShortestDistance()) {
 //                    minDistance = t.computeShortestDistance();
 //                    bestCommandId = id;

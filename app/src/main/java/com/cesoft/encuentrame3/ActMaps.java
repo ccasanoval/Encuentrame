@@ -3,13 +3,17 @@ package com.cesoft.encuentrame3;
 import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreMaps;
+import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -27,6 +31,9 @@ import com.cesoft.encuentrame3.models.Lugar;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -42,6 +49,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	private Marker marker;
 	private Circle circle;
 
+	@Inject Voice voice;
 	@Inject Util util;
 	@Inject PreMaps presenter;
 
@@ -50,8 +58,10 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		((App)getApplication()).getGlobalComponent().inject(this);
-		super.ini(presenter, util, new Lugar(), R.layout.act_maps);
+		super.ini(presenter, util, voice, new Lugar(), R.layout.act_maps);
 		super.onCreate(savedInstanceState);
+
+		voice.setActivity(this);
 
 		FloatingActionButton fabGuardar = findViewById(R.id.btnGuardar);
 		if( ! presenter.isAviso() && ! presenter.isLugar())
@@ -158,10 +168,6 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 			iColor = Color.MAGENTA;
 			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
 			break;
-//		case Color.LTGRAY:
-//			iColor = Color.MAGENTA;
-//			bm = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
-//			break;
 		default:
 		case Color.MAGENTA:
 			iColor = Color.BLUE;
@@ -268,4 +274,44 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 			</intent-filter>
 		</activity>
 	}*/
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		getMenuInflater().inflate(R.menu.menu_mapa, menu);
+		vozMenuItem = menu.findItem(R.id.action_voz);
+		return true;
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch(item.getItemId()) {
+			case R.id.action_voz:
+				voice.toggleStatus();
+				voice.toggleListening();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onCommandEvent(Voice.CommandEvent event)
+	{
+		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
+
+		switch(event.getCommand()) {
+			case R.string.voice_cancel:
+				presenter.onSalir(true);
+				voice.speak(event.getText());
+				break;
+			case R.string.voice_stop_listening:
+				voice.stopListening();
+				voice.speak(event.getText());
+				break;
+			default:
+				break;
+		}
+	}
 }

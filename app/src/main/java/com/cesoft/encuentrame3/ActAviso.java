@@ -51,6 +51,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	private static final String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
 	private static final int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 
+	private MenuItem vozMenuItem;
 	private Circle circle;
 	private Marker marker;
 
@@ -63,8 +64,10 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		App.getComponent(getApplicationContext()).inject(this);
-		super.ini(presenter, util, new Aviso(), R.layout.act_aviso);
+		super.ini(presenter, util, voice, new Aviso(), R.layout.act_aviso);
 		super.onCreate(savedInstanceState);
+
+		voice.setActivity(this);
 
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
@@ -76,7 +79,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 
 		//------------------------------------
 		lblPosicion = findViewById(R.id.lblPosicion);
-		setPosLabel(presenter.getLatitud(), presenter.getLongitud());//TODO: no se ha creado aun el objeto??
+		setPosLabel(presenter.getLatitud(), presenter.getLongitud());
 
 		swtActivo = findViewById(R.id.bActivo);
 		swtActivo.setChecked(presenter.isActivo());
@@ -125,16 +128,26 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		getMenuInflater().inflate(R.menu.menu_aviso, menu);
 		if(presenter.isNuevo())
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
+		vozMenuItem = menu.findItem(R.id.action_voz);
 		return true;
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if(item.getItemId() == R.id.menu_guardar)
-			presenter.guardar();
-		else if(item.getItemId() == R.id.menu_eliminar)
-			presenter.onEliminar();
-		return super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+			case R.id.menu_guardar:
+				presenter.guardar();
+				return true;
+			case R.id.menu_eliminar:
+				presenter.onEliminar();
+				return true;
+			case R.id.action_voz:
+				voice.toggleStatus();
+				voice.toggleListening();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -182,25 +195,11 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
 	}
 
-
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		EventBus.getDefault().register(this);
-	}
-
-	@Override
-	public void onStop() {
-		EventBus.getDefault().unregister(this);
-		super.onStop();
-	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
 		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
-		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
 			case R.string.voice_cancel:
@@ -212,20 +211,13 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 				presenter.guardar();
 				voice.speak(event.getText());
 				break;
-
-			case R.string.voice_name:
+			case R.string.voice_stop_listening:
+				voice.stopListening();
+				voice.speak(event.getText());
 				break;
-			case R.string.voice_description:
-				break;
-			case R.string.voice_radious:
-				break;
-			case R.string.voice_metres:
-				break;
-			case R.string.voice_kilometers:
-				break;
-
 			default:
 				break;
 		}
 	}
+
 }

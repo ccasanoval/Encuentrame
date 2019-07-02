@@ -88,7 +88,7 @@ public class GeoTrackingJobService
         start(context, delay,true);
     }
     private static void start(Context context, long delay, boolean first) {
-        Log.e(TAG, "************************* TRACKING Start *************************");
+//        Log.e(TAG, "************************* TRACKING Start *************************");
 
         ComponentName componentName = new ComponentName(context, GeoTrackingJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_TRACKING, componentName);
@@ -110,7 +110,7 @@ public class GeoTrackingJobService
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
-        Log.e(TAG, "************************* GEO onStartJob *************************");
+//        Log.e(TAG, "************************* GEO onStartJob *************************");
         keepAwake();
         runPayload(jobParameters);
         return false;
@@ -118,7 +118,7 @@ public class GeoTrackingJobService
 
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        Log.e(TAG, "************************* GEO onStopJob *************************");
+//        Log.e(TAG, "************************* GEO onStopJob *************************");
         dontKeepAwake();
         return false;
     }
@@ -174,7 +174,7 @@ public class GeoTrackingJobService
         App.getComponent(appContext).inject(this);
         saveAll = pref.isSaveAllPoints();
         delay = pref.getTrackingDelay();
-        Log.e(TAG, "iniEnviron-------------------------------------"+ saveAll +" : "+ delay);
+        //Log.e(TAG, "iniEnviron-------------------------------------"+ saveAll +" : "+ delay);
     }
 
     private void reschedule() {
@@ -200,7 +200,7 @@ public class GeoTrackingJobService
 
 
     private void stopTracking() {
-        Log.e(TAG, "stopTracking:-----------------------------------------------------------");
+        //Log.e(TAG, "stopTracking:-----------------------------------------------------------");
         if (googleApiClient != null && googleApiClient.isConnected())
             googleApiClient.disconnect();
         if(fusedLocationClient != null)
@@ -212,7 +212,7 @@ public class GeoTrackingJobService
     }
 
     private void iniTracking() {
-        Log.e(TAG, "iniGeoTracking:------------------------1-----------------------------------");
+        //Log.e(TAG, "iniGeoTracking:------------------------1-----------------------------------");
         if (checkPlayServices()) buildGoogleApiClient();
         if (googleApiClient != null) googleApiClient.connect();
         LocationRequest locationRequest = new LocationRequest();
@@ -222,13 +222,13 @@ public class GeoTrackingJobService
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
             && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "pideGPS:---------------------------------------------------------------");
+            //Log.e(TAG, "pideGPS:---------------------------------------------------------------");
             util.showNotifGPS();
         }
         else {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         }
-        Log.e(TAG, "iniGeoTracking:------------------------2-----------------------------------"+ fusedLocationClient);
+        //Log.e(TAG, "iniGeoTracking:------------------------2-----------------------------------"+ fusedLocationClient);
     }
 
     private synchronized void buildGoogleApiClient()
@@ -262,10 +262,10 @@ public class GeoTrackingJobService
     public void saveGeoTracking()
     {
         sId = util.getTrackingRoute();
-        Log.e(TAG, "saveGeoTracking ************************************** "+ this.sId);
+//        Log.e(TAG, "saveGeoTracking ************************************** "+ this.sId);
         if(sId.isEmpty())
         {
-            Log.e(TAG, "saveGeoTracking ******************sId IS EMPTY***************");
+//            Log.e(TAG, "saveGeoTracking ******************sId IS EMPTY***************");
             finish();
             return;
         }
@@ -274,7 +274,7 @@ public class GeoTrackingJobService
             @Override
             public void onDatos(Ruta[] aData) {
                 if(aData[0] == null) {
-                    Log.e(TAG, "saveGeoTracking:Ruta.getById: RUTA == NULL --------------------"+sId);
+                    //Log.e(TAG, "saveGeoTracking:Ruta.getById: RUTA == NULL --------------------"+sId);
                     util.setTrackingRoute("");
                     finish();
                 }

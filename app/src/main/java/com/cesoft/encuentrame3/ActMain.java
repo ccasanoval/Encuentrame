@@ -94,10 +94,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Override
 	public void onResume()
 	{
+		Log.e(TAG, "onResume-------------------------------------------------------");
 		super.onResume();
-		if(voice.isListeningActive) {
-			Log.e(TAG, "voice.isListeningActive()----------------------------------------------------------------");
-			voice.toggleStatus();
+		if(voice.isListening()) {
+			voice.startListening();
 		}
 	}
 	//----------------------------------------------------------------------------------------------
@@ -150,12 +150,18 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			Toast.makeText(this, sMensaje, Toast.LENGTH_LONG).show();
 	}
 
+	private void refreshVoiceIcon() {
+		if(vozMenuItem != null)
+			vozMenuItem.setIcon(voice.isListening() ? R.drawable.ic_mic_white_24dp : R.drawable.ic_mic_off_white_24dp);
+	}
+
 	//----------------------------------------------------------------------------------------------
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_act_main, menu);
 		vozMenuItem = menu.findItem(R.id.action_voz);
+		refreshVoiceIcon();
 		return true;
 	}
 	@Override
@@ -185,7 +191,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				return true;
 			case R.id.action_voz:
 				voice.toggleStatus();
-				voice.isListeningActive = !voice.isListeningActive;
+				voice.toggleListening();
+				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -202,8 +209,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
 	public void onVoiceEvent(Voice.VoiceEvent event)
 	{
-		if(vozMenuItem != null)
-			vozMenuItem.setIcon(event.isListening() ? R.drawable.ic_mic_white_24dp : R.drawable.ic_mic_off_white_24dp);
+		Log.e(TAG, "--------------------------------------------event.isListening()="+event.isListening()+" : "+voice.isListening());
+		refreshVoiceIcon();
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)
@@ -228,13 +235,14 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				onAviso(true);
 				voice.speak(event.getText());
 				break;
-
-			case R.string.voice_cancel:
+			case R.string.voice_stop_listening:
+				voice.stopListening();
+				if(voice.isListening())
+					voice.toggleListening();
+				voice.speak(event.getText());
 				break;
-			case R.string.voice_save:
-			case R.string.voice_start:
-				break;
 
+			/*
 			case R.string.voice_name:
 				break;
 			case R.string.voice_description:
@@ -244,7 +252,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			case R.string.voice_metres:
 				break;
 			case R.string.voice_kilometers:
-				break;
+				break;*/
 
 			default:
 				break;
@@ -301,7 +309,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			intent.putExtra(Objeto.NOMBRE, obj);
 			startActivityForResult(intent, Constantes.RUTAS);
 		}
-		catch(Exception e){Log.e(TAG, "------------------goRuta:onItemEdit:e:-----------------------", e);}
+		catch(Exception e){Log.e(TAG, "goRuta:onItemEdit:e:------------------------------------", e);}
 	}
 	//---
 	public void goLugarMap(Objeto obj)
@@ -327,7 +335,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			i.putExtra(Util.TIPO, Constantes.RUTAS);
 			startActivityForResult(i, Constantes.RUTAS);
 		}
-		catch(Exception e){Log.e(TAG, "goRutaMap:RUTAS:e:-------------------------------------------", e);}
+		catch(Exception e){Log.e(TAG, "goRutaMap:RUTAS:e:--------------------------------------", e);}
 	}
 	//---
 	public void buscar(final FrgMain frg)
@@ -336,7 +344,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		{
 			if( ! frg.isAdded())
 			{
-				Log.e(TAG, "buscar: *************** frg is not ADDED *****************");
+				Log.e(TAG, "buscar: ********************* frg is not ADDED *********************");
 				getSupportFragmentManager().beginTransaction().add(frg, String.valueOf(frg.getSectionNumber())).commit();
 				util.exeDelayed(100, () -> buscar(frg));
 				return;
@@ -347,7 +355,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			i.putExtra(Filtro.FILTRO, fil);
 			frg.startActivityForResult(i, Constantes.BUSCAR);
 		}
-		catch(Exception e){Log.e(TAG, "buscar:e:----------------------------------------------------", e);}
+		catch(Exception e){Log.e(TAG, "buscar:e:-----------------------------------------------", e);}
 	}
 	//---
 	public int getCurrentItem()

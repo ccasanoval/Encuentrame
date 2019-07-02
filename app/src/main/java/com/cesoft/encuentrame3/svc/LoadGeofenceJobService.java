@@ -34,7 +34,7 @@ public class LoadGeofenceJobService extends JobService {
         start(context, true);
     }
     private static void start(Context context, boolean first) {
-        Log.e(TAG, "************************* FENCE Start *************************");
+//        Log.e(TAG, "************************* FENCE Start *************************");
 
         ComponentName componentName = new ComponentName(context, LoadGeofenceJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(ID_JOB_GEOFENCE_LOADING, componentName).setPersisted(true);
@@ -55,7 +55,7 @@ public class LoadGeofenceJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
-        Log.e(TAG, "************************* onStartJob *************************");
+//        Log.e(TAG, "************************* onStartJob *************************");
         App.getComponent(getApplicationContext()).inject(this);
         new Thread(() -> {
             if( ! login.isLogged()) {
@@ -76,7 +76,7 @@ public class LoadGeofenceJobService extends JobService {
 
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        Log.e(TAG, "************************* onStopJob *************************");
+//        Log.e(TAG, "************************* onStopJob *************************");
         if(geofenceStoreAvisos != null)
             geofenceStoreAvisos.clear();
         geofenceStoreAvisos = null;
@@ -87,7 +87,7 @@ public class LoadGeofenceJobService extends JobService {
 
     public void cargarListaGeoAvisos()
     {
-        Log.e(TAG, "************************* cargarListaGeoAvisos *************************");
+//        Log.e(TAG, "************************* cargarListaGeoAvisos *************************");
         createListAviso();
         try { Aviso.getActivos(lisAviso); }
         catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
@@ -108,7 +108,7 @@ public class LoadGeofenceJobService extends JobService {
                 //TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
                 boolean bDirty = false;
                 long n = aData.length;
-                Log.e(TAG, "aData.length:"+n+" VS "+listaGeoAvisos.size()+"-----------------------------------------------------");
+                //Log.e(TAG, "aData.length:"+n+" VS "+listaGeoAvisos.size()+"-----------------------------------------------------");
                 if(n != listaGeoAvisos.size())
                 {
                     if(geofenceStoreAvisos != null) geofenceStoreAvisos.clear();
@@ -138,7 +138,7 @@ public class LoadGeofenceJobService extends JobService {
                     listaGeoAvisos = aAvisos;
                     geofenceStoreAvisos = new CesGeofenceStore(getApplication(), aGeofences);//Se puede añadir en lugar de crear desde cero?
                 }
-                Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------aGeofences:"+aGeofences.size()+"-----------------------------------");
+                //Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------aGeofences:"+aGeofences.size()+"-----------------------------------");
             }
             @Override
             public void onError(String err)

@@ -196,11 +196,12 @@
 	<string name="voice_start">Empezar</string>
 	<string name="voice_save">Guardar</string>
 	<string name="voice_cancel">Cancelar</string>
-	<string name="voice_name">Nombre</string>
+	<string name="voice_stop_listening">Para de escuchar</string>
+	<!-- string name="voice_name">Nombre</string>
 	<string name="voice_description">Descripcion</string>
 	<string name="voice_radious">Radio</string>
 	<string name="voice_metres">Metro</string>
-	<string name="voice_kilometers">Kilometros</string>
-	<string name="voice_comands_all">Nuevo lugar, Nueva ruta, Nuevo aviso, Empezar, Guardar, Cancelar</string>
+	<string name="voice_kilometers">Kilometros</string -->
+	<string name="voice_comands_all">Nuevo lugar, Nueva ruta, Nuevo aviso, Empezar, Guardar, Cancelar, Para de escuchar</string>
 
 </resources>

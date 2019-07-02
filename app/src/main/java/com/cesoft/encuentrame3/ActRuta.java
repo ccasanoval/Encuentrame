@@ -39,6 +39,8 @@ import javax.inject.Inject;
 //
 public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 {
+	private static final String TAG = ActRuta.class.getSimpleName();
+
 	@Inject	Voice voice;
 	@Inject Util util;
 	@Inject PreRuta presenter;
@@ -52,12 +54,17 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	private boolean oncePideActivarBateria = true;
 	private boolean oncePideActivarBateria2 = true;
 
+	private ImageButton btnStart;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		App.getComponent(getApplicationContext()).inject(this);
-		super.ini(presenter, util, new Ruta(), R.layout.act_ruta);
+		super.ini(presenter, util, voice, new Ruta(), R.layout.act_ruta);
 		super.onCreate(savedInstanceState);
+
+		voice.setActivity(this);
+		btnStart = findViewById(R.id.btnStart);
 
 		//-----------------------------------
 		initStartButton();
@@ -69,14 +76,13 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	}
 
 	private void initStartButton() {
-		final ImageButton btnStart = findViewById(R.id.btnStart);
 		if(btnStart != null)
 		{
 			btnStart.setEnabled(true);
-			btnStart.setOnClickListener(v -> startButtonListener(btnStart));
+			btnStart.setOnClickListener(v -> startButtonListener());
 		}
 	}
-	private void startButtonListener(ImageButton btnStart) {
+	private void startButtonListener() {
 		if(oncePideActivarBateria && util.pideBateria(ActRuta.this)) {
 			oncePideActivarBateria = false;
 			return;
@@ -159,18 +165,29 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
 			menu.findItem(R.id.menu_estadisticas).setVisible(false);
 		}
+		vozMenuItem = menu.findItem(R.id.action_voz);
 		return true;
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if(item.getItemId() == R.id.menu_guardar)
-			presenter.guardar();
-		else if(item.getItemId() == R.id.menu_eliminar)
-			presenter.onEliminar();
-		else if(item.getItemId() == R.id.menu_estadisticas)
-			presenter.estadisticas();
-		return super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+			case R.id.menu_guardar:
+				presenter.guardar();
+				return true;
+			case R.id.menu_eliminar:
+				presenter.onEliminar();
+				return true;
+			case R.id.menu_estadisticas:
+				presenter.estadisticas();
+				return true;
+			case R.id.action_voz:
+				voice.toggleStatus();
+				voice.toggleListening();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 	//______________________________________________________________________________________________
 
@@ -233,24 +250,11 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 		dlgEliminar.show();
 	}
 
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		EventBus.getDefault().register(this);
-	}
-
-	@Override
-	public void onStop() {
-		EventBus.getDefault().unregister(this);
-		super.onStop();
-	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
 		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
-		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
 			case R.string.voice_cancel:
@@ -259,17 +263,17 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 				break;
 			case R.string.voice_save:
 			case R.string.voice_start:
-				presenter.guardar();
+				//presenter.guardar();
+				startButtonListener();
 				voice.speak(event.getText());
 				break;
-
-			case R.string.voice_name:
+			case R.string.voice_stop_listening:
+				voice.stopListening();
+				voice.speak(event.getText());
 				break;
-			case R.string.voice_description:
-				break;
-
 			default:
 				break;
 		}
 	}
+
 }

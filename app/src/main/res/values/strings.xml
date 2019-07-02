@@ -195,12 +195,13 @@
 	<string name="voice_start">Start</string>
 	<string name="voice_save">Save</string>
 	<string name="voice_cancel">Cancel</string>
-	<string name="voice_name">Name</string>
+	<string name="voice_stop_listening">Stop listening</string>
+	<!-- string name="voice_name">Name</string>
 	<string name="voice_description">Description</string>
 	<string name="voice_radious">Radious</string>
 	<string name="voice_metres">Meters</string>
-	<string name="voice_kilometers">Kilometers</string>
-	<string name="voice_comands_all">New point, New route, New alert, Start, Save, Cancel</string>
+	<string name="voice_kilometers">Kilometers</string -->
+	<string name="voice_comands_all">New point, New route, New alert, Start, Save, Cancel, Stop listening</string>
 
 
 </resources>

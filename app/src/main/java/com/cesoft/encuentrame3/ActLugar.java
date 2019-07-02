@@ -50,10 +50,9 @@ public class ActLugar extends VistaBase
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		((App)getApplication()).getGlobalComponent().inject(this);
-		super.ini(presenter, util, new Lugar(), R.layout.act_lugar);
+		super.ini(presenter, util, voice, new Lugar(), R.layout.act_lugar);
 		super.onCreate(savedInstanceState);
 
-		voice = ((App)getApplication()).getGlobalComponent().voice();
 		voice.setActivity(this);
 
 		//------------------------------------
@@ -89,6 +88,7 @@ public class ActLugar extends VistaBase
 		getMenuInflater().inflate(R.menu.menu_lugar, menu);
 		if(presenter.isNuevo())
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
+		vozMenuItem = menu.findItem(R.id.action_voz);
 		return true;
 	}
 	@Override
@@ -98,15 +98,15 @@ public class ActLugar extends VistaBase
 			case R.id.menu_guardar:
 				presenter.guardar();
 				return true;
-			case R.id.action_voz:
-				voice.toggleStatus();
-				voice.isListeningActive = !voice.isListeningActive;
-				return true;
 			case R.id.menu_eliminar:
 				presenter.onEliminar();
 				return true;
 			case R.id.menu_img:
 				presenter.imagen();
+				return true;
+			case R.id.action_voz:
+				voice.toggleStatus();
+				voice.toggleListening();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -164,43 +164,11 @@ public class ActLugar extends VistaBase
 			Log.e(TAG, "onActivityResult-----------------LUGAR ERROR----------- ");
 	}
 
-
-
-	@Override
-	public void onResume()
-	{
-		super.onResume();
-		if(voice.isListeningActive) {
-			Log.e(TAG, "voice.isListeningActive()----------------------------------------------------------------");
-			voice.toggleStatus();
-		}
-	}
-
-	@Override
-	public void onPause()
-	{
-		voice.stopListening();
-		super.onPause();
-	}
-
-	@Override
-	public void onStart()
-	{
-		super.onStart();
-		EventBus.getDefault().register(this);
-	}
-
-	@Override
-	public void onStop() {
-		EventBus.getDefault().unregister(this);
-		super.onStop();
-	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
 		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
-		Toast.makeText(this, event.getText()+" ("+event.getCommand()+")", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
 			case R.string.voice_cancel:
@@ -212,14 +180,13 @@ public class ActLugar extends VistaBase
 				presenter.guardar();
 				voice.speak(event.getText());
 				break;
-
-			case R.string.voice_name:
+			case R.string.voice_stop_listening:
+				voice.stopListening();
+				voice.speak(event.getText());
 				break;
-			case R.string.voice_description:
-				break;
-
 			default:
 				break;
 		}
 	}
+
 }
