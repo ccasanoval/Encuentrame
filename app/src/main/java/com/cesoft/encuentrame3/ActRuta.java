@@ -92,7 +92,8 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			oncePideActivarBateria2 = false;
 			return;
 		}
-		if(oncePideActivarGPS && util.pideActivarGPS(ActRuta.this)) {
+		if(oncePideActivarGPS) {
+			util.pideActivarGPS(ActRuta.this, 6868);
 			oncePideActivarGPS = false;
 			return;
 		}

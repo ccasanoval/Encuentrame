@@ -1,7 +1,9 @@
 package com.cesoft.encuentrame3;
 
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -47,6 +49,8 @@ import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CU
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 {
 	private static final String TAG = ActMain.class.getSimpleName();
+	private static final int ASK_GPS_PERMISSION = 6969;
+	private static final int ASK_GPS_ACTIVATION = 6968;
 
 	private FrgMain[] frmMain = new FrgMain[3];
 	private ViewPager viewPager;
@@ -111,7 +115,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			util.pideBateria(this);
 			oncePideBateria = false;
 		}
-		util.pideGPS(this, 6969);
+		if(util.pideGPS(this, ASK_GPS_PERMISSION))
+			util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
 		EventBus.getDefault().register(this);
 	}
 	//----------------------------------------------------------------------------------------------
@@ -165,7 +170,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		return true;
 	}
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
+	public boolean onOptionsItemSelected(@NonNull MenuItem item)
 	{
 		// Handle action bar item clicks here. The action bar will automatically handle clicks on the
 		// Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
@@ -194,13 +199,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			default:
 				return super.onOptionsItemSelected(item);
 		}
-	}
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		if(resultCode != RESULT_OK)return;
-		if(requestCode == Constantes.CONFIG)gotoLogin();
-		else super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
@@ -373,6 +371,58 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	{
 		if(viewPager == null)return Constantes.NADA;
 		return viewPager.getCurrentItem();
+	}
+
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		switch(requestCode) {
+			case ASK_GPS_PERMISSION:
+				// If request is cancelled, the result arrays are empty.
+				if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
+				}
+				else {
+					//Toast.makeText(this, R.string.permission_required, Toast.LENGTH_SHORT).show();
+					AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+					dialogBuilder.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> finish());
+					dialogBuilder.setPositiveButton(getString(R.string.ok), (dialog1, which) ->
+						util.pideGPS(this, ASK_GPS_PERMISSION)
+					);
+					final AlertDialog dlgEliminar = dialogBuilder.create();
+					dlgEliminar.setTitle(R.string.permission_required_title);
+					dlgEliminar.setMessage(getString(R.string.permission_required));
+					dlgEliminar.show();
+				}
+				return;
+
+			default:
+				break;
+		}
+	}
+	/*@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(resultCode != RESULT_OK)return;
+		if(requestCode == Constantes.CONFIG)gotoLogin();
+		else super.onActivityResult(requestCode, resultCode, data);
+	}*/
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.e(TAG, "onActivityResult() called with: " + "requestCode = [" + requestCode + "], resultCode = [" + resultCode + "], data = [" + data + "]");
+		switch (requestCode) {
+			case Constantes.CONFIG:
+				if(resultCode == RESULT_OK) gotoLogin();
+				break;
+
+			case ASK_GPS_ACTIVATION:
+				Log.e(TAG, "onActivityResult: ASK_GPS_ACTIVATION: resultCode="+resultCode);
+				break;
+
+			default:
+				super.onActivityResult(requestCode, resultCode, data);
+				break;
+		}
 	}
 
 

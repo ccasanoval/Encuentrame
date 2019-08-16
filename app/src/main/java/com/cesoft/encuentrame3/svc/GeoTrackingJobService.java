@@ -212,7 +212,6 @@ public class GeoTrackingJobService
     }
 
     private void iniTracking() {
-        //Log.e(TAG, "iniGeoTracking:------------------------1-----------------------------------");
         if (checkPlayServices()) buildGoogleApiClient();
         if (googleApiClient != null) googleApiClient.connect();
         LocationRequest locationRequest = new LocationRequest();
@@ -222,13 +221,11 @@ public class GeoTrackingJobService
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
             && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            //Log.e(TAG, "pideGPS:---------------------------------------------------------------");
             util.showNotifGPS();
         }
         else {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         }
-        //Log.e(TAG, "iniGeoTracking:------------------------2-----------------------------------"+ fusedLocationClient);
     }
 
     private synchronized void buildGoogleApiClient()

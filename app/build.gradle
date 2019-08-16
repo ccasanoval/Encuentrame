@@ -12,12 +12,12 @@ android {
             storeFile file('/home/cesar/usr/tests/Encuentrame/cesks.jks')
         }
     }
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
     defaultConfig {
         applicationId 'com.cesoft.encuentrame3'
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 25
         versionName "2.5"
         multiDexEnabled true
@@ -40,8 +40,6 @@ android {
 def VER_GOOGLE_LOCATION = '17.0.0'
 def VER_GOOGLE = '17.0.0'
 def VER_GOOGLE_AUTH = '17.0.0'
-def VER_FIREBASE = '17.0.0'
-def VER_FIREBASE2 = '18.0.0'
 def VER_DAGGER_TEST = '2.23.2'
 def VER_DAGGER = '2.23.2'
 def VER_JUNIT = '4.13-beta-3'
@@ -52,7 +50,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:17.0.0'
 
     // Android
-    implementation "com.google.android.material:material:1.1.0-alpha07"
+    implementation "com.google.android.material:material:1.1.0-alpha09"
 
     // Google
     implementation "com.google.android.gms:play-services-location:${VER_GOOGLE_LOCATION}"
@@ -61,10 +59,10 @@ dependencies {
     implementation "com.google.android.gms:play-services-gcm:${VER_GOOGLE}"
 
     // Firebase
-    implementation "com.google.firebase:firebase-auth:${VER_FIREBASE2}"
-    implementation "com.google.firebase:firebase-core:${VER_FIREBASE}"
-    implementation "com.google.firebase:firebase-database:${VER_FIREBASE2}"
-    implementation "com.google.firebase:firebase-storage:${VER_FIREBASE2}"
+    implementation "com.google.firebase:firebase-core:17.0.1"
+    implementation "com.google.firebase:firebase-auth:18.1.0"
+    implementation "com.google.firebase:firebase-database:18.0.1"
+    implementation "com.google.firebase:firebase-storage:18.1.1"
     implementation 'com.firebase:geofire-java:3.0.0'
 
     // Img

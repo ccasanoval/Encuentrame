@@ -36,10 +36,16 @@ import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Task;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -136,7 +142,13 @@ public class Util
         Vibrator vibrator = (Vibrator)app.getSystemService(Context.VIBRATOR_SERVICE);
 		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
 		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
-		if(vibrator != null)vibrator.vibrate(1000);//1seg
+		if(vibrator == null) return;
+			//vibrator.vibrate(1000);//1seg
+		if (Build.VERSION.SDK_INT >= 26) {
+			vibrator.vibrate(android.os.VibrationEffect.createOneShot(150,10));
+		} else {
+			vibrator.vibrate(150);
+		}
     }
 
 	//______________________________________________________________________________________________
@@ -212,7 +224,7 @@ public class Util
 		wakeLock.acquire(2000);
 
 		Intent intent = new Intent(app, ActMain.class);
-		int idNotificacion = 6969;
+		int idNotificacion = 6900;
 
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(app, app.getString(R.string.app_name))
 				.setSmallIcon(android.R.drawable.ic_menu_compass)
@@ -237,7 +249,7 @@ public class Util
 		else
 			notificationBuilder.setVibrate(null);
 
-		nm.notify(6969, notificationBuilder.build());
+		nm.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
 	}
 
@@ -440,16 +452,41 @@ public class Util
 	}
 
 
-	public void pideGPS(Activity act, int requestCode) {
+	public boolean pideGPS(Activity act, int requestCode) {
 		int permissionCheck = ContextCompat.checkSelfPermission(act, android.Manifest.permission.ACCESS_FINE_LOCATION);
-		if(permissionCheck == PackageManager.PERMISSION_DENIED)
+		if(permissionCheck == PackageManager.PERMISSION_DENIED) {
 			ActivityCompat.requestPermissions(
 					act,
 					new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
 					requestCode);
+			return false;
+		}
+		else return true;
 	}
 	//______________________________________________________________________________________________
-	public boolean pideActivarGPS(Context context) {
+	public void pideActivarGPS(Activity act, int requestCode) {
+		LocationRequest request = LocationRequest.create();
+		LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
+				.addLocationRequest(request)
+				.build();
+		LocationServices.getSettingsClient(act)
+				.checkLocationSettings(settingsRequest)
+				.addOnCompleteListener((Task<LocationSettingsResponse> task) -> {
+					if( ! task.isSuccessful()) {
+						Exception e = task.getException();
+						if (e instanceof ResolvableApiException) {
+							// Show the dialog by calling startResolutionForResult(), and check the result in onActivityResult()
+							ResolvableApiException ex = (ResolvableApiException)e;
+							try {
+								ex.startResolutionForResult(act, requestCode);
+							}
+							catch(Exception ignore) { }
+						}
+					}
+				});
+
+		/*
+
 		if(context != null && lm != null && ! lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setMessage(R.string.ask_to_enable_gps)
@@ -462,7 +499,7 @@ public class Util
 			alert.show();
 			return true;
 		}
-		return false;
+		return false;*/
 	}
 
 	//______________________________________________________________________________________________

@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -56,6 +57,17 @@ public class ActWidgetNuevaRuta extends Activity
             return false;
         });
 		((App)getApplication()).getGlobalComponent().inject(this);
+
+		login = ((App)getApplication()).getGlobalComponent().login();
+		if(!login.isLogged())gotoLogin();
+	}
+	public void gotoLogin()
+	{
+		login.logout();
+		Intent intent = new Intent(getBaseContext(), ActLogin.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+		finish();
 	}
 	@Override
 	public void onPause()
@@ -109,7 +121,8 @@ public class ActWidgetNuevaRuta extends Activity
         if(pidePermisosGPS()) {
             return;
         }
-		if(oncePideActivarGPS && util.pideActivarGPS(this)) {
+		if(oncePideActivarGPS) {
+			util.pideActivarGPS(this, 6868);
 			oncePideActivarGPS = false;
 			return;
 		}
@@ -177,7 +190,7 @@ public class ActWidgetNuevaRuta extends Activity
 		return false;
 	}
 	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
 	{
 		try {
 			for(int i=0; i < permissions.length; i++)
