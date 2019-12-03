@@ -159,7 +159,7 @@ public class ActLugar extends VistaBase
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == ActImagen.IMAGE_CAPTURE && resultCode == RESULT_OK) {
 			presenter.setImg(data);
-			Log.e(TAG, "onActivityResult-----------------LUGAR----------- ");
+			Log.e(TAG, "onActivityResult-----------------LUGAR----------- "+data+" / "+data.getStringExtra(ActImagen.PARAM_IMG_PATH));
 		}
 		else
 			Log.e(TAG, "onActivityResult-----------------LUGAR ERROR----------- ");

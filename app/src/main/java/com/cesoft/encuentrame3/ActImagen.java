@@ -138,6 +138,7 @@ public class ActImagen extends AppCompatActivity
 		{
 			imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
 			lugar = getIntent().getParcelableExtra(PARAM_LUGAR);
+Log.e(TAG, "onCreate----------------------------------------------------------------imgURLnew="+imgURLnew);
 			if(imgURLnew != null)
 			{
 				File file = new File(imgURLnew);
@@ -288,23 +289,14 @@ public class ActImagen extends AppCompatActivity
 		@SuppressLint("SimpleDateFormat")
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = "JPEG_" + timeStamp + "_";
-		//File path = getExternalFilesDir(null);
-		File path;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			path = getDataDir();
-		}
-		else {
-			path = Environment.getDataDirectory();
-		}
 
 		try {
-			path.mkdirs();// Make sure the Pictures directory exists.
-			File image = File.createTempFile(imageFileName,".jpg", path);
-			currentPhotoPath = FILE_STR + image.getAbsolutePath();
-			Log.e(TAG, "createImageFile:----------------------------currentPhotoPath="+currentPhotoPath);
+			File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+			File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+			currentPhotoPath = image.getAbsolutePath();
 			return image;
 		}
-		catch (Exception e) {
+		catch(Exception e) {
 			Log.e(TAG, "createImageFile:e:---------------------------- ",e);
 			return null;
 		}
@@ -318,17 +310,20 @@ public class ActImagen extends AppCompatActivity
 			// Create the File where the photo should go
 			try {
 				File photoFile = createImageFile();
-Log.e(TAG, "dispatchTakePictureIntent:-------------------------------------"+photoFile+" : "+BuildConfig.APPLICATION_ID + ".fileprovider");
+Log.e(TAG, "dispatchTakePictureIntent:------------------------------A-------"+photoFile);
 				if(photoFile != null) {
-					String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
-					Uri photoURI = FileProvider.getUriForFile(
-							getApplicationContext(),
-							authority,
-							photoFile);
-					takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+					Uri photoURI;
+					try {
+						photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", photoFile);
+					} catch (IllegalArgumentException e) {
+Log.e(TAG, "dispatchTakePictureIntent:------------------------------z-------"+Uri.fromFile(photoFile));
+						android.os.StrictMode.VmPolicy.Builder builder = new android.os.StrictMode.VmPolicy.Builder();
+						android.os.StrictMode.setVmPolicy(builder.build());
+						photoURI = Uri.fromFile(photoFile);
+					}
+Log.e(TAG, "dispatchTakePictureIntent:------------------------------B-------"+photoURI);
 					takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-					if(takePictureIntent.resolveActivity(getPackageManager()) != null)
-						startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
+					startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
 				}
 			}
 			catch(Exception e) {
@@ -340,13 +335,19 @@ Log.e(TAG, "dispatchTakePictureIntent:-------------------------------------"+pho
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQUEST_ACTION_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
+			Log.e(TAG, "onActivityResult:e:----------------------------------CANCELADO ????????????????");
+		}
 		if (requestCode == REQUEST_ACTION_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 			refreshMenu(ESTADO.NEW_IMG);
 			show();
 
 			// Variable to store the img
-			if (currentPhotoPath.contains(FILE_STR))
-				imgURLnew = currentPhotoPath.substring(FILE_STR.length());
+			//if (currentPhotoPath.contains(FILE_STR))
+				imgURLnew = currentPhotoPath;//.substring(FILE_STR.length());
+
+Log.e(TAG, "onActivityResult:A:----------------------------------currentPhotoPath="+currentPhotoPath);
+Log.e(TAG, "onActivityResult:B:----------------------------------imgURLnew="+imgURLnew);
 
 			// Show the thumbnail on ImageView
 			try {
@@ -360,14 +361,17 @@ Log.e(TAG, "dispatchTakePictureIntent:-------------------------------------"+pho
 
 			// ScanFile so it will be appeared on Gallery
 			Uri imageUri = Uri.parse(currentPhotoPath);
+Log.e(TAG, "onActivityResult:imageUri:----------------------------------"+imageUri);
 			MediaScannerConnection.scanFile(this,
 					new String[]{imageUri.getPath()},
 					null,
 					(path, uri) -> {
+						Log.e(TAG, "onActivityResult:---+++++++++++------"+path+" : "+uri);
 					});
-		} else {
+		}
+		else {
 			finish();
-			Log.e(TAG, "onActivityResult:---------else finish");
+			Log.e(TAG, "onActivityResult:---------else finish: requestCode="+requestCode+" resultCode="+resultCode+" currentPhotoPath="+currentPhotoPath);
 		}
 	}
 
@@ -376,6 +380,7 @@ Log.e(TAG, "dispatchTakePictureIntent:-------------------------------------"+pho
 
 	private void guardar()
 	{
+Log.e(TAG, "guardar-----------------------------------------------------------------------imgURLnew="+imgURLnew);
 		Intent i = new Intent();
 		i.putExtra(PARAM_IMG_PATH, imgURLnew);
 		setResult(RESULT_OK, i);
@@ -418,7 +423,7 @@ Log.e(TAG, "dispatchTakePictureIntent:-------------------------------------"+pho
 				REQUEST_PERMISSION_CAMERA);
 	}
 	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
 	{
 		//Log.e(TAG, "------------------------------------- requestCode = "+requestCode+" : ");
 		//for(String s : permissions)Log.e(TAG, "------------------------------------- permissions = "+s);

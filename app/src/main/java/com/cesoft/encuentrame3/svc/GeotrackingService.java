@@ -248,6 +248,7 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
             }
             @Override
             public void onError(String err) {
+                util.setTrackingRoute("","");
                 Log.e(TAG, "saveGeoTracking:findById:e:----------------------------------------:" + err);
             }
         });

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- external-path name="my_images" path="Android/data/com.example.package.name/files/Pictures" / -->
+    <external-path name="pictures" path="Android/data/com.cesoft.encuentrame3/files/Pictures" />
+    <!-- files-path name="pictures" path="."/ -->
+    <!-- files-path name="pictures" path="images/"/ -->
     <!-- external-path name="external_files" path="."/ -->
-    <files-path name="pictures" path="."/>
+    <!-- cache-path name="shared" path="image_manager_disk_cache"/ -->
 </paths>

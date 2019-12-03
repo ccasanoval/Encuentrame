@@ -141,6 +141,42 @@ Log.e(TAG, "onTimeout-----------------------------------------------------------
 	}
 
 	//----------------------------------------------------------------------------------------------
+	private void eliminarHelper() {
+		((Ruta)o).eliminar(new Fire.CompletadoListener()
+		{
+			@Override
+			protected void onDatos(String id)
+			{
+				isEliminar = true;
+				if(view != null) {
+					view.finEspera();
+					Log.e(TAG, "eliminar:onDatos-------------------------------------------- "+onBackPressed);
+					if( ! onBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
+				}
+			}
+			@Override
+			protected void onError(String err, int code)
+			{
+				isEliminar = true;
+				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
+				if(view != null) {
+					view.finEspera();
+					view.toast(R.string.error_eliminar, err);
+				}
+			}
+			@Override
+			public void onTimeout() {
+				if( ! isWorking)return;
+				isEliminar = true;
+				if(view != null) {
+					view.finEspera();
+					if( ! onBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+				}
+			}
+		});
+	}
 	public synchronized void eliminar()
 	{
 		view.iniEspera();
@@ -151,40 +187,7 @@ Log.e(TAG, "onTimeout-----------------------------------------------------------
 		onBackPressed = false;
 		new Thread() {
 			@Override public void run() {
-				((Ruta)o).eliminar(new Fire.CompletadoListener()
-				{
-					@Override
-					protected void onDatos(String id)
-					{
-						isEliminar = true;
-						if(view != null) {
-							view.finEspera();
-							Log.e(TAG, "eliminar:onDatos-------------------------------------------- "+onBackPressed);
-							if( ! onBackPressed)
-								util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
-						}
-					}
-					@Override
-					protected void onError(String err, int code)
-					{
-						isEliminar = true;
-						Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
-						if(view != null) {
-							view.finEspera();
-							view.toast(R.string.error_eliminar, err);
-						}
-					}
-					@Override
-					public void onTimeout() {
-						if( ! isWorking)return;
-						isEliminar = true;
-						if(view != null) {
-							view.finEspera();
-							if( ! onBackPressed)
-								util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
-						}
-					}
-				});
+				eliminarHelper();
 			}
 		}.start();
 	}

@@ -63,6 +63,7 @@ public class PreLugar extends PresenterBase
 			@Override
 			protected void onDatos(String id)
 			{
+Log.e(TAG, "GUARDAR : *****************************************"+imgURLnew);
 				bGuardar = true;
 				if(imgURLnew != null)((Lugar) o).uploadImg(imgURLnew);
 				imgURLnew = null;
