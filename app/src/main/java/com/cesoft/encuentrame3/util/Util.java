@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.util;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -26,7 +26,6 @@ import android.widget.EditText;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActMain;
@@ -165,7 +164,7 @@ public class Util
 		boolean bVibrate = pref.isNotificationVibrate();
 		boolean bLights = pref.isNotificationLights();
 
-		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame:Util");
+		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame3:Util");
 		wakeLock.acquire(2000);
 
 		int idNotificacion = conversor(aviso.getId());
@@ -207,7 +206,7 @@ public class Util
 		return Integer.valueOf(sb.toString().substring(0, 9));
 	}
 
-	private long lastShowNotifGPS = 0;
+	/*private long lastShowNotifGPS = 0;
 	private long delayShowNotifGPS = 0;
 	public void showNotifGPS()
 	{
@@ -220,7 +219,7 @@ public class Util
 		boolean bVibrate = pref.isNotificationVibrate();
 		boolean bLights = pref.isNotificationLights();
 
-		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame:Util");
+		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame3:Util");
 		wakeLock.acquire(2000);
 
 		Intent intent = new Intent(app, ActMain.class);
@@ -251,15 +250,18 @@ public class Util
 
 		nm.notify(idNotificacion, notificationBuilder.build());
 		wakeLock.release();
-	}
+	}*/
 
 
 	//______________________________________________________________________________________________
-	public void setTrackingRoute(String idRoute) {
-		pref.setTrackingRoute(idRoute);
+	public void setTrackingRoute(String idRoute, String nameRoute) {
+		pref.setTrackingRoute(idRoute, nameRoute);
 	}
-	public String getTrackingRoute() {
- 		return pref.getTrackingRoute();
+	public String getIdTrackingRoute() {
+ 		return pref.getIdTrackingRoute();
+	}
+	public String getNameTrackingRoute() {
+		return pref.getNameTrackingRoute();
 	}
 
 	//______________________________________________________________________________________________
@@ -272,6 +274,7 @@ public class Util
 		intent.putExtra(Constantes.MENSAJE, sMensaje);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
+Log.e(TAG, "return2Main-------------------------------------------- ");
 	}
 	public void return2Main(Activity act, Filtro filtro)
 	{
@@ -332,16 +335,15 @@ public class Util
 	}
 	//private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
 	//---
-	private SimpleDateFormat timeFormatter = null;
+	/*private SimpleDateFormat timeFormatter = null;
 	public String formatTiempo(long t)
 	{
 		if(timeFormatter == null)
 		{
 			timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
-			//timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return timeFormatter.format(new Date(t));
-	}
+	}*/
 	//---
 	private SimpleDateFormat dateFormatter = null;
 	public String formatFecha(Date date)
@@ -350,7 +352,6 @@ public class Util
 		if(dateFormatter == null)
 		{
 			dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-			//dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return dateFormatter.format(date);
 	}
@@ -362,7 +363,6 @@ public class Util
 		if(dateTimeFormatter == null)
 		{
 			dateTimeFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-			//dateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return dateTimeFormatter.format(date);
 	}
@@ -402,69 +402,77 @@ public class Util
 	}
 
 
-
 	@SuppressLint("BatteryLife")
 	public boolean pideBateria(Context context) {
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if(pm != null) {
-				if(pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
-					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: TRUE");
-					return false;
+			if(pm != null && pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
+				Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: TRUE");
+				return false;
+			}
+			else {
+				// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+				Intent intent = new Intent();
+				intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+				intent.setData(Uri.parse("package:"+app.getPackageName()));
+				if(context == null) {
+					intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+					app.startActivity(intent);
 				}
 				else {
-					// Need this in manifest: <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-					Intent intent = new Intent();
-					intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-					intent.setData(Uri.parse("package:"+app.getPackageName()));
-					if(context == null) {
-						intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-						app.startActivity(intent);
-					}
-					else {
-						context.startActivity(intent);
-					}
-					// CHECK:
-					//  turn off the screen and:
-					//adb shell dumpsys battery unplug
-					//adb shell dumpsys deviceidle step --> Till status =  IDLE_PENDING, SENSING, (LOCATING), IDLE_MAINTENANCE, IDLE
-					Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: FALSE");
-					return true;
+					context.startActivity(intent);
 				}
-			}
-		}
-		return false;
-	}
-	public boolean pideBateriaDeNuevoSiEsNecesario(Context context) {
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if(pm != null && !pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
-						.setCancelable(false)
-						.setPositiveButton(android.R.string.no, (dialog, id) -> pideBateria(context))
-						.setNegativeButton(android.R.string.yes, (dialog, id) -> dialog.cancel())
-				;
-				final AlertDialog alert = builder.create();
-				alert.show();
+				// CHECK:
+				//  turn off the screen and:
+				//adb shell dumpsys battery unplug
+				//adb shell dumpsys deviceidle step --> Till status =  IDLE_PENDING, SENSING, (LOCATING), IDLE_MAINTENANCE, IDLE
+				Log.e(TAG, "pideBateria:isIgnoringBatteryOptimizations: FALSE");
 				return true;
 			}
 		}
 		return false;
 	}
+	public boolean pideBateriaDeNuevoSiEsNecesario(Context context) {
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+				&& pm != null && !pm.isIgnoringBatteryOptimizations(app.getPackageName())) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setMessage(R.string.ask_to_ignore_energy_saving_again)
+					.setCancelable(false)
+					.setPositiveButton(android.R.string.no, (dialog, id) -> pideBateria(context))
+					.setNegativeButton(android.R.string.yes, (dialog, id) -> dialog.cancel())
+			;
+			final AlertDialog alert = builder.create();
+			alert.show();
+			return true;
+		}
+		return false;
+	}
+
+//public boolean compruebaPermisosActivityRecognition(Activity act, int requestCode) {
+//TODO: AnddroidQ ???--------------------------------------------------------------------------------------------------------
+//			if(ActivityCompat.checkSelfPermission(act, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED)
+//				asPermissions.add(Manifest.permission.ACTIVITY_RECOGNITION);
 
 
-	public boolean pideGPS(Activity act, int requestCode) {
-		int permissionCheck = ContextCompat.checkSelfPermission(act, android.Manifest.permission.ACCESS_FINE_LOCATION);
-		if(permissionCheck == PackageManager.PERMISSION_DENIED) {
-			ActivityCompat.requestPermissions(
-					act,
-					new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-					requestCode);
+	public boolean compruebaPermisosGPS(Activity act, int requestCode) {
+		boolean isFineLocation = ActivityCompat.checkSelfPermission(act, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+		if(isFineLocation) {
+			if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+				boolean isBackgroundLocation = ActivityCompat.checkSelfPermission(act, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+				if( ! isBackgroundLocation) {
+					ActivityCompat.requestPermissions(act, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, requestCode);
+					return false;
+				}
+			}
+		}
+		else {
+			ActivityCompat.requestPermissions(act, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
 			return false;
 		}
-		else return true;
+		return true;
 	}
 	//______________________________________________________________________________________________
 	public void pideActivarGPS(Activity act, int requestCode) {
+Log.e(TAG, "pideActivarGPS-------------------------------------------------------requestCode="+requestCode);
 		LocationRequest request = LocationRequest.create();
 		LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
 				.addLocationRequest(request)
@@ -484,22 +492,6 @@ public class Util
 						}
 					}
 				});
-
-		/*
-
-		if(context != null && lm != null && ! lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-			builder.setMessage(R.string.ask_to_enable_gps)
-					.setCancelable(false)
-					.setPositiveButton(R.string.ok, (dialog, id) ->
-							app.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
-					.setNegativeButton(R.string.cancelar, (dialog, id) ->dialog.cancel())
-				;
-			final AlertDialog alert = builder.create();
-			alert.show();
-			return true;
-		}
-		return false;*/
 	}
 
 	//______________________________________________________________________________________________
@@ -526,4 +518,25 @@ public class Util
 				return resources.getString(R.string.unidentifiable_activity, detectedActivityType);
 		}
 	}
+
+	//______________________________________________________________________________________________
+	/*public boolean checkPlayServices()
+	{
+//ServiceNotifications.create(app, "Google Play Services", "----------------------------------------------");
+		try {
+			GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+			int result = googleAPI.isGooglePlayServicesAvailable(app);
+			if (result != ConnectionResult.SUCCESS) {
+				//TODO: Notificacion?
+				ServiceNotifications.create(app, "Google Play Services", "Para usar esta aplicacion debe instalar Google Play Services");
+				Log.e(TAG, String.format("checkPlayServices: No tiene Google Services? result = %s !!!!!!!!!!!!!!!", result));
+				return false;
+			}
+			return true;
+		}
+		catch(Exception e) {
+			Log.e(TAG, "checkPlayServices:e:---------------------------------------------------", e);
+			return false;
+		}
+	}*/
 }

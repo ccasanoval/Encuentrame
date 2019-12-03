@@ -2,7 +2,6 @@ package com.cesoft.encuentrame3;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -18,7 +17,7 @@ import androidx.core.content.ContextCompat;
 
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
+import com.cesoft.encuentrame3.svc.GeotrackingService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
@@ -38,7 +37,6 @@ public class ActWidgetNuevaRuta extends Activity
 	@Inject Login login;
 	@Inject Preferencias pref;
 
-	private ProgressDialog progressDialog;
 	private EditText txtNombre;
 
 	@Override
@@ -63,7 +61,7 @@ public class ActWidgetNuevaRuta extends Activity
 	}
 	public void gotoLogin()
 	{
-		login.logout();
+		login.logout(this);
 		Intent intent = new Intent(getBaseContext(), ActLogin.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
@@ -73,14 +71,14 @@ public class ActWidgetNuevaRuta extends Activity
 	public void onPause()
 	{
 		super.onPause();
-		progressDialog.dismiss();
+		//progressDialog.dismiss();
 	}
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
-		progressDialog.hide();
+		//progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
+		//progressDialog.hide();
 		//
 		if( ! login.isLogged())
 		{
@@ -132,8 +130,6 @@ public class ActWidgetNuevaRuta extends Activity
 			return;
 		}
 
-		progressDialog.show();
-
 		// if(ruta_activa)"quiere parar la ruta actual y crear una nueva?"
 		//TODO: ruta_activa = true
 		//TODO: activa boton stop
@@ -148,12 +144,11 @@ public class ActWidgetNuevaRuta extends Activity
 			@Override
 			protected void onDatos(String id)
 			{
-				util.setTrackingRoute(id);
-				progressDialog.dismiss();
+				util.setTrackingRoute(id, txtNombre.getText().toString());
 				Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 				ActWidgetNuevaRuta.this.finish();
 				//
-				GeoTrackingJobService.start(getApplicationContext(), pref.getTrackingDelay());
+				GeotrackingService.start(getApplicationContext(), pref.getTrackingDelay());
 				WidgetRutaJobService.start(getApplicationContext());
 			}
 			@Override
@@ -166,7 +161,7 @@ public class ActWidgetNuevaRuta extends Activity
 					return;
 				}
 				Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:e:----------------------------------"+err);
-				progressDialog.hide();
+				//progressDialog.hide();
 				Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 				//
 				WidgetRutaJobService.start(getApplicationContext());

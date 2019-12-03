@@ -27,8 +27,7 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentStart="true"
 		android:layout_alignParentEnd="true"
-		android:layout_alignParentTop="true"
-		>
+		android:layout_alignParentTop="true">
 		<EditText
 			android:id="@+id/txtNombre"
 			android:layout_width="match_parent"
@@ -36,7 +35,8 @@
 			android:ems="10"
 			android:hint="@string/nombre"
 			android:maxLines="1"
-			android:inputType="textCapWords"/>
+			android:inputType="textCapWords"
+			android:importantForAutofill="no" />
 	</com.google.android.material.textfield.TextInputLayout>
 
 
@@ -46,8 +46,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentEnd="true"
-		android:layout_alignParentStart="true"
-		>
+		android:layout_alignParentStart="true">
 		<EditText
 			android:id="@+id/txtDescripcion"
 			android:layout_width="match_parent"
@@ -55,7 +54,8 @@
 			android:hint="@string/descripcion"
 			android:ems="10"
 			android:inputType="textMultiLine"
-			android:maxLines="3"/>
+			android:maxLines="3"
+			android:importantForAutofill="no" />
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<LinearLayout

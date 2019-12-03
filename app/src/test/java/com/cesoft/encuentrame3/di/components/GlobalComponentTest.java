@@ -23,7 +23,6 @@ import dagger.Component;
 @Component(modules = {GlobalModuleTest.class})
 public interface GlobalComponentTest
 {
-	void inject(ActLogin.PlaceholderFragment v);
 	void inject(ActAviso v);
 	void inject(ActLugar v);
 	void inject(ActRuta v);
@@ -31,7 +30,6 @@ public interface GlobalComponentTest
 	void inject(ActBuscar v);
 	void inject(ActWidgetNuevaRuta v);
 	void inject(ActWidgetNuevoLugar v);
-	void inject(WidgetRutaService v);
 	void inject(RutaArrayAdapter v);
 	void inject(FrgMain v);
 

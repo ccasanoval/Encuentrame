@@ -83,6 +83,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	public void onMapReady(GoogleMap map)
 	{
 		super.onMapReady(map);
+		map.getUiSettings().setZoomControlsEnabled(true);
 
 		//MARCADOR MULTILINEA --------------------------------------------
 		this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter()
@@ -228,7 +229,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 
 				MarkerOptions mo = new MarkerOptions();
 				mo.title(r.getNombre());
-				Date date = pto.getFecha();
+				Date date = new Date(pto.getFecha());
 
 				String sDist;
 				if(distancia > 3000)	sDist = String.format(Locale.ENGLISH, getString(R.string.info_dist2), distancia/1000);
@@ -256,24 +257,11 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 			map.addPolyline(po);//Polyline line =
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gpIni.getLatitud(), gpIni.getLongitud()), mapZoom));
 		}
-		catch(Exception e){Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);}
+		catch(Exception e)
+		{
+			Log.e(TAG, "showRutaHelper:e:-------------------------------------------", e);
+		}
 	}
-
-	/*public void showMap(Uri geoLocation) {
-		Intent intent = getIntent();
-    	Uri data = intent.getData();
-    	do something with uri... got to the lat/lon indicated...
-
-		<activity
-			android:name=".ActMaps"
-			android:label="@string/title_activity_act_maps">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<data android:scheme="geo" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</activity>
-	}*/
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)

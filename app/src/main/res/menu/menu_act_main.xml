@@ -21,6 +21,12 @@
 		android:icon="@android:drawable/ic_menu_search"
 		app:showAsAction="ifRoom"/>
 	<item
+		android:id="@+id/action_onoff_fence"
+		android:orderInCategory="115"
+		android:title="@string/stop_geofencing"
+		android:icon="@android:drawable/ic_menu_close_clear_cancel"
+		app:showAsAction="ifRoom"/>
+	<item
 		android:id="@+id/action_config"
 		android:orderInCategory="120"
 		android:title="@string/config"

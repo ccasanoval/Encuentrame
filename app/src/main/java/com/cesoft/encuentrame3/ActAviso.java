@@ -61,7 +61,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		App.getComponent(getApplicationContext()).inject(this);
+		App.getComponent().inject(this);
 		super.ini(presenter, util, voice, new Aviso(), R.layout.act_aviso);
 		super.onCreate(savedInstanceState);
 
@@ -155,6 +155,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	public void onMapReady(GoogleMap map)
 	{
 		super.onMapReady(map);
+		map.getUiSettings().setZoomControlsEnabled(true);
 		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
 
 		Location loc = util.getLocation();

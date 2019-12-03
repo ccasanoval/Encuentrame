@@ -43,32 +43,37 @@ public class Objeto implements Parcelable
 	/*protected long fecha;
         @Exclude public Date getFecha(){return new Date(fecha);}
         @Exclude public void setFecha(Date v){fecha=v.getTime();}*/
-	public Date fecha;
-		@Exclude public Date getFecha(){return fecha;}
-		@Exclude public void setFecha(Date v){fecha=v;}
+
+	public Date fecha = new Date();//Old field, dont remove for old objects stored on firebase...
+
+	public void checkDateAndCorrect() {
+		Date fechaTmp = new Date(fechaLong);
+		if(fechaTmp.compareTo(fecha) != 0) {
+			fechaLong = fecha.getTime();
+		}
+	}
+
+		//@Exclude public Date getFecha(){return new Date(fechaLong);}
+		//@Exclude public void setFecha(Date v){fechaLong = v.getTime();}
+	public Long fechaLong;
+		@Exclude protected long getFecha(){return fechaLong;}
+		@Exclude protected void setFecha(long v){fechaLong = v;}
 
 	public double latitud, longitud;
         @Exclude public double getLatitud(){return latitud;}
         @Exclude public double getLongitud(){return longitud;}
         @Exclude public void setLatLon(double lat, double lon){latitud=lat;longitud=lon;}
 
-    public void bind(Objeto obj) {
-        this.descripcion = obj.descripcion;
-		this.fecha = obj.fecha;
-		this.id = obj.id;
-		this.latitud = obj.latitud;
-		this.longitud = obj.longitud;
-		this.nombre = obj.nombre;
-	}
-
 	//______________________________________________________________________________________________
-	Objeto() { fecha = new Date(); }
+	Objeto() {
+        	fechaLong = new Date().getTime();
+	}
 	//______________________________________________________________________________________________
 	@NonNull
 	@Override public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Objeto{id='%s', nombre='%s', descripcion='%s', fecha='%s'}",
-				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fecha));
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), DATE_FORMAT.format(fechaLong));
 	}
 
 	//______________________________________________________________________________________________
@@ -77,19 +82,24 @@ public class Objeto implements Parcelable
 		String n1 = filtro.getNombre().toLowerCase();
 		String n2 = getNombre().toLowerCase();
 		if(!n1.isEmpty() && !n2.contains(n1))return false;
-		if(filtro.getFechaIni() != null && getFecha().getTime() < filtro.getFechaIni().getTime())return false;
-        return filtro.getFechaFin() == null || getFecha().getTime() <= filtro.getFechaFin().getTime();
+		if(filtro.getFechaIni() != null && getFecha() < filtro.getFechaIni().getTime())return false;
+        return filtro.getFechaFin() == null || getFecha() <= filtro.getFechaFin().getTime();
     }
 
 	// PARCELABLE
 	//______________________________________________________________________________________________
 	Objeto(Parcel in)
 	{
-		setId(in.readString());
-		setNombre(in.readString());
-		setDescripcion(in.readString());
-		setLatLon(in.readDouble(), in.readDouble());
-		setFecha(new Date(in.readLong()));
+		try {
+			setId(in.readString());
+			setNombre(in.readString());
+			setDescripcion(in.readString());
+			setLatLon(in.readDouble(), in.readDouble());
+			setFecha(in.readLong());
+		}
+		catch(Exception e) {
+			android.util.Log.e("Objeto", "Constructor-------------------------------------",e);
+		}
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
@@ -99,7 +109,7 @@ public class Objeto implements Parcelable
 		dest.writeString(getDescripcion());
 		dest.writeDouble(getLatitud());
 		dest.writeDouble(getLongitud());
-		dest.writeLong(getFecha().getTime());
+		dest.writeLong(getFecha());
 	}
 	@Override public int describeContents() { return 0; }
 	public static final Parcelable.Creator<Objeto> CREATOR = new Parcelable.Creator<Objeto>()

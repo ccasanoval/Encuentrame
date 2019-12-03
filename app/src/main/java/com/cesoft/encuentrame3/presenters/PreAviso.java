@@ -6,7 +6,7 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
+import com.cesoft.encuentrame3.svc.CesGeofenceStore;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -29,12 +29,12 @@ public class PreAviso extends PresenterBase
 	}
 
 	private Util util;
-	private LoadGeofenceJobService servicio;
-	@Inject PreAviso(Application app, Util util, LoadGeofenceJobService servicio)
+	private CesGeofenceStore geofenceStoreAvisos;
+	@Inject PreAviso(Application app, Util util, CesGeofenceStore geofenceStoreAvisos)
 	{
 		super(app);
 		this.util = util;
-		this.servicio = servicio;
+		this.geofenceStoreAvisos = geofenceStoreAvisos;
 	}
 
 	@Override public void setLatLon(double lat, double lon)
@@ -99,7 +99,8 @@ public class PreAviso extends PresenterBase
 			protected void onDatos(String id)
 			{
 				bGuardar = true;
-				servicio.cargarListaGeoAvisos();
+				geofenceStoreAvisos.cargarListaGeoAvisos();
+Log.e(TAG, "guardar:onDatos: "+id);
 				if(view != null) {
 					view.finEspera();
 					openMain(app.getString(R.string.ok_guardar_aviso));
@@ -118,7 +119,8 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onTimeout()
 			{
-				Log.e(TAG, "eliminar:timeout");
+				if( ! isWorking)return;
+				Log.e(TAG, "guardar:timeout");
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -156,6 +158,7 @@ public class PreAviso extends PresenterBase
 			@Override
 			protected void onTimeout()
 			{
+				if( ! isWorking)return;
 				Log.e(TAG, "eliminar:timeout");
 				isEliminar = true;
 				if(view != null) {

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:key="setting_logout"
+        app:icon="@drawable/ic_power_settings_new_black_24dp"
+        app:summary="@string/pref_header_logout_sum"
+        app:title="@string/pref_header_logout" />
+
+    <Preference
+        app:fragment="com.cesoft.encuentrame3.ActSettings$OptionsPreferenceFragment"
+        app:icon="@drawable/ic_sync_black_24dp"
+        app:summary="@string/pref_header_opciones_sum"
+        app:title="@string/pref_header_opciones"/>
+
+    <Preference
+        app:fragment="com.cesoft.encuentrame3.ActSettings$VoicePreferenceFragment"
+        app:icon="@drawable/ic_mic_black_24dp"
+        app:summary="@string/pref_header_voice_sum"
+        app:title="@string/pref_header_voice"/>
+
+    <Preference
+        app:fragment="com.cesoft.encuentrame3.ActSettings$NotificationsPreferenceFragment"
+        app:icon="@drawable/ic_notifications_black_24dp"
+        app:summary="@string/pref_header_notifications_sum"
+        app:title="@string/pref_header_notifications"/>
+
+    <Preference
+        app:fragment="com.cesoft.encuentrame3.ActSettings$AboutPreferenceFragment"
+        app:icon="@drawable/ic_info_black_24dp"
+        app:title="@string/pref_header_about"/>
+
+</PreferenceScreen>

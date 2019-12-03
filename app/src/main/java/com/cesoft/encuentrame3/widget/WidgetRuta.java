@@ -29,7 +29,7 @@ public class WidgetRuta extends AppWidgetProvider
 	{
 		WidgetRutaJobService.start(context);
 
-		Util _util = ((App)context.getApplicationContext()).getGlobalComponent().util();
+		Util util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 
 		if(ACTION_WIDGET_RUTA_ADD.equals(intent.getAction()))
 		{
@@ -39,7 +39,7 @@ public class WidgetRuta extends AppWidgetProvider
 		}
 		else if(ACTION_WIDGET_RUTA_STOP.equals(intent.getAction()))
 		{
-			_util.setTrackingRoute("");
+			util.setTrackingRoute("", "");
 			//
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_ruta);
 			remoteViews.setTextViewText(R.id.txtRuta, "");
@@ -59,7 +59,7 @@ public class WidgetRuta extends AppWidgetProvider
 	}
 
 	//----------------------------------------------------------------------------------------------
-	static public void setWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, String sRuta, boolean bRuta)
+	public static void setWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, String sRuta, boolean bRuta)
 	{
 		Intent intent;
 		PendingIntent actionPendingIntent;
@@ -67,7 +67,7 @@ public class WidgetRuta extends AppWidgetProvider
 
 		// NOMBRE RUTA
 		if(sRuta != null)
-		remoteViews.setTextViewText(R.id.txtRuta, sRuta);
+			remoteViews.setTextViewText(R.id.txtRuta, sRuta);
 		if(bRuta)
 			remoteViews.setViewVisibility(R.id.btnStop, View.VISIBLE);
 		else

@@ -12,14 +12,13 @@ import android.widget.TextView;
 
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.GoogleMap;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar Casanova on 09/05/2017.
-//
+// TODO: Use Android Components
 public abstract class PresenterBase
 {
 	private static final String TAG = PresenterBase.class.getSimpleName();
@@ -49,8 +48,10 @@ public abstract class PresenterBase
 		public void setLatLon(double lat, double lon){
 			o.setLatLon(lat, lon);}
 
+	boolean onBackPressed = false;
+		public void onBackPressed(){ onBackPressed=true; }
 	boolean isSucio = false;
-		public void setSucio(){ isSucio =true; }
+		public void setSucio(){ isSucio=true; }
 	private boolean isNuevo = false;
 		public boolean isNuevo(){return isNuevo;}
 	private boolean isVoiceCommand = false;
@@ -77,7 +78,6 @@ public abstract class PresenterBase
 	}
 	public void unsubscribe()
 	{
-		Log.e(TAG, "-------------------------------unsubscribe------1--------------------------------");
 		//Como dlg tienen referencia a view, debemos destruir referencia para evitar MemoryLeak!
 		if(dlgEliminar != null)
 		{
@@ -91,7 +91,6 @@ public abstract class PresenterBase
 		dlgSucio = null;
 		//
 		view = null;
-		Log.e(TAG, "-------------------------------unsubscribe------2--------------------------------");
 	}
 
 	private static final String SUCIO = "sucio";
@@ -188,5 +187,9 @@ public abstract class PresenterBase
 	{
 		nom.addTextChangedListener(new PresenterBase.CesTextWatcher(nom, getNombre(), this));
 		desc.addTextChangedListener(new PresenterBase.CesTextWatcher(desc,  getDescripcion(), this));
+	}
+
+	public void onResume() {
+		//onBackPressed = false;
 	}
 }

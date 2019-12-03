@@ -1,9 +1,12 @@
 package com.cesoft.encuentrame3;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
@@ -18,7 +21,7 @@ public class Login
 {
 	private static final String TAG = Login.class.getSimpleName();
 	private static final String PREF_LOGIN = "login";
-	private static final String PREF_PWD = "password";
+	private static final String PREF_PASS = "password";
 	private static final String PREF_SAVE_LOGIN = "save_login";
 
 	//______________________________________________________________________________________________
@@ -29,37 +32,28 @@ public class Login
 		this.sp = sp;
 	}
 
-	private static FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
-	public static String getCurrentUserID()
+	private GoogleSignInClient signInClient;
+	void setGoogleSignInClient(GoogleSignInClient signInClient) {
+		this.signInClient = signInClient;
+	}
+	private FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
+	public String getCurrentUserID()
 	{
 		FirebaseAuth a = FirebaseAuth.getInstance();
-		if(a == null || a.getCurrentUser() == null)return "";
+		if(a.getCurrentUser() == null)return "";
 		return a.getCurrentUser().getUid();
 	}
 	static String getCurrentUserName()
 	{
 		FirebaseAuth a = FirebaseAuth.getInstance();
-		if(a == null || a.getCurrentUser() == null)return "";
+		if(a.getCurrentUser() == null)return "";
 		return a.getCurrentUser().getEmail();
-	}
-
-	private static FirebaseDatabase fbdb =null;
-	public static synchronized FirebaseDatabase getDBInstance()
-	{
-		if(fbdb == null)
-		{
-			fbdb = FirebaseDatabase.getInstance();
-			try{
-				fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
-			}catch(Exception e){Log.e("Login", "getDBInstance:e:", e);}
-		}
-		return fbdb;
 	}
 
 
 	//-----
 
-	static void addUser(String email, String password, final Fire.AuthListener listener)
+	void addUser(String email, String password, final Fire.AuthListener listener)
 	{
 		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
 		getAuth().createUserWithEmailAndPassword(email, password)
@@ -71,16 +65,16 @@ public class Login
 			;
 	}
 
-	private static void login2(String email, String password, final Fire.AuthListener listener)
+	private void login2(String email, String password, final Fire.AuthListener listener)
 	{
-		if(email == null || password == null)return;
+		if(email.isEmpty() || password.isEmpty()) {
+			listener.onFallo(new Exception("email or passworkd empty"));
+			return;
+		}
 		try {
 			getAuth().signInWithEmailAndPassword(email, password)
 					.addOnSuccessListener(authResult -> listener.onExito(authResult.getUser()))
 					.addOnFailureListener(listener::onFallo)
-//			.addOnCompleteListener(task -> {
-//				//System.err.println("Login:login2:task:"+task);
-//			})
 			;
 		}
 		catch(Exception e) {
@@ -88,14 +82,13 @@ public class Login
 		}
 	}
 
-
 	private String getUsuario()
 	{
 		return sp.getString(PREF_LOGIN, "");
 	}
 	private String getClave()
 	{
-		return sp.getString(PREF_PWD, "");
+		return sp.getString(PREF_PASS, "");
 	}
 	private void saveLogin(String usr, String pwd)
 	{
@@ -103,20 +96,20 @@ public class Login
 		if(!sp.getBoolean(PREF_SAVE_LOGIN, true))return;
 		SharedPreferences.Editor e = sp.edit();
 		e.putString(PREF_LOGIN, usr);
-		e.putString(PREF_PWD, pwd);
+		e.putString(PREF_PASS, pwd);
 		e.apply();
 	}
 	private void delLogin()
 	{
 		SharedPreferences.Editor e = sp.edit();
 		e.putString(PREF_LOGIN, "");
-		e.putString(PREF_PWD, "");
+		e.putString(PREF_PASS, "");
 		e.apply();
 	}
 	private void delPasswordOnly()
 	{
 		SharedPreferences.Editor e = sp.edit();
-		e.putString(PREF_PWD, "");
+		e.putString(PREF_PASS, "");
 		e.apply();
 	}
 
@@ -130,7 +123,11 @@ public class Login
 				delLogin();
 				return false;
 			}
-		}catch(Exception e){Log.e(TAG, String.format("Login.login:e:%s",e),e);}
+		}
+		catch(Exception e)
+		{
+			Log.e(TAG, String.format("Login.login:e:%s",e),e);
+		}
 		String email = getUsuario();
 		String password = getClave();
 		if(email.isEmpty() || password.isEmpty())return false;
@@ -156,17 +153,18 @@ public class Login
 	}
 
 	//-------
-	void logout()
+	void logout(@NonNull Activity activity)
 	{
+		if( ! sp.getBoolean(PREF_SAVE_LOGIN, true))
+			signInClient.signOut().addOnCompleteListener(activity, task -> { });
 		getAuth().signOut();
 		delPasswordOnly();
 	}
 
 	//-------
-	static void restoreUser(final String email, final Fire.AuthListener listener)
+	void restoreUser(final String email, final Fire.AuthListener listener)
 	{
 		getAuth().sendPasswordResetEmail(email)
-//			.addOnCompleteListener(task -> { Log.e(); })
 			.addOnSuccessListener(aVoid -> listener.onExito(getAuth().getCurrentUser()))
 			.addOnFailureListener(listener::onFallo);
 	}

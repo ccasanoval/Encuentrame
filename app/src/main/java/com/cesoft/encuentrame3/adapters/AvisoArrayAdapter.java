@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 
@@ -33,7 +35,14 @@ public class AvisoArrayAdapter extends RecyclerView.Adapter<ItemViewHolder>
 
 	@Override
 	public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-		holder.bind(avisos[position]);
+		Aviso a = avisos[position];
+		int color;
+		if(a.isActivo())
+			color = App.getInstance().getResources().getColor(android.R.color.holo_green_dark);
+		else
+			color = App.getInstance().getResources().getColor(android.R.color.darker_gray);
+		holder.txtNombre.setTextColor(color);
+		holder.bind(a);
 	}
 
 	@Override

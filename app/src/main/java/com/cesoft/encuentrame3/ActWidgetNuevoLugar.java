@@ -1,7 +1,7 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.ProgressDialog;///TODO: DEPRECATED
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -22,10 +22,9 @@ import javax.inject.Inject;
 public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se muestra como dialogo
 {
 	private static final String TAG = ActWidgetNuevoLugar.class.getSimpleName();
-	@Inject
-	Util _util;
-	@Inject	Login _login;
-	private ProgressDialog _progressDialog;
+	@Inject	Util util;
+	@Inject	Login login;
+	private ProgressDialog progressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -40,17 +39,17 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 	public void onPause()
 	{
 		super.onPause();
-		_progressDialog.dismiss();
+		progressDialog.dismiss();
 	}
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		_progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
-		_progressDialog.hide();
+		progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
+		progressDialog.hide();
 		//
 		//Util.setSvcContext(this);
-		if( ! _login.isLogged())
+		if( ! login.isLogged())
 		{
 			Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.login_error), Toast.LENGTH_LONG).show();
 			finish();
@@ -68,9 +67,9 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 					Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.sin_nombre), Toast.LENGTH_SHORT).show();
 					return;
 				}
-				_progressDialog.show();//runOnUiThread(new Runnable()
+				progressDialog.show();//runOnUiThread(new Runnable()
 
-				Location pos = _util.getLocation();
+				Location pos = util.getLocation();
 				if(pos == null)
 				{
 					Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.sin_posicion), Toast.LENGTH_SHORT).show();
@@ -86,7 +85,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 					@Override
 					protected void onDatos(String id)
 					{
-						_progressDialog.dismiss();
+						progressDialog.dismiss();
 						Toast.makeText(ActWidgetNuevoLugar.this, getString(R.string.ok_guardar_lugar), Toast.LENGTH_SHORT).show();
 						ActWidgetNuevoLugar.this.finish();
 					}
@@ -100,7 +99,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 							return;
 						}
 						Log.e(TAG, "ActWidgetNuevoLugar:addNuevo:backendlessFault: ------------"+err);
-						_progressDialog.hide();
+						progressDialog.hide();
 						Toast.makeText(ActWidgetNuevoLugar.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 					}
 				});

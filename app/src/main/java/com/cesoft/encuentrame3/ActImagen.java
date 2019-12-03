@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.opengl.GLES10;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.os.Bundle;
@@ -287,8 +288,15 @@ public class ActImagen extends AppCompatActivity
 		@SuppressLint("SimpleDateFormat")
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = "JPEG_" + timeStamp + "_";
-		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-		///File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+		//File path = getExternalFilesDir(null);
+		File path;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			path = getDataDir();
+		}
+		else {
+			path = Environment.getDataDirectory();
+		}
+
 		try {
 			path.mkdirs();// Make sure the Pictures directory exists.
 			File image = File.createTempFile(imageFileName,".jpg", path);
@@ -310,13 +318,17 @@ public class ActImagen extends AppCompatActivity
 			// Create the File where the photo should go
 			try {
 				File photoFile = createImageFile();
+Log.e(TAG, "dispatchTakePictureIntent:-------------------------------------"+photoFile+" : "+BuildConfig.APPLICATION_ID + ".fileprovider");
 				if(photoFile != null) {
+					String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
 					Uri photoURI = FileProvider.getUriForFile(
-							this,
-							BuildConfig.APPLICATION_ID + ".provider",
+							getApplicationContext(),
+							authority,
 							photoFile);
+					takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 					takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-					startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
+					if(takePictureIntent.resolveActivity(getPackageManager()) != null)
+						startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
 				}
 			}
 			catch(Exception e) {

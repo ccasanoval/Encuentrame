@@ -19,6 +19,7 @@ public class Preferencias {
     private static final String TRACKING_DELAY = "tracking_seconds";
     // NO pref.xml
     private static final String ID_TRACKING = "id_tracking_route";
+    private static final String NAME_TRACKING = "name_tracking_route";
     private static final String AUTOARRANQUE = "is_auto_arranque";
     // REFER TO  pref_voice.xml
     private static final String SPEECH_ENABLED = "speech_enabled";
@@ -62,13 +63,17 @@ public class Preferencias {
         return sp.getBoolean(AUTOARRANQUE, true);
     }
     //----------------------------------------------------------------------------------------------
-    public void setTrackingRoute(String sIdRoute) {
+    public void setTrackingRoute(String sIdRoute, String nameRoute) {
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(ID_TRACKING, sIdRoute);
+        editor.putString(NAME_TRACKING, nameRoute);
         editor.apply();//editor.commit(); Apply does it in background
     }
-    public String getTrackingRoute() {
+    public String getIdTrackingRoute() {
         return sp.getString(ID_TRACKING, "");
+    }
+    public String getNameTrackingRoute() {
+        return sp.getString(NAME_TRACKING, "");
     }
 
     public boolean isSpeechEnabled() {

@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3.adapters;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
 import androidx.annotation.NonNull;
@@ -20,10 +19,9 @@ public class RutaViewHolder extends ItemViewHolder {
 
     @Inject Util util;
 
-    public RutaViewHolder(@NonNull View itemView, IListaItemClick inter) {
+    RutaViewHolder(@NonNull View itemView, IListaItemClick inter) {
         super(itemView, inter);
-        Context appContext = itemView.getContext().getApplicationContext();
-        App.getComponent(appContext).inject(this);
+        App.getComponent().inject(this);
     }
 
     @Override
@@ -31,9 +29,8 @@ public class RutaViewHolder extends ItemViewHolder {
         super.bind(obj);
         Ruta ruta = (Ruta)obj;
         txtNombre.setText(String.format(Locale.ENGLISH, "%s (%d)", ruta.getNombre(), ruta.getPuntosCount()));
-        //txtFecha.setText(Objeto.DATE_FORMAT2.format(ruta.getFecha()));
         // Si la ruta se está grabando, resaltar
-        if(ruta.getId() != null && ruta.getId().equals(util.getTrackingRoute()))
+        if(ruta.getId() != null && ruta.getId().equals(util.getIdTrackingRoute()))
         {
             txtNombre.setTextColor(Color.RED);
             itemView.setBackgroundColor(Color.YELLOW);

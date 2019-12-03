@@ -17,7 +17,6 @@ import com.cesoft.encuentrame3.R;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -100,7 +99,7 @@ public class Voice implements RecognitionListener {
         speech.startListening(recognizerIntent);*/
     }
     public void startListening() {
-        Log.e(TAG, "startListening: ------------------------------------");
+        //Log.e(TAG, "startListening: ------------------------------------");
         if(isListening) {
             Log.e(TAG, "startListening: ------------------------------------ RETURN");
             return;
@@ -123,7 +122,7 @@ public class Voice implements RecognitionListener {
     }
 
     public void stopListening() {
-        Log.e(TAG, "stopListening: ----------------------------------------");
+        //Log.e(TAG, "stopListening: ----------------------------------------"+isListening+" : "+isListeningActive);
         isListening = false;
         if(speech != null) {
             speech.stopListening();
@@ -376,11 +375,12 @@ public class Voice implements RecognitionListener {
         textToSpeech.setSpeechRate(1f);
     }
     private void ttsUnder20(String text) {
-        HashMap map = new HashMap<String, String>();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            map.putIfAbsent(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
-        }
-        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, map);
+//        HashMap map = new HashMap<String, String>();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            map.putIfAbsent(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
+//        }
+        //textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, map);
+        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, new Bundle(), "MessageId");
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

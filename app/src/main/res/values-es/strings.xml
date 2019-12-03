@@ -17,7 +17,7 @@
 	] -->
 <resources>
 	<!-- App -->
-	<string name="app_name">Encuentrame! Fire</string>
+	<string name="app_name">Encuentrame!</string>
 	<string name="app_desc">\nAplicación para la gestión de lugares de interés, con avisos por geo-posicionamiento y registro de rutas. Podrás administrar  tus geo-datos fácilmente, pues serán almacenados en la nube.\n\n</string>
 	<string name="app_lice_tit">Licencia:</string>
 	<string name="app_vers_tit">Versión:</string>
@@ -30,13 +30,10 @@
 	<string name="activo">Activo</string>
 	<string name="aviso">Mensaje de aviso</string>
 	<string name="cargando">Cargando…</string>
-	<string name="categoria">Categoría</string>
 	<string name="clave">Clave</string>
 	<string name="clave_confirmar">Confirmar Clave</string>
 	<string name="config">Preferencias</string>
 	<string name="privacy_policy">Política de Privacidad</string>
-	<string name="configuracion">Configuración</string>
-	<string name="cuenta">Cuenta</string>
 	<string name="descripcion">Descripción</string>
 	<string name="direccion">Dirección…</string>
 	<string name="estadisticas">Estadísticas</string>
@@ -45,7 +42,6 @@
 	<string name="enter_lbl">Introduce tu usuario</string>
 	<string name="nombre">Nombre</string>
 	<string name="radio">Radio</string>
-	<string name="periodo">Periodo</string>
 	<string name="lista_vacia">Lista vacía…</string>
 	<string name="voz_onoff">Voz</string>
 	<string name="activos">ACTIVOS</string>
@@ -54,14 +50,15 @@
 
 	<!-- Actions -->
 	<string name="guardar">Guardar</string>
-	<string name="enter">Entrar</string>
+	<string name="eliminar">Eliminar</string>
+	<string name="cancelar">Cancelar</string>
 	<string name="start">Iniciar</string>
 	<string name="stop">Detener</string>
 	<string name="salir">Salir</string>
 	<string name="ver_mapa">Ver mapa</string>
-	<string name="eliminar">Eliminar</string>
-	<string name="cancelar">Cancelar</string>
 	<string name="buscar">Buscar</string>
+	<string name="stop_geofencing">Detener geofencing</string>
+	<string name="start_geofencing">Activar geofencing</string>
 	<string name="actualizar_posicion">Actualizar posición</string>
 
 	<!-- Items -->
@@ -76,14 +73,12 @@
 	<string name="editar_ruta">Editar Ruta</string>
 
 	<!-- Fecha -->
-	<string name="fecha">Fecha</string>
 	<string name="fecha_desde">Del</string>
 	<string name="fecha_hasta">al</string>
 	<string name="fin">Fin: </string>
 	<string name="ini">Ini: </string>
 
 	<!-- Nuevo -->
-	<string name="nuevo">Nuevo</string>
 	<string name="nuevo_lugar">Nuevo Lugar</string>
 	<string name="nuevo_aviso">Nuevo Aviso</string>
 	<string name="nueva_ruta">Nueva Ruta</string>
@@ -100,7 +95,6 @@
 
 	<!-- Imagen -->
 	<string name="imagen">Imagen</string>
-	<string name="guardar_imagen">Guardar la imagen</string>
 	<string name="tomar_imagen">Tomar imagen</string>
 	<string name="error_img_path">Sucedió un error al recuperar la imagen de la cámara</string>
 
@@ -111,11 +105,9 @@
 	<!-- Recover -->
 	<string name="recover_ko">Ocurrió un error al recuperar \n la cuenta de usuario</string>
 	<string name="recover_lbl">Recupera tu clave</string>
-	<string name="recover">Recordar</string>
 	<string name="recover_ok">Te hemos enviado un correo \n para que recurperes la cuenta</string>
 
 	<!-- Register -->
-	<string name="register">Registrate</string>
 	<string name="register_lbl">Crea una cuenta</string>
 	<string name="register_ok">¡Te has registrado con éxito! \n Ahora comprueba tu correo</string>
 	<string name="register_bad_pass">¡Atención, ambas claves deben ser iguales!</string>
@@ -123,7 +115,6 @@
 
 	<!-- Error -->
 	<string name="err_get_ruta_pts">Error al obtener los puntos de la ruta</string>
-	<string name="err_conn_google">Error al conectar a los servicios de Google: %s</string>
 	<string name="no_camera_hardware">Este dispositivo no tiene cámara</string>
 	<string name="error_eliminar">Error al eliminar: %s</string>
 	<string name="error_guardar">Hubo un problema al guardar los datos del registro: %s</string>
@@ -136,7 +127,6 @@
 	<string name="ok_guardar_lugar">Se guardaron los datos del lugar</string>
 	<string name="ok_guardar_aviso">Se guardaron los datos del aviso</string>
 	<string name="ok_guardar_ruta">Se guardaron los datos de la ruta</string>
-	<string name="ok_stop_tracking">La ruta termina aquí</string>
 
 	<!-- Ask -->
 	<string name="seguro_salir">Ha hecho cambios. ¿Quiere guardarlos?</string>
@@ -151,14 +141,10 @@
 	<string name="sin_posicion">Sin posición</string>
 	<string name="sin_nombre">Debe establecer un nombre…</string>
 	<string name="sin_lugar">Debe establecer una posición…</string>
-	<string name="sin_camara">Este dispositivo no tiene cámara</string>
-	<string name="sin_permiso_camara">Sin permiso para usar la cámara</string>
 
 	<!-- Login -->
 	<string name="login">Iniciar sesión</string>
 	<string name="login_error">Usuario o contraseña incorrectas</string>
-	<string name="login_fisrt">Entre en su cuenta primero</string>
-	<string name="login_timeout">Tiempo de espera excedido</string>
 	<string name="login_ok">Bienvenido %s</string>
 
 	<!-- Estado -->
@@ -195,7 +181,6 @@
     <string name="pref_tracking_seconds">Periodo rastreo (segundos)</string>
 	<string name="pref_header_notifications_sum">Configuración de avisos…</string>
 	<string name="pref_header_notifications">Avisos</string>
-	<string name="pref_msg_notif_type">Mostrar diálogos PopUp</string>
 	<string name="pref_ringtone">Tono</string>
 	<string name="pref_ringtone_silent">Silencio</string>
 	<string name="pref_vibrate">Vibrar</string>

@@ -20,8 +20,7 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentStart="true"
 		android:layout_alignParentEnd="true"
-		android:layout_alignParentTop="true"
-		>
+		android:layout_alignParentTop="true">
 		<EditText
 			android:id="@+id/txtNombre"
 			android:layout_width="match_parent"
@@ -29,7 +28,8 @@
 			android:ems="10"
 			android:hint="@string/nombre"
 			android:inputType="textCapWords"
-			android:maxLines="1"/>
+			android:maxLines="1"
+			android:importantForAutofill="no" />
 	</com.google.android.material.textfield.TextInputLayout>
 
 
@@ -39,8 +39,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentEnd="true"
-		android:layout_alignParentStart="true"
-		>
+		android:layout_alignParentStart="true">
 		<EditText
 			android:id="@+id/txtDescripcion"
 			android:layout_width="match_parent"
@@ -48,37 +47,9 @@
 			android:hint="@string/descripcion"
 			android:ems="10"
 			android:inputType="textMultiLine"
-			android:maxLines="3"/>
+			android:maxLines="3"
+			android:importantForAutofill="no" />
 	</com.google.android.material.textfield.TextInputLayout>
-
-	<!-- TextView
-		android:id="@+id/lblFecha"
-		android:layout_below="@+id/txtDescripcion_"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textAppearance="?android:attr/textAppearanceSmall"
-		/ -->
-
-	<!--LinearLayout
-		android:id="@+id/layPeriodo"
-		android:layout_below="@+id/txtDescripcion_"
-		android:orientation="horizontal"
-		android:layout_centerHorizontal="true"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="10dp">
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceMedium"
-			android:text="@string/periodo"/>
-		<Spinner
-			android:id="@+id/spnTrackingDelay"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceLarge"
-			android:prompt="@string/periodo" />
-	</LinearLayout-->
 
 	<LinearLayout
 		android:id="@+id/layStartStop"
@@ -109,13 +80,10 @@
 	<fragment
 		android:id="@+id/map"
 		android:layout_below="@+id/layStartStop"
-		xmlns:android="http://schemas.android.com/apk/res/android"
-    	xmlns:tools="http://schemas.android.com/tools"
 		class="com.google.android.gms.maps.SupportMapFragment"
 		android:layout_marginTop="5dp"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		tools:context=".ActRuta"
-		/>
+		tools:context=".ActRuta" />
 
 </RelativeLayout>

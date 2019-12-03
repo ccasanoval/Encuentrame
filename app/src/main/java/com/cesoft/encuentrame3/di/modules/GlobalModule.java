@@ -7,14 +7,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
-
+import androidx.preference.PreferenceManager;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
 
 import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -25,6 +25,10 @@ public class GlobalModule
 	private final Application app;
 
 	public GlobalModule(Application application) { app = application; }
+
+	@Singleton
+	@Provides
+	Context provideApplicationContext() { return app.getApplicationContext(); }
 
 	@Singleton
 	@Provides

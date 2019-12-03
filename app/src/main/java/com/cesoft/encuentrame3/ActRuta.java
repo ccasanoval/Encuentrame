@@ -1,6 +1,7 @@
 package com.cesoft.encuentrame3;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Typeface;
 
 import android.graphics.Color;
@@ -39,6 +40,7 @@ import javax.inject.Inject;
 public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 {
 	private static final String TAG = ActRuta.class.getSimpleName();
+	private static final int ASK_GPS_ACTIVATION = 6968;
 
 	@Inject	Voice voice;
 	@Inject Util util;
@@ -48,18 +50,13 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, mapZoom));
 	}
 
-	//______________________________________________________________________________________________
-	private boolean oncePideActivarGPS = true;
-	private boolean oncePideActivarBateria = true;
-	private boolean oncePideActivarBateria2 = true;
-
 	private ImageButton btnStart;
 	private ImageButton btnStop;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		App.getComponent(getApplicationContext()).inject(this);
+		App.getComponent().inject(this);
 		super.ini(presenter, util, voice, new Ruta(), R.layout.act_ruta);
 		super.onCreate(savedInstanceState);
 
@@ -76,6 +73,16 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		initUI();
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.e(TAG, "onActivityResult() called with: " + "requestCode = [" + requestCode + "], resultCode = [" + resultCode + "], data = [" + data + "]");
+		if (requestCode == ASK_GPS_ACTIVATION) {
+			Log.e(TAG, "onActivityResult: ASK_GPS_ACTIVATION: resultCode=" + resultCode);
+		} else {
+			super.onActivityResult(requestCode, resultCode, data);
+		}
+	}
+
 	private void initStartButton() {
 		if(btnStart != null)
 		{
@@ -84,19 +91,10 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		}
 	}
 	private void startButtonListener() {
-		if(oncePideActivarBateria && util.pideBateria(ActRuta.this)) {
-			oncePideActivarBateria = false;
+		if(util.pideBateria(ActRuta.this)) {
 			return;
 		}
-		if(oncePideActivarBateria2 && util.pideBateriaDeNuevoSiEsNecesario(ActRuta.this)) {
-			oncePideActivarBateria2 = false;
-			return;
-		}
-		if(oncePideActivarGPS) {
-			util.pideActivarGPS(ActRuta.this, 6868);
-			oncePideActivarGPS = false;
-			return;
-		}
+		util.pideActivarGPS(ActRuta.this, ASK_GPS_ACTIVATION);
 		if(presenter.startTrackingRecord()) {
 			btnStart.setEnabled(false);
 			btnStart.setAlpha(0.5f);
@@ -141,7 +139,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		setTitle(getString(R.string.editar_ruta));
 		if(btnStart!=null)btnStart.setVisibility(View.GONE);
 		//si está isActivo muestra btnStop
-		String sId = util.getTrackingRoute();
+		String sId = util.getIdTrackingRoute();
 		View layStartStop = findViewById(R.id.layStartStop);
 		if( ! sId.equals(presenter.getId()))
 		{
@@ -197,6 +195,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	public void onMapReady(GoogleMap map)
 	{
 		super.onMapReady(map);
+		map.getUiSettings().setZoomControlsEnabled(true);
 
 		if(presenter.isNuevo())
 			map.moveCamera(CameraUpdateFactory.zoomTo(mapZoom));
@@ -263,14 +262,11 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 				break;
 			case R.string.voice_save:
 			case R.string.voice_start:
-				//presenter.guardar();
 				startButtonListener();
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_stop_route:
-				//String routeId = util.getTrackingRoute();//TODO: in presenter...?
-				//if( ! routeId.isEmpty())
-				util.setTrackingRoute("");
+				util.setTrackingRoute("", "");
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_stop_listening:
@@ -282,4 +278,14 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 		}
 	}
 
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		presenter.onBackPressed();
+	}
+	@Override
+	public void onResume() {
+		super.onResume();
+		presenter.onResume();
+	}
 }

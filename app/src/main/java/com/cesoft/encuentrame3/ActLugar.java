@@ -121,6 +121,7 @@ public class ActLugar extends VistaBase
 	public void onMapReady(GoogleMap map)
 	{
 		super.onMapReady(map);
+		map.getUiSettings().setZoomControlsEnabled(true);
 		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
 		setMarker();
 	}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="is_auto_arranque"
+        android:title="@string/pref_auto_arranque"/>
+
+    <!-- TODO: Exportar e importar -->
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="save_login"
+        android:title="@string/pref_save_login"/>
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="save_all_points"
+        android:title="@string/pref_save_all"/>
+
+    <EditTextPreference
+        android:defaultValue="30"
+        android:key="tracking_seconds"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:inputType="number"
+        android:title="@string/pref_tracking_seconds" />
+
+</PreferenceScreen>

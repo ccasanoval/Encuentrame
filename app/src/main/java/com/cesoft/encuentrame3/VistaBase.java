@@ -1,7 +1,6 @@
 package com.cesoft.encuentrame3;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -48,7 +46,7 @@ import java.util.List;
 public abstract class VistaBase
 		extends AppCompatActivity
 		implements PresenterBase.IVista, OnMapReadyCallback,
-		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
+		ResultCallback<Status> {
 	private static final String TAG = VistaBase.class.getSimpleName();
 	private static final int DELAY_LOCATION = 30 * 1000;
 
@@ -60,7 +58,6 @@ public abstract class VistaBase
 	protected EditText txtNombre;
 	protected EditText txtDescripcion;
 
-	protected GoogleApiClient googleApiClient;
 	protected LocationRequest locationRequest;
 	protected GoogleMap map;
 	protected int idLayout;
@@ -77,16 +74,7 @@ public abstract class VistaBase
 		this.idLayout = idLayout;
 	}
 
-	//----------------------------------------------------------------------------------------------
-	protected synchronized void buildGoogleApiClient() {
-		googleApiClient = new GoogleApiClient.Builder(this)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.addApi(LocationServices.API)
-				.build();
-		googleApiClient.connect();
-	}
-
+	/* TODO: meter en utiles y llamar al inicio para comprobar que tiene servicios...
 	protected boolean checkPlayServices() {
 		GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
 		int result = googleAPI.isGooglePlayServicesAvailable(this);
@@ -95,7 +83,7 @@ public abstract class VistaBase
 			return false;
 		}
 		return true;
-	}
+	}*/
 
 	protected void buildLocationRequest() {
 		locationRequest = new LocationRequest();
@@ -107,16 +95,16 @@ public abstract class VistaBase
 	protected void clean() {
 		stopTracking();
 		locationRequest = null;
-		googleApiClient.unregisterConnectionCallbacks(this);
-		googleApiClient.unregisterConnectionFailedListener(this);
-		googleApiClient.disconnect();
-		googleApiClient = null;
+//		googleApiClient.unregisterConnectionCallbacks(this);
+//		googleApiClient.unregisterConnectionFailedListener(this);
+//		googleApiClient.disconnect();
+//		googleApiClient = null;
 		if (map != null) {
 			map.clear();
 			map = null;
 		}
-		if (progressDialog != null) progressDialog.dismiss();
-		progressDialog = null;
+		//if (progressDialog != null) progressDialog.dismiss();
+		//progressDialog = null;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,9 +124,9 @@ public abstract class VistaBase
 		//----------------------------
 		try { setSupportActionBar(findViewById(R.id.toolbar)); } catch(Exception ignore){}//ActMaps no tiene toolbar
 		//
-		FloatingActionButton fab = findViewById(R.id.fabVolver);
-		if(fab != null) fab.setOnClickListener(view -> presenter.onSalir());
-		//
+		FloatingActionButton fab;
+//		fab = findViewById(R.id.fabVolver);
+//		if(fab != null) fab.setOnClickListener(view -> presenter.onSalir());
 		fab = findViewById(R.id.fabBuscar);
 		if(fab != null) fab.setOnClickListener(view -> util.onBuscar(this, map, mapZoom));
 
@@ -180,7 +168,7 @@ public abstract class VistaBase
 		super.onStart();
 		EventBus.getDefault().register(this);
 		presenter.subscribe(this);
-		if(checkPlayServices()) buildGoogleApiClient();
+		//if(checkPlayServices()) buildGoogleApiClient();
 		buildLocationRequest();
 		SupportMapFragment smf = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 		if(smf != null)
@@ -214,16 +202,16 @@ public abstract class VistaBase
 
 
 	private void startTracking() {
-        if (googleApiClient == null || !googleApiClient.isConnected())return;
+        //if (googleApiClient == null || !googleApiClient.isConnected())return;
 		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+		&& ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 		    return;
 		locationCallback = createLocationCallback();
 		fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
 	}
 
 	private void stopTracking() {
-        if (googleApiClient == null || !googleApiClient.isConnected())return;
+        //if (googleApiClient == null || !googleApiClient.isConnected())return;
 		if(locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback);
 		locationCallback = null;
 	}
@@ -244,19 +232,23 @@ public abstract class VistaBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private ProgressDialog progressDialog = null;
+	//private ProgressDialog progressDialog = null;
 	@Override public void iniEspera() {
-		progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+		//progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
+		//TODO: UI for user to know work is in progress
+		android.util.Log.e(TAG, "iniEspera--------------------------------------------");
 	}
 	@Override public void finEspera() {
-		if(progressDialog !=null) progressDialog.dismiss();
+		//if(progressDialog !=null) progressDialog.dismiss();
+		//TODO: UI for user to know work in progress is finish
+		android.util.Log.e(TAG, "finEspera--------------------------------------------");
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// OnConnectionFailedListener : https://developers.google.com/android/reference/com/google/android/gms/common/ConnectionResult
 	//----------------------------------------------------------------------------------------------
-	@Override public void onConnectionFailed(@NonNull ConnectionResult result) {
+	/*@Override public void onConnectionFailed(@NonNull ConnectionResult result) {
 		Log.e(TAG, "onConnectionFailed:e:*****************************************************"+result.getErrorCode());
 		toast(R.string.err_conn_google, result.getErrorMessage());
 	}
@@ -266,7 +258,7 @@ public abstract class VistaBase
 	@Override public void onConnectionSuspended(int arg0) {
 		if(googleApiClient != null)
 			googleApiClient.connect();
-	}
+	}*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// ResultCallback
 	//----------------------------------------------------------------------------------------------
@@ -297,6 +289,7 @@ public abstract class VistaBase
 	public void onMapReady(GoogleMap googleMap)
 	{
 		map = googleMap;
+		map.getUiSettings().setZoomControlsEnabled(true);
 		try { map.setMyLocationEnabled(true);} catch(SecurityException ignored){}
 		//https://developers.google.com/maps/documentation/android-api/map?hl=es-419
 		//map.setMapType(GoogleMap.MAP_TYPE_NORMAL y GoogleMap.MAP_TYPE_SATELLITE

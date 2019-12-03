@@ -25,11 +25,11 @@ public class RutaArrayAdapter extends RecyclerView.Adapter<ItemViewHolder>
 
 	@Inject	Util util;
 
-	public RutaArrayAdapter(Context context, Ruta[] rutas, IListaItemClick inter)
+	public RutaArrayAdapter(Ruta[] rutas, IListaItemClick inter)
 	{
 		this.rutas = rutas;
 		this.inter = inter;
-		util = App.getComponent(context).util();
+		util = App.getComponent().util();
 	}
 
 	@NonNull

@@ -66,7 +66,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_buscar);
 
-		App.getComponent(getApplicationContext()).inject(this);
+		App.getComponent().inject(this);
 
 		SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
 		if(mapFragment != null)
@@ -74,9 +74,9 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		FloatingActionButton fab = findViewById(R.id.fabVolver);
-		if(fab != null)
-			fab.setOnClickListener(view -> finish());
+//		FloatingActionButton fab = findViewById(R.id.fabVolver);
+//		if(fab != null)
+//			fab.setOnClickListener(view -> finish());
 
 		//------------------------------------------------------------------------------------------
 		txtNombre = findViewById(R.id.txtNombre);
@@ -261,8 +261,9 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	public void onMapReady(GoogleMap googleMap)
 	{
 		map = googleMap;
-		try{
-			map.setMyLocationEnabled(true);}catch(SecurityException se){Log.e(TAG, String.format("onMapReady:setMyLocationEnabled:e:%s",se), se);}
+		map.getUiSettings().setZoomControlsEnabled(true);
+		try{ map.setMyLocationEnabled(true); }
+		catch(SecurityException se){Log.e(TAG, String.format("onMapReady:setMyLocationEnabled:e:%s",se), se);}
 		Location loc = util.getLocation();
 		if(loc == null)return;
 		map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 15));

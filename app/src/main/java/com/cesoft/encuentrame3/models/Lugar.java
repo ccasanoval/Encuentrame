@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 import com.bumptech.glide.Glide;
 
@@ -50,10 +51,10 @@ public class Lugar extends Objeto
 	private static final String TAG = Lugar.class.getSimpleName();
 	public static final String NOMBRE = "lugar";
 	private static DatabaseReference newFirebase() {
-		return Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(NOMBRE);
+		return Fire.newFirebase().child(NOMBRE);
 	}
 	private static GeoFire newGeoFire() {
-		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
+		return new GeoFire(Fire.newFirebase().child(GEO).child(NOMBRE));
 	}
 	@Exclude private DatabaseReference datos;
 
@@ -67,7 +68,7 @@ public class Lugar extends Objeto
 	public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Lugar{id='%s', nombre='%s', descripcion='%s', latitud='%f', longitud='%f', fecha='%s'}",
-				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fecha));
+				getId(), (nombre==null?"":nombre), (descripcion==null?"":descripcion), latitud, longitud, DATE_FORMAT.format(fechaLong));
 	}
 
 	//// FIREBASE
@@ -129,7 +130,11 @@ public class Lugar extends Objeto
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren()) {
 					try {
-						aLugares.add(o.getValue(Lugar.class));
+						Lugar lugar = o.getValue(Lugar.class);
+						if(lugar != null) {
+							lugar.checkDateAndCorrect();
+							aLugares.add(lugar);
+						}
 					}
 					catch(Exception e) {
 						Log.e(TAG, "getLista:onDataChange:e:-----------------------------------",e);
@@ -175,9 +180,10 @@ public class Lugar extends Objeto
 				ArrayList<Lugar> aLugares = new ArrayList<>((int)n);
 				for(DataSnapshot o : data.getChildren())
 				{
-					Lugar l = o.getValue(Lugar.class);
-					if(l != null && ! l.pasaFiltro(filtro))continue;
-					aLugares.add(l);
+					Lugar lugar = o.getValue(Lugar.class);
+					if(lugar == null || ! lugar.pasaFiltro(filtro))continue;
+					lugar.checkDateAndCorrect();
+					aLugares.add(lugar);
 				}
 				listener.onDatos(reverse(aLugares));
 			}
@@ -289,11 +295,9 @@ public class Lugar extends Objeto
 			if(datGeo == null) datGeo = newGeoFire();
 Log.e(TAG, "delGeo:-------------------------------------------------- "+datos.getKey()+" : "+datGeo.getDatabaseReference());
 			datGeo.removeLocation(datos.getKey(), (key, error) -> {
-				if(error != null)
-					Log.e(TAG, "delGeo:e:"+key+" - "+error);
-				else
-					Log.e(TAG, "delGeo:OK:"+key);
-				});
+				if(error != null)	Log.e(TAG, "delGeo:e:"+key+" - "+error);
+				//else				Log.e(TAG, "delGeo:OK:"+key);
+			});
 		}
 		catch(Exception e) {
 			Log.e(TAG, "delGeo:e:", e);
@@ -318,8 +322,7 @@ Log.e(TAG, "delGeo:-------------------------------------------------- "+datos.ge
 			datos = newFirebase().child(getId());
 		}
 		if(datos.getKey() == null)return;
-		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-				.child(Login.getCurrentUserID()).child(NOMBRE).child(datos.getKey());
+		StorageReference storageRef = Fire.newStorage().child(NOMBRE).child(datos.getKey());
 		storageRef.delete().addOnCompleteListener(task ->
 				Log.e(TAG, "uploadImagen:del anterior:addOnCompleteListener:"+task.toString()));
 
@@ -354,8 +357,7 @@ Log.e(TAG, "delGeo:-------------------------------------------------- "+datos.ge
 			datos = newFirebase().child(getId());
 		}
 		if(datos.getKey() == null)return;
-		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-				.child(Login.getCurrentUserID()).child(NOMBRE).child(datos.getKey());
+		StorageReference storageRef = Fire.newStorage().child(NOMBRE).child(datos.getKey());
 
 		OnSuccessListener<Uri> lisOk = uri ->
 		{
@@ -395,8 +397,7 @@ Log.e(TAG, "delGeo:-------------------------------------------------- "+datos.ge
 			datos = newFirebase().child(getId());
 		}
 		if(datos.getKey() == null)return;
-		StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-				.child(Login.getCurrentUserID()).child(NOMBRE).child(datos.getKey());
+		StorageReference storageRef = Fire.newStorage().child(NOMBRE).child(datos.getKey());
 		storageRef.delete().addOnCompleteListener(task -> Log.e(TAG, "delImg:addOnCompleteListener:"+task.toString()));
 	}
 	// IMAGEN

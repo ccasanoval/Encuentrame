@@ -90,8 +90,8 @@ public class FrgMain extends Fragment implements IListaItemClick
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		if(App.getComponent(getContext()) != null)
-			App.getComponent(getContext()).inject(this);
+		if(App.getComponent() != null)
+			App.getComponent().inject(this);
 
 		Bundle args = getArguments();
 		if(args != null)
@@ -350,7 +350,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 				{
 					scrollState = layoutManager.onSaveInstanceState();
 					layoutManager.onRestoreInstanceState(scrollState);
-					RutaArrayAdapter r = new RutaArrayAdapter(rootView.getContext(), aRutas,FrgMain.this);
+					RutaArrayAdapter r = new RutaArrayAdapter(aRutas,FrgMain.this);
 					listView.setAdapter(r);
 					listView.setContentDescription(getString(R.string.rutas));//Para Espresso
 					r.notifyDataSetChanged();
@@ -418,7 +418,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 		if(filtro.isOn())
 		{
 			checkFechas();
-			Ruta.getLista(lisRuta, filtro, util.getTrackingRoute());
+			Ruta.getLista(lisRuta, filtro, util.getIdTrackingRoute());
 		}
 		else
 			Ruta.getLista(lisRuta);

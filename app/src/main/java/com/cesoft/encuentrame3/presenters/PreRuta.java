@@ -7,7 +7,7 @@ import android.graphics.Color;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
+import com.cesoft.encuentrame3.svc.GeotrackingService;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
@@ -86,6 +86,8 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onDatos(String id)
 			{
+Log.e(TAG, "onDatos---------------------------------------------------------------------isWorking="+isWorking);
+				GeotrackingService.start(app, pref.getTrackingDelay());
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -95,16 +97,17 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onError(String err, int code)
 			{
+Log.e(TAG, "onError---------------------------------------------------------------------isWorking="+isWorking);
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_guardar, err);
 				}
 			}
-			@Override public void onTimeout() {
+			@Override public void onTimeout()
+			{
+Log.e(TAG, "onTimeout---------------------------------------------------------------------isWorking="+isWorking);
 				if( ! isWorking)return;
-				isWorking = false;
-
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -118,9 +121,7 @@ public class PreRuta extends PresenterBase
 	{
 		o.setNombre(view.getTextNombre());
 		o.setDescripcion(view.getTextDescripcion());
-		((Ruta) o).guardar(res);
-        // Start tracking
-		GeoTrackingJobService.start(view.getAct().getApplicationContext(), pref.getTrackingDelay());
+		((Ruta)o).guardar(res);
 	}
 	//----------------------------------------------------------------------------------------------
 	private boolean isErrorEnCampos()
@@ -144,41 +145,48 @@ public class PreRuta extends PresenterBase
 	{
 		view.iniEspera();
 
-		if(o.getId() != null && o.getId().equals(util.getTrackingRoute()))
-			util.setTrackingRoute("");
-		((Ruta) o).eliminar(new Fire.CompletadoListener()
-		{
-			@Override
-			protected void onDatos(String id)
-			{
-				isEliminar = true;
-				if(view != null) {
-					view.finEspera();
-					util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
-				}
-			}
-			@Override
-			protected void onError(String err, int code)
-			{
-				isEliminar = true;
-				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
-				if(view != null) {
-					view.finEspera();
-					view.toast(R.string.error_eliminar, err);
-				}
-			}
-			@Override
-			public void onTimeout() {
-				if( ! isWorking)return;
-				isWorking = false;
+		if(o.getId() != null && o.getId().equals(util.getIdTrackingRoute()))
+			util.setTrackingRoute("", "");
 
-				isEliminar = true;
-				if(view != null) {
-					view.finEspera();
-					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
-				}
+		onBackPressed = false;
+		new Thread() {
+			@Override public void run() {
+				((Ruta)o).eliminar(new Fire.CompletadoListener()
+				{
+					@Override
+					protected void onDatos(String id)
+					{
+						isEliminar = true;
+						if(view != null) {
+							view.finEspera();
+							Log.e(TAG, "eliminar:onDatos-------------------------------------------- "+onBackPressed);
+							if( ! onBackPressed)
+								util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
+						}
+					}
+					@Override
+					protected void onError(String err, int code)
+					{
+						isEliminar = true;
+						Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
+						if(view != null) {
+							view.finEspera();
+							view.toast(R.string.error_eliminar, err);
+						}
+					}
+					@Override
+					public void onTimeout() {
+						if( ! isWorking)return;
+						isEliminar = true;
+						if(view != null) {
+							view.finEspera();
+							if( ! onBackPressed)
+								util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+						}
+					}
+				});
 			}
-		});
+		}.start();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -186,22 +194,25 @@ public class PreRuta extends PresenterBase
 	{
 		if(isErrorEnCampos())return false;
 		view.iniEspera();
+		onBackPressed = false;
 		guardar(new Fire.CompletadoListener()
 		{
 			@Override
 			public void onDatos(String id)
 			{
-				util.setTrackingRoute(o.getId());
-                GeoTrackingJobService.start(app.getApplicationContext(), pref.getTrackingDelay());
+Log.e(TAG, "startTrackingRecord:onDatos---------------------------------------------------------------------isWorking="+isWorking);
+				util.setTrackingRoute(o.id, o.nombre);
 				if(view != null) {
 					view.finEspera();
-					util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
+					if(!onBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
 				}
+				GeotrackingService.start(app, pref.getTrackingDelay());
 			}
 			@Override
 			public void onError(String err, int code)
 			{
-				util.setTrackingRoute("");
+				util.setTrackingRoute("", "");
 				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------- "+err);
 				if(view != null) {
 					view.finEspera();
@@ -211,13 +222,13 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onTimeout() {
 				if( ! isWorking)return;
-				isWorking = false;
-
-				util.setTrackingRoute(o.getId());
-				GeoTrackingJobService.start(app.getApplicationContext(), pref.getTrackingDelay());
+Log.e(TAG, "startTrackingRecord:onTimeout---------------------------------------------------------------------");
+				util.setTrackingRoute(o.id, o.nombre);
+				GeotrackingService.start(app, pref.getTrackingDelay());
 				if(view != null) {
 					view.finEspera();
-					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+					if(!onBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
 		});
@@ -226,7 +237,7 @@ public class PreRuta extends PresenterBase
 	//----------------------------------------------------------------------------------------------
 	public void stopTrackingRecord()
 	{
-		util.setTrackingRoute("");
+		util.setTrackingRoute("", "");
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -315,10 +326,10 @@ public class PreRuta extends PresenterBase
 					sVelMax = getMaxVelociodad(fMaxVel);
 
 					if(aData.length > 0) {
-						long t = aData[aData.length - 1].getFecha().getTime() - aData[0].getFecha().getTime();
+						long t = aData[aData.length - 1].getFecha() - aData[0].getFecha();
 						sTiempo = util.formatDiffTimes(
-								new DateTime(aData[0].getFecha().getTime()),        //Time Ini
-								new DateTime(aData[aData.length - 1].getFecha()));    //Time End
+								new DateTime(aData[0].getFecha()),						//Time Ini
+								new DateTime(aData[aData.length - 1].getFecha()));		//Time End
 
 						if(t > 1000)//No calcular velocidad media si tiempo < 1s
 						{
@@ -422,8 +433,8 @@ public class PreRuta extends PresenterBase
 			else if(pto == gpFin)snippet = fin;
 			else snippet = app.getString(R.string.info_time);
 
-			Date date = pto.getFecha();
-			if(date != null)snippet += util.formatFechaTiempo(date);
+			Date date = new Date(pto.getFecha());
+			snippet += util.formatFechaTiempo(date);
 			snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_prec), pto.getPrecision());
 			if(gpAnt != null)
 			{

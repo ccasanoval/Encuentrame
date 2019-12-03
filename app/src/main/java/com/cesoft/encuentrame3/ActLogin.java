@@ -1,6 +1,5 @@
 package com.cesoft.encuentrame3;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -62,10 +61,11 @@ public class ActLogin extends AppCompatActivity
 	private class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
 
-		public SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
+		SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
 			super(fm, behavior);
 		}
 
+		@NonNull
 		@Override
 		public Fragment getItem(int position)
 		{
@@ -96,15 +96,4 @@ public class ActLogin extends AppCompatActivity
 		startActivity(intent);
 		finish();
 	}
-
-	private ProgressDialog progressDialog;
-	public void iniEsperaLogin()
-	{
-		progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
-	}
-	public void finEsperaLogin()
-	{
-		if(progressDialog!=null)progressDialog.dismiss();
-	}
-
 }

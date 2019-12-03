@@ -23,13 +23,13 @@
 
 	<include layout="@layout/act_aviso_cont"/>
 
-	<com.google.android.material.floatingactionbutton.FloatingActionButton
+	<!-- com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/fabVolver"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom|end"
 		android:layout_margin="@dimen/fab_margin"
-		android:src="@android:drawable/ic_menu_revert"/>
+		android:src="@android:drawable/ic_menu_revert"/ -->
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/fabBuscar"
 		android:layout_width="wrap_content"

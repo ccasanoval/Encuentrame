@@ -84,6 +84,7 @@ public class PreLugar extends PresenterBase
 			@Override
 			protected void onTimeout()
 			{
+				if( ! isWorking)return;
 				Log.e(TAG, "guardar:timeout");
 				bGuardar = true;
 				if(view != null) {
@@ -124,6 +125,7 @@ public class PreLugar extends PresenterBase
 			@Override
 			protected void onTimeout()
 			{
+				if( ! isWorking)return;
 				Log.e(TAG, "eliminar:timeout");
 				isEliminar = true;
 				if(view != null) {

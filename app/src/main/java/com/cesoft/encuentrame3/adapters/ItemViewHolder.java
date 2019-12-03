@@ -13,6 +13,7 @@ import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Constantes;
+import com.cesoft.encuentrame3.util.Log;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,10 +21,10 @@ import com.cesoft.encuentrame3.util.Constantes;
 public class ItemViewHolder extends RecyclerView.ViewHolder {
 
     protected TextView txtNombre;
-    protected TextView txtFecha;
-    protected IListaItemClick inter;
+    private TextView txtFecha;
+    private IListaItemClick inter;
 
-    public ItemViewHolder(@NonNull View itemView, IListaItemClick inter) {
+    ItemViewHolder(@NonNull View itemView, IListaItemClick inter) {
         super(itemView);
         this.inter = inter;
         txtNombre = itemView.findViewById(R.id.txtNombre);
@@ -32,8 +33,7 @@ public class ItemViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(Objeto obj) {
         txtNombre.setText(obj.nombre);
-        txtFecha.setText(Objeto.DATE_FORMAT.format(obj.fecha));
-
+        txtFecha.setText(Objeto.DATE_FORMAT.format(obj.fechaLong));
         final int type;
         if(obj instanceof Lugar) type = Constantes.LUGARES;
         else if(obj instanceof Ruta) type = Constantes.RUTAS;

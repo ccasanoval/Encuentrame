@@ -15,14 +15,17 @@ import java.util.List;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 21/03/2016.
-//En lugar de CesServiceAvisoGeo se utiliza este BroadcastReceiver porque dicen es mas fiable
+//
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
 	private static final String TAG = CesGeofenceReceiver.class.getSimpleName();
 
+	// On Android 8.0 (API level 26) and higher, if an app is running in the background while
+	// monitoring a geofence, then the device responds to geofencing events every couple of minutes
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
+Log.w(TAG, "CesGeofenceReceiver:onReceive:-----------***************************--------------------------000");
 		Util util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 		GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 		if( ! geofencingEvent.hasError())

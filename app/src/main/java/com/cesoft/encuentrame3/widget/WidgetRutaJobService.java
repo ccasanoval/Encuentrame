@@ -55,14 +55,12 @@ public class WidgetRutaJobService extends JobService {
 
     @Inject Login login;
     @Inject Util util;
-    //@Inject JobScheduler jobScheduler;
     @Inject public WidgetRutaJobService() { }
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStartJob *************************");
-        Context context = getApplicationContext();
-        App.getComponent(context).inject(this);
+        App.getComponent().inject(this);
 
         new Thread(() -> {
             if( ! login.isLogged()) {
@@ -93,7 +91,7 @@ public class WidgetRutaJobService extends JobService {
 
     private long payLoad()
     {
-        String idRuta = util.getTrackingRoute();
+        String idRuta = util.getIdTrackingRoute();
         if(idRuta.isEmpty()) {
             borrarRuta();
             return WIDGET_DELAY_LONG;
@@ -117,7 +115,7 @@ public class WidgetRutaJobService extends JobService {
     {
         try
         {
-            String idRuta = util.getTrackingRoute();
+            String idRuta = util.getIdTrackingRoute();
             Ruta.getById(idRuta, new Fire.SimpleListener<Ruta>()
             {
                 @Override

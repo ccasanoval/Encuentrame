@@ -9,6 +9,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 
 import org.mockito.Mockito;
@@ -64,9 +65,9 @@ public class GlobalModuleTest
 
 	@Singleton
 	@Provides
-	Util provideUtil(Application app, SharedPreferences sp, LocationManager lm, NotificationManager nm, PowerManager pm)
+	Util provideUtil(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm)
 	{
-		return new Util(app, sp, lm, nm, pm);
+		return new Util(app, pref, lm, nm, pm);
 	}
 	@Singleton
 	@Provides

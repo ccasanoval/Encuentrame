@@ -17,7 +17,7 @@
 	] -->
 <resources>
 	<!-- App -->
-	<string name="app_name">Find me! Fire</string>
+	<string name="app_name">Find me!</string>
 	<string name="app_lice" translatable="false">2016 Cesar Casanova \n(Creative Commons NC-SA)</string>
 	<string name="app_vers" translatable="false">2016 - Ver. %s</string>
 	<string name="app_lice_tit">Licence</string>
@@ -30,21 +30,17 @@
 	<string name="activo">Active</string>
 	<string name="aviso">Alert message</string>
 	<string name="cargando">Loading…</string>
-	<string name="categoria">Category</string>
 	<string name="clave">Password</string>
 	<string name="clave_confirmar">Repeat password</string>
 	<string name="config">Settings</string>
 	<string name="privacy_policy">Privacy Policy</string>
-	<string name="configuracion">Settings</string>
-	<string name="cuenta">Login</string>
 	<string name="descripcion">Description</string>
 	<string name="direccion">Address…</string>
 	<string name="estadisticas">Statistics</string>
-	<string name="estadisticas_format" formatted="false">Length:\t\t\t\t\t\t%s\nTime:\t\t\t\t\t\t\t%s\nAvg Speed:\t\t\t\t%s\nMin Speed:\t\t\t\t%s\nMax Speed:\t\t\t%s\nMin Altitude:\t\t%s\nMax Altitude:\t\t%s\n</string>
+	<string name="estadisticas_format" formatted="false">Length:\t\t\t\t\t\t%1$s\nTime:\t\t\t\t\t\t\t%2$s\nAvg Speed:\t\t\t\t%3$s\nMin Speed:\t\t\t\t%4$s\nMax Speed:\t\t\t%5$s\nMin Altitude:\t\t%6$s\nMax Altitude:\t\t%7$s\n</string>
 	<string name="en_zona_aviso">Inside Alert Zone</string>
 	<string name="enter_lbl">Input login</string>
 	<string name="nombre">Name</string>
-	<string name="periodo">Period</string>
 	<string name="radio">Radius</string>
 	<string name="lista_vacia">Empty list…</string>
 	<string name="voz_onoff">Voice</string>
@@ -53,15 +49,16 @@
 	<string name="on_timeout">Task timeout, check Internet connection</string>
 
 	<!-- Actions -->
-	<string name="enter">Enter</string>
 	<string name="guardar">Save</string>
 	<string name="eliminar">Remove</string>
 	<string name="cancelar">Cancel</string>
-	<string name="ver_mapa">Show map</string>
-	<string name="salir">Exit anyway</string>
 	<string name="start">Start</string>
 	<string name="stop">Stop</string>
+	<string name="salir">Exit anyway</string>
+	<string name="ver_mapa">Show map</string>
 	<string name="buscar">Search</string>
+	<string name="stop_geofencing">Stop geofencing</string>
+	<string name="start_geofencing">Start geofencing</string>
 	<string name="actualizar_posicion">Refresh location</string>
 
 	<!-- Items -->
@@ -76,14 +73,12 @@
 	<string name="editar_ruta">Edit Route</string>
 
 	<!-- Fecha -->
-	<string name="fecha">Date</string>
 	<string name="fecha_desde">From</string>
 	<string name="fecha_hasta">to</string>
 	<string name="fin">End: </string>
 	<string name="ini">Ini: </string>
 
 	<!-- Nuevo -->
-	<string name="nuevo">New</string>
 	<string name="nueva_ruta">New Route</string>
 	<string name="nuevo_aviso">New Alert</string>
 	<string name="nuevo_lugar">New Point</string>
@@ -101,20 +96,17 @@
 	<!-- Imagen -->
 	<string name="imagen">Picture</string>
 	<string name="tomar_imagen">Take a picture</string>
-	<string name="guardar_imagen">Save the picture</string>
 
 	<!-- Widget -->
 	<string name="widget_lugar">Points</string>
 	<string name="widget_ruta">Routes</string>
 
 	<!-- Recover -->
-	<string name="recover">Reset</string>
 	<string name="recover_ko">There was a fault while \n resetting the user\'s account</string>
 	<string name="recover_lbl">Reset your password</string>
 	<string name="recover_ok">An email to recover your \n password was sent to you</string>
 
 	<!-- Register -->
-	<string name="register">Register</string>
 	<string name="register_bad_pass">Notice that both passwords must be equal!</string>
 	<string name="register_lbl">Create a new account</string>
 	<string name="register_ok">You have just registered! \n Now check your email</string>
@@ -122,7 +114,6 @@
 
 	<!-- Error -->
 	<string name="err_get_ruta_pts">Failed to retrieve route data</string>
-	<string name="err_conn_google">Failed to connect to Google services: %s</string>
 	<string name="no_camera_hardware">There is no camera hardware in this device</string>
 	<string name="error_img_path">Failed trying to get the image path</string>
 	<string name="error_eliminar">Fault at deleting: %s</string>
@@ -136,7 +127,6 @@
 	<string name="ok_guardar_aviso">The Alert was saved</string>
 	<string name="ok_guardar_lugar">The Point was saved</string>
 	<string name="ok_guardar_ruta">The Route was saved</string>
-	<string name="ok_stop_tracking">The route ends here</string>
 
 	<!-- Ask -->
 	<string name="seguro_eliminar">Are you sure you want to remove?</string>
@@ -150,15 +140,11 @@
 	<string name="sin_lugar">A location must be stablished…</string>
 	<string name="sin_nombre">A name must be stablished…</string>
 	<string name="sin_posicion">No location</string>
-	<string name="sin_camara">There is no camera on this device</string>
-	<string name="sin_permiso_camara">Camera permission not granted</string>
 	<string name="sin_filtro">Search parameters removed</string>
 
 	<!-- Login -->
 	<string name="login">Log in</string>
 	<string name="login_error">Wrong user or password</string>
-	<string name="login_timeout">Login timeout</string>
-	<string name="login_fisrt">Log in first</string>
 	<string name="login_ok">Welcome %s</string>
 
 	<!-- Estado -->
@@ -197,7 +183,6 @@
 	<string name="pref_header_notifications_sum">Alerts settings…</string>
 	<string name="pref_ringtone">Ringtone</string>
 	<string name="pref_ringtone_silent">Silent</string>
-	<string name="pref_msg_notif_type">Use PopUps Notif.</string>
 	<string name="pref_vibrate">Vibrate</string>
 	<string name="pref_lights">Lights</string>
 	<string name="pref_header_voice">Voice commands</string>

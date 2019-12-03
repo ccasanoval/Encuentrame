@@ -19,10 +19,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-@Singleton
 public class ActividadIntentService extends IntentService {
     protected static final String TAG = ActividadIntentService.class.getSimpleName();
 
@@ -48,14 +44,13 @@ public class ActividadIntentService extends IntentService {
     }
 
 
-    @Inject Login login;
-    @Inject public ActividadIntentService() { super(TAG); }
+    public ActividadIntentService() { super(TAG); }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Context appContext = getApplicationContext();
-        App.getComponent(appContext).inject(this);
+        Login login = App.getComponent().login();
         if( ! login.isLogged()) {
             Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
             stop(appContext);

@@ -20,7 +20,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.cesoft.encuentrame3.Login;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
@@ -30,16 +29,8 @@ public class Aviso extends Objeto
 {
 	private static final String TAG =  Aviso.class.getSimpleName();
 	public static final String NOMBRE = "aviso";
-	private static DatabaseReference newFirebase()
-	{
-		return Login.getDBInstance()
-				.getReference()
-				.child(Login.getCurrentUserID())
-				.child(NOMBRE);
-	}
-	private static GeoFire newGeoFire() {
-		return new GeoFire(Login.getDBInstance().getReference().child(Login.getCurrentUserID()).child(GEO).child(NOMBRE));
-	}
+	private static DatabaseReference newFirebase() { return Fire.newFirebase().child(NOMBRE); }
+	private static GeoFire newGeoFire() { return new GeoFire(Fire.newFirebase().child(GEO).child(NOMBRE)); }
 	@Exclude private DatabaseReference datos;
 
 	private static final int DELAY = 5000;
@@ -65,7 +56,7 @@ public class Aviso extends Objeto
 	@Override public String toString()
 	{
 		return String.format(java.util.Locale.ENGLISH, "Aviso{id='%s', nombre='%s', descripcion='%s', fecha='%s', latitud='%f', longitud='%f', radio='%f', isActivo='%b'}",
-				getId(), nombre, descripcion, DATE_FORMAT.format(fecha), latitud, longitud, radio, isActivo);
+				getId(), nombre, descripcion, DATE_FORMAT.format(fechaLong), latitud, longitud, radio, isActivo);
 	}
 
 	//______________________________________________________________________________________________
@@ -126,7 +117,7 @@ public class Aviso extends Objeto
 		/// Just in case there's no Internet connection...
 		handler.postDelayed(listener::onTimeout, DELAY);
 	}
-	public void guardar(Fire.CompletadoListener listener)//DatabaseReference.CompletionListener listener)
+	public void guardar(Fire.CompletadoListener listener)
 	{
 		if(datos != null)
 		{
@@ -184,7 +175,11 @@ public class Aviso extends Objeto
 			{
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)data.getChildrenCount());
 				for(DataSnapshot o : data.getChildren()) {
-					aAvisos.add(o.getValue(Aviso.class));
+					Aviso aviso = o.getValue(Aviso.class);
+					if(aviso != null) {
+						aviso.checkDateAndCorrect();
+						aAvisos.add(aviso);
+					}
 				}
 				listener.onDatos(reverse(aAvisos));
 			}
@@ -208,8 +203,13 @@ public class Aviso extends Objeto
 			{
 				long n = data.getChildrenCount();
 				ArrayList<Aviso> aAvisos = new ArrayList<>((int)n);
-				for(DataSnapshot o : data.getChildren())
-					aAvisos.add(o.getValue(Aviso.class));
+				for(DataSnapshot o : data.getChildren()) {
+					Aviso aviso = o.getValue(Aviso.class);
+					if(aviso != null) {
+						aviso.checkDateAndCorrect();
+						aAvisos.add(aviso);
+					}
+				}
 				listener.onDatos(reverse(aAvisos));
 			}
 			@Override
@@ -347,10 +347,8 @@ public class Aviso extends Objeto
 		}
 		if(datGeo == null) datGeo = newGeoFire();
 		datGeo.removeLocation(datos.getKey(), (key, error) -> {
-			if(error != null)
-				Log.e(TAG, "delGeo:e:"+key+" - "+error);
-			else
-				Log.e(TAG, "delGeo:OK:"+key);
+			if(error != null)	Log.e(TAG, "delGeo:e:"+key+" - "+error);
+			//else				Log.e(TAG, "delGeo:OK:"+key);
 		});
 	}
 	// GEOFIRE

@@ -15,9 +15,7 @@ import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.adapters.RutaViewHolder;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
-import com.cesoft.encuentrame3.svc.ActividadIntentService;
-import com.cesoft.encuentrame3.svc.GeoTrackingJobService;
-import com.cesoft.encuentrame3.svc.LoadGeofenceJobService;
+import com.cesoft.encuentrame3.svc.CesGeofenceStore;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
@@ -41,9 +39,6 @@ public interface GlobalComponent
 	void inject(ActWidgetNuevoLugar v);
 	void inject(RutaArrayAdapter v);
 	void inject(FrgMain v);
-	void inject(LoadGeofenceJobService v);
-	void inject(GeoTrackingJobService v);
-	void inject(ActividadIntentService v);
 	void inject(WidgetRutaJobService v);
 	void inject(RutaViewHolder v);
 
@@ -51,4 +46,5 @@ public interface GlobalComponent
 	Voice voice();
 	Login login();
 	Preferencias pref();
+	CesGeofenceStore geofence();
 }

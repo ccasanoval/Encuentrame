@@ -2,22 +2,22 @@ package com.cesoft.encuentrame3.svc;
 
 import java.util.ArrayList;
 
-import android.app.Application;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-
+import com.cesoft.encuentrame3.models.Aviso;
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD_GEOFENCE;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 04/02/2016
@@ -30,85 +30,77 @@ import com.google.android.gms.location.LocationServices;
 
 //https://www.raywenderlich.com/103540/geofences-googleapiclient
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListener
+@Singleton
+public class CesGeofenceStore
 {
 	private static final String TAG = CesGeofenceStore.class.getSimpleName();
 
 	private PendingIntent pendingIntent;
-	private ArrayList<Geofence> aGeofences;
-	private GeofencingClient geoFenceClient;
-	private Application app;
+	private GeofencingClient geofencingClient;
+	private Context context;
+	private ArrayList<Geofence> geofenceList = new ArrayList<>();
 
 	//----------------------------------------------------------------------------------------------
-	CesGeofenceStore(Application app, ArrayList<Geofence> geofences)
+	@Inject
+	CesGeofenceStore(Context context)
 	{
+		Log.e(TAG, "CONSTRUCTOR:----------------------------"+context);
 		try
 		{
-			this.app = app;
-			aGeofences = new ArrayList<>(geofences);
-			new GoogleApiClient
-					.Builder(app)
-					.addApi(LocationServices.API)
-					.addConnectionCallbacks(this)
-					.addOnConnectionFailedListener(this)
-					.build()
-					.connect();
-			geoFenceClient = LocationServices.getGeofencingClient(app);
+			this.context = context;
+			geofencingClient = LocationServices.getGeofencingClient(context);
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "CONSTRUCTOR:e:---------geofences:"+geofences.size()+"---------------------", e);
+			Log.e(TAG, "CONSTRUCTOR:e:-----------------------------context="+context, e);
 		}
 	}
 
-	//// 4 OnConnectionFailedListener
-	@Override
-	public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+	private void update(ArrayList<Geofence> geofences)
 	{
-		Log.e(TAG, "CesGeofenceStore:e:Connection failed");
-	}
-	//// 4 ConnectionCallbacks
-	@Override
-	public void onConnected(Bundle connectionHint)
-	{
-		// We're connected, now we need to create a GeofencingRequest with the geofences we have stored.
-		if( ! aGeofences.isEmpty())
-		{
-			try
-			{
-				GeofencingRequest geofencingRequest = new GeofencingRequest.Builder().addGeofences(aGeofences).build();
-				pendingIntent = createRequestPendingIntent();
-				if(pendingIntent == null)return;
+		Log.e(TAG, "update:-----------------------------"+geofences.hashCode()+" N="+geofences.size());
 
-				// Submitting the request to monitor geofences.
-				geoFenceClient.addGeofences(geofencingRequest, pendingIntent);
-			}
-			catch(SecurityException ignore) { }
+		if( ! geofenceList.isEmpty()) {
+			geofencingClient.removeGeofences(pendingIntent);
 		}
-	}
-	@Override
-	public void onConnectionSuspended(int cause)
-	{
-		Log.w(TAG, "CesGeofenceStore:onConnectionSuspended:e:");
+
+		if(geofences.isEmpty()) {
+			geofenceList = new ArrayList<>();
+			return;
+		}
+		geofenceList = new ArrayList<>(geofences);
+
+		if(createRequestPendingIntent() == null)return;
+
+		GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+		builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+		builder.addGeofences(geofenceList);
+
+		GeofencingRequest geofencingRequest = builder.build();
+
+		geofencingClient.addGeofences(geofencingRequest, pendingIntent)
+				.addOnSuccessListener(aVoid -> Log.e(TAG, "CONSTRUCTOR:----------------------------ADDED"))
+				.addOnFailureListener(e -> Log.e(TAG, "CONSTRUCTOR:----------------------------ERROR ADD : ",e));
 	}
 
-	//______________________________________________________________________________________________
-	void clear()
+	private void clear()
 	{
 		if(pendingIntent != null)
-			geoFenceClient.removeGeofences(pendingIntent);
+			geofencingClient.removeGeofences(pendingIntent);
 	}
 
 	// This creates a PendingIntent that is to be fired when geofence transitions take place. In this instance, we are using an IntentService to handle the transitions.
 	private PendingIntent createRequestPendingIntent()
 	{
+Log.e(TAG, "createRequestPendingIntent-------------------------------pendingIntent="+pendingIntent);
 		try
 		{
 			if(null != pendingIntent)return pendingIntent;
-			Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
-			// Return a PendingIntent to start the IntentService. Always create a PendingIntent sent to Location Services with FLAG_UPDATE_CURRENT,
-			// so that sending the PendingIntent again updates the original. Otherwise, Location Services can't match the PendingIntent to requests made with it.
-			return PendingIntent.getBroadcast(app, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			//Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
+			Intent intent = new Intent(context, CesGeofenceReceiver.class);
+Log.e(TAG, "createRequestPendingIntent-------------------------------1111");
+			pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			return pendingIntent;
 		}
 		catch(Exception e)
 		{
@@ -116,4 +108,83 @@ class CesGeofenceStore implements ConnectionCallbacks, OnConnectionFailedListene
 			return null;
 		}
 	}
+
+
+	//----------------------------------------- AVISOS EN FIREBASE -----------------------------------------
+
+	public void cargarListaGeoAvisos()
+	{
+		Log.e(TAG, "************************* cargarListaGeoAvisos *************************");
+		createListAviso();
+		try { Aviso.getActivos(lisAviso); }
+		catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
+	}
+
+	private boolean isInit = false;
+	private Fire.DatosListener<Aviso> lisAviso;
+	private ArrayList<Aviso> listaGeoAvisos = new ArrayList<>();
+	private void createListAviso()
+	{
+		if(isInit)return;
+		isInit = true;
+		lisAviso = new Fire.DatosListener<Aviso>()
+		{
+			@Override
+			public void onDatos(Aviso[] aData)
+			{
+				//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
+				boolean bDirty = false;
+				long n = aData.length;
+				//Log.e(TAG, "aData.length:"+n+" VS "+listaGeoAvisos.size()+"-----------------------------------------------------");
+				if(n != listaGeoAvisos.size())
+				{
+					if( ! geofenceList.isEmpty()) clear();
+					listaGeoAvisos.clear();
+					bDirty = true;
+				}
+
+				ArrayList<Geofence> geofenceList2 = new ArrayList<>();
+				ArrayList<Aviso> aAvisos = new ArrayList<>();
+				for(int i=0; i < aData.length; i++)
+				{
+					Aviso a = aData[i];
+					android.util.Log.e(TAG, "onDatos--------------------------------------"+a.getLatitud()+"/"+a.getLongitud()+" R="+a.getRadio()+" ACT="+a.isActivo());
+					if( ! a.isActivo()) continue;
+
+					aAvisos.add(a);
+
+					Geofence gf = new Geofence.Builder().setRequestId(a.getId())
+							.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
+							.setExpirationDuration(Geofence.NEVER_EXPIRE)
+							//.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)//| Geofence.GEOFENCE_TRANSITION_DWELL
+							.build();
+					geofenceList2.add(gf);
+					if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))
+					{
+						bDirty = true;
+					}
+				}
+				if(bDirty)
+				{
+					listaGeoAvisos = aAvisos;
+					update(geofenceList2);//Se puede añadir en lugar de crear desde cero?
+					for(Aviso a : listaGeoAvisos) {
+						Log.e(TAG, "update:-----------------------------"+a.nombre+" : "+a.isActivo());
+					}
+				}
+				Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------geofenceList:"+geofenceList.size()+"-----------------------------------");
+				if(geofenceList.isEmpty())
+					GeofencingService.stop(context);
+				else if(GeofencingService.isOnOff())
+					GeofencingService.start(context);
+			}
+			@Override
+			public void onError(String err)
+			{
+				Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------"+err);
+			}
+		};
+	}
+
 }

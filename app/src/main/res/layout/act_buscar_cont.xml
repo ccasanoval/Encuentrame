@@ -35,7 +35,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textAppearance="?android:attr/textAppearanceMedium"
-			android:layout_marginRight="5dp"
 			android:layout_marginEnd="5dp"
 			android:text="@string/activo"/>
 		<Spinner
@@ -51,9 +50,7 @@
 		android:layout_below="@+id/layActivo"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
-		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true">
 		<EditText
 			android:id="@+id/txtNombre"
@@ -62,7 +59,8 @@
 			android:inputType="textPersonName"
 			android:ems="10"
 			android:hint="@string/nombre"
-			android:maxLines="1"/>
+			android:maxLines="1"
+			android:importantForAutofill="no" />
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<LinearLayout
@@ -79,24 +77,28 @@
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
 			android:hint="@string/fecha_desde"
-			android:inputType="date" />
+			android:inputType="date"
+			android:importantForAutofill="no" />
 		<ImageButton
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:id="@+id/btnFechaIni"
-			android:src="@android:drawable/ic_menu_my_calendar"	/>
+			android:src="@android:drawable/ic_menu_my_calendar"
+			android:contentDescription="@string/ini" />
 		<EditText
 			android:id="@+id/txtFechaFin"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
 			android:hint="@string/fecha_hasta"
-			android:inputType="date" />
+			android:inputType="date"
+			android:importantForAutofill="no" />
 		<ImageButton
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:id="@+id/btnFechaFin"
-			android:src="@android:drawable/ic_menu_my_calendar"	/>
+			android:src="@android:drawable/ic_menu_my_calendar"
+			android:contentDescription="@string/fin"/>
 	</LinearLayout>
 
 	<LinearLayout
@@ -123,13 +125,10 @@
 	<fragment
 		android:id="@+id/map"
 		android:layout_below="@+id/layRadio"
-		xmlns:android="http://schemas.android.com/apk/res/android"
-    	xmlns:tools="http://schemas.android.com/tools"
 		class="com.google.android.gms.maps.SupportMapFragment"
 		android:layout_marginTop="5dp"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		tools:context=".ActBuscar"
-		/>
+		tools:context=".ActBuscar" />
 
 </RelativeLayout>

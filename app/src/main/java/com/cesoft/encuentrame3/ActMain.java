@@ -20,6 +20,10 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Objeto;
+import com.cesoft.encuentrame3.svc.ActividadIntentService;
+import com.cesoft.encuentrame3.svc.GeofencingService;
+import com.cesoft.encuentrame3.svc.GeotrackingService;
+import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -32,22 +36,10 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
 
-//TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
-
-//TODO: OPCIONES para habilitar o deshabilitar TextToVoice
-//TODO: AVISO: no molestar mas por hoy
-//TODO: main window=> Number or routes, places and geofences...
-//TODO: Egg?
-//TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente
-//TODO: Opcion que diga no preguntar por activar GPS ni BATTERY (en tablet que no tiene gps...)
-//http://developer.android.com/intl/es/training/basics/supporting-devices/screens.html
-// small, normal, large, xlarge   ///  low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft
-public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
-{
+public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	private static final String TAG = ActMain.class.getSimpleName();
 	private static final int ASK_GPS_PERMISSION = 6969;
 	private static final int ASK_GPS_ACTIVATION = 6968;
@@ -61,9 +53,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 
 	//----------------------------------------------------------------------------------------------
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
+	protected void onCreate(Bundle savedInstanceState)//TODO: Cuando se cambia de orientacion se recrea: NOOOR!
 	{
 		super.onCreate(savedInstanceState);
+Log.e(TAG, "onCreate------------------------------------------------------"+getIntent().getAction());
 		setContentView(R.layout.act_main);
 		login = ((App)getApplication()).getGlobalComponent().login();
 		if(!login.isLogged())gotoLogin();
@@ -78,6 +71,17 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		createViews();
 		gotoPage(getIntent());
 		showMensaje(getIntent());
+
+
+		if(!login.isLogged())gotoLogin();
+		if(oncePideBateria) {
+			util.pideBateria(this);
+			oncePideBateria = false;
+		}
+		if(util.compruebaPermisosGPS(this, ASK_GPS_PERMISSION)) {
+			util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
+			startServices();
+		}
 	}
 	@Override
 	protected void onNewIntent(Intent intent)
@@ -85,6 +89,22 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		super.onNewIntent(intent);
 		gotoPage(intent);
 		showMensaje(intent);
+		int nPagina = intent.getIntExtra(Constantes.WIN_TAB, Constantes.NADA);
+		boolean stop = intent.getBooleanExtra(ServiceNotifications.ACTION_STOP, false);
+		String msg = intent.getStringExtra(Constantes.MENSAJE);
+		if(msg != null)
+			Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+		if(stop) {
+			switch(nPagina) {
+				case Constantes.AVISOS:
+					GeofencingService.stop(this);
+					break;
+				case Constantes.RUTAS:
+					GeotrackingService.stop(this);
+					break;
+			}
+		}
+Log.e(TAG, "onNewIntent------------------------------------------------------"+intent.getExtras());
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -98,7 +118,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Override
 	public void onResume()
 	{
-		Log.e(TAG, "onResume-------------------------------------------------------");
 		super.onResume();
 		if(voice.isListening()) {
 			voice.startListening();
@@ -110,13 +129,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	public void onStart()
 	{
 		super.onStart();
-		if(!login.isLogged())gotoLogin();
-		if(oncePideBateria) {
-			util.pideBateria(this);
-			oncePideBateria = false;
-		}
-		if(util.pideGPS(this, ASK_GPS_PERMISSION))
-			util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
+
 		EventBus.getDefault().register(this);
 	}
 	//----------------------------------------------------------------------------------------------
@@ -178,7 +191,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 		switch(id)
 		{
 			case R.id.action_config:
-				startActivityForResult(new Intent(this, ActConfig.class), Constantes.CONFIG);
+				startActivityForResult(new Intent(this, ActSettings.class), Constantes.CONFIG);
 				return true;
 			case R.id.action_mapa:
 				goMap();
@@ -187,6 +200,16 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				FrgMain frg = frmMain[viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
 				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT).getItem(viewPager.getCurrentItem());
 				buscar(frmMain[viewPager.getCurrentItem()]);
+				return true;
+			case R.id.action_onoff_fence:
+				if(GeofencingService.isOnOff()) {
+					GeofencingService.turnOnOff(this, false);//TODO:Preguntar?
+					item.setTitle(R.string.start_geofencing);
+				}
+				else {
+					GeofencingService.turnOnOff(this, true);
+					item.setTitle(R.string.stop_geofencing);
+				}
 				return true;
 			case R.id.action_privacy_policy:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
@@ -204,14 +227,14 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
 	public void onVoiceEvent(Voice.VoiceStatusEvent event)
 	{
-		Log.e(TAG, "-------------------------------------------- voice.isListening()="+voice.isListening());
+		//Log.e(TAG, "-------------------------------------------- voice.isListening()="+voice.isListening());
 		refreshVoiceIcon();
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
-		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		//Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
 		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
@@ -227,9 +250,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_stop_route:
-				//String routeId = util.getTrackingRoute();//TODO: in presenter...?
-				//if( ! routeId.isEmpty())
-				util.setTrackingRoute("");
+				util.setTrackingRoute("", "");
 				voice.speak(event.getText());
 				break;
 			case R.string.voice_new_alert:
@@ -267,7 +288,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	/// FrgMain : MainIterface
 	public void gotoLogin()
 	{
-		login.logout();
+		login.logout(this);
 		Intent intent = new Intent(getBaseContext(), ActLogin.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
@@ -313,7 +334,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			intent.putExtra(Objeto.NOMBRE, obj);
 			startActivityForResult(intent, Constantes.RUTAS);
 		}
-		catch(Exception e){Log.e(TAG, "goRuta:onItemEdit:e:------------------------------------", e);}
+		catch(Exception e)
+		{
+			Log.e(TAG, "goRuta:onItemEdit:e:------------------------------------", e);
+		}
 	}
 	//---
 	public void goMap() {
@@ -344,7 +368,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			i.putExtra(Util.TIPO, Constantes.RUTAS);
 			startActivityForResult(i, Constantes.RUTAS);
 		}
-		catch(Exception e){Log.e(TAG, "goRutaMap:RUTAS:e:--------------------------------------", e);}
+		catch(Exception e)
+		{
+			Log.e(TAG, "goRutaMap:RUTAS:e:--------------------------------------", e);
+		}
 	}
 	//---
 	public void buscar(final FrgMain frg)
@@ -364,13 +391,25 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 			i.putExtra(Filtro.FILTRO, fil);
 			frg.startActivityForResult(i, Constantes.BUSCAR);
 		}
-		catch(Exception e){Log.e(TAG, "buscar:e:-----------------------------------------------", e);}
+		catch(Exception e)
+		{
+			Log.e(TAG, "buscar:e:-----------------------------------------------", e);
+		}
 	}
 	//---
 	public int getCurrentItem()
 	{
 		if(viewPager == null)return Constantes.NADA;
 		return viewPager.getCurrentItem();
+	}
+
+	private void startServices() {
+		long delay = App.getComponent().pref().getTrackingDelay();
+		//GeoTrackingJobService.start(this, delay);
+		GeotrackingService.start(this, delay);
+		//LoadGeofenceJobService.start(this);
+		GeofencingService.start(this);
+		ActividadIntentService.start(this);
 	}
 
 
@@ -381,14 +420,14 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				// If request is cancelled, the result arrays are empty.
 				if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
+					//TODO: Ahora puedes activar servicios localizacion y geofence
+					startServices();
 				}
 				else {
-					//Toast.makeText(this, R.string.permission_required, Toast.LENGTH_SHORT).show();
 					AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 					dialogBuilder.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> finish());
 					dialogBuilder.setPositiveButton(getString(R.string.ok), (dialog1, which) ->
-						util.pideGPS(this, ASK_GPS_PERMISSION)
-					);
+						util.compruebaPermisosGPS(this, ASK_GPS_PERMISSION));
 					final AlertDialog dlgEliminar = dialogBuilder.create();
 					dlgEliminar.setTitle(R.string.permission_required_title);
 					dlgEliminar.setMessage(getString(R.string.permission_required));
@@ -400,13 +439,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 				break;
 		}
 	}
-	/*@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		if(resultCode != RESULT_OK)return;
-		if(requestCode == Constantes.CONFIG)gotoLogin();
-		else super.onActivityResult(requestCode, resultCode, data);
-	}*/
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		Log.e(TAG, "onActivityResult() called with: " + "requestCode = [" + requestCode + "], resultCode = [" + resultCode + "], data = [" + data + "]");
@@ -417,6 +450,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 
 			case ASK_GPS_ACTIVATION:
 				Log.e(TAG, "onActivityResult: ASK_GPS_ACTIVATION: resultCode="+resultCode);
+				if(resultCode == RESULT_OK) ;
 				break;
 
 			default:
@@ -435,7 +469,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	private class SectionsPagerAdapter extends FragmentPagerAdapter
 	{
-
 		SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
 			super(fm, behavior);
 		}
