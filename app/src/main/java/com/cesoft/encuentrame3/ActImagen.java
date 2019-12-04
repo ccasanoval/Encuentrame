@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.opengl.GLES10;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.os.Bundle;
@@ -45,7 +44,6 @@ public class ActImagen extends AppCompatActivity
 	private static final String TAG = ActImagen.class.getSimpleName();
 	public static final String PARAM_LUGAR = "lugar";
 	public static final String PARAM_IMG_PATH = "img_path";
-	public static final String FILE_STR = "file:";
 
 	public static final int IMAGE_CAPTURE = 6969;
 
@@ -150,7 +148,6 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 					}
 					catch(OutOfMemoryError e)
 					{
-						//TODO: por que las imagenes no se ven en todos los dispositivos, HACER COMPATIBLES!!!!!!!!
 						//TODO: guardar imagen reducida a 1Mb
 						Log.e(TAG, "onCreate:BitmapFactory.decodeFile:e"+e,e);
 					}
@@ -238,7 +235,6 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 	}
 
 
-
 	//____________________________________________________________________________________________________________________________________________________
 	/// MENU
 	//______________________________________________________________________________________________
@@ -310,18 +306,16 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 			// Create the File where the photo should go
 			try {
 				File photoFile = createImageFile();
-Log.e(TAG, "dispatchTakePictureIntent:------------------------------A-------"+photoFile);
 				if(photoFile != null) {
 					Uri photoURI;
 					try {
-						photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", photoFile);
-					} catch (IllegalArgumentException e) {
-Log.e(TAG, "dispatchTakePictureIntent:------------------------------z-------"+Uri.fromFile(photoFile));
+						photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID+".fileprovider", photoFile);
+					}
+					catch(IllegalArgumentException e) {
 						android.os.StrictMode.VmPolicy.Builder builder = new android.os.StrictMode.VmPolicy.Builder();
 						android.os.StrictMode.setVmPolicy(builder.build());
 						photoURI = Uri.fromFile(photoFile);
 					}
-Log.e(TAG, "dispatchTakePictureIntent:------------------------------B-------"+photoURI);
 					takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 					startActivityForResult(takePictureIntent, REQUEST_ACTION_IMAGE_CAPTURE);
 				}
@@ -335,19 +329,12 @@ Log.e(TAG, "dispatchTakePictureIntent:------------------------------B-------"+ph
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == REQUEST_ACTION_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
-			Log.e(TAG, "onActivityResult:e:----------------------------------CANCELADO ????????????????");
-		}
 		if (requestCode == REQUEST_ACTION_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 			refreshMenu(ESTADO.NEW_IMG);
 			show();
 
 			// Variable to store the img
-			//if (currentPhotoPath.contains(FILE_STR))
-				imgURLnew = currentPhotoPath;//.substring(FILE_STR.length());
-
-Log.e(TAG, "onActivityResult:A:----------------------------------currentPhotoPath="+currentPhotoPath);
-Log.e(TAG, "onActivityResult:B:----------------------------------imgURLnew="+imgURLnew);
+			imgURLnew = currentPhotoPath;
 
 			// Show the thumbnail on ImageView
 			try {
@@ -361,13 +348,10 @@ Log.e(TAG, "onActivityResult:B:----------------------------------imgURLnew="+img
 
 			// ScanFile so it will be appeared on Gallery
 			Uri imageUri = Uri.parse(currentPhotoPath);
-Log.e(TAG, "onActivityResult:imageUri:----------------------------------"+imageUri);
 			MediaScannerConnection.scanFile(this,
 					new String[]{imageUri.getPath()},
 					null,
-					(path, uri) -> {
-						Log.e(TAG, "onActivityResult:---+++++++++++------"+path+" : "+uri);
-					});
+					(path, uri) -> { });
 		}
 		else {
 			finish();

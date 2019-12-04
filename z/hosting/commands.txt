@@ -1,0 +1,27 @@
+*Install CLI
+======================================
+curl -sL firebase.tools | bash
+
+*List projects
+======================================
+firebase list
+firebase projects:list
+
+
+*Init project
+======================================
+firebase init
+
+
+*Upload and test:
+======================================
+firebase serve
+...
+firebase serve
+...
+
+*Deploy
+======================================
+firebase deploy
+
+

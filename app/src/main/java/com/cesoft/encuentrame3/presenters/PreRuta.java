@@ -353,7 +353,7 @@ Log.e(TAG, "startTrackingRecord:onTimeout---------------------------------------
 					Log.e(TAG, "estadisticas:onDatos:e:---------------------------------------",e);
 				}
 
-				estadisticasShow(String.format(app.getString(R.string.estadisticas_format),
+				estadisticasShow(app.getString(R.string.estadisticas_format,
 						sDistancia, sTiempo, sVelMed, sVelMin, sVelMax, sAltMin, sAltMax));
 			}
 			@Override

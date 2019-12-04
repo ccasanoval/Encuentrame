@@ -18,8 +18,8 @@ android {
         applicationId 'com.cesoft.encuentrame3'
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 25
-        versionName "2.5"
+        versionCode 26
+        versionName "2.6"
         multiDexEnabled true
     }
     buildTypes {
@@ -45,12 +45,12 @@ def VER_GLIDE = '4.9.0'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'org.jetbrains:annotations:17.0.0'
+    implementation 'org.jetbrains:annotations:18.0.0'
 
     // Android X
     implementation "androidx.preference:preference:1.1.0"
     // Google
-    implementation "com.google.android.material:material:1.1.0-alpha10"
+    implementation "com.google.android.material:material:1.2.0-alpha02"
     // Services
     implementation "com.google.android.gms:play-services-gcm:${VER_GOOGLE}"
     implementation "com.google.android.gms:play-services-location:${VER_GOOGLE}"
@@ -65,10 +65,10 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     // Firebase
-    implementation "com.google.firebase:firebase-core:17.2.0"
-    implementation "com.google.firebase:firebase-auth:19.0.0"
-    implementation "com.google.firebase:firebase-database:19.1.0"
-    implementation "com.google.firebase:firebase-storage:19.0.1"
+    implementation "com.google.firebase:firebase-core:17.2.1"
+    implementation "com.google.firebase:firebase-auth:19.2.0"
+    implementation "com.google.firebase:firebase-database:19.2.0"
+    implementation "com.google.firebase:firebase-storage:19.1.0"
     implementation 'com.firebase:geofire-java:3.0.0'
 
     // Img

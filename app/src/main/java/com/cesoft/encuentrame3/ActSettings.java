@@ -2,6 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,13 +13,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
+
+import com.cesoft.encuentrame3.util.Log;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 public class ActSettings extends AppCompatActivity
         implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
-    private static final String TAG = "ActSettings";
+    private static final String TAG = ActSettings.class.getSimpleName();
     private static final String TITLE = "title";
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -37,29 +41,45 @@ public class ActSettings extends AppCompatActivity
                 });
         }
     }
+
+    @SuppressWarnings("unused")
     public static class OptionsPreferenceFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.settings_options, rootKey);
         }
     }
+    @SuppressWarnings("unused")
     public static class VoicePreferenceFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.settings_voice, rootKey);
         }
     }
+    @SuppressWarnings("unused")
     public static class NotificationsPreferenceFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.settings_notifications, rootKey);
         }
     }
+    @SuppressWarnings("unused")
     public static class AboutPreferenceFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.settings_about, rootKey);
-            //getPreferenceScreen()//TODO: change version number...
+            try {
+                App app = App.getInstance();
+                PackageInfo pInfo = app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
+                String version = getString(R.string.app_vers, pInfo.versionName);
+                Preference p = getPreferenceScreen().findPreference("version");
+                if(p != null) {
+                    p.setSummary(version);
+                }
+            }
+            catch (Exception e) {
+                Log.e(TAG, "AboutPreferenceFragment:e:", e);
+            }
         }
     }
 
