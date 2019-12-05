@@ -83,8 +83,12 @@ public class FrgMain extends Fragment implements IListaItemClick
 	@Override
 	public void onSaveInstanceState(@NonNull Bundle state) {
 		super.onSaveInstanceState(state);
-		scrollState = layoutManager.onSaveInstanceState();
-		state.putParcelable(LIST_SCROLL_STATE, scrollState);
+		if(layoutManager != null) {
+			scrollState = layoutManager.onSaveInstanceState();
+			state.putParcelable(LIST_SCROLL_STATE, scrollState);
+		}
+		else
+			Log.e(TAG, "onSaveInstanceState:e:--------*********************-------------layoutManager == null");
 	}
 
 	@Override

@@ -35,11 +35,11 @@ public class GeofencingService extends Service {
     private static boolean isStarted = false;
     public static void start(Context context) {
         if(isStarted) return;
-        Intent intentService = new Intent(context, GeofencingService.class);
+        Intent intent = new Intent(context, GeofencingService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intentService);
+            context.startForegroundService(intent);
         } else {
-            context.startService(intentService);
+            context.startService(intent);
         }
         isStarted = true;
     }
@@ -49,7 +49,6 @@ public class GeofencingService extends Service {
         Log.e(TAG, "stop-----------------------------------------------------------------------------------");
     }
 
-    private boolean isRunning = true;
     private Thread thread = null;
 
     @Nullable
@@ -74,23 +73,24 @@ public class GeofencingService extends Service {
             public void run() {
                 Login login = App.getComponent().login();
                 CesGeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
-                isRunning = true;
-                while(isRunning) {
-                    Log.e(TAG, "onStartCommand:Thread:-------------------------------- RUN ");
+                try {
+                    while(true) {
+                        Log.e(TAG, "onStartCommand:Thread:-------------------------------- RUN ");
 
-                    if( ! login.isLogged()) {
-                        Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
-                        stopSelf();
-                    }
-                    else {
-                        geofenceStoreAvisos.cargarListaGeoAvisos();//PAYLOAD
-                    }
+                        if( ! login.isLogged()) {
+                            Log.e(TAG, "No hay usuario logado !! STOPPING SERVICE");
+                            Thread.currentThread().interrupt();
+                            stopSelf();
+                        }
+                        else {
+                            geofenceStoreAvisos.cargarListaGeoAvisos();//PAYLOAD
+                        }
 
-                    try { Thread.sleep(DELAY_LOAD_GEOFENCE); }
-                    catch(InterruptedException e) {
-                        //Log.e(TAG, "onStartCommand:Thread:InterruptedException--------------------------------",e);
-                        isRunning = false;
+                        Thread.sleep(DELAY_LOAD_GEOFENCE);
                     }
+                }
+                catch(InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
         };

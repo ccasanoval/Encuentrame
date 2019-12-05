@@ -117,8 +117,6 @@ public abstract class VistaBase
 		try { setSupportActionBar(findViewById(R.id.toolbar)); } catch(Exception ignore){}//ActMaps no tiene toolbar
 		//
 		FloatingActionButton fab;
-//		fab = findViewById(R.id.fabVolver);
-//		if(fab != null) fab.setOnClickListener(view -> presenter.onSalir());
 		fab = findViewById(R.id.fabBuscar);
 		if(fab != null) fab.setOnClickListener(view -> util.onBuscar(this, map, mapZoom));
 
@@ -145,7 +143,7 @@ public abstract class VistaBase
 
 	//----------------------------------------------------------------------------------------------
 	private static final String MAP_ZOOM = "mapzoom";
-	protected float mapZoom = 15;
+	protected float mapZoom = 20;
 
 	@Override
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -160,7 +158,6 @@ public abstract class VistaBase
 		super.onStart();
 		EventBus.getDefault().register(this);
 		presenter.subscribe(this);
-		//if(checkPlayServices()) buildGoogleApiClient();
 		buildLocationRequest();
 		SupportMapFragment smf = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 		if(smf != null)
@@ -194,7 +191,6 @@ public abstract class VistaBase
 
 
 	private void startTracking() {
-        //if (googleApiClient == null || !googleApiClient.isConnected())return;
 		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 		&& ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 		    return;
@@ -203,7 +199,6 @@ public abstract class VistaBase
 	}
 
 	private void stopTracking() {
-        //if (googleApiClient == null || !googleApiClient.isConnected())return;
 		if(locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback);
 		locationCallback = null;
 	}
@@ -240,7 +235,7 @@ public abstract class VistaBase
 	// ResultCallback
 	//----------------------------------------------------------------------------------------------
 	@Override public void onResult(@NonNull Status status) {
-		Log.w(TAG, "---------------------------------onResult---------------------------------"+status);
+		Log.e(TAG, "---------------------------------onResult---------------------------------"+status);
 	}
 
 	private LocationCallback locationCallback = null;

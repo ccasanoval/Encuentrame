@@ -83,7 +83,7 @@ public class ActWidgetNuevaRuta extends Activity
 			login.login(new Fire.AuthListener() {
 				@Override
 				public void onExito(FirebaseUser usr) {
-					Log.w(TAG, "ActWidgetNuevRuta:Login:OK:usr="+usr.getEmail());
+					Log.e(TAG, "ActWidgetNuevRuta:Login:OK:usr="+usr.getEmail());
 				}
 				@Override
 				public void onFallo(Exception e) {

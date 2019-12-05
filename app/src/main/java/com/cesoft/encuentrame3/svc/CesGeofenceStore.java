@@ -57,11 +57,11 @@ public class CesGeofenceStore
 
 	private void update(ArrayList<Geofence> geofences)
 	{
-Log.e(TAG, "update:-----------------------------hashCode="+geofences.hashCode()+" #geof="+geofences.size());
-
 		if( ! geofenceList.isEmpty()) {
 			geofencingClient.removeGeofences(pendingIntent);
+			Log.e(TAG, "update:----------------------------REMOVING");
 		}
+		createRequestPendingIntent();
 
 		if(geofences.isEmpty()) {
 			geofenceList = new ArrayList<>();
@@ -69,7 +69,6 @@ Log.e(TAG, "update:-----------------------------hashCode="+geofences.hashCode()+
 		}
 		geofenceList = new ArrayList<>(geofences);
 
-		if(createRequestPendingIntent() == null)return;
 Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 		GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 		builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
@@ -77,8 +76,8 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 		GeofencingRequest geofencingRequest = builder.build();
 
 		geofencingClient.addGeofences(geofencingRequest, pendingIntent)
-				.addOnSuccessListener(aVoid -> Log.e(TAG, "CONSTRUCTOR:----------------------------ADDED"))
-				.addOnFailureListener(e -> Log.e(TAG, "CONSTRUCTOR:----------------------------ERROR ADD : ",e));
+				.addOnSuccessListener(aVoid -> Log.e(TAG, "update:---------A-------------------ADDED"))
+				.addOnFailureListener(e -> Log.e(TAG, "update:-------------A---------------ERROR ADDING : ",e));
 	}
 
 	private void clear()
@@ -87,21 +86,19 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 			geofencingClient.removeGeofences(pendingIntent);
 	}
 
-	// This creates a PendingIntent that is to be fired when geofence transitions take place. In this instance, we are using an IntentService to handle the transitions.
-	private PendingIntent createRequestPendingIntent()
+	// This creates a PendingIntent that is to be fired when geofence transitions take place.
+	private void createRequestPendingIntent()
 	{
 		try
 		{
-			if(null != pendingIntent)return pendingIntent;
-			Intent intent = new Intent(context, CesGeofenceReceiver.class);
-			//Intent intent = new Intent("com.cesoft.encuentrame3.ACTION_RECEIVE_GEOFENCE");
-			pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			return pendingIntent;
+			if(pendingIntent == null) {
+				Intent intent = new Intent(context, CesGeofenceReceiver.class);
+				pendingIntent = PendingIntent.getBroadcast(context, CesGeofenceReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			}
 		}
 		catch(Exception e)
 		{
 			Log.e(TAG, "createRequestPendingIntent:e:-----------------------------------------",e);
-			return null;
 		}
 	}
 
@@ -162,9 +159,11 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
             Geofence gf = new Geofence.Builder()
                     .setRequestId(a.getId())
                     .setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
-                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                    //.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)//| Geofence.GEOFENCE_TRANSITION_DWELL
+                    //.setExpirationDuration(Geofence.NEVER_EXPIRE)
+					.setExpirationDuration(10*60*60*1000L)
+                    .setLoiteringDelay(60*1000)//GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+					.setNotificationResponsiveness(60*1000)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
                     .build();
             geofenceList2.add(gf);
             if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))
@@ -180,7 +179,7 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
                 Log.e(TAG, "update:-----------------------------"+a.nombre+" : "+a.isActivo());
             }*/
         }
-        Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------geofenceList:"+geofenceList.size()+"-----------------------------------");
+        Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------geofenceList:"+geofenceList.size()+"-----------------------------------bDirty="+bDirty);
         if(geofenceList.isEmpty())
             GeofencingService.stop(context);
         else if(GeofencingService.isOnOff())

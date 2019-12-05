@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
+<manifest
 	package="com.cesoft.encuentrame3"
-		  xmlns:android="http://schemas.android.com/apk/res/android">
+	xmlns:tools="http://schemas.android.com/tools"
+	xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -91,25 +92,19 @@
 
 		<!-- ************************* SERVICES ******************************** -->
 
-		<service android:name=".svc.GeotrackingService"
-			android:foregroundServiceType="location" /><!-- ForegroundService VS ACCESS_BACKGROUND_LOCATION ??? -->
-		<service android:name=".svc.GeofencingService"
-			android:foregroundServiceType="location" />
-
+		<service android:name=".svc.GeotrackingService" android:foregroundServiceType="location" /><!-- ForegroundService VS ACCESS_BACKGROUND_LOCATION ??? -->
+		<service android:name=".svc.GeofencingService" android:foregroundServiceType="location" />
 		<service android:name=".svc.ActividadIntentService" />
-		<!-- service
-			android:name=".svc.LoadGeofenceJobService"
-			android:label="GeoFence Load Service"
-			android:permission="android.permission.BIND_JOB_SERVICE" / -->
+
+		<service
+			android:name=".svc.GeofenceJob"
+			android:exported="true"
+			android:permission="android.permission.BIND_JOB_SERVICE" />
 
 		<!-- ************************* RECEIVERS ******************************** -->
-		<!-- receiver android:name=".svc.CesGeofenceReceiver"
-			android:enabled="true" android:exported="true" / -->
-		<receiver android:name="com.cesoft.encuentrame3.svc.CesGeofenceReceiver" android:exported="false">
-			<!-- intent-filter>
-				<action android:name="com.cesoft.encuentrame3.ACTION_RECEIVE_GEOFENCE"/>
-			</intent-filter -->
-		</receiver>
+		<receiver android:name=".svc.CesGeofenceReceiver"
+			android:enabled="true"
+			android:exported="true" />
 
 		<receiver android:name=".svc.CesOnSysBoot">
 			<intent-filter>

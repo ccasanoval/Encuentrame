@@ -67,14 +67,14 @@ public class ActividadIntentService extends IntentService {
         // Each activity is associated with a confidence level, which is an int between 0 and 100.
         ArrayList<DetectedActivity> detectedActivities = (ArrayList)result.getProbableActivities();
 
-for(DetectedActivity act : detectedActivities) {
-    Log.e(TAG, "onHandleIntent---------------------------------------------act="+act+" : "+act.getConfidence());
-}
+//for(DetectedActivity act : detectedActivities) {
+//    Log.e(TAG, "onHandleIntent---------------------------------------------act="+act+" : "+act.getConfidence());
+//}
 
         // Comunicar la nueva actividad a los observers
         DetectedActivity act = getMostProbableAct(detectedActivities);
         if(act != null && act.getConfidence() >= 30) {
-            Log.e(TAG, "ActividadEvent---------------------------------------------act="+act+" : "+act.getConfidence());
+            //Log.e(TAG, "ActividadEvent---------------------------------------------act="+act+" : "+act.getConfidence());
             EventBus.getDefault().post(new ActividadEvent(act));
         }
 

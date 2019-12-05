@@ -19,13 +19,15 @@ import java.util.List;
 public class CesGeofenceReceiver extends BroadcastReceiver
 {
 	private static final String TAG = CesGeofenceReceiver.class.getSimpleName();
+	public static final int REQUEST_CODE = 5555;
 
 	// On Android 8.0 (API level 26) and higher, if an app is running in the background while
 	// monitoring a geofence, then the device responds to geofencing events every couple of minutes
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
-Log.w(TAG, "CesGeofenceReceiver:onReceive:-----------***************************--------------------------000");
+Log.e(TAG, "CesGeofenceReceiver:onReceive:-----------***************************--------------------------000");
+		GeofenceJob.enqueueWork(context, intent);
 		GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 		if( ! geofencingEvent.hasError())
 		{
@@ -35,30 +37,30 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:-----------***************************
 			switch(transition)
 			{
 			case Geofence.GEOFENCE_TRANSITION_ENTER:
-Log.w(TAG, "CesGeofenceReceiver:onReceive:-------------------------------------GEOFENCE_TRANSITION_ENTER");
+Log.e(TAG, "CesGeofenceReceiver:onReceive:-------------------------------------GEOFENCE_TRANSITION_ENTER");
 				for(Geofence geof : geofences)
 				{
 					util.showAvisoGeo(geof.getRequestId());
-Log.w(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
+Log.e(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_ENTER:"+geof.getRequestId());
 				}
 				break;
 			case Geofence.GEOFENCE_TRANSITION_DWELL:
-Log.w(TAG, "CesGeofenceReceiver:onReceive:--------------------------------------GEOFENCE_TRANSITION_DWELL");
+Log.e(TAG, "CesGeofenceReceiver:onReceive:--------------------------------------GEOFENCE_TRANSITION_DWELL");
 				for(Geofence geof : geofences)
 				{
 					util.showAvisoGeo(geof.getRequestId());
-					Log.w(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
+					Log.e(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_DWELL:"+geof.getRequestId());
 				}
 				break;
 			case Geofence.GEOFENCE_TRANSITION_EXIT:
-Log.w(TAG, "CesGeofenceReceiver:onReceive:---------------------------------------GEOFENCE_TRANSITION_EXIT");
+Log.e(TAG, "CesGeofenceReceiver:onReceive:---------------------------------------GEOFENCE_TRANSITION_EXIT");
 				for(Geofence geof : geofences)
 				{
-					Log.w(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_EXIT:"+geof.getRequestId());
+					Log.e(TAG, "CesGeofenceReceiver:onReceive:-------******************************-------GEOFENCE_TRANSITION_EXIT:"+geof.getRequestId());
 				}
 				break;
 			default:
-Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -----------------------------");
+Log.e(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -----------------------------");
 				break;
 			}
 		}

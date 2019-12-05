@@ -69,7 +69,7 @@ public class ActLogin extends AppCompatActivity
 		@Override
 		public Fragment getItem(int position)
 		{
-			return FrgLogin.newInstance(position, ActLogin.this);
+			return FrgLogin.newInstance(position);
 		}
 		@Override
 		public int getCount()

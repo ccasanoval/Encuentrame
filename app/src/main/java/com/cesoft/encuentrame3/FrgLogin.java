@@ -41,7 +41,6 @@ public class FrgLogin extends Fragment //implements GoogleApiClient.OnConnection
 {
     private static final String TAG = FrgLogin.class.getSimpleName();
     private static final String ARG_SECTION_NUMBER = "section_number";
-    private ActLogin main;
     private Login login;
 
     //------------------------------------------------------------------------------------------
@@ -74,43 +73,40 @@ Log.e(TAG, "onActivityResult----------------------------------------------------
         final String usr = acct.getEmail();
         Log.e(TAG, "firebaseAuthWithGoogle:"+acct.getId()+" ::: "+acct.getEmail());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        firebaseAuth.signInWithCredential(credential).addOnCompleteListener(main,
-                task -> {
-Log.e(TAG, "----------------------------------------**********************----------exception= "+task.getException());
-                    AuthResult authResult = task.getResult();
-                    if(authResult != null) {
-                        Log.e(TAG, "----------------------------------------**********************----------result= " + authResult.getUser());
-                        Log.e(TAG, "----------------------------------------**********************----------result= " + authResult.getCredential());
-                        Log.e(TAG, "----------------------------------------**********************----------result= " + authResult.getAdditionalUserInfo());
-                    }
-                    logginOk(usr);
-
-//                    if (!task.isSuccessful()) {
-//                        Toast.makeText(FrgLogin.this.main, "Authentication failed.", Toast.LENGTH_SHORT).show();
-//                    }
-//                    else {
-//                        logginOk(usr);
-//                    }
-                });
+        Activity activity = getActivity();
+        if(activity == null) return;
+        firebaseAuth.signInWithCredential(credential).addOnCompleteListener(
+            activity,
+            task -> {
+                if(task.getException() != null) {
+                    Log.e(TAG, "----------------------------------------**********************----------exception= " + task.getException());
+                }
+                AuthResult authResult = task.getResult();
+                if(authResult != null) {
+                    Log.e(TAG, "----------------------------------------**********************----------result= " + authResult.getUser());
+                    Log.e(TAG, "----------------------------------------**********************----------result= " + authResult.getCredential());
+                    Log.e(TAG, "----------------------------------------**********************----------result= " + authResult.getAdditionalUserInfo());
+                }
+                logginOk(usr);
+            });
     }
 
     private void logginOk(String usr) {
-        ((App) main.getApplication()).iniServicesDependantOnLogin();
-        //main.finEsperaLogin();
-        Toast.makeText(main, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
-        main.goMain();
+        ActLogin activity = (ActLogin)getActivity();
+        if(activity == null) return;
+        ((App)activity.getApplication()).iniServicesDependantOnLogin();
+        Toast.makeText(activity, String.format(getString(R.string.login_ok), usr), Toast.LENGTH_LONG).show();
+        activity.goMain();
     }
 
 
     // Returns a new instance of this fragment for the given section number.
-    public static FrgLogin newInstance(int sectionNumber, ActLogin main)
+    public static FrgLogin newInstance(int sectionNumber)
     {
         FrgLogin fragment = new FrgLogin();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
-        fragment.main = main;
-
         return fragment;
     }
 
@@ -124,7 +120,9 @@ Log.e(TAG, "----------------------------------------**********************------
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        if(login == null || login.isLogged()) main.goMain();
+        ActLogin activity = (ActLogin)getActivity();
+        if(activity == null) return null;
+        if(login == null || login.isLogged()) activity.goMain();
 
         final int sectionNumber = getArguments()!=null ? getArguments().getInt(ARG_SECTION_NUMBER) : 0;
         final View rootView = inflater.inflate(R.layout.act_login_frag, container, false);
@@ -177,7 +175,7 @@ Log.e(TAG, "----------------------------------------**********************------
                         @Override
                         public void onFallo(Exception e) {
                             //main.finEsperaLogin();
-                            Toast.makeText(main, getString(R.string.login_error), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), getString(R.string.login_error), Toast.LENGTH_LONG).show();
                         }
                     });
         });
@@ -223,7 +221,7 @@ Log.e(TAG, "----------------------------------------**********************------
         btnSend.setOnClickListener(v -> {
             if( ! txtPassword.getText().toString().equals(txtPassword2.getText().toString()))
             {
-                Toast.makeText(main, getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), getString(R.string.register_bad_pass), Toast.LENGTH_LONG).show();
                 return;
             }
             //main.iniEsperaLogin();
@@ -235,13 +233,13 @@ Log.e(TAG, "----------------------------------------**********************------
                         {
                             //main.finEsperaLogin();
                             if(usr != null)
-                                Toast.makeText(main, getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), getString(R.string.register_ok)+"  "+usr.getEmail(), Toast.LENGTH_LONG).show();
                         }
                         @Override
                         public void onFallo(Exception e)
                         {
                             //main.finEsperaLogin();//TODO: Añadir %s en la cadena
-                            Toast.makeText(main, getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), getString(R.string.register_ko)+"  "+e, Toast.LENGTH_LONG).show();
                         }
                     });
         });
@@ -266,7 +264,9 @@ Log.e(TAG, "----------------------------------------**********************------
                     public void onExito(FirebaseUser usr)
                     {
                         Toast.makeText(rootView.getContext(), R.string.recover_ok, Toast.LENGTH_LONG).show();
-                        main.selectTabEnter();
+                        ActLogin activity = (ActLogin)getActivity();
+                        if(activity != null)
+                            activity.selectTabEnter();
                     }
                     @Override
                     public void onFallo(Exception e)
