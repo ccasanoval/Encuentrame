@@ -7,8 +7,7 @@
 	android:paddingLeft="@dimen/activity_horizontal_margin"
 	android:paddingRight="@dimen/activity_horizontal_margin"
 	android:paddingTop="@dimen/activity_vertical_margin"
-	tools:context=".ActLogin"
-	>
+	tools:context=".ActLogin">
 
 	<TextView
 		android:id="@+id/lblTitulo"
@@ -17,51 +16,50 @@
 		android:layout_centerHorizontal="true"
 		android:text="@string/enter_lbl"
 		android:paddingTop="@dimen/activity_vertical_margin"
-		style="@android:style/TextAppearance.Large"
-		/>
+		style="@android:style/TextAppearance.Large"/>
 
 	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/lblEmail"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@+id/lblTitulo"
-		>
+		android:layout_below="@+id/lblTitulo">
 		<EditText
 			android:id="@+id/txtEmail"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/email"
 			android:inputType="textEmailAddress"
-			android:maxLines="1"/>
+			android:maxLines="1"
+			android:autofillHints="email" />
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/lblPassword"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@+id/lblEmail"
-		>
+		android:layout_below="@+id/lblEmail">
 		<EditText
 			android:id="@+id/txtPassword"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/clave"
 			android:inputType="textPassword"
-			android:maxLines="1"/>
+			android:maxLines="1"
+			android:autofillHints="password" />
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/lblPassword2"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@+id/lblPassword"
-		>
+		android:layout_below="@+id/lblPassword">
 		<EditText
 			android:id="@+id/txtPassword2"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/clave_confirmar"
 			android:inputType="textPassword"
+			android:autofillHints="password"
 			android:maxLines="1"/>
 	</com.google.android.material.textfield.TextInputLayout>
 

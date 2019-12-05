@@ -9,7 +9,6 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.GeotrackingService;
 import com.cesoft.encuentrame3.util.Log;
-import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -46,12 +45,10 @@ public class PreRuta extends PresenterBase
 
 	//----------------------------------------------------------------------------------------------
 	private Util util;
-	private Preferencias pref;
-	@Inject PreRuta(Application app, Util util, Preferencias pref)
+	@Inject PreRuta(Application app, Util util)
 	{
 		super(app);
 		this.util = util;
-		this.pref = pref;
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -87,7 +84,7 @@ public class PreRuta extends PresenterBase
 			public void onDatos(String id)
 			{
 Log.e(TAG, "onDatos---------------------------------------------------------------------isWorking="+isWorking);
-				GeotrackingService.start(app, pref.getTrackingDelay());
+				GeotrackingService.start(app);
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -210,7 +207,7 @@ Log.e(TAG, "startTrackingRecord:onDatos-----------------------------------------
 					if(!onBackPressed)
 						util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
 				}
-				GeotrackingService.start(app, pref.getTrackingDelay());
+				GeotrackingService.start(app);
 			}
 			@Override
 			public void onError(String err, int code)
@@ -227,7 +224,7 @@ Log.e(TAG, "startTrackingRecord:onDatos-----------------------------------------
 				if( ! isWorking)return;
 Log.e(TAG, "startTrackingRecord:onTimeout---------------------------------------------------------------------");
 				util.setTrackingRoute(o.id, o.nombre);
-				GeotrackingService.start(app, pref.getTrackingDelay());
+				GeotrackingService.start(app);
 				if(view != null) {
 					view.finEspera();
 					if(!onBackPressed)

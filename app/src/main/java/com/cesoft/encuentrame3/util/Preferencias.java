@@ -49,13 +49,13 @@ public class Preferencias {
         return delay;
     }
     //----------------------------------------------------------------------------------------------
-    public String getNotificationRingtone() {
+    String getNotificationRingtone() {
         return sp.getString(NOTIFICATION_RINGTONE, "");
     }
-    public boolean isNotificationVibrate() {
+    boolean isNotificationVibrate() {
         return sp.getBoolean(NOTIFICATION_VIBRATE, false);
     }
-    public boolean isNotificationLights() {
+    boolean isNotificationLights() {
         return sp.getBoolean(NOTIFICATION_LIGHTS, false);
     }
     //----------------------------------------------------------------------------------------------
@@ -63,23 +63,23 @@ public class Preferencias {
         return sp.getBoolean(AUTOARRANQUE, true);
     }
     //----------------------------------------------------------------------------------------------
-    public void setTrackingRoute(String sIdRoute, String nameRoute) {
+    void setTrackingRoute(String sIdRoute, String nameRoute) {
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(ID_TRACKING, sIdRoute);
         editor.putString(NAME_TRACKING, nameRoute);
         editor.apply();//editor.commit(); Apply does it in background
     }
-    public String getIdTrackingRoute() {
+    String getIdTrackingRoute() {
         return sp.getString(ID_TRACKING, "");
     }
-    public String getNameTrackingRoute() {
+    String getNameTrackingRoute() {
         return sp.getString(NAME_TRACKING, "");
     }
 
-    public boolean isSpeechEnabled() {
+    boolean isSpeechEnabled() {
         return sp.getBoolean(SPEECH_ENABLED, true);
     }
-    public boolean isVoiceEnabled() {
+    boolean isVoiceEnabled() {
         return sp.getBoolean(VOICE_ENABLED, false);
     }
 }

@@ -19,7 +19,6 @@ import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.GeotrackingService;
 import com.cesoft.encuentrame3.util.Log;
-import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 
 import com.cesoft.encuentrame3.widget.WidgetRutaJobService;
@@ -35,7 +34,6 @@ public class ActWidgetNuevaRuta extends Activity
 
 	@Inject	Util util;
 	@Inject Login login;
-	@Inject Preferencias pref;
 
 	private EditText txtNombre;
 
@@ -148,7 +146,7 @@ public class ActWidgetNuevaRuta extends Activity
 				Toast.makeText(ActWidgetNuevaRuta.this, getString(R.string.ok_guardar_ruta), Toast.LENGTH_SHORT).show();
 				ActWidgetNuevaRuta.this.finish();
 				//
-				GeotrackingService.start(getApplicationContext(), pref.getTrackingDelay());
+				GeotrackingService.start(getApplicationContext());
 				WidgetRutaJobService.start(getApplicationContext());
 			}
 			@Override

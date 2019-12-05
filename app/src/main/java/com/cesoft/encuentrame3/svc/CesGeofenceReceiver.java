@@ -26,10 +26,10 @@ public class CesGeofenceReceiver extends BroadcastReceiver
 	public void onReceive(Context context, Intent intent)
 	{
 Log.w(TAG, "CesGeofenceReceiver:onReceive:-----------***************************--------------------------000");
-		Util util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 		GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 		if( ! geofencingEvent.hasError())
 		{
+			Util util = ((App)context.getApplicationContext()).getGlobalComponent().util();
 			int transition = geofencingEvent.getGeofenceTransition();
 			List<Geofence> geofences = geofencingEvent.getTriggeringGeofences();
 			switch(transition)
@@ -63,6 +63,4 @@ Log.w(TAG, "CesGeofenceReceiver:onReceive:e: Unknown Geofence Transition -------
 			}
 		}
 	}
-
-
 }

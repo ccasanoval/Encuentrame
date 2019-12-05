@@ -17,7 +17,6 @@ import com.google.android.gms.location.LocationServices;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD_GEOFENCE;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 04/02/2016
@@ -58,7 +57,7 @@ public class CesGeofenceStore
 
 	private void update(ArrayList<Geofence> geofences)
 	{
-		Log.e(TAG, "update:-----------------------------"+geofences.hashCode()+" N="+geofences.size());
+Log.e(TAG, "update:-----------------------------hashCode="+geofences.hashCode()+" #geof="+geofences.size());
 
 		if( ! geofenceList.isEmpty()) {
 			geofencingClient.removeGeofences(pendingIntent);
@@ -71,11 +70,10 @@ public class CesGeofenceStore
 		geofenceList = new ArrayList<>(geofences);
 
 		if(createRequestPendingIntent() == null)return;
-
+Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 		GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 		builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
 		builder.addGeofences(geofenceList);
-
 		GeofencingRequest geofencingRequest = builder.build();
 
 		geofencingClient.addGeofences(geofencingRequest, pendingIntent)
@@ -92,19 +90,17 @@ public class CesGeofenceStore
 	// This creates a PendingIntent that is to be fired when geofence transitions take place. In this instance, we are using an IntentService to handle the transitions.
 	private PendingIntent createRequestPendingIntent()
 	{
-Log.e(TAG, "createRequestPendingIntent-------------------------------pendingIntent="+pendingIntent);
 		try
 		{
 			if(null != pendingIntent)return pendingIntent;
-			//Intent intent = new Intent("com.cesoft.encuentrame3.ACCION_RECIBE_GEOFENCE");
 			Intent intent = new Intent(context, CesGeofenceReceiver.class);
-Log.e(TAG, "createRequestPendingIntent-------------------------------1111");
+			//Intent intent = new Intent("com.cesoft.encuentrame3.ACTION_RECEIVE_GEOFENCE");
 			pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			return pendingIntent;
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "createRequestPendingIntent:e:-----------------------------------------------",e);
+			Log.e(TAG, "createRequestPendingIntent:e:-----------------------------------------",e);
 			return null;
 		}
 	}
@@ -133,51 +129,7 @@ Log.e(TAG, "createRequestPendingIntent-------------------------------1111");
 			public void onDatos(Aviso[] aData)
 			{
 				//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
-				boolean bDirty = false;
-				long n = aData.length;
-				//Log.e(TAG, "aData.length:"+n+" VS "+listaGeoAvisos.size()+"-----------------------------------------------------");
-				if(n != listaGeoAvisos.size())
-				{
-					if( ! geofenceList.isEmpty()) clear();
-					listaGeoAvisos.clear();
-					bDirty = true;
-				}
-
-				ArrayList<Geofence> geofenceList2 = new ArrayList<>();
-				ArrayList<Aviso> aAvisos = new ArrayList<>();
-				for(int i=0; i < aData.length; i++)
-				{
-					Aviso a = aData[i];
-					android.util.Log.e(TAG, "onDatos--------------------------------------"+a.getLatitud()+"/"+a.getLongitud()+" R="+a.getRadio()+" ACT="+a.isActivo());
-					if( ! a.isActivo()) continue;
-
-					aAvisos.add(a);
-
-					Geofence gf = new Geofence.Builder().setRequestId(a.getId())
-							.setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
-							.setExpirationDuration(Geofence.NEVER_EXPIRE)
-							//.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-							.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)//| Geofence.GEOFENCE_TRANSITION_DWELL
-							.build();
-					geofenceList2.add(gf);
-					if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))
-					{
-						bDirty = true;
-					}
-				}
-				if(bDirty)
-				{
-					listaGeoAvisos = aAvisos;
-					update(geofenceList2);//Se puede añadir en lugar de crear desde cero?
-					for(Aviso a : listaGeoAvisos) {
-						Log.e(TAG, "update:-----------------------------"+a.nombre+" : "+a.isActivo());
-					}
-				}
-				Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------geofenceList:"+geofenceList.size()+"-----------------------------------");
-				if(geofenceList.isEmpty())
-					GeofencingService.stop(context);
-				else if(GeofencingService.isOnOff())
-					GeofencingService.start(context);
+				processDatos(aData);
 			}
 			@Override
 			public void onError(String err)
@@ -186,5 +138,52 @@ Log.e(TAG, "createRequestPendingIntent-------------------------------1111");
 			}
 		};
 	}
+    private void processDatos(Aviso[] aData) {
+        boolean bDirty = false;
+        long n = aData.length;
 
+        if(n != listaGeoAvisos.size())
+        {
+            if( ! geofenceList.isEmpty()) clear();
+            listaGeoAvisos.clear();
+            bDirty = true;
+        }
+
+        ArrayList<Geofence> geofenceList2 = new ArrayList<>();
+        ArrayList<Aviso> aAvisos = new ArrayList<>();
+        for(int i=0; i < aData.length; i++)
+        {
+            Aviso a = aData[i];
+            android.util.Log.e(TAG, "onDatos--------------------------------------"+a.getLatitud()+"/"+a.getLongitud()+" R="+a.getRadio()+" ACT="+a.isActivo());
+            if( ! a.isActivo()) continue;
+
+            aAvisos.add(a);
+
+            Geofence gf = new Geofence.Builder()
+                    .setRequestId(a.getId())
+                    .setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    //.setLoiteringDelay(GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)//| Geofence.GEOFENCE_TRANSITION_DWELL
+                    .build();
+            geofenceList2.add(gf);
+            if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))
+            {
+                bDirty = true;
+            }
+        }
+        if(bDirty)
+        {
+            listaGeoAvisos = aAvisos;
+            update(geofenceList2);//Se puede añadir en lugar de crear desde cero?
+            /*for(Aviso a : listaGeoAvisos) {
+                Log.e(TAG, "update:-----------------------------"+a.nombre+" : "+a.isActivo());
+            }*/
+        }
+        Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------geofenceList:"+geofenceList.size()+"-----------------------------------");
+        if(geofenceList.isEmpty())
+            GeofencingService.stop(context);
+        else if(GeofencingService.isOnOff())
+            GeofencingService.start(context);
+    }
 }

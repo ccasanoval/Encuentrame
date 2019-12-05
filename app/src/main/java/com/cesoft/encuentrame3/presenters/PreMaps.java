@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
+import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
@@ -173,9 +174,17 @@ public class PreMaps extends PresenterBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private void showLugares() { Lugar.getLista(lisLugar); }
-	private void showAvisos() { Aviso.getLista(lisAviso); }
-	private void showRutas() { Ruta.getLista(lisRuta); }
+	private void showLugares() {
+		Lugar.getLista(lisLugar);
+	}
+	private void showAvisos() {
+		Filtro filtro = new Filtro(Constantes.AVISOS);
+		filtro.setActivo(Filtro.ACTIVO);
+		Aviso.getLista(lisAviso, filtro);
+	}
+	private void showRutas() {
+		Ruta.getLista(lisRuta);
+	}
 	//----------------------------------------------------------------------------------------------
 	private void showRuta() { showRuta((Ruta) o); }
 	private synchronized void showRuta(Ruta r)

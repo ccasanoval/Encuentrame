@@ -56,7 +56,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	protected void onCreate(Bundle savedInstanceState)//TODO: Cuando se cambia de orientacion se recrea: NOOOR!
 	{
 		super.onCreate(savedInstanceState);
-Log.e(TAG, "onCreate------------------------------------------------------"+getIntent().getAction());
 		setContentView(R.layout.act_main);
 		login = ((App)getApplication()).getGlobalComponent().login();
 		if(!login.isLogged())gotoLogin();
@@ -104,7 +103,6 @@ Log.e(TAG, "onCreate------------------------------------------------------"+getI
 					break;
 			}
 		}
-Log.e(TAG, "onNewIntent------------------------------------------------------"+intent.getExtras());
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -225,16 +223,12 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 	}
 
 	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
-	public void onVoiceEvent(Voice.VoiceStatusEvent event)
-	{
-		//Log.e(TAG, "-------------------------------------------- voice.isListening()="+voice.isListening());
+	public void onVoiceEvent(Voice.VoiceStatusEvent event) {
 		refreshVoiceIcon();
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)
-	public void onCommandEvent(Voice.CommandEvent event)
-	{
-		//Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+	public void onCommandEvent(Voice.CommandEvent event) {
 		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
@@ -336,7 +330,7 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "goRuta:onItemEdit:e:------------------------------------", e);
+			Log.e(TAG, "goRuta:onItemEdit:e:--------------------------------------------------", e);
 		}
 	}
 	//---
@@ -370,7 +364,7 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "goRutaMap:RUTAS:e:--------------------------------------", e);
+			Log.e(TAG, "goRutaMap:RUTAS:e:----------------------------------------------------", e);
 		}
 	}
 	//---
@@ -393,7 +387,7 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "buscar:e:-----------------------------------------------", e);
+			Log.e(TAG, "buscar:e:-------------------------------------------------------------", e);
 		}
 	}
 	//---
@@ -404,10 +398,7 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 	}
 
 	private void startServices() {
-		long delay = App.getComponent().pref().getTrackingDelay();
-		//GeoTrackingJobService.start(this, delay);
-		GeotrackingService.start(this, delay);
-		//LoadGeofenceJobService.start(this);
+		GeotrackingService.start(this);
 		GeofencingService.start(this);
 		ActividadIntentService.start(this);
 	}
@@ -415,28 +406,21 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-		switch(requestCode) {
-			case ASK_GPS_PERMISSION:
-				// If request is cancelled, the result arrays are empty.
-				if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
-					//TODO: Ahora puedes activar servicios localizacion y geofence
-					startServices();
-				}
-				else {
-					AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-					dialogBuilder.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> finish());
-					dialogBuilder.setPositiveButton(getString(R.string.ok), (dialog1, which) ->
+		if (requestCode == ASK_GPS_PERMISSION) {// If request is cancelled, the result arrays are empty.
+			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
+				//TODO: Ahora puedes activar servicios localizacion y geofence
+				startServices();
+			} else {
+				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+				dialogBuilder.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> finish());
+				dialogBuilder.setPositiveButton(getString(R.string.ok), (dialog1, which) ->
 						util.compruebaPermisosGPS(this, ASK_GPS_PERMISSION));
-					final AlertDialog dlgEliminar = dialogBuilder.create();
-					dlgEliminar.setTitle(R.string.permission_required_title);
-					dlgEliminar.setMessage(getString(R.string.permission_required));
-					dlgEliminar.show();
-				}
-				return;
-
-			default:
-				break;
+				final AlertDialog dlgEliminar = dialogBuilder.create();
+				dlgEliminar.setTitle(R.string.permission_required_title);
+				dlgEliminar.setMessage(getString(R.string.permission_required));
+				dlgEliminar.show();
+			}
 		}
 	}
 
@@ -450,7 +434,6 @@ Log.e(TAG, "onNewIntent------------------------------------------------------"+i
 
 			case ASK_GPS_ACTIVATION:
 				Log.e(TAG, "onActivityResult: ASK_GPS_ACTIVATION: resultCode="+resultCode);
-				if(resultCode == RESULT_OK) ;
 				break;
 
 			default:

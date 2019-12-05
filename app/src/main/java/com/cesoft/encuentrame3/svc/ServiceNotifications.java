@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat;
 import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.util.Constantes;
-import com.cesoft.encuentrame3.util.Log;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -50,6 +50,7 @@ public class ServiceNotifications {
                 mainPendingIntent,
                 stopPendingIntent);
     }
+
     static Notification createForGeofencing(Context context) {
 
         Intent intentMain = new Intent(context.getApplicationContext(), ActMain.class);
@@ -78,7 +79,7 @@ public class ServiceNotifications {
     private static Notification create(final Context context, final Bitmap iconBig, final int iconSmall,
         final CharSequence title, final CharSequence subtitle,
         final PendingIntent contentIntent, final PendingIntent stopPendingIntent) {
-Log.e(TAG, "create------------------------------------title="+title+" : subtitle="+subtitle);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(), CHANNEL_ID_SERVICE)
                 .setContentIntent(contentIntent)
                 .setContentTitle(title)
@@ -95,14 +96,6 @@ Log.e(TAG, "create------------------------------------title="+title+" : subtitle
                         context.getString(R.string.stop),
                         stopPendingIntent)
                 ;
-
-        /*if (subtitle !== null || title.length() == 0) {
-            RemoteViews view = new RemoteViews(context.getPackageName(), R.layout.notification);
-            view.setTextViewText(R.id.notification_title, title);
-            builder
-                    .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                    .setCustomContentView(view);
-        }*/
 
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

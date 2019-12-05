@@ -11,7 +11,8 @@
 		android:layout_height="wrap_content"
 		android:hint="@string/nuevo_lugar"
 		android:layout_weight="1"
-		android:inputType="textCapWords"/>
+		android:inputType="textCapWords"
+		android:autofillHints="name" />
 
 	<ImageButton
 		android:id="@+id/btnSave"

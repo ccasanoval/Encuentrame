@@ -17,7 +17,6 @@ import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
-import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
@@ -48,8 +47,8 @@ public class GeotrackingService extends Service {
     private static final int ID_SERVICE = 6969;
 
     private static boolean isStarted = false;
-    public static synchronized void start(Context context, long delay) {
-Log.e(TAG, "start-----------------------------------------------------------------------------------isStarted="+isStarted+" delay="+delay);
+    public static synchronized void start(Context context) {
+Log.e(TAG, "start-----------------------------------------------------------------------------------isStarted="+isStarted);
         if(isStarted) return;
         if(App.getComponent().util().getIdTrackingRoute().isEmpty()) {
             Log.e(TAG, "No hay ruta activa!! STOPPING SERVICE");
@@ -60,7 +59,6 @@ Log.e(TAG, "start---------------------------------------------------------------
             return;
         }
 
-        GeotrackingService.delay = delay;
         Intent intentService = new Intent(context, GeotrackingService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.e(TAG, "start-----------------------------------------------------------------------------------");
@@ -77,8 +75,7 @@ Log.e(TAG, "start---------------------------------------------------------------
         Log.e(TAG, "stop-----------------------------------------------------------------------------------");
     }
 
-    private static long delay = DELAY_TRACK_MIN;
-
+    private long delay = DELAY_TRACK_MIN;
     private int lastDetectedActivity = DetectedActivity.STILL;
 
     private Util util;
@@ -148,9 +145,9 @@ Log.e(TAG, "start---------------------------------------------------------------
     @Override
     public void onDestroy() {
         super.onDestroy();
-        isStarted = false;
         dontKeepAwake();
         EventBus.getDefault().unregister(this);
+        isStarted = false;
         Log.e(TAG, "onDestroy:--------------------------------****************************");
     }
     private PowerManager.WakeLock wakeLock;
@@ -180,13 +177,14 @@ Log.e(TAG, "start---------------------------------------------------------------
     }
 
     private void iniEnviron() {
+        ActividadIntentService.start(this);
         saveAll = pref.isSaveAllPoints();
         delay = pref.getTrackingDelay();
-        //Log.e(TAG, "iniEnviron-------------------------------------"+ saveAll +" : "+ delay);
     }
 
     private void finish() {
 Log.e(TAG, "finish---------------------------------------------------------------------------");
+        ActividadIntentService.stop(this);
         thread.interrupt();
         stopSelf();
     }
@@ -202,8 +200,6 @@ Log.e(TAG, "notTracking---------------------------------------------------------
 
     private void stopTracking() {
 Log.e(TAG, "stopTracking:-----------------------------------------------------------");
-//        if (googleApiClient != null && googleApiClient.isConnected())
-//            googleApiClient.disconnect();
         if(fusedLocationClient != null)
             fusedLocationClient.removeLocationUpdates(locationCallback);
         fusedLocationClient = null;
@@ -255,20 +251,48 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
     }
 
     private boolean isWrongPoint(Location loc, Ruta ruta) {
+        //------------------------------------------------------------------------------------------
         if(loc == null)
         {
             Log.e(TAG, "guardarPunto:loc==NULL------------------------------------------------------");
             return true;
         }
+        //------------------------------------------------------------------------------------------
         if( ! loc.hasAccuracy())
         {
             Log.e(TAG, "guardarPunto:loc.hasAccuracy()==FALSE---------------------------------------");
             return true;
         }
-        if( ! saveAll && ruta.getPuntosCount() > 0 && (loc.getAccuracy() > ACCURACY_MAX || loc.getAccuracy() > 2*DISTANCE_MIN)) {
+        //------------------------------------------------------------------------------------------
+        if( ! saveAll && ruta.getPuntosCount() > 0 && loc.getAccuracy() > ACCURACY_MAX) {  // || loc.getAccuracy() > 2*DISTANCE_MIN
             Log.e(TAG, "guardarPunto:loc.getAccuracy()("+loc.getAccuracy()+")   > MAX_ACCURACY("+ ACCURACY_MAX+")  or  > DISTANCE_MIN*2("+2*DISTANCE_MIN+")    :::: n pts "+ruta.getPuntosCount());
-//            return true;//TODO:TEST-----------------------
+            return true;
         }
+        //------------------------------------------------------------------------------------------
+        if(locLast != null) {
+            try
+            {
+                float distLast = loc.distanceTo(locLast);
+                long t0 = locLast.getTime();
+                long t1 = loc.getTime();
+
+                double time = (t1-t0)/1000.0;//s
+                if(time > 0) {
+                    double speed = distLast / time;    //60 m/s = 216 Km/h
+                    double accel = (speed - velLast) / time;//Aceleración coche muy potente (desde parado!) < 8 m/s2
+
+                    Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*************----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, velLast, accel));
+                    if (speed > SPEED_MAX || accel > ACCEL_MAX)//imaginamos que es un punto erróneo, salvo que vayas en un cohete
+                    {
+                        //Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.2f ***************************** !!!", speed, velLast, time, accel));
+                        return true;
+                    }
+                    velLast = speed;
+                }
+            }
+            catch(Exception e){Log.e(TAG, "guardarPunto:e:-----------------------------------------",e);}
+        }
+
         return false;
     }
     private synchronized boolean guardarPunto(Location loc, Ruta ruta)
@@ -286,35 +310,6 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
         }
         else if(!saveAll && locLastSaved != null)
         {
-            //---
-            //Determinar probabilidad de punto erroneo (velocidad actual, velocidad pasada, distancia al anterior punto, tiempo transcurrido)
-            //TODO: isWrongPoint deberia hacerse cargo de esto no?!!!!!!!!!!!!!
-            if(locLast != null)
-            {
-                try
-                {
-                    float distLast = loc.distanceTo(locLast);
-                    long t0 = locLast.getTime();
-                    long t1 = loc.getTime();
-
-                    double time = (t1-t0)/1000.0;//s
-                    if(time > 0) {
-                        double speed = distLast / time;    //60 m/s = 216 Km/h
-                        double accel = (speed - velLast) / time;//Aceleración coche muy potente (desde parado!) < 8 m/s2
-
-                        Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*************----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, velLast, accel));
-                        if (speed > SPEED_MAX || accel > ACCEL_MAX)//imaginamos que es un punto erróneo, salvo que vayas en un cohete
-                        {
-                            //Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.2f ***************************** !!!", speed, velLast, time, accel));
-                            return false;
-                        }
-                        velLast = speed;
-                    }
-                }
-                catch(Exception e){Log.e(TAG, "guardarPunto:e:-----------------------------------------",e);}
-            }
-            //---
-
             float distLastSaved = loc.distanceTo(locLastSaved);
             Log.e(TAG, "guardarPunto:-------********---last="+ locLastSaved
                     +"\n---newLoc="+loc
@@ -329,7 +324,6 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
         return true;
     }
 
-
     private class GuardarListener extends Fire.CompletadoListener
     {
         private Location loc;
@@ -339,9 +333,8 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
         protected void onDatos(String id) {
             Log.e(TAG, "GuardarListener:onComplete:----------------------:" + id);
             //Actividad actual: Coche, bici, parado...
-            int lastActividad = DetectedActivity.STILL;
             Ruta.addPunto(id, loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(),
-                    loc.getAltitude(), loc.getSpeed(), loc.getBearing(), lastActividad,
+                    loc.getAltitude(), loc.getSpeed(), loc.getBearing(), lastDetectedActivity,
                     new Fire.SimpleListener<Long>() {
                         @Override
                         public void onDatos(Long[] puntos) {

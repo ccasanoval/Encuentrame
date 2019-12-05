@@ -37,7 +37,7 @@
 	<string name="descripcion">Descripción</string>
 	<string name="direccion">Dirección…</string>
 	<string name="estadisticas">Estadísticas</string>
-	<string name="estadisticas_format" formatted="false">Longitud:\t\t\t\t\t\t%s\nTiempo:\t\t\t\t\t\t\t%s\nVelocidad.Med:\t\t%s\nVelocidad Min:\t\t%s\nVelocidad Max:\t\t%s\nAltitud Min:\t\t\t\t%s\nAltitud Max:\t\t\t\t%s\n</string>
+	<string name="estadisticas_format" formatted="false">Longitud:\t\t\t\t\t\t%1$s\nTiempo:\t\t\t\t\t\t\t%2$s\nVelocidad.Med:\t\t%3$s\nVelocidad Min:\t\t%4$s\nVelocidad Max:\t\t%5$s\nAltitud Min:\t\t\t\t%6$s\nAltitud Max:\t\t\t\t%7$s\n</string>
 	<string name="en_zona_aviso">En zona de aviso</string>
 	<string name="enter_lbl">Introduce tu usuario</string>
 	<string name="nombre">Nombre</string>
@@ -132,7 +132,7 @@
 	<string name="seguro_salir">Ha hecho cambios. ¿Quiere guardarlos?</string>
 	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
 	<string name="ask_to_ignore_energy_saving_again">Al apagarse la pantalla, el tracking se detendrá si no desactiva las optimizaciones de batería. Está seguro?</string>
-	<string name="ask_to_enable_gps">El servicio de rastreo necesita que actives la localización por GPS</string>
+	<!-- string name="ask_to_enable_gps">El servicio de rastreo necesita que actives la localización por GPS</string -->
 	<string name="permission_required">Se necesita el permiso para poder usar la app</string>
 	<string name="permission_required_title">¿Conceder permiso?</string>
 
@@ -181,8 +181,8 @@
     <string name="pref_tracking_seconds">Periodo rastreo (segundos)</string>
 	<string name="pref_header_notifications_sum">Configuración de avisos…</string>
 	<string name="pref_header_notifications">Avisos</string>
-	<string name="pref_ringtone">Tono</string>
-	<string name="pref_ringtone_silent">Silencio</string>
+	<!-- string name="pref_ringtone">Tono</string -->
+	<!-- string name="pref_ringtone_silent">Silencio</string -->
 	<string name="pref_vibrate">Vibrar</string>
 	<string name="pref_lights">Luces</string>
 	<string name="pref_header_voice">Comandos de voz</string>

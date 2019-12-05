@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActividadIntentService extends IntentService {
-    protected static final String TAG = ActividadIntentService.class.getSimpleName();
+    private static final String TAG = ActividadIntentService.class.getSimpleName();
+    private static final int REQUEST_CODE = 6901;
 
     // Time between activity detections. Larger values result in fewer detections while improving
     // battery life. A value of 0 results in activity detections at the fastest rate possible
@@ -28,7 +29,7 @@ public class ActividadIntentService extends IntentService {
     private static PendingIntent getPendingIntent(Context context) {
         // FLAG_UPDATE_CURRENT to get the same pending intent back when ini and destroy service
         Intent intent = new Intent(context, ActividadIntentService.class);
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
     public static void start(Context context) {
         ActivityRecognitionClient activityRecognitionClient = new ActivityRecognitionClient(context);
@@ -66,9 +67,14 @@ public class ActividadIntentService extends IntentService {
         // Each activity is associated with a confidence level, which is an int between 0 and 100.
         ArrayList<DetectedActivity> detectedActivities = (ArrayList)result.getProbableActivities();
 
+for(DetectedActivity act : detectedActivities) {
+    Log.e(TAG, "onHandleIntent---------------------------------------------act="+act+" : "+act.getConfidence());
+}
+
         // Comunicar la nueva actividad a los observers
         DetectedActivity act = getMostProbableAct(detectedActivities);
         if(act != null && act.getConfidence() >= 30) {
+            Log.e(TAG, "ActividadEvent---------------------------------------------act="+act+" : "+act.getConfidence());
             EventBus.getDefault().post(new ActividadEvent(act));
         }
 
@@ -102,7 +108,7 @@ public class ActividadIntentService extends IntentService {
         return mostProbable;
     }
 
-    public static class ActividadEvent {
+    static class ActividadEvent {
         private DetectedActivity actividad;
         public DetectedActivity getActividad() { return actividad; }
         ActividadEvent(DetectedActivity actividad) {

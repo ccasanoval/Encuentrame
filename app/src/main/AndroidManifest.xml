@@ -103,9 +103,15 @@
 			android:permission="android.permission.BIND_JOB_SERVICE" / -->
 
 		<!-- ************************* RECEIVERS ******************************** -->
-		<receiver android:name=".svc.CesGeofenceReceiver" />
-		<receiver
-			android:name=".svc.CesOnSysBoot">
+		<!-- receiver android:name=".svc.CesGeofenceReceiver"
+			android:enabled="true" android:exported="true" / -->
+		<receiver android:name="com.cesoft.encuentrame3.svc.CesGeofenceReceiver" android:exported="false">
+			<!-- intent-filter>
+				<action android:name="com.cesoft.encuentrame3.ACTION_RECEIVE_GEOFENCE"/>
+			</intent-filter -->
+		</receiver>
+
+		<receiver android:name=".svc.CesOnSysBoot">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
 			</intent-filter>
@@ -169,6 +175,7 @@
 				android:resource="@xml/widget_ruta"/>
 		</receiver>
 
+		<!-- ************************* FILE PROVIDER ************************* -->
 		<provider
 			android:name="androidx.core.content.FileProvider"
 			android:authorities="${applicationId}.fileprovider"

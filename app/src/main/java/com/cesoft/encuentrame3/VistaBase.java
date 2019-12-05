@@ -18,8 +18,6 @@ import com.cesoft.encuentrame3.presenters.PresenterBase;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -95,16 +93,10 @@ public abstract class VistaBase
 	protected void clean() {
 		stopTracking();
 		locationRequest = null;
-//		googleApiClient.unregisterConnectionCallbacks(this);
-//		googleApiClient.unregisterConnectionFailedListener(this);
-//		googleApiClient.disconnect();
-//		googleApiClient = null;
 		if (map != null) {
 			map.clear();
 			map = null;
 		}
-		//if (progressDialog != null) progressDialog.dismiss();
-		//progressDialog = null;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,29 +228,14 @@ public abstract class VistaBase
 	@Override public void iniEspera() {
 		//progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
 		//TODO: UI for user to know work is in progress
-		android.util.Log.e(TAG, "iniEspera--------------------------------------------");
+		//android.util.Log.e(TAG, "iniEspera--------------------------------------------");
 	}
 	@Override public void finEspera() {
 		//if(progressDialog !=null) progressDialog.dismiss();
 		//TODO: UI for user to know work in progress is finish
-		android.util.Log.e(TAG, "finEspera--------------------------------------------");
+		//android.util.Log.e(TAG, "finEspera--------------------------------------------");
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	// OnConnectionFailedListener : https://developers.google.com/android/reference/com/google/android/gms/common/ConnectionResult
-	//----------------------------------------------------------------------------------------------
-	/*@Override public void onConnectionFailed(@NonNull ConnectionResult result) {
-		Log.e(TAG, "onConnectionFailed:e:*****************************************************"+result.getErrorCode());
-		toast(R.string.err_conn_google, result.getErrorMessage());
-	}
-	@Override public void onConnected(Bundle arg0) {
-		Log.w(TAG, "------------------------------onConnected---------------------------------");
-	}
-	@Override public void onConnectionSuspended(int arg0) {
-		if(googleApiClient != null)
-			googleApiClient.connect();
-	}*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// ResultCallback
 	//----------------------------------------------------------------------------------------------

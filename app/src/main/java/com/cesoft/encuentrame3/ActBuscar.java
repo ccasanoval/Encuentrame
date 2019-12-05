@@ -53,8 +53,8 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	private EditText txtFechaIni;
 	private EditText txtFechaFin;
 
-	private String[] asRadio = {"-",				 "10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private int[]	adRadio = { Constantes.NADA,	  10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private final String[] asRadio = {"-",			"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
+	private final int[]	adRadio = { Constantes.NADA, 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
 
 	private GoogleMap map;
 	private Marker marker;
