@@ -5,8 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,16 +23,14 @@ import android.view.View;
 import android.widget.EditText;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 
-import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActMain;
 import com.cesoft.encuentrame3.adapters.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Fire;
-import com.cesoft.encuentrame3.models.Objeto;
+import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
@@ -73,16 +69,16 @@ public class Util
 	private Application app;
 	private Preferencias pref;
 	private LocationManager lm;
-	private NotificationManager nm;
 	private PowerManager pm;
+	private ServiceNotifications sn;
 	@Inject
-	public Util(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm)
+	public Util(Application app, Preferencias pref, LocationManager lm, PowerManager pm, ServiceNotifications sn)
 	{
 		this.app = app;
 		this.pref = pref;
 		this.lm = lm;
-		this.nm = nm;
 		this.pm = pm;
+		this.sn = sn;
 	}
 	//______________________________________________________________________________________________
 	// REFRESH LISTA RUTAS
@@ -151,109 +147,6 @@ public class Util
     }
 
 	//______________________________________________________________________________________________
-	// NOTIFICATION
-	//______________________________________________________________________________________________
-	private void showAviso(String sTitulo, Aviso aviso, Intent intent)
-	{
-		showNotificacion(sTitulo, aviso, intent);
-	}
-	//______________________________________________________________________________________________
-	private void showNotificacion(String titulo, Aviso aviso, Intent intent)
-	{
-		String sSound = pref.getNotificationRingtone();
-		boolean bVibrate = pref.isNotificationVibrate();
-		boolean bLights = pref.isNotificationLights();
-
-		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame3:Util");
-		wakeLock.acquire(2000);
-
-		int idNotificacion = conversor(aviso.getId());
-		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(app, app.getString(R.string.app_name))
-				.setSmallIcon(android.R.drawable.ic_menu_mylocation)//R.mipmap.ic_launcher)
-				.setLargeIcon(android.graphics.BitmapFactory.decodeResource(app.getResources(), R.mipmap.ic_launcher))
-				.setContentTitle(titulo)
-				.setContentText(aviso.getNombre()+":"+aviso.getDescripcion())
-				.setContentIntent(PendingIntent.getActivity(app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
-				.setAutoCancel(true)
-				.setDefaults(NotificationCompat.DEFAULT_ALL)
-				;
-		if( ! sSound.isEmpty())		notificationBuilder.setSound(Uri.parse(sSound));
-		else						notificationBuilder.setSound(null);
-
-		if(bLights) {
-			notificationBuilder
-					//.setDefaults(NotificationCompat.DEFAULT_VIBRATE | NotificationCompat.DEFAULT_SOUND | NotificationCompat.FLAG_SHOW_LIGHTS)
-					.setLights(0xff00ff00, 300, 100);//android.graphics.Color.RED
-			notificationBuilder.setLights(0xff, 0, 0);
-		}
-
-		//notificationBuilder.setVibrate(new long[]{1000L});//no funciona, llamar directamente a vibrar
-		if(bVibrate)
-			vibrate();
-		else
-			notificationBuilder.setVibrate(null);
-
-		nm.notify(idNotificacion, notificationBuilder.build());
-		wakeLock.release();
-	}
-	//______________________________________________________________________________________________
-	private int conversor(String s)
-	{
-		StringBuilder sb = new StringBuilder(10);
-		s = s.replace("-", "");
-		for(int i=0; i < 9; i++)
-			sb.append(s.charAt(i) % 10);
-		return Integer.valueOf(sb.toString().substring(0, 9));
-	}
-
-	/*private long lastShowNotifGPS = 0;
-	private long delayShowNotifGPS = 0;
-	public void showNotifGPS()
-	{
-		if(delayShowNotifGPS < 60*60*1000)
-			delayShowNotifGPS += 5*60*1000;
-		if(lastShowNotifGPS + delayShowNotifGPS > System.currentTimeMillis())return;
-		lastShowNotifGPS = System.currentTimeMillis();
-
-		String sSound = pref.getNotificationRingtone();
-		boolean bVibrate = pref.isNotificationVibrate();
-		boolean bLights = pref.isNotificationLights();
-
-		PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CESoft:Encuentrame3:Util");
-		wakeLock.acquire(2000);
-
-		Intent intent = new Intent(app, ActMain.class);
-		int idNotificacion = 6900;
-
-		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(app, app.getString(R.string.app_name))
-				.setSmallIcon(android.R.drawable.ic_menu_compass)
-				.setLargeIcon(BitmapFactory.decodeResource(app.getResources(), R.mipmap.ic_launcher))
-				.setContentTitle(app.getString(R.string.ask_to_enable_gps))
-				.setContentText("GPS")
-				.setContentIntent(PendingIntent.getActivity(app, idNotificacion, intent, PendingIntent.FLAG_ONE_SHOT))
-				.setAutoCancel(true)
-				.setDefaults(NotificationCompat.DEFAULT_ALL)
-				;
-		if( ! sSound.isEmpty())		notificationBuilder.setSound(Uri.parse(sSound));
-		else						notificationBuilder.setSound(null);
-
-		if(bLights) {
-			notificationBuilder
-					.setLights(0xff00ff00, 300, 100);//android.graphics.Color.RED
-			notificationBuilder.setLights(0xff, 0, 0);
-		}
-
-		if(bVibrate)
-			vibrate();
-		else
-			notificationBuilder.setVibrate(null);
-
-		nm.notify(idNotificacion, notificationBuilder.build());
-		wakeLock.release();
-	}*/
-
-
-	//______________________________________________________________________________________________
 	public void setTrackingRoute(String idRoute, String nameRoute) {
 		pref.setTrackingRoute(idRoute, nameRoute);
 	}
@@ -303,14 +196,14 @@ Log.e(TAG, "return2Main-------------------------------------------- ");
 			@Override
 			public void onDatos(Aviso[] aData)
 			{
-				Intent i = new Intent(app, ActAviso.class);//CesServiceAvisoGeo.this
-				i.putExtra(Objeto.NOMBRE, aData[0]);
-				showAviso(app.getString(R.string.en_zona_aviso), aData[0], i);//CesServiceAvisoGeo.this
+				String titulo = app.getString(R.string.en_zona_aviso);
+				Aviso aviso = aData[0];
+				sn.createForAviso(titulo, aviso);
 			}
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, String.format("Util:showAvisoGeo:e:--------------------------------------%s",err));
+				Log.e(TAG, String.format("showAvisoGeo:e:--------------------------------------%s",err));
 			}
 		});
 	}
@@ -333,17 +226,6 @@ Log.e(TAG, "return2Main-------------------------------------------- ");
 			sb.append(String.format(" %ds", period.getSeconds()));
 		return sb.toString();
 	}
-	//private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()); // HH for 0-23
-	//---
-	/*private SimpleDateFormat timeFormatter = null;
-	public String formatTiempo(long t)
-	{
-		if(timeFormatter == null)
-		{
-			timeFormatter = new SimpleDateFormat("HH'h' mm'm' ss's'", Locale.getDefault()); // HH for 0-23
-		}
-		return timeFormatter.format(new Date(t));
-	}*/
 	//---
 	private SimpleDateFormat dateFormatter = null;
 	public String formatFecha(Date date)
@@ -387,7 +269,6 @@ Log.e(TAG, "return2Main-------------------------------------------- ");
 				{
 					double lat = addresses.get(0).getLatitude();
 					double lng = addresses.get(0).getLongitude();
-					// Callback(new LatLng(lat, lng)) en lugar de:
 					map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
 				}
 			}
@@ -447,12 +328,6 @@ Log.e(TAG, "return2Main-------------------------------------------- ");
 		return false;
 	}
 
-//public boolean compruebaPermisosActivityRecognition(Activity act, int requestCode) {
-//TODO: AnddroidQ ???--------------------------------------------------------------------------------------------------------
-//			if(ActivityCompat.checkSelfPermission(act, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED)
-//				asPermissions.add(Manifest.permission.ACTIVITY_RECOGNITION);
-
-
 	public boolean compruebaPermisosGPS(Activity act, int requestCode) {
 		boolean isFineLocation = ActivityCompat.checkSelfPermission(act, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 		if(isFineLocation) {
@@ -472,7 +347,6 @@ Log.e(TAG, "return2Main-------------------------------------------- ");
 	}
 	//______________________________________________________________________________________________
 	public void pideActivarGPS(Activity act, int requestCode) {
-Log.e(TAG, "pideActivarGPS-------------------------------------------------------requestCode="+requestCode);
 		LocationRequest request = LocationRequest.create();
 		LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
 				.addLocationRequest(request)

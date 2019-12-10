@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.PowerManager;
 import androidx.preference.PreferenceManager;
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
@@ -72,8 +73,8 @@ public class GlobalModule
 
 	@Singleton
 	@Provides
-	Util provideUtil(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm) {
-		return new Util(app, pref, lm, nm, pm);
+	Util provideUtil(Application app, Preferencias pref, LocationManager lm, PowerManager pm, ServiceNotifications sn) {
+		return new Util(app, pref, lm, pm, sn);
 	}
 
 	@Singleton

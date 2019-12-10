@@ -16,6 +16,9 @@
 #   public *;
 #}
 
+# SETTINGS
+-keep public class * extends androidx.preference.PreferenceFragmentCompat
+
 # CES ---------------------------------------------------
 -keep class com.cesoft.encuentrame3.models.** { *; }
 

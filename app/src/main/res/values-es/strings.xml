@@ -131,6 +131,7 @@
 	<!-- Ask -->
 	<string name="seguro_salir">Ha hecho cambios. ¿Quiere guardarlos?</string>
 	<string name="seguro_eliminar">¿Seguro que desea eliminar?</string>
+	<string name="seguro_eliminar_pto">¿Seguro que desea eliminar el punto?</string>
 	<string name="ask_to_ignore_energy_saving_again">Al apagarse la pantalla, el tracking se detendrá si no desactiva las optimizaciones de batería. Está seguro?</string>
 	<!-- string name="ask_to_enable_gps">El servicio de rastreo necesita que actives la localización por GPS</string -->
 	<string name="permission_required">Se necesita el permiso para poder usar la app</string>

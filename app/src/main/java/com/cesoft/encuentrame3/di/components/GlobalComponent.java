@@ -1,7 +1,5 @@
 package com.cesoft.encuentrame3.di.components;
 
-import android.app.Activity;
-
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActBuscar;
 import com.cesoft.encuentrame3.ActLugar;
@@ -15,7 +13,8 @@ import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.adapters.RutaViewHolder;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
-import com.cesoft.encuentrame3.svc.CesGeofenceStore;
+import com.cesoft.encuentrame3.svc.GeofenceStore;
+import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
@@ -46,5 +45,6 @@ public interface GlobalComponent
 	Voice voice();
 	Login login();
 	Preferencias pref();
-	CesGeofenceStore geofence();
+	GeofenceStore geofence();
+	ServiceNotifications serviceNotifications();
 }

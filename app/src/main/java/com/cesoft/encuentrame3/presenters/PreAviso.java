@@ -6,7 +6,7 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.svc.CesGeofenceStore;
+import com.cesoft.encuentrame3.svc.GeofenceStore;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
@@ -29,8 +29,8 @@ public class PreAviso extends PresenterBase
 	}
 
 	private Util util;
-	private CesGeofenceStore geofenceStoreAvisos;
-	@Inject PreAviso(Application app, Util util, CesGeofenceStore geofenceStoreAvisos)
+	private GeofenceStore geofenceStoreAvisos;
+	@Inject PreAviso(Application app, Util util, GeofenceStore geofenceStoreAvisos)
 	{
 		super(app);
 		this.util = util;
@@ -100,7 +100,6 @@ public class PreAviso extends PresenterBase
 			{
 				bGuardar = true;
 				geofenceStoreAvisos.cargarListaGeoAvisos();
-Log.e(TAG, "guardar:onDatos: "+id);
 				if(view != null) {
 					view.finEspera();
 					openMain(app.getString(R.string.ok_guardar_aviso));
@@ -109,7 +108,7 @@ Log.e(TAG, "guardar:onDatos: "+id);
 			@Override
 			protected void onError(String err, int code)
 			{
-				Log.e(TAG, "guardar:handleFault:e: "+err);
+				Log.e(TAG, "guardar:handleFault:e: --------------------------------------------"+err);
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -120,7 +119,7 @@ Log.e(TAG, "guardar:onDatos: "+id);
 			protected void onTimeout()
 			{
 				if( ! isWorking)return;
-				Log.e(TAG, "guardar:timeout");
+				Log.e(TAG, "guardar:timeout----------------------------------------------------");
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -148,7 +147,7 @@ Log.e(TAG, "guardar:onDatos: "+id);
 			@Override
 			protected void onError(String err, int code)
 			{
-				Log.e(TAG, "eliminar:handleFault:e: "+err);
+				Log.e(TAG, "eliminar:handleFault:e: -------------------------------------------"+err);
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
@@ -159,7 +158,7 @@ Log.e(TAG, "guardar:onDatos: "+id);
 			protected void onTimeout()
 			{
 				if( ! isWorking)return;
-				Log.e(TAG, "eliminar:timeout");
+				Log.e(TAG, "eliminar:timeout---------------------------------------------------");
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();

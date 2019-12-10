@@ -245,7 +245,7 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 		});
 		final AlertDialog dlgEliminar = dialogBuilder.create();
 		dlgEliminar.setTitle(marker.getTitle());
-		dlgEliminar.setMessage(getString(R.string.seguro_eliminar));
+		dlgEliminar.setMessage(getString(R.string.seguro_eliminar_pto));
 		dlgEliminar.show();
 	}
 

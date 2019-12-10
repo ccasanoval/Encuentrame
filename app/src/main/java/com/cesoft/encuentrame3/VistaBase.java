@@ -223,12 +223,10 @@ public abstract class VistaBase
 	@Override public void iniEspera() {
 		//progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
 		//TODO: UI for user to know work is in progress
-		//android.util.Log.e(TAG, "iniEspera--------------------------------------------");
 	}
 	@Override public void finEspera() {
 		//if(progressDialog !=null) progressDialog.dismiss();
 		//TODO: UI for user to know work in progress is finish
-		//android.util.Log.e(TAG, "finEspera--------------------------------------------");
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////

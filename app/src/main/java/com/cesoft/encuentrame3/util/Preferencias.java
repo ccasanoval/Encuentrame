@@ -10,10 +10,6 @@ import javax.inject.Singleton;
 @Singleton
 public class Preferencias {
 
-    // REFER TO  pref_notification.xml
-    private static final String NOTIFICATION_RINGTONE = "notifications_new_message_ringtone";
-    private static final String NOTIFICATION_VIBRATE = "notifications_new_message_vibrate";
-    private static final String NOTIFICATION_LIGHTS = "notifications_new_message_lights";
     // REFER TO  pref_data_sync.xml
     private static final String SAVE_ALL_POINTS = "save_all_points";
     private static final String TRACKING_DELAY = "tracking_seconds";
@@ -38,26 +34,17 @@ public class Preferencias {
         return sp.getBoolean(SAVE_ALL_POINTS, false);
     }
     public long getTrackingDelay() {
-        long delay = Constantes.DELAY_TRACK_MIN;
+        long delay = Constantes.MIN_TRACK_DELAY;
         String s = sp.getString(TRACKING_DELAY, "30");
         if(s == null) s = "30";
         try { delay = Long.parseLong(s) * 1000; } catch (Exception ignore) {}
-        if(delay < Constantes.DELAY_TRACK_MIN / 2)///TODO:RELEASE: delay min = 30s  &&&  save all -> only op2501!!!
-            delay = Constantes.DELAY_TRACK_MIN / 2;
+        if(delay < Constantes.MIN_TRACK_DELAY / 2)///TODO:RELEASE: delay min = 30s  &&&  save all -> only op2501!!!
+            delay = Constantes.MIN_TRACK_DELAY / 2;
         if(delay > 60*60*1000)
             delay = 60*60*1000L;
         return delay;
     }
-    //----------------------------------------------------------------------------------------------
-    String getNotificationRingtone() {
-        return sp.getString(NOTIFICATION_RINGTONE, "");
-    }
-    boolean isNotificationVibrate() {
-        return sp.getBoolean(NOTIFICATION_VIBRATE, false);
-    }
-    boolean isNotificationLights() {
-        return sp.getBoolean(NOTIFICATION_LIGHTS, false);
-    }
+
     //----------------------------------------------------------------------------------------------
     public boolean isAutoArranque() {
         return sp.getBoolean(AUTOARRANQUE, true);

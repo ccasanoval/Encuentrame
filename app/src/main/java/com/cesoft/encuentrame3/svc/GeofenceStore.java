@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.models.Fire;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -30,9 +31,9 @@ import javax.inject.Singleton;
 //https://www.raywenderlich.com/103540/geofences-googleapiclient
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 @Singleton
-public class CesGeofenceStore
+public class GeofenceStore
 {
-	private static final String TAG = CesGeofenceStore.class.getSimpleName();
+	private static final String TAG = GeofenceStore.class.getSimpleName();
 
 	private PendingIntent pendingIntent;
 	private GeofencingClient geofencingClient;
@@ -41,7 +42,7 @@ public class CesGeofenceStore
 
 	//----------------------------------------------------------------------------------------------
 	@Inject
-	CesGeofenceStore(Context context)
+	GeofenceStore(Context context)
 	{
 		Log.e(TAG, "CONSTRUCTOR:----------------------------"+context);
 		try
@@ -82,6 +83,7 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 
 	private void clear()
 	{
+		Log.e(TAG, "clear------------------------------------------------------------------");
 		if(pendingIntent != null)
 			geofencingClient.removeGeofences(pendingIntent);
 	}
@@ -91,9 +93,14 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 	{
 		try
 		{
+			Log.e(TAG, "createRequestPendingIntent------------------------------------------------------------------");
 			if(pendingIntent == null) {
-				Intent intent = new Intent(context, CesGeofenceReceiver.class);
-				pendingIntent = PendingIntent.getBroadcast(context, CesGeofenceReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+				Intent intent = new Intent(context, GeofenceReceiver.class);
+				pendingIntent = PendingIntent.getBroadcast(
+						context,
+						GeofenceReceiver.REQUEST_CODE,
+						intent,
+						PendingIntent.FLAG_UPDATE_CURRENT);
 			}
 		}
 		catch(Exception e)
@@ -107,7 +114,7 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 
 	public void cargarListaGeoAvisos()
 	{
-		Log.e(TAG, "************************* cargarListaGeoAvisos *************************");
+		Log.e(TAG, "*************************---- cargarListaGeoAvisos ----*************************");
 		createListAviso();
 		try { Aviso.getActivos(lisAviso); }
 		catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
@@ -151,7 +158,6 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
         for(int i=0; i < aData.length; i++)
         {
             Aviso a = aData[i];
-            android.util.Log.e(TAG, "onDatos--------------------------------------"+a.getLatitud()+"/"+a.getLongitud()+" R="+a.getRadio()+" ACT="+a.isActivo());
             if( ! a.isActivo()) continue;
 
             aAvisos.add(a);
@@ -159,11 +165,10 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
             Geofence gf = new Geofence.Builder()
                     .setRequestId(a.getId())
                     .setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
-                    //.setExpirationDuration(Geofence.NEVER_EXPIRE)
-					.setExpirationDuration(10*60*60*1000L)
-                    .setLoiteringDelay(60*1000)//GEOFEN_DWELL_TIME)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
-					.setNotificationResponsiveness(60*1000)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
+					.setExpirationDuration(Constantes.GEOFENCE_EXPIRE_DELAY)//Geofence.NEVER_EXPIRE
+					.setNotificationResponsiveness(Constantes.GEOFENCE_RESPONSE_DELAY)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)// | Geofence.GEOFENCE_TRANSITION_DWELL)
+					//.setLoiteringDelay(GEOFENCE_DWELL_DELAY)// Required when we use the transition type of GEOFENCE_TRANSITION_DWELL
                     .build();
             geofenceList2.add(gf);
             if( ! bDirty && (listaGeoAvisos.size() < i || ! listaGeoAvisos.contains(a)))

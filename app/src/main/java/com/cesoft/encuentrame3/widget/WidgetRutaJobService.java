@@ -88,7 +88,6 @@ public class WidgetRutaJobService extends JobService {
 
     //----------------------------------------------------------------------------------------------
 
-
     private long payLoad()
     {
         String idRuta = util.getIdTrackingRoute();

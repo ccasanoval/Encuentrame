@@ -1,9 +1,8 @@
 package com.cesoft.encuentrame3.models;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
+import com.cesoft.encuentrame3.util.Log;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;

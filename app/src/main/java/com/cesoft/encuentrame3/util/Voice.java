@@ -362,7 +362,7 @@ public class Voice implements RecognitionListener {
     public void speak(String message) {
         if( !pref.isSpeechEnabled()) return;
         textToSpeech = new TextToSpeech(app, status -> {
-            android.util.Log.e(TAG, "*********************-------"+message);
+            Log.e(TAG, "*********************-------"+message);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 ttsGreater20(message);
             }

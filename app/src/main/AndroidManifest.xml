@@ -96,19 +96,19 @@
 		<service android:name=".svc.GeofencingService" android:foregroundServiceType="location" />
 		<service android:name=".svc.ActividadIntentService" />
 
-		<service
-			android:name=".svc.GeofenceJob"
-			android:exported="true"
-			android:permission="android.permission.BIND_JOB_SERVICE" />
-
 		<!-- ************************* RECEIVERS ******************************** -->
-		<receiver android:name=".svc.CesGeofenceReceiver"
+		<receiver android:name=".svc.GeofenceReceiver"
 			android:enabled="true"
 			android:exported="true" />
 
-		<receiver android:name=".svc.CesOnSysBoot">
+		<receiver android:name=".svc.SystemBootReceiver"
+			android:enabled="true"
+			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+				<action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+				<action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/><!-- HTC devices -->
+				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</receiver>
 

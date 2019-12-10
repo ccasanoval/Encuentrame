@@ -47,8 +47,8 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	private Switch swtActivo;
 		public boolean isActivo() { return swtActivo.isChecked(); }
 
-	private static final String[] _asRadio = {"10 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "4 Km", "5 Km", "7.5 Km", "10 Km"};
-	private static final int[]    _adRadio = { 10,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   4000,   5000,   7500,     10000};
+	private static final String[] _asRadio = {"10 m", "30 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "5 Km", "10 Km"};
+	private static final int[]    _adRadio = { 10,     30,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   5000,   10000};
 
 	private Circle circle;
 	private Marker marker;
@@ -192,13 +192,13 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 					.strokeColor(Color.TRANSPARENT)
 					.fillColor(0x55AA0000));//Color.BLUE
 		}
-		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------------", e);}
+		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------", e);}
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
-		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		Log.e(TAG, "onCommandEvent------------------------------------------------------------ "+event.getCommand()+" / "+event.getText());
 		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {
@@ -219,5 +219,4 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 				break;
 		}
 	}
-
 }

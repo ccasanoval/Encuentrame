@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 
+import com.cesoft.encuentrame3.util.Log;
 import com.google.firebase.database.Exclude;
 
 import java.util.Date;
@@ -44,7 +45,7 @@ public class ObjetoOld extends Objeto
 			setFecha(in.readLong());
 		}
 		catch(Exception e) {
-			android.util.Log.e("Objeto", "Constructor-------------------------------------",e);
+			Log.e("Objeto", "Constructor-------------------------------------",e);
 		}
 	}
 	@Override

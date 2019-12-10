@@ -12,9 +12,9 @@ import androidx.annotation.Nullable;
 
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 
-import static com.cesoft.encuentrame3.util.Constantes.DELAY_LOAD_GEOFENCE;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -59,7 +59,8 @@ public class GeofencingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification notification = ServiceNotifications.createForGeofencing(this);
+        ServiceNotifications sn = App.getComponent().serviceNotifications();
+        Notification notification = sn.createForGeofencing();
         startForeground(ID_SERVICE, notification);
 
         Log.e(TAG, "onStartCommand:--------------------------------  startId="+startId+"  :  flags="+flags+"  :  intent="+intent);
@@ -72,7 +73,7 @@ public class GeofencingService extends Service {
             @Override
             public void run() {
                 Login login = App.getComponent().login();
-                CesGeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
+                GeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
                 try {
                     while(true) {
                         Log.e(TAG, "onStartCommand:Thread:-------------------------------- RUN ");
@@ -86,7 +87,7 @@ public class GeofencingService extends Service {
                             geofenceStoreAvisos.cargarListaGeoAvisos();//PAYLOAD
                         }
 
-                        Thread.sleep(DELAY_LOAD_GEOFENCE);
+                        Thread.sleep(Constantes.GEOFENCE_LOAD_DELAY);
                     }
                 }
                 catch(InterruptedException e) {

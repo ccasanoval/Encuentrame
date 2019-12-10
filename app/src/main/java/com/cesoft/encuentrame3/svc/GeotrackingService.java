@@ -36,7 +36,7 @@ import java.util.Locale;
 
 import static com.cesoft.encuentrame3.util.Constantes.ACCEL_MAX;
 import static com.cesoft.encuentrame3.util.Constantes.ACCURACY_MAX;
-import static com.cesoft.encuentrame3.util.Constantes.DELAY_TRACK_MIN;
+import static com.cesoft.encuentrame3.util.Constantes.MIN_TRACK_DELAY;
 import static com.cesoft.encuentrame3.util.Constantes.DISTANCE_MIN;
 import static com.cesoft.encuentrame3.util.Constantes.SPEED_MAX;
 
@@ -75,7 +75,7 @@ Log.e(TAG, "start---------------------------------------------------------------
         Log.e(TAG, "stop-----------------------------------------------------------------------------------");
     }
 
-    private long delay = DELAY_TRACK_MIN;
+    private long delay = MIN_TRACK_DELAY;
     private int lastDetectedActivity = DetectedActivity.STILL;
 
     private Util util;
@@ -91,6 +91,7 @@ Log.e(TAG, "start---------------------------------------------------------------
     private double velLast = 0;             //Para calculo de punto erroneo
 
     private boolean saveAll = true;
+    private ServiceNotifications sn;
 
     @Nullable
     @Override
@@ -100,7 +101,8 @@ Log.e(TAG, "start---------------------------------------------------------------
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification notification = ServiceNotifications.createForGeotracking(this, util.getNameTrackingRoute());
+        sn = App.getComponent().serviceNotifications();
+        Notification notification = sn.createForGeotracking(util.getNameTrackingRoute());
         startForeground(ID_SERVICE, notification);
 
         Log.e(TAG, "onStartCommand:--------------------------------  startId="+startId+"  :  flags="+flags+"  :  intent="+intent);
@@ -120,7 +122,7 @@ Log.e(TAG, "start---------------------------------------------------------------
                         Log.e(TAG, "onStartCommand:Thread:-------------------------------- RUN ");
                         keepAwake();
                         runPayload();
-                        Thread.sleep(DELAY_TRACK_MIN / 2);
+                        Thread.sleep(MIN_TRACK_DELAY / 2);
                     }
                 }
                 catch(Exception e) {
@@ -156,7 +158,7 @@ Log.e(TAG, "start---------------------------------------------------------------
         if(powerManager != null) {
             String lockName = getPackageName()+"::"+GeotrackingService.class.getSimpleName();
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, lockName);
-            wakeLock.acquire(DELAY_TRACK_MIN*5);
+            wakeLock.acquire(MIN_TRACK_DELAY*5);
         }
     }
     private void dontKeepAwake() {
@@ -280,11 +282,9 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
                 if(time > 0) {
                     double speed = distLast / time;    //60 m/s = 216 Km/h
                     double accel = (speed - velLast) / time;//Aceleración coche muy potente (desde parado!) < 8 m/s2
-
                     Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:-------*************----TIME(s)= %.0f  VEL(m/s)= %.2f  LAST VEL=%.2f  A(m/s2)= %.2f", time, speed, velLast, accel));
                     if (speed > SPEED_MAX || accel > ACCEL_MAX)//imaginamos que es un punto erróneo, salvo que vayas en un cohete
                     {
-                        //Log.e(TAG, String.format(Locale.ENGLISH, "guardarPunto:Punto erróneo:   VEL=%.2f m/s  LAST VEL=%.2f  T=%.0f  a=%.2f ***************************** !!!", speed, velLast, time, accel));
                         return true;
                     }
                     velLast = speed;
@@ -331,7 +331,6 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
 
         @Override
         protected void onDatos(String id) {
-            Log.e(TAG, "GuardarListener:onComplete:----------------------:" + id);
             //Actividad actual: Coche, bici, parado...
             Ruta.addPunto(id, loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(),
                     loc.getAltitude(), loc.getSpeed(), loc.getBearing(), lastDetectedActivity,
@@ -340,7 +339,7 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
                         public void onDatos(Long[] puntos) {
                             Log.e(TAG, String.format(Locale.ENGLISH, "GuardarListener:addPunto: n ptos: %d", puntos[0]));
                             util.refreshListaRutas();//Refrescar lista rutas en main..
-                            ServiceNotifications.createForGeotracking(GeotrackingService.this, util.getNameTrackingRoute()+" "+puntos[0]+" pts");
+                            sn.createForGeotracking(util.getNameTrackingRoute()+" "+puntos[0]+" pts");
                         }
                         @Override
                         public void onError(String err) {
@@ -369,7 +368,6 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
     public void onActividadEvent(ActividadIntentService.ActividadEvent event)
     {
         DetectedActivity act = event.getActividad();
-Log.e(TAG, "onActividadEvent:--------------------------------  lastDetectedActivity = "+lastDetectedActivity +" and now = "+act.getType());
         lastDetectedActivity = act.getType();
     }
 }
