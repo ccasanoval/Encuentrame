@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 
 import com.bumptech.glide.Glide;
 
@@ -28,7 +27,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.Exclude;
 
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -37,7 +35,6 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 
-import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.util.Log;
 
 
@@ -336,13 +333,13 @@ Log.e(TAG, "delGeo:-------------------------------------------------- "+datos.ge
 			Log.e(TAG, "uploadImagen:onProgress:"+n);
 		});
 		storageRef.getDownloadUrl().addOnSuccessListener(uri ->
-				Log.e(TAG, "uploadImagen:onSuccess:------BBBB-----"+uri.toString()));
+				Log.e(TAG, "uploadImagen:onSuccess(a): "+uri.toString()));
 
 		uploadTask
 				.addOnFailureListener(exception -> Log.e(TAG, "uploadImagen:onFailure:"+exception, exception))
 				.addOnSuccessListener(taskSnapshot ->
 					storageRef.getDownloadUrl().addOnSuccessListener(uri ->
-                       	Log.e(TAG, "uploadImagen:onSuccess:----AAAAA-------"+uri.toString())));
+                       	Log.e(TAG, "uploadImagen:onSuccess(b): "+uri.toString())));
 	}
 	//______________________________________________________________________________________________
 	public void downloadImg(final ImageView iv, final Activity act, final Fire.SimpleListener<String> listener)

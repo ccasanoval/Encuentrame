@@ -44,7 +44,6 @@ public class GeofenceStore
 	@Inject
 	GeofenceStore(Context context)
 	{
-		Log.e(TAG, "CONSTRUCTOR:----------------------------"+context);
 		try
 		{
 			this.context = context;
@@ -52,7 +51,7 @@ public class GeofenceStore
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "CONSTRUCTOR:e:-----------------------------context="+context, e);
+			Log.e(TAG, "GeofenceStore:e:------------------------------------------------------", e);
 		}
 	}
 
@@ -60,7 +59,6 @@ public class GeofenceStore
 	{
 		if( ! geofenceList.isEmpty()) {
 			geofencingClient.removeGeofences(pendingIntent);
-			Log.e(TAG, "update:----------------------------REMOVING");
 		}
 		createRequestPendingIntent();
 
@@ -70,7 +68,6 @@ public class GeofenceStore
 		}
 		geofenceList = new ArrayList<>(geofences);
 
-Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 		GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 		builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
 		builder.addGeofences(geofenceList);
@@ -83,7 +80,6 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 
 	private void clear()
 	{
-		Log.e(TAG, "clear------------------------------------------------------------------");
 		if(pendingIntent != null)
 			geofencingClient.removeGeofences(pendingIntent);
 	}
@@ -93,7 +89,6 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
 	{
 		try
 		{
-			Log.e(TAG, "createRequestPendingIntent------------------------------------------------------------------");
 			if(pendingIntent == null) {
 				Intent intent = new Intent(context, GeofenceReceiver.class);
 				pendingIntent = PendingIntent.getBroadcast(
@@ -180,11 +175,7 @@ Log.e(TAG, "update:----------------------------- #geof="+geofenceList.size());
         {
             listaGeoAvisos = aAvisos;
             update(geofenceList2);//Se puede añadir en lugar de crear desde cero?
-            /*for(Aviso a : listaGeoAvisos) {
-                Log.e(TAG, "update:-----------------------------"+a.nombre+" : "+a.isActivo());
-            }*/
         }
-        Log.e(TAG, "listaGeoAvisos:"+listaGeoAvisos.size()+"------------------geofenceList:"+geofenceList.size()+"-----------------------------------bDirty="+bDirty);
         if(geofenceList.isEmpty())
             GeofencingService.stop(context);
         else if(GeofencingService.isOnOff())

@@ -40,6 +40,8 @@ public class ServiceNotifications {
     private static final int RC_GEOFENCING = 200;
     private static final int RC_GEOFENCING_STOP = 201;
 
+    private enum Type { GEOFENCING_SERV, GEOTRACKING_SERV, GEOFENCING_ALERT }
+
     private NotificationManager notificationManager;
     private Context appContext;
     @Inject
@@ -48,6 +50,7 @@ public class ServiceNotifications {
         this.notificationManager = notificationManager;
     }
 
+    //----------------------------------------------------------------------------------------------
     Notification createForGeotracking(String subtitle) {
 
         Intent intentMain = new Intent(appContext, ActMain.class);
@@ -62,17 +65,17 @@ public class ServiceNotifications {
         intentStop.putExtra(ACTION_STOP, true);
         PendingIntent stopPendingIntent = PendingIntent.getActivity(appContext, RC_GEOTRACKING_STOP, intentStop, 0);
 
-        Bitmap iconLarge = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
         return create(
                 appContext,
-                iconLarge,
-                android.R.drawable.ic_menu_directions,//ic_menu_compass,
+                android.R.drawable.ic_menu_directions,
                 "Tracking service",
                 subtitle,
                 mainPendingIntent,
-                stopPendingIntent);
+                stopPendingIntent,
+                Type.GEOTRACKING_SERV);
     }
 
+    //----------------------------------------------------------------------------------------------
     Notification createForGeofencing() {
         Context context = App.getInstance().getApplicationContext();
 
@@ -88,17 +91,17 @@ public class ServiceNotifications {
         intentStop.putExtra(ACTION_STOP, true);
         PendingIntent stopPendingIntent = PendingIntent.getActivity(context, RC_GEOFENCING_STOP, intentStop, 0);
 
-        Bitmap iconLarge = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
         return create(
                 context,
-                iconLarge,
                 android.R.drawable.ic_menu_mylocation,
                 "Geofencing service",
                 "",
                 mainPendingIntent,
-                stopPendingIntent);
+                stopPendingIntent,
+                Type.GEOFENCING_SERV);
     }
 
+    //----------------------------------------------------------------------------------------------
     private final AtomicInteger c = new AtomicInteger(0);
     private int getID() {
         return c.incrementAndGet();
@@ -108,51 +111,58 @@ public class ServiceNotifications {
         Intent intent = new Intent(context, ActAviso.class);
         intent.putExtra(Objeto.NOMBRE, aviso);
 
-        int id = getID();
+        int id = aviso.id.hashCode();
         PendingIntent mainPendingIntent = PendingIntent.getActivity(
                 context.getApplicationContext(),
                 id,
                 intent,
                 0);
-        Bitmap iconLarge = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
         String subtitle = aviso.getNombre();
         if( ! aviso.getDescripcion().isEmpty())
             subtitle += ":"+aviso.getDescripcion();
         Notification notification = create(
                 context,
-                iconLarge,
                 android.R.drawable.ic_menu_compass,
                 titulo,
                 subtitle,
                 mainPendingIntent,
-                null);
+                null,
+                Type.GEOFENCING_ALERT);
         //NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        notificationManager.notify(id, notification);
+        notificationManager.notify(getID(), notification);
     }
 
-    private static Notification create(final Context context, final Bitmap iconBig, final int iconSmall,
+    //----------------------------------------------------------------------------------------------
+    private static Notification create(final Context context, final int iconSmall,
         final CharSequence title, final CharSequence subtitle,
-        final PendingIntent contentIntent, final PendingIntent stopPendingIntent) {
+        final PendingIntent contentIntent,
+        final PendingIntent stopPendingIntent,
+        final Type type) {
 
-        boolean isService = (stopPendingIntent != null);
-
+        Bitmap iconLarge = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(), CHANNEL_ID_SERVICE)
                 .setContentIntent(contentIntent)
                 .setContentTitle(title)
                 .setContentText(subtitle)
                 .setTicker(subtitle)
                 .setSmallIcon(iconSmall)
-                .setLargeIcon(iconBig)
+                .setLargeIcon(iconLarge)
                 //.setShowWhen(false)
                 //.setOngoing(true)
                 .setVibrate(new long[0])
                 ;
-        if(isService) {
+        if(type == Type.GEOFENCING_SERV || type == Type.GEOTRACKING_SERV) {
             builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, context.getString(R.string.stop), stopPendingIntent);
             builder.setAutoCancel(false);
+            if(type == Type.GEOFENCING_SERV) {
+                builder.setGroup("Avisos!");
+                builder.setGroupSummary(true);
+            }
         }
         else {
             builder.setAutoCancel(true);
+            if(type == Type.GEOFENCING_ALERT)
+                builder.setGroup("Avisos!");
         }
 
         Notification notification;
@@ -161,7 +171,8 @@ public class ServiceNotifications {
             builder.setChannelId(CHANNEL_ID_SERVICE);
 
             notification = builder.build();
-            if(isService) {
+            if(type == Type.GEOFENCING_SERV || type == Type.GEOTRACKING_SERV)
+            {
                 notification.flags = notification.flags
                         | Notification.FLAG_FOREGROUND_SERVICE
                         | Notification.FLAG_ONLY_ALERT_ONCE;

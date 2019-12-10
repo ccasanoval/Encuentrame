@@ -39,6 +39,7 @@ public class PreAviso extends PresenterBase
 
 	@Override public void setLatLon(double lat, double lon)
 	{
+		Log.e(TAG, "setLatLon-----------------"+o.nombre+"-----------------------------------pos="+lat+", "+lon);
 		o.setLatLon(lat, lon);
 	}
 
@@ -90,6 +91,8 @@ public class PreAviso extends PresenterBase
 		bGuardar = false;
 		view.iniEspera();
 
+Log.e(TAG, "guardar-------------------------------------------------------------"+o);
+
 		o.setNombre(view.getTextNombre());
 		o.setDescripcion(view.getTextDescripcion());
 		((Aviso) o).setActivo(((IVistaAviso) view).isActivo());
@@ -104,11 +107,12 @@ public class PreAviso extends PresenterBase
 					view.finEspera();
 					openMain(app.getString(R.string.ok_guardar_aviso));
 				}
+Log.e(TAG, "guardar:onDatos-------------------------------------------------------------"+o);
 			}
 			@Override
 			protected void onError(String err, int code)
 			{
-				Log.e(TAG, "guardar:handleFault:e: --------------------------------------------"+err);
+				Log.e(TAG, "guardar:onError:e: ------------------------------------------------"+err);
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -119,7 +123,7 @@ public class PreAviso extends PresenterBase
 			protected void onTimeout()
 			{
 				if( ! isWorking)return;
-				Log.e(TAG, "guardar:timeout----------------------------------------------------");
+				Log.e(TAG, "guardar:onTimeout--------------------------------------------------");
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();

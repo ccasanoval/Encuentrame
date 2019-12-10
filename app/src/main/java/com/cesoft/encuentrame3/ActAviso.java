@@ -72,7 +72,8 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		btnActPos.setOnClickListener(v ->
 		{
 			Location loc = util.getLocation();
-			if(loc != null) setPosicion(loc.getLatitude(), loc.getLongitude());
+			if(loc != null)
+				setPosicion(loc.getLatitude(), loc.getLongitude(), true);
 		});
 
 		//------------------------------------
@@ -156,18 +157,24 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	{
 		super.onMapReady(map);
 		map.getUiSettings().setZoomControlsEnabled(true);
-		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
+		map.setOnMapClickListener(latLng -> {
+			Log.e(TAG, "onMapReady:setOnMapClickListener-------------------------------------------------latLng="+latLng);
+			setPosicion(latLng.latitude, latLng.longitude, true);
+		});
 
 		Location loc = util.getLocation();
-		if(loc != null) setPosicion(loc.getLatitude(), loc.getLongitude());
+		if(loc != null && presenter.isNuevo()) {
+			Log.e(TAG, "onMapReady:-------------------------------------------------loc="+loc);
+			setPosicion(loc.getLatitude(), loc.getLongitude(), false);
+		}
 	}
 
 	//----------------------------------------------------------------------------------------------
-	protected void setPosicion(double lat, double lon)
+	protected void setPosicion(double lat, double lon, boolean sucio)
 	{
 		presenter.setLatLon(lat, lon);
-		presenter.setSucio();
-		lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
+		if(sucio) presenter.setSucio();
+		setPosLabel(lat, lon);
 		setMarker();
 	}
 

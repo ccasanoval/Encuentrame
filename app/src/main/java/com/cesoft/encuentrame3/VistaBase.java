@@ -6,11 +6,15 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 
 import com.cesoft.encuentrame3.models.Objeto;
@@ -219,14 +223,31 @@ public abstract class VistaBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	//private ProgressDialog progressDialog = null;
+	protected ProgressBar progressBar = null;
+	protected boolean iniProgressBar() {
+		if(progressBar == null) {
+			progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
+			params.addRule(RelativeLayout.CENTER_IN_PARENT);
+			CoordinatorLayout layout = findViewById(idLayout);
+			if(layout != null)
+				layout.addView(progressBar, params);
+			else
+				android.util.Log.e(TAG, "iniEspera--------------------------------------------layout==NULL");
+		}
+		return (progressBar != null);
+	}
 	@Override public void iniEspera() {
-		//progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);
-		//TODO: UI for user to know work is in progress
+		android.util.Log.e(TAG, "iniEspera--------------------------------------------");
+		if(iniProgressBar())
+			progressBar.setVisibility(View.VISIBLE);
+		//getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 	}
 	@Override public void finEspera() {
-		//if(progressDialog !=null) progressDialog.dismiss();
-		//TODO: UI for user to know work in progress is finish
+		android.util.Log.e(TAG, "finEspera--------------------------------------------");
+		if(iniProgressBar())
+			progressBar.setVisibility(View.GONE);
+		//getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +272,11 @@ public abstract class VistaBase
 			}
 		};
 	}
-	protected void setPosLugar(double lat, double lon) { presenter.setLatLon(lat, lon); }
+	protected void setPosLugar(double lat, double lon)
+	{
+		Log.e(TAG, "setPosLugar-------------------------------------------------------------- "+lat+", "+lon);
+		presenter.setLatLon(lat, lon);
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// OnMapReadyCallback
@@ -268,10 +293,12 @@ public abstract class VistaBase
 				mapZoom = map.getCameraPosition().zoom;
 		});
 		map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
-		if(presenter.getLatitud() == 0 && presenter.getLongitud() == 0)
+		if(presenter.getLatitud() == 0 && presenter.getLongitud() == 0 && presenter.isNuevo())
 		{
+Log.e(TAG, "onMapReady-------------------------------------------------------------------");
 			Location loc = util.getLocation();
-			if(loc != null) presenter.setLatLon(loc.getLatitude(), loc.getLongitude());
+			if(loc != null)
+				presenter.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
 		setPosLugar(presenter.getLatitud(), presenter.getLongitud());
 	}

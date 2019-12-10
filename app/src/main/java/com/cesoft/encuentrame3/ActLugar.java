@@ -56,7 +56,7 @@ public class ActLugar extends VistaBase
 
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
-		btnActPos.setOnClickListener(v -> setCurrentLocation());
+		btnActPos.setOnClickListener(v -> setCurrentLocation(true));
 
 		//------------------------------------
 		lblPosicion = findViewById(R.id.lblPosicion);
@@ -65,17 +65,17 @@ public class ActLugar extends VistaBase
 		//------------------------------------
 		if(presenter.isNuevo()) {
 			setTitle(getString(R.string.nuevo_lugar));
-			setCurrentLocation();
+			setCurrentLocation(false);
 		}
 		else {
 			setTitle(getString(R.string.editar_lugar));
 		}
 	}
 
-	private void setCurrentLocation() {
+	private void setCurrentLocation(boolean sucio) {
 		Location loc = util.getLocation();
 		if(loc != null)
-			setPosicion(loc.getLatitude(), loc.getLongitude());
+			setPosicion(loc.getLatitude(), loc.getLongitude(), sucio);
 	}
 
 	//____________________________________________________________________________________________________________________________________________________
@@ -122,15 +122,15 @@ public class ActLugar extends VistaBase
 	{
 		super.onMapReady(map);
 		map.getUiSettings().setZoomControlsEnabled(true);
-		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude));
+		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude, true));
 		setMarker();
 	}
 	//----------------------------------------------------------------------------------------------
-	protected void setPosicion(double lat, double lon)
+	protected void setPosicion(double lat, double lon, boolean sucio)
 	{
 		presenter.setLatLon(lat, lon);
-		presenter.setSucio();
-		lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
+		if(sucio)presenter.setSucio();
+		setPosLabel(lat, lon);
 		setMarker();
 	}
 

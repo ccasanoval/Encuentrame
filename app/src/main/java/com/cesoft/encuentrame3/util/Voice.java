@@ -80,37 +80,17 @@ public class Voice implements RecognitionListener {
     private void restartListening() {
         stopListening();
         startListening();
-        /*//TODO: refactor, dont repeat code...
-        isListening = false;
-        if(speech != null) {
-            speech.stopListening();
-            speech.cancel();
-            speech.destroy();
-            speech = null;
-            System.gc();
-        }
-        isListening = true;
-        recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_RESULTS);
-        speech = SpeechRecognizer.createSpeechRecognizer(app);
-        speech.setRecognitionListener(this);
-        speech.startListening(recognizerIntent);*/
     }
     public void startListening() {
-        //Log.e(TAG, "startListening: ------------------------------------");
         if(isListening) {
-            Log.e(TAG, "startListening: ------------------------------------ RETURN");
             return;
-            //stopListening();
         }
         if( ! checkPermissions())return;
         isListening = true;
         Log.e(TAG, "isRecognitionAvailable: -------------------" + SpeechRecognizer.isRecognitionAvailable(app));
 
         recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        //recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.getDefault().getLanguage());   Log.e("AAAA", "------------------LANG: "+ Locale.getDefault().getLanguage());
+        //recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.getDefault().getLanguage());
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_RESULTS);
@@ -122,7 +102,6 @@ public class Voice implements RecognitionListener {
     }
 
     public void stopListening() {
-        //Log.e(TAG, "stopListening: ----------------------------------------"+isListening+" : "+isListeningActive);
         isListening = false;
         if(speech != null) {
             speech.stopListening();
@@ -148,7 +127,7 @@ public class Voice implements RecognitionListener {
     @Override
     public void onRmsChanged(float rmsdB) {
         if( !isListeningActive) {
-            Log.e(TAG, "onRmsChanged------------------------------isListeningActive="+isListeningActive+" / isListening="+isListening);
+            Log.e(TAG, "onRmsChanged------------------------------ isListening="+isListening);
             stopListening();
         }
     }
@@ -163,13 +142,10 @@ public class Voice implements RecognitionListener {
 
     @Override
     public void onError(int error) {
-        Log.e(TAG, "onError: ------------------------------------------------------------------ "+getErrorText(error));
-
         switch(error) {
             case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
                 Log.e(TAG, "onError: ERROR_RECOGNIZER_BUSY------------------------------------------------------------------ DID YOU CALL startListening twice ???");
                 stopListening();
-                //restartListening();
                 break;
             case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
             case SpeechRecognizer.ERROR_NO_MATCH:
@@ -235,12 +211,6 @@ public class Voice implements RecognitionListener {
         int bestCommandId = Integer.MIN_VALUE;
         String bestCommandStr = "";
 
-        /*if(commandStr == null) {
-            commandStr = new String[commandId.length];
-            for(int i=0; i < commandId.length; i++) {
-                commandStr[i] = app.getString(commandId[i]);
-            }
-        }*/
         for(int i=0; i < commandId.length; i++) {
             int id = commandId[i];
             String cmd = commandStr[i];
@@ -318,51 +288,48 @@ public class Voice implements RecognitionListener {
     // Event Bus Messages
     //----------------------------------------------------------------------------------------------
 
-
-    private String getErrorText(int errorCode) {
-        String message;
-        switch (errorCode) {
-            case SpeechRecognizer.ERROR_AUDIO:
-                message = "Audio recording error";
-                break;
-            case SpeechRecognizer.ERROR_CLIENT:
-                message = "Client side error";
-                break;
-            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                message = "Insufficient permissions";
-                break;
-            case SpeechRecognizer.ERROR_NETWORK:
-                message = "Network error";
-                break;
-            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-                message = "Network timeout";
-                break;
-            case SpeechRecognizer.ERROR_NO_MATCH:
-                message = "No match";
-                break;
-            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                message = "RecognitionService busy";
-                break;
-            case SpeechRecognizer.ERROR_SERVER:
-                message = "error from server";
-                break;
-            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                message = "No speech input";
-                break;
-            default:
-                message = "Didn't understand, please try again.";
-                break;
-        }
-        return message;
-    }
-
+//    private String getErrorText(int errorCode) {
+//        String message;
+//        switch (errorCode) {
+//            case SpeechRecognizer.ERROR_AUDIO:
+//                message = "Audio recording error";
+//                break;
+//            case SpeechRecognizer.ERROR_CLIENT:
+//                message = "Client side error";
+//                break;
+//            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+//                message = "Insufficient permissions";
+//                break;
+//            case SpeechRecognizer.ERROR_NETWORK:
+//                message = "Network error";
+//                break;
+//            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+//                message = "Network timeout";
+//                break;
+//            case SpeechRecognizer.ERROR_NO_MATCH:
+//                message = "No match";
+//                break;
+//            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+//                message = "RecognitionService busy";
+//                break;
+//            case SpeechRecognizer.ERROR_SERVER:
+//                message = "error from server";
+//                break;
+//            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+//                message = "No speech input";
+//                break;
+//            default:
+//                message = "Didn't understand, please try again.";
+//                break;
+//        }
+//        return message;
+//    }
 
 
     private TextToSpeech textToSpeech = null;
     public void speak(String message) {
         if( !pref.isSpeechEnabled()) return;
         textToSpeech = new TextToSpeech(app, status -> {
-            Log.e(TAG, "*********************-------"+message);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 ttsGreater20(message);
             }
@@ -375,11 +342,6 @@ public class Voice implements RecognitionListener {
         textToSpeech.setSpeechRate(1f);
     }
     private void ttsUnder20(String text) {
-//        HashMap map = new HashMap<String, String>();
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            map.putIfAbsent(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
-//        }
-        //textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, map);
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, new Bundle(), "MessageId");
     }
 
@@ -388,6 +350,5 @@ public class Voice implements RecognitionListener {
         String utteranceId = hashCode() + "";
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
     }
-
 
 }
