@@ -1,18 +1,43 @@
 package com.cesoft.encuentrame3;
 
+import com.cesoft.encuentrame3.models.Aviso;
+
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar Casanova on 16/05/2017.
 // TODO: READ: https://medium.com/@sergiygrechukha/android-ui-and-unit-tests-coverage-report-with-jacoco-and-sonarqube-1db5576f79b0
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class ActTest2
 {
+    @Test
+    public void test1()
+    {
+        Aviso aviso1 = new Aviso();
+        Aviso aviso2 = new Aviso();
+
+        aviso1.id = "A1";
+        aviso2.id = "A1";
+
+        aviso1.nombre = "Aviso";
+        aviso2.nombre = "Aviso";
+        aviso1.descripcion = "";
+        aviso2.descripcion = "";
+
+        aviso1.setRadio(35);
+        aviso2.setRadio(35);
+        aviso1.latitud = 3.5;
+        aviso2.latitud = 3.5;
+        aviso1.longitud= 4.0;
+        aviso2.longitud= 4.0;
+
+        System.out.println("hashCode1="+aviso1.hashCode()+" --- hashCode2="+aviso2.hashCode());
+
+        assert aviso1.equals(aviso2);
+    }
 
 	/*
 	@Test

@@ -28,18 +28,18 @@ public class PreAviso extends PresenterBase
 		boolean isActivo();
 	}
 
-	private Util util;
-	private GeofenceStore geofenceStoreAvisos;
+	private final Util util;
+	private final GeofenceStore geofenceStoreAvisos;
 	@Inject PreAviso(Application app, Util util, GeofenceStore geofenceStoreAvisos)
 	{
 		super(app);
+Log.e(TAG, "Constructor:--------------------------------------o="+o);
 		this.util = util;
 		this.geofenceStoreAvisos = geofenceStoreAvisos;
 	}
 
 	@Override public void setLatLon(double lat, double lon)
 	{
-		Log.e(TAG, "setLatLon-----------------"+o.nombre+"-----------------------------------pos="+lat+", "+lon);
 		o.setLatLon(lat, lon);
 	}
 
@@ -48,12 +48,13 @@ public class PreAviso extends PresenterBase
 	public double getRadio() { return ((Aviso) o).getRadio(); }
 	public void setRadio(int radio)
 	{
-		isSucio = ((Aviso) o).getRadio() != radio;
-		((Aviso) o).setRadio(radio);
+		boolean changed = ((Aviso)o).setRadio(radio);
+		isSucio = isSucio || changed;
 	}
 	public void setActivo(boolean isChecked)
 	{
-		isSucio = isChecked != ((Aviso) o).isActivo();
+		boolean changed = isChecked != ((Aviso)o).isActivo();
+		isSucio = isSucio || changed;
 	}
 	@Override
 	public void loadObjeto(Objeto objDefault)
@@ -107,7 +108,6 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 					view.finEspera();
 					openMain(app.getString(R.string.ok_guardar_aviso));
 				}
-Log.e(TAG, "guardar:onDatos-------------------------------------------------------------"+o);
 			}
 			@Override
 			protected void onError(String err, int code)

@@ -22,7 +22,7 @@ public class Preferencias {
     private static final String VOICE_ENABLED = "voice_enabled";
 
 
-    private SharedPreferences sp;
+    private final SharedPreferences sp;
     @Inject
     public Preferencias(SharedPreferences sp) {
         this.sp = sp;

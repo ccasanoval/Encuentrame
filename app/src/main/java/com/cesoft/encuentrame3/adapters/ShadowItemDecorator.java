@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 // Created by Cesar_Casanova on 21/06/2019
 public class ShadowItemDecorator extends RecyclerView.ItemDecoration {
 
-    private Drawable divider;
+    private final Drawable divider;
 
     public ShadowItemDecorator(Context context, int resId) {
         this.divider = ContextCompat.getDrawable(context, resId);

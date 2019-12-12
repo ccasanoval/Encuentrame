@@ -42,7 +42,7 @@ import javax.inject.Inject;
 import static android.app.Activity.RESULT_OK;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+// Created by Cesar_Casanova
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the {@link MainIterface} interface to handle interaction events.
@@ -87,8 +87,7 @@ public class FrgMain extends Fragment implements IListaItemClick
 			scrollState = layoutManager.onSaveInstanceState();
 			state.putParcelable(LIST_SCROLL_STATE, scrollState);
 		}
-		else
-			Log.e(TAG, "onSaveInstanceState:e:--------*********************-------------layoutManager == null");
+		//else Log.e(TAG, "onSaveInstanceState:e:--------*********************-------------layoutManager == null");
 	}
 
 	@Override
@@ -116,7 +115,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 
 		if(sectionNumber < 0)
 		{
-			Log.e(TAG, "onCreateView:-----------------------------------------sectionNumber="+ sectionNumber);
 			main.gotoLogin();
 			return null;
 		}
@@ -147,7 +145,6 @@ public class FrgMain extends Fragment implements IListaItemClick
 				break;
 			default:break;
 		}
-		//listView.addHeaderView(textView);//TODO
 
 		return rootView;
 	}
@@ -467,14 +464,16 @@ public class FrgMain extends Fragment implements IListaItemClick
 				if(sMensaje != null && !sMensaje.isEmpty())
 					Toast.makeText(getContext(), sMensaje, Toast.LENGTH_LONG).show();
 			}
-			catch(Exception e){Log.e(TAG, "processDataResult:e:--------------------------------------",e);}
+			catch(Exception e) {
+				Log.e(TAG, "processDataResult:e:-----------------------------------------------",e);
+			}
 			if( ! data.getBooleanExtra(DIRTY, true))return;
 			Filtro filtro0 = data.getParcelableExtra(Filtro.FILTRO);
 
 			if(filtro != null && filtro.getTipo() != Constantes.NADA)
 			{
 				this.filtro = filtro0;
-				if( ! filtro.isOn())
+				if(filtro != null && ! filtro.isOn())
 					Toast.makeText(getContext(), getString(R.string.sin_filtro), Toast.LENGTH_SHORT).show();
 			}
 		}
@@ -496,5 +495,4 @@ public class FrgMain extends Fragment implements IListaItemClick
 			default:break;
 		}
 	}
-
 }

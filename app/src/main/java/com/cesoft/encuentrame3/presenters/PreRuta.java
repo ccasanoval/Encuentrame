@@ -44,7 +44,7 @@ public class PreRuta extends PresenterBase
 	public String getId(){return o.getId();}
 
 	//----------------------------------------------------------------------------------------------
-	private Util util;
+	private final Util util;
 	@Inject PreRuta(Application app, Util util)
 	{
 		super(app);
@@ -83,7 +83,6 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onDatos(String id)
 			{
-Log.e(TAG, "onDatos---------------------------------------------------------------------isWorking="+isWorking);
 				GeotrackingService.start(app);
 				bGuardar = true;
 				if(view != null) {
@@ -94,7 +93,7 @@ Log.e(TAG, "onDatos-------------------------------------------------------------
 			@Override
 			public void onError(String err, int code)
 			{
-Log.e(TAG, "onError---------------------------------------------------------------------isWorking="+isWorking);
+				Log.e(TAG, "guardar:onError:e:-------------------------------------------------"+err);
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -103,8 +102,8 @@ Log.e(TAG, "onError-------------------------------------------------------------
 			}
 			@Override public void onTimeout()
 			{
-Log.e(TAG, "onTimeout---------------------------------------------------------------------isWorking="+isWorking);
 				if( ! isWorking)return;
+				Log.e(TAG, "guardar:onTimeout:------------------------------------------------");
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
@@ -147,7 +146,6 @@ Log.e(TAG, "onTimeout-----------------------------------------------------------
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
-					Log.e(TAG, "eliminar:onDatos-------------------------------------------- "+onBackPressed);
 					if( ! onBackPressed)
 						util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
 				}
@@ -156,7 +154,7 @@ Log.e(TAG, "onTimeout-----------------------------------------------------------
 			protected void onError(String err, int code)
 			{
 				isEliminar = true;
-				Log.e(TAG, "eliminar:handleFault:e:-------------------------------------------- "+err);
+				Log.e(TAG, "eliminar:onError:e:------------------------------------------------"+err);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_eliminar, err);
@@ -165,6 +163,7 @@ Log.e(TAG, "onTimeout-----------------------------------------------------------
 			@Override
 			public void onTimeout() {
 				if( ! isWorking)return;
+				Log.e(TAG, "eliminar:onTimeout:------------------------------------------------");
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
@@ -200,7 +199,6 @@ Log.e(TAG, "onTimeout-----------------------------------------------------------
 			@Override
 			public void onDatos(String id)
 			{
-Log.e(TAG, "startTrackingRecord:onDatos---------------------------------------------------------------------isWorking="+isWorking);
 				util.setTrackingRoute(o.id, o.nombre);
 				if(view != null) {
 					view.finEspera();
@@ -213,7 +211,7 @@ Log.e(TAG, "startTrackingRecord:onDatos-----------------------------------------
 			public void onError(String err, int code)
 			{
 				util.setTrackingRoute("", "");
-				Log.e(TAG, "startTrackingRecord:onError:e:------------------------------------- "+err);
+				Log.e(TAG, "startTrackingRecord:onError:e:-------------------------------------"+err);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.error_guardar, err);
@@ -222,7 +220,7 @@ Log.e(TAG, "startTrackingRecord:onDatos-----------------------------------------
 			@Override
 			public void onTimeout() {
 				if( ! isWorking)return;
-Log.e(TAG, "startTrackingRecord:onTimeout---------------------------------------------------------------------");
+				Log.e(TAG, "startTrackingRecord:onTimeout--------------------------------------");
 				util.setTrackingRoute(o.id, o.nombre);
 				GeotrackingService.start(app);
 				if(view != null) {
@@ -356,7 +354,7 @@ Log.e(TAG, "startTrackingRecord:onTimeout---------------------------------------
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "estadisticas:onCancelled:------------------------------------------ "+err);
+				Log.e(TAG, "estadisticas:onCancelled:------------------------------------------"+err);
 			}
 		});
 	}
@@ -391,7 +389,7 @@ Log.e(TAG, "startTrackingRecord:onTimeout---------------------------------------
 			}
 			@Override public void onError(String err)
 			{
-				Log.e(TAG, "newListeners:ListenerRuta:e:--------------------------------------- "+err);
+				Log.e(TAG, "newListeners:ListenerRuta:e:---------------------------------------"+err);
 				if(view != null)
 					view.toast(R.string.err_get_ruta_pts);
 			}

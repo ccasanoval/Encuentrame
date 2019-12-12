@@ -29,7 +29,6 @@
 
 	<string name="activo">Active</string>
 	<string name="aviso">Alert message</string>
-	<string name="cargando">Loading…</string>
 	<string name="clave">Password</string>
 	<string name="clave_confirmar">Repeat password</string>
 	<string name="config">Settings</string>
@@ -42,6 +41,7 @@
 	<string name="enter_lbl">Input login</string>
 	<string name="nombre">Name</string>
 	<string name="radio">Radius</string>
+	<string name="radio_m" translatable="false">%d m</string>
 	<string name="lista_vacia">Empty list…</string>
 	<string name="voz_onoff">Voice</string>
 	<string name="activos">ACTIVE</string>

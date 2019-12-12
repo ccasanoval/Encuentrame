@@ -109,7 +109,7 @@ public class ActividadIntentService extends IntentService {
     }
 
     static class ActividadEvent {
-        private DetectedActivity actividad;
+        private final DetectedActivity actividad;
         public DetectedActivity getActividad() { return actividad; }
         ActividadEvent(DetectedActivity actividad) {
             this.actividad = actividad;

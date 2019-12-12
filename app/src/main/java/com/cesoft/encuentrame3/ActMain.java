@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -13,14 +14,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.cesoft.encuentrame3.adapters.SectionsPagerAdapter;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.svc.ActividadIntentService;
+import com.cesoft.encuentrame3.svc.GeofenceStore;
 import com.cesoft.encuentrame3.svc.GeofencingService;
 import com.cesoft.encuentrame3.svc.GeotrackingService;
 import com.cesoft.encuentrame3.svc.ServiceNotifications;
@@ -38,22 +38,22 @@ import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CU
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Created by CESoft
+// Created by César Casanova
 public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	private static final String TAG = ActMain.class.getSimpleName();
 	private static final int ASK_GPS_PERMISSION = 6969;
 	private static final int ASK_GPS_ACTIVATION = 6968;
 
-	private FrgMain[] frmMain = new FrgMain[3];
 	private ViewPager viewPager;
 	private Login login;
 	private Util util;
 	private Voice voice;
 	private MenuItem vozMenuItem;
+	private SectionsPagerAdapter sectionsPagerAdapter;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
-	protected void onCreate(Bundle savedInstanceState)//TODO: Cuando se cambia de orientacion se recrea: NOOOR!
+	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
@@ -68,15 +68,12 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 		toolbar.setSubtitle(Login.getCurrentUserName());
 
 		createViews();
-		gotoPage(getIntent());
-		showMensaje(getIntent());
-
+		processIntent(getIntent());
 
 		if(!login.isLogged())gotoLogin();
-		if(oncePideBateria) {
-			util.pideBateria(this);
-			oncePideBateria = false;
-		}
+
+		util.pideBateria(this);
+
 		if(util.compruebaPermisosGPS(this, ASK_GPS_PERMISSION)) {
 			util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
 			startServices();
@@ -86,6 +83,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	protected void onNewIntent(Intent intent)
 	{
 		super.onNewIntent(intent);
+		processIntent(intent);
+	}
+	private void processIntent(Intent intent) {
+		if(intent == null) return;
 		gotoPage(intent);
 		showMensaje(intent);
 		int nPagina = intent.getIntExtra(Constantes.WIN_TAB, Constantes.NADA);
@@ -96,7 +97,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 		if(stop) {
 			switch(nPagina) {
 				case Constantes.AVISOS:
-					GeofencingService.stop(this);
+					GeofencingService.stop();
 					break;
 				case Constantes.RUTAS:
 					GeotrackingService.stop(this);
@@ -122,12 +123,10 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 		}
 	}
 	//----------------------------------------------------------------------------------------------
-	private boolean oncePideBateria = true;
 	@Override
 	public void onStart()
 	{
 		super.onStart();
-
 		EventBus.getDefault().register(this);
 	}
 	//----------------------------------------------------------------------------------------------
@@ -135,6 +134,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	public void onStop() {
 		EventBus.getDefault().unregister(this);
 		super.onStop();
+		if(menu != null) menu.close();
 	}
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -147,7 +147,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	//----------------------------------------------------------------------------------------------
 	private void createViews()
 	{
-		SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+		sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 		viewPager = findViewById(R.id.container);
 		viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = findViewById(R.id.tabs);
@@ -172,9 +172,11 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	}
 
 	//----------------------------------------------------------------------------------------------
+	private Menu menu;
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
+		this.menu = menu;
 		getMenuInflater().inflate(R.menu.menu_act_main, menu);
 		vozMenuItem = menu.findItem(R.id.action_voz);
 		refreshVoiceIcon();
@@ -195,19 +197,15 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 				goMap();
 				return true;
 			case R.id.action_buscar:
-				FrgMain frg = frmMain[viewPager.getCurrentItem()];// frg==null cuando se libero mem y luego se activó app...
+				FrgMain frg = sectionsPagerAdapter.getPage(viewPager.getCurrentItem());// frg==null cuando se libero mem y luego se activó app...
 				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT).getItem(viewPager.getCurrentItem());
-				buscar(frmMain[viewPager.getCurrentItem()]);
+				buscar(sectionsPagerAdapter.getPage(viewPager.getCurrentItem()));
 				return true;
-			case R.id.action_onoff_fence:
-				if(GeofencingService.isOnOff()) {
-					GeofencingService.turnOnOff(this, false);//TODO:Preguntar?
-					item.setTitle(R.string.start_geofencing);
-				}
-				else {
-					GeofencingService.turnOnOff(this, true);
-					item.setTitle(R.string.stop_geofencing);
-				}
+			case R.id.action_onoff_geofence:
+				if(GeofencingService.isOn())
+					GeofencingService.turnOff();//TODO:Preguntar?
+				else
+					GeofencingService.turnOn();
 				return true;
 			case R.id.action_privacy_policy:
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
@@ -399,7 +397,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 
 	private void startServices() {
 		GeotrackingService.start(this);
-		GeofencingService.start(this);
+		GeofencingService.start();
 		ActividadIntentService.start(this);
 	}
 
@@ -442,43 +440,24 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 		}
 	}
 
-
-
-	/**
-	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the sections/tabs/pages.
-	 */
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	// FRAGMEN PAGER ADAPTER
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	private class SectionsPagerAdapter extends FragmentPagerAdapter
-	{
-		SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
-			super(fm, behavior);
+	private final Handler handler = new Handler();
+	//@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onGeofenceStoreEvent(GeofenceStore.Event event) {
+		if(menu == null) {
+			Log.e(TAG, "DALE TIEMPO---------------------------------------");
+			handler.removeCallbacksAndMessages(null);
+			handler.postDelayed(() -> onGeofenceStoreEvent(event), 500);
+			return;
 		}
-
-		@Override
-		@NonNull
-		public Fragment getItem(int position)
-		{
-			frmMain[position] = FrgMain.newInstance(position);
-			return frmMain[position];
+		//Log.e(TAG, "            OK!---------------------------------------isOnOff="+GeofencingService.isOn()+" event.isOn()="+event.isOn());
+		if(GeofencingService.isOn()) {
+			MenuItem item = menu.findItem(R.id.action_onoff_geofence);
+			if(item != null)item.setTitle(R.string.stop_geofencing);
 		}
-		@Override
-		public int getCount()
-		{
-			return 3;
-		}
-		@Override
-		public CharSequence getPageTitle(int position)
-		{
-			switch(position)
-			{
-			case Constantes.LUGARES:return getString(R.string.lugares);
-			case Constantes.RUTAS:	return getString(R.string.rutas);
-			case Constantes.AVISOS:	return getString(R.string.avisos);
-			default:break;
-			}
-			return null;
+		else {
+			MenuItem item = menu.findItem(R.id.action_onoff_geofence);
+			if(item != null)item.setTitle(R.string.start_geofencing);
 		}
 	}
 }

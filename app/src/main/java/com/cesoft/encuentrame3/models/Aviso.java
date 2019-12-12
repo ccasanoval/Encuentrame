@@ -23,7 +23,6 @@ import java.util.Collections;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 15/02/2016
-////////////////////////////////////////////////////////////////////////////////////////////////////
 @IgnoreExtraProperties
 public class Aviso extends Objeto
 {
@@ -33,8 +32,10 @@ public class Aviso extends Objeto
 	private static GeoFire newGeoFire() { return new GeoFire(Fire.newFirebase().child(GEO).child(NOMBRE)); }
 	@Exclude private DatabaseReference datos;
 
+	public static final int MIN_RADIO = 30;
+	public static final int MAX_RADIO = 10000;
 	private static final int DELAY = 5000;
-	private Handler handler = new Handler();
+	private final Handler handler = new Handler();
 
 	//
 	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...
@@ -43,12 +44,20 @@ public class Aviso extends Objeto
 	//______________________________________________________________________________________________
 	private static final String ACTIVO = "activo";
 	private boolean isActivo = true;
-		public boolean isActivo(){return isActivo;}
-		public void setActivo(boolean v){isActivo=v;}
+		public boolean isActivo() { return isActivo; }
+		public void setActivo(boolean v) { isActivo=v; }
 
-	private double radio;
-		public double getRadio(){return radio;}
-		public void setRadio(double v){if(v >= 0 && v < 10000)radio=v;}
+	private double radio = MIN_RADIO;
+		public double getRadio() {
+			return radio;
+		}
+		public boolean setRadio(double v) {
+			if(v >= MIN_RADIO && v <= MAX_RADIO && radio != v) {
+				radio = v;
+				return true;
+			}
+			return false;
+		}
 
 	//______________________________________________________________________________________________
 	public Aviso() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
@@ -71,8 +80,9 @@ public class Aviso extends Objeto
 			&& getNombre().equals(a.getNombre()) && getDescripcion().equals(a.getDescripcion());
 	}
 	@Override
-	public int hashCode() {
-		return super.hashCode();
+	public int hashCode()
+	{
+		return getId().hashCode();
 	}
 
 	//// PARCELABLE

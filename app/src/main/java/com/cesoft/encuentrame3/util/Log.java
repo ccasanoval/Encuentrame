@@ -7,19 +7,19 @@ import com.cesoft.encuentrame3.BuildConfig;
 //^(?!.*(No setter)).*$
 public class Log
 {
-	private static final boolean TESTING = false;
+	private static final boolean FORCE_LOG = false;
 	private static final String PREFIX = "CESoft:";
 	private Log(){}
-	public static void d(String tag, String msg) {
-		if(TESTING || BuildConfig.DEBUG) android.util.Log.d(tag, PREFIX+msg);
-	}
+//	public static void d(String tag, String msg) {
+//		if(FORCE_LOG || BuildConfig.DEBUG) android.util.Log.d(tag, PREFIX+msg);
+//	}
 	public static void w(String tag, String msg) {
-		if(TESTING || BuildConfig.DEBUG) android.util.Log.w(tag, PREFIX+msg);
+		if(FORCE_LOG || BuildConfig.DEBUG) android.util.Log.w(tag, PREFIX+msg);
 	}
 	public static void e(String tag, String msg) {
-		if(TESTING || BuildConfig.DEBUG) android.util.Log.e(tag, PREFIX+msg);
+		if(FORCE_LOG || BuildConfig.DEBUG) android.util.Log.e(tag, PREFIX+msg);
 	}
 	public static void e(String tag, String msg, Throwable t) {
-		if(TESTING || BuildConfig.DEBUG) android.util.Log.e(tag, PREFIX+msg, t);
+		if(FORCE_LOG || BuildConfig.DEBUG) android.util.Log.e(tag, PREFIX+msg, t);
 	}
 }

@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 
 import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 
@@ -30,6 +30,10 @@ public class GlobalModuleTest
 	@Singleton
 	@Provides
 	Application provideApplication() { return _app; }
+
+	@Singleton
+	@Provides
+	Context provideAppContext() { return _app.getApplicationContext(); }
 
 	@Singleton
 	@Provides
@@ -65,9 +69,16 @@ public class GlobalModuleTest
 
 	@Singleton
 	@Provides
-	Util provideUtil(Application app, Preferencias pref, LocationManager lm, NotificationManager nm, PowerManager pm)
+	ServiceNotifications provideServiceNotifications()
 	{
-		return new Util(app, pref, lm, nm, pm);
+		return Mockito.mock(ServiceNotifications.class);
+	}
+
+	@Singleton
+	@Provides
+	Util provideUtil(Application app, Preferencias pref, LocationManager lm, PowerManager pm, ServiceNotifications sn)
+	{
+		return new Util(app, pref, lm, pm, sn);
 	}
 	@Singleton
 	@Provides

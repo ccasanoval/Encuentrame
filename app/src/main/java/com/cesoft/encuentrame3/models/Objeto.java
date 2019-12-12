@@ -12,7 +12,6 @@ import java.util.Date;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 17/02/2016.
-////////////////////////////////////////////////////////////////////////////////////////////////////
 //https://github.com/firebase/geofire-java
 public class Objeto implements Parcelable
 {
@@ -20,7 +19,6 @@ public class Objeto implements Parcelable
 	public static final String NOMBRE = "objeto";
 
 	public static final java.text.SimpleDateFormat DATE_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
-	public static final java.text.DateFormat DATE_FORMAT2 = java.text.DateFormat.getDateTimeInstance();
 
 	//
 	//NOTE: Firebase needs public field or public getter/setter, if use @Exclude that's like private...

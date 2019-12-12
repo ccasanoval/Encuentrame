@@ -45,7 +45,7 @@ public class Ruta extends Objeto implements Parcelable
 	@Exclude private DatabaseReference datos;
 
 	private static final int DELAY = 5000;
-	private Handler handler = new Handler();
+	private final Handler handler = new Handler();
 
 	//______________________________________________________________________________________________
 	public Ruta() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos
@@ -258,12 +258,12 @@ public class Ruta extends Objeto implements Parcelable
 	}
 	//----
 	private static class BuscarPorGeoFiltroSimpleListener implements ValueEventListener {
-		private ArrayList<Ruta> aRutas = new ArrayList<>();
-		private ArrayList<Ruta> aIgnorados = new ArrayList<>();
-		private Filtro filtro;
-		private String idRutaAct;
-		private String[] aData;
-		private Fire.SimpleListener<Ruta> listener;
+		private final ArrayList<Ruta> aRutas = new ArrayList<>();
+		private final ArrayList<Ruta> aIgnorados = new ArrayList<>();
+		private final Filtro filtro;
+		private final String idRutaAct;
+		private final String[] aData;
+		private final Fire.SimpleListener<Ruta> listener;
 		BuscarPorGeoFiltroSimpleListener(final Fire.SimpleListener<Ruta> listener, final String[] aData, final Filtro filtro, final String idRutaAct) {
 			this.listener = listener;
 			this.aData = aData;
@@ -314,7 +314,7 @@ public class Ruta extends Objeto implements Parcelable
 	private static GeoQueryEventListener getBuscarPorGeoFiltroGeoQueryEventListener(Fire.SimpleListener<String> lis, GeoQuery geoQuery) {
 		return new GeoQueryEventListener()
 		{
-			private Set<String> asRutas = new TreeSet<>();
+			private final Set<String> asRutas = new TreeSet<>();
 			private int nCount = 0;
 			@Override
 			public void onKeyEntered(String key, GeoLocation location)

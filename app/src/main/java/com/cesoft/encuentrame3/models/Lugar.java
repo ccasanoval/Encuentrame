@@ -56,7 +56,7 @@ public class Lugar extends Objeto
 	@Exclude private DatabaseReference datos;
 
 	private static final int DELAY = 5000;
-	private Handler handler = new Handler();
+	private final Handler handler = new Handler();
 
 	//______________________________________________________________________________________________
 	public Lugar() { super(); }	//NOTE: Firebase necesita un constructor sin argumentos

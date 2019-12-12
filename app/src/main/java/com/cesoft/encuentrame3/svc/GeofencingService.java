@@ -17,36 +17,36 @@ import com.cesoft.encuentrame3.util.Log;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+// Created by Cesar_Casanova
 public class GeofencingService extends Service {
     private static final String TAG = GeofencingService.class.getSimpleName();
     private static final int ID_SERVICE = 6970;
 
-    private static boolean isOnOff = true;
-    public static void turnOnOff(Context context, boolean v) {
-        isOnOff = v;
-        if(isOnOff)
-            GeofencingService.start(context);
-        else
-            GeofencingService.stop(context);
+    private static boolean isOn = true;
+    public static void turnOn() {
+        GeofencingService.start();
     }
-    public static boolean isOnOff() { return isOnOff; }
+    public static void turnOff() {
+        GeofencingService.stop();
+    }
+    public static boolean isOn() { return isOn; }
 
     private static boolean isStarted = false;
-    public static void start(Context context) {
+    public static void start() {
         if(isStarted) return;
-        Intent intent = new Intent(context, GeofencingService.class);
+        Context appContext = App.getInstance();
+        Intent intent = new Intent(appContext, GeofencingService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
+            appContext.startForegroundService(intent);
         } else {
-            context.startService(intent);
+            appContext.startService(intent);
         }
         isStarted = true;
     }
-    public static synchronized void stop(Context context) {
-        Intent intentService = new Intent(context, GeofencingService.class);
-        context.stopService(intentService);
-        Log.e(TAG, "stop-----------------------------------------------------------------------------------");
+    public static synchronized void stop() {
+        Context appContext = App.getInstance();
+        Intent intentService = new Intent(appContext, GeofencingService.class);
+        appContext.stopService(intentService);
     }
 
     private Thread thread = null;
@@ -68,6 +68,7 @@ public class GeofencingService extends Service {
             Log.e(TAG, "onStartCommand:--------------------------------  Killing old thread "+thread.hashCode());
             thread.interrupt();
         }
+        isOn = true;
 
         thread = new Thread() {
             @Override
@@ -103,6 +104,9 @@ public class GeofencingService extends Service {
     public void onDestroy() {
         super.onDestroy();
         isStarted = false;
+        isOn = false;
+        GeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
+        geofenceStoreAvisos.clear();
         Log.e(TAG, "onDestroy:-----------------------------------------------------------------");
     }
 }

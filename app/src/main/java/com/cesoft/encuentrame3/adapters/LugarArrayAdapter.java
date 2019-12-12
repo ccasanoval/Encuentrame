@@ -18,7 +18,7 @@ import com.cesoft.encuentrame3.models.Lugar;
 public class LugarArrayAdapter extends RecyclerView.Adapter<ItemViewHolder>
 {
 	private final Lugar[] lugares;
-	private IListaItemClick inter;
+	private final IListaItemClick inter;
 
 	public LugarArrayAdapter(Lugar[] lugares, IListaItemClick inter)
 	{

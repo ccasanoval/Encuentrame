@@ -2,10 +2,7 @@ package com.cesoft.encuentrame3;
 
 import android.app.Application;
 import android.content.Context;
-
-//import com.cesoft.encuentrame3.di.components.DaggerGlobalComponentTest;
 import com.cesoft.encuentrame3.di.components.GlobalComponentTest;
-import com.cesoft.encuentrame3.di.modules.GlobalModuleTest;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar Casanova on 18/05/2017.

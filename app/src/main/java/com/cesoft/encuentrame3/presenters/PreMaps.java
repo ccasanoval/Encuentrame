@@ -82,11 +82,13 @@ public class PreMaps extends PresenterBase
 				@Override
 				protected void onDatos(String id)
 				{
-					view.toast(R.string.ok_guardar_lugar);
-					Intent data = new Intent();
-					data.putExtra(Lugar.NOMBRE, o);
-					view.getAct().setResult(Activity.RESULT_OK, data);
-					view.finish();
+					if(view != null) {
+						view.toast(R.string.ok_guardar_lugar);
+						Intent data = new Intent();
+						data.putExtra(Lugar.NOMBRE, o);
+						view.getAct().setResult(Activity.RESULT_OK, data);
+						view.finish();
+					}
 				}
 				@Override
 				protected void onError(String err, int code)
@@ -209,7 +211,7 @@ public class PreMaps extends PresenterBase
 		});
 	}
 
-	public double getRadioAviso(){return ((Aviso) o).getRadio();}
+	public double getRadioAviso(){return ((Aviso)o).getRadio();}
 
 	public void setPosicion(double lat, double lon)
 	{
@@ -220,7 +222,8 @@ public class PreMaps extends PresenterBase
 				isSucio = true;
 				o.setLatLon(lat, lon);
 			}
-			((IMapsView) view).setMarker(o.getNombre(), o.getDescripcion(), new LatLng(lat, lon));
+			if(view != null)
+				((IMapsView)view).setMarker(o.getNombre(), o.getDescripcion(), new LatLng(lat, lon));
 		}
 		else if(isAviso())
 		{
@@ -229,13 +232,15 @@ public class PreMaps extends PresenterBase
 				isSucio = true;
 				o.setLatLon(lat, lon);
 			}
-			LatLng pos = new LatLng(lat, lon);
-			((IMapsView) view).setMarker(o.getNombre(), o.getDescripcion(), pos);
-			((IMapsView) view).setMarkerRadius(pos);
+			if(view != null) {
+				LatLng pos = new LatLng(lat, lon);
+				((IMapsView)view).setMarker(o.getNombre(), o.getDescripcion(), pos);
+				((IMapsView)view).setMarkerRadius(pos);
+			}
 		}
-		else if(isRuta())
+		else if(isRuta() && view != null)
 		{
-			((IMapsView) view).animateCamera();
+			((IMapsView)view).animateCamera();
 		}
 	}
 	public void dibujar()
@@ -243,12 +248,14 @@ public class PreMaps extends PresenterBase
 		if(isLugar())
 		{
 			setPosicion(o.getLatitud(), o.getLongitud());
-			((IMapsView) view).showLugar((Lugar) o);
+			if(view != null)
+				((IMapsView)view).showLugar((Lugar) o);
 		}
 		else if(isAviso())
 		{
 			setPosicion(o.getLatitud(), o.getLongitud());
-			((IMapsView) view).showAviso((Aviso) o);
+			if(view != null)
+				((IMapsView) view).showAviso((Aviso) o);
 		}
 		else if(isRuta())
 		{

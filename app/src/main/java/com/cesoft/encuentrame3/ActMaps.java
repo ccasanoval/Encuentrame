@@ -287,7 +287,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
-		Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
+		//Log.e(TAG, "onCommandEvent--------------------------- "+event.getCommand()+" / "+event.getText());
 		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 
 		switch(event.getCommand()) {

@@ -9,12 +9,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 
 import com.cesoft.encuentrame3.models.Objeto;
@@ -51,6 +49,7 @@ public abstract class VistaBase
 		ResultCallback<Status> {
 	private static final String TAG = VistaBase.class.getSimpleName();
 	private static final int DELAY_LOCATION = 30 * 1000;
+	private static final String MAP_ZOOM = "mapzoom";
 
 	private PresenterBase presenter;
 	private Util util;
@@ -59,10 +58,12 @@ public abstract class VistaBase
     protected MenuItem vozMenuItem;
 	protected EditText txtNombre;
 	protected EditText txtDescripcion;
+	protected ProgressBar progressBar;
 
 	protected LocationRequest locationRequest;
 	protected GoogleMap map;
 	protected int idLayout;
+	protected float mapZoom = 20;
 
 	protected FusedLocationProviderClient fusedLocationClient;
 
@@ -131,11 +132,12 @@ public abstract class VistaBase
 			txtNombre.setText(presenter.getNombre());
 			txtDescripcion.setText(presenter.getDescripcion());
 			presenter.setOnTextChange(txtNombre, txtDescripcion);
+			progressBar = findViewById(R.id.progressBar);
 		} catch(Exception ignore){}//ActMaps no tiene campos
 
 		//----------------------------
-		if (savedInstanceState != null) {
-			mapZoom = savedInstanceState.getFloat(MAP_ZOOM, 15);
+		if(savedInstanceState != null) {
+			mapZoom = savedInstanceState.getFloat(MAP_ZOOM, mapZoom);
 			presenter.loadSavedInstanceState(savedInstanceState);
 		}
 
@@ -146,8 +148,6 @@ public abstract class VistaBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	private static final String MAP_ZOOM = "mapzoom";
-	protected float mapZoom = 20;
 
 	@Override
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -223,29 +223,13 @@ public abstract class VistaBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	protected ProgressBar progressBar = null;
-	protected boolean iniProgressBar() {
-		if(progressBar == null) {
-			progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
-			params.addRule(RelativeLayout.CENTER_IN_PARENT);
-			CoordinatorLayout layout = findViewById(idLayout);
-			if(layout != null)
-				layout.addView(progressBar, params);
-			else
-				android.util.Log.e(TAG, "iniEspera--------------------------------------------layout==NULL");
-		}
-		return (progressBar != null);
-	}
 	@Override public void iniEspera() {
-		android.util.Log.e(TAG, "iniEspera--------------------------------------------");
-		if(iniProgressBar())
+		if(progressBar != null)
 			progressBar.setVisibility(View.VISIBLE);
 		//getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 	}
 	@Override public void finEspera() {
-		android.util.Log.e(TAG, "finEspera--------------------------------------------");
-		if(iniProgressBar())
+		if(progressBar != null)
 			progressBar.setVisibility(View.GONE);
 		//getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 	}
@@ -274,7 +258,6 @@ public abstract class VistaBase
 	}
 	protected void setPosLugar(double lat, double lon)
 	{
-		Log.e(TAG, "setPosLugar-------------------------------------------------------------- "+lat+", "+lon);
 		presenter.setLatLon(lat, lon);
 	}
 
@@ -288,19 +271,18 @@ public abstract class VistaBase
 		try { map.setMyLocationEnabled(true);} catch(SecurityException ignored){}
 		//https://developers.google.com/maps/documentation/android-api/map?hl=es-419
 		//map.setMapType(GoogleMap.MAP_TYPE_NORMAL y GoogleMap.MAP_TYPE_SATELLITE
-		map.setOnCameraMoveListener(() -> {
+		map.setOnCameraIdleListener(() -> {
 			if(map != null)
 				mapZoom = map.getCameraPosition().zoom;
 		});
-		map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
 		if(presenter.getLatitud() == 0 && presenter.getLongitud() == 0 && presenter.isNuevo())
 		{
-Log.e(TAG, "onMapReady-------------------------------------------------------------------");
 			Location loc = util.getLocation();
 			if(loc != null)
 				presenter.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
 		setPosLugar(presenter.getLatitud(), presenter.getLongitud());
+		map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
 	}
 
     protected void refreshVoiceIcon() {

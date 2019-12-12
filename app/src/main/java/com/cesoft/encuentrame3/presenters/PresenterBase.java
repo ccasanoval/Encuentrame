@@ -58,7 +58,7 @@ public abstract class PresenterBase
 		public boolean isVoiceCommand(){return isVoiceCommand;}
 	boolean bDesdeNotificacion = false;
 	////////////////////////////////////////////////////
-	protected Application app;
+	protected final Application app;
 	PresenterBase(Application app) { this.app = app; }
 
 	//----------------------------------------------------------------------------------------------
@@ -169,9 +169,9 @@ public abstract class PresenterBase
 
 	private static class CesTextWatcher implements TextWatcher
 	{
-		private TextView tv;
-		private String str;
-		private PresenterBase presenter;
+		private final TextView tv;
+		private final String str;
+		private final PresenterBase presenter;
 		CesTextWatcher(TextView tv, String str, PresenterBase presenter){
 			this.tv = tv; this.str = str; this.presenter = presenter;}
 		@Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
@@ -187,9 +187,5 @@ public abstract class PresenterBase
 	{
 		nom.addTextChangedListener(new PresenterBase.CesTextWatcher(nom, getNombre(), this));
 		desc.addTextChangedListener(new PresenterBase.CesTextWatcher(desc,  getDescripcion(), this));
-	}
-
-	public void onResume() {
-		//onBackPressed = false;
 	}
 }

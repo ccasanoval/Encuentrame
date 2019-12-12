@@ -15,6 +15,8 @@ import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.greenrobot.eventbus.EventBus;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -39,6 +41,14 @@ public class GeofenceStore
 	private GeofencingClient geofencingClient;
 	private Context context;
 	private ArrayList<Geofence> geofenceList = new ArrayList<>();
+
+	public class Event {
+		private final boolean isOn;
+		public boolean isOn() { return isOn; }
+		public Event(boolean v) {
+			isOn = v;
+		}
+	}
 
 	//----------------------------------------------------------------------------------------------
 	@Inject
@@ -74,14 +84,25 @@ public class GeofenceStore
 		GeofencingRequest geofencingRequest = builder.build();
 
 		geofencingClient.addGeofences(geofencingRequest, pendingIntent)
-				.addOnSuccessListener(aVoid -> Log.e(TAG, "update:---------A-------------------ADDED"))
-				.addOnFailureListener(e -> Log.e(TAG, "update:-------------A---------------ERROR ADDING : ",e));
+				.addOnSuccessListener(aVoid -> {
+					Log.e(TAG, "update:--------------------------------------------------------ADDED");
+					EventBus.getDefault().postSticky(new Event(true));
+				})
+				.addOnFailureListener(e -> {
+					//Falla sin GPS: @RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
+					Log.e(TAG, "update:addGeofences:e:----------------------------ERROR ADDING : ",e);
+					EventBus.getDefault().postSticky(new Event(false));
+				});
 	}
 
-	private void clear()
+	public void clear()
 	{
 		if(pendingIntent != null)
-			geofencingClient.removeGeofences(pendingIntent);
+			geofencingClient.removeGeofences(pendingIntent)
+					.addOnSuccessListener(aVoid -> {
+						Log.e(TAG, "clear:-----------------------------------------------------");
+						EventBus.getDefault().postSticky(new Event(false));
+					});
 	}
 
 	// This creates a PendingIntent that is to be fired when geofence transitions take place.
@@ -177,8 +198,8 @@ public class GeofenceStore
             update(geofenceList2);//Se puede añadir en lugar de crear desde cero?
         }
         if(geofenceList.isEmpty())
-            GeofencingService.stop(context);
-        else if(GeofencingService.isOnOff())
-            GeofencingService.start(context);
+            GeofencingService.stop();
+        else if(GeofencingService.isOn())
+            GeofencingService.start();
     }
 }

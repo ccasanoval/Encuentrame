@@ -326,7 +326,7 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
 
     private class GuardarListener extends Fire.CompletadoListener
     {
-        private Location loc;
+        private final Location loc;
         GuardarListener(Location loc) { this.loc = loc; }
 
         @Override
@@ -352,7 +352,7 @@ Log.e(TAG, "iniTracking:--------------------------------------------------------
             Log.e(TAG, String.format(Locale.ENGLISH, "saveGeoTracking:guardar:err:-------------------------:%s : %d",err, code));
         }
     }
-    private LocationCallback locationCallback = new LocationCallback() {
+    private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             List<Location> locationList = locationResult.getLocations();

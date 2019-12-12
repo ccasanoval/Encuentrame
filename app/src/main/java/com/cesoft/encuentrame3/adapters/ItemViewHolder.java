@@ -13,16 +13,15 @@ import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Constantes;
-import com.cesoft.encuentrame3.util.Log;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar_Casanova on 21/06/2019
 public class ItemViewHolder extends RecyclerView.ViewHolder {
 
-    protected TextView txtNombre;
-    private TextView txtFecha;
-    private IListaItemClick inter;
+    protected final TextView txtNombre;
+    private final TextView txtFecha;
+    private final IListaItemClick inter;
 
     ItemViewHolder(@NonNull View itemView, IListaItemClick inter) {
         super(itemView);

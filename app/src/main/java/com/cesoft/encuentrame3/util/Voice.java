@@ -31,8 +31,8 @@ public class Voice implements RecognitionListener {
     private static final int REQUEST_RECORD_PERMISSION = 100;
     private static final int MAX_RESULTS = 5;
 
-    private Application app;
-    private Preferencias pref;
+    private final Application app;
+    private final Preferencias pref;
     private Activity activity;
     public void setActivity(Activity activity) { this.activity = activity; }
 
@@ -192,7 +192,7 @@ public class Voice implements RecognitionListener {
 
     //----------------------------------------------------------------------------------------------
     // Word Process
-    private int[] commandId = new int[] {
+    private final int[] commandId = new int[] {
             R.string.voice_new_point,
             R.string.voice_new_route,
             R.string.voice_new_route2,
@@ -204,7 +204,7 @@ public class Voice implements RecognitionListener {
             R.string.voice_map,
             R.string.voice_stop_listening,
     };
-    private String[] commandStr;
+    private final String[] commandStr;
 
     private void processCommand(ArrayList<String> matches) {
         int minDistance = Integer.MAX_VALUE;
@@ -275,9 +275,9 @@ public class Voice implements RecognitionListener {
         EventBus.getDefault().post(new CommandEvent(command, desc));
     }
     public class CommandEvent {
-        private int command;
+        private final int command;
         public int getCommand() { return command; }
-        private String text;
+        private final String text;
         public String getText() { return text; }
         CommandEvent(int command, String text) {
             this.command = command;

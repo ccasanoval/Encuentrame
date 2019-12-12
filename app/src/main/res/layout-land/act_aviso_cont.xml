@@ -120,12 +120,21 @@
 			android:layout_height="wrap_content"
 			android:textAppearance="?android:attr/textAppearanceMedium"
 			android:text="@string/radio"/>
-		<Spinner
+		<!-- Spinner
 			android:id="@+id/spnRadio"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textAppearance="?android:attr/textAppearanceLarge"
-			android:prompt="@string/radio" />
+			android:prompt="@string/radio" /-->
+		<SeekBar
+			android:id="@+id/seekBar"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_weight="1"
+			android:progress="10"
+			android:min="10"
+			android:max="5000"/>
 	</LinearLayout>
 
 	</RelativeLayout>

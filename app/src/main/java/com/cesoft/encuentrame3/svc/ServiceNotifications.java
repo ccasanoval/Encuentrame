@@ -42,8 +42,8 @@ public class ServiceNotifications {
 
     private enum Type { GEOFENCING_SERV, GEOTRACKING_SERV, GEOFENCING_ALERT }
 
-    private NotificationManager notificationManager;
-    private Context appContext;
+    private final NotificationManager notificationManager;
+    private final Context appContext;
     @Inject
     public ServiceNotifications(Context appContext, NotificationManager notificationManager) {
         this.appContext = appContext;
@@ -152,7 +152,10 @@ public class ServiceNotifications {
                 .setVibrate(new long[0])
                 ;
         if(type == Type.GEOFENCING_SERV || type == Type.GEOTRACKING_SERV) {
-            builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, context.getString(R.string.stop), stopPendingIntent);
+            builder.addAction(
+                    android.R.drawable.ic_menu_close_clear_cancel,
+                    context.getString(R.string.stop),
+                    stopPendingIntent);
             builder.setAutoCancel(false);
             if(type == Type.GEOFENCING_SERV) {
                 builder.setGroup("Avisos!");

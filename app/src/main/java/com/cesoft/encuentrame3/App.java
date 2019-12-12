@@ -9,13 +9,20 @@ import com.cesoft.encuentrame3.util.Log;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
+//TODO:
+// + Cuando borra se congela la UI ? y luego para atras y luego vuelves y te echa?
+// + Traducir a kotlin, asi evito if(view!=null)
+// + En lugar de menu a la derecha un DrawerMenu grande a la izquierda...con foto de usuario etc
+// + Cuando se cambia de orientacion se recrea el activity, evitar!!
+// + Presenter para ActMain !!
+// + Opcion pausa en ruta ???
+
 //TODO:  Adaptative Icons
 //https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive
 //https://developer.android.com/studio/write/image-asset-studio.html#create-adaptive
 
 //TODO: Conectar con un smart watch en la ruta y cada punto que guarde bio-metrics...?!   --->   https://github.com/patloew
 
-//TODO: AVISO: no molestar mas por hoy
 //TODO: main window=> Number or routes, places and geofences...
 //TODO: Egg?
 //TODO: Menu para ir al inicio, asi cuando abres aviso puedes volver y no cerrar directamente

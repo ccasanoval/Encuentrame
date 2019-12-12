@@ -25,7 +25,7 @@ public class Login
 	private static final String PREF_SAVE_LOGIN = "save_login";
 
 	//______________________________________________________________________________________________
-	private SharedPreferences sp;
+	private final SharedPreferences sp;
 	@Inject
 	public Login(SharedPreferences sp)
 	{
@@ -37,12 +37,12 @@ public class Login
 		this.signInClient = signInClient;
 	}
 	private FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
-	public String getCurrentUserID()
-	{
-		FirebaseAuth a = FirebaseAuth.getInstance();
-		if(a.getCurrentUser() == null)return "";
-		return a.getCurrentUser().getUid();
-	}
+//	public String getCurrentUserID()
+//	{
+//		FirebaseAuth a = FirebaseAuth.getInstance();
+//		if(a.getCurrentUser() == null)return "";
+//		return a.getCurrentUser().getUid();
+//	}
 	static String getCurrentUserName()
 	{
 		FirebaseAuth a = FirebaseAuth.getInstance();

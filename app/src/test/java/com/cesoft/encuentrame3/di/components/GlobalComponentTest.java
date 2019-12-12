@@ -2,7 +2,6 @@ package com.cesoft.encuentrame3.di.components;
 
 import com.cesoft.encuentrame3.ActAviso;
 import com.cesoft.encuentrame3.ActBuscar;
-import com.cesoft.encuentrame3.ActLogin;
 import com.cesoft.encuentrame3.ActLugar;
 import com.cesoft.encuentrame3.ActMaps;
 import com.cesoft.encuentrame3.ActRuta;
@@ -12,6 +11,7 @@ import com.cesoft.encuentrame3.FrgMain;
 import com.cesoft.encuentrame3.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.di.modules.GlobalModuleTest;
+import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Util;
 
 import javax.inject.Singleton;
@@ -35,4 +35,5 @@ public interface GlobalComponentTest
 
 	Util util();
 	Login login();
+	ServiceNotifications serviceNotifications();
 }

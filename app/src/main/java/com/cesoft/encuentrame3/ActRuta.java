@@ -67,7 +67,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 		//-----------------------------------
 		initStartButton();
 		initStopButton();
-		//TODO: Hacer tambien funcion pausa
 
 		//-----------------------------------
 		initUI();
@@ -282,10 +281,5 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 	public void onBackPressed() {
 		super.onBackPressed();
 		presenter.onBackPressed();
-	}
-	@Override
-	public void onResume() {
-		super.onResume();
-		presenter.onResume();
 	}
 }

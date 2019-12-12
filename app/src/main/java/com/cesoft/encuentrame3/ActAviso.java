@@ -7,11 +7,8 @@ import java.util.Locale;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.Spinner;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +34,7 @@ import javax.inject.Inject;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// Created by Cesar_Casanova
 public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 {
 	private static final String TAG = ActAviso.class.getSimpleName();
@@ -46,9 +44,16 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 			lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
 	private Switch swtActivo;
 		public boolean isActivo() { return swtActivo.isChecked(); }
-
-	private static final String[] _asRadio = {"10 m", "30 m", "50 m", "100 m", "200 m", "300 m", "400 m", "500 m", "750 m", "1 Km", "2 Km", "3 Km", "5 Km", "10 Km"};
-	private static final int[]    _adRadio = { 10,     30,     50,     100,     200,     300,     400,     500,     750,     1000,   2000,   3000,   5000,   10000};
+	private TextView lblRadio;
+		private void setRadioLabel(int radio) {
+			lblRadio.setText(getString(R.string.radio_m, radio));
+		}
+	private SeekBar seekBarRadio;
+	private void changeRadio(int radio) {
+		seekBarRadio.setProgress((int)Math.sqrt(radio));
+		setRadioLabel(radio);
+		setMarker();
+	}
 
 	private Circle circle;
 	private Marker marker;
@@ -84,32 +89,23 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		swtActivo.setChecked(presenter.isActivo());
 		swtActivo.setOnCheckedChangeListener((buttonView, isChecked) -> presenter.setActivo(isChecked));
 
-		Spinner spnRadio = findViewById(R.id.spnRadio);
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, _asRadio);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spnRadio.setAdapter(adapter);
-		spnRadio.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-		{
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-			{
-				presenter.setRadio(_adRadio[position]);
-				setMarker();
-			}
-			@Override
-			public void onNothingSelected(AdapterView<?> parent)
-			{
-				presenter.setRadio(100);
+		//https://abhiandroid.com/ui/seekbar
+		lblRadio = findViewById(R.id.lblRadio);
+		seekBarRadio = findViewById(R.id.seekBar);
+		seekBarRadio.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			@Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+			@Override public void onStartTrackingTouch(SeekBar seekBar) {}
+			@Override public void onStopTrackingTouch(SeekBar seekBar) {
+				int radio = seekBar.getProgress();
+				radio = radio*radio;
+				if(radio < Aviso.MIN_RADIO)
+					radio=Aviso.MIN_RADIO;
+				presenter.setRadio(radio);
+				changeRadio(radio);
 			}
 		});
-		for(int i=0; i < _adRadio.length; i++)
-		{
-			if(presenter.getRadio() == _adRadio[i])
-			{
-				spnRadio.setSelection(i);
-				break;
-			}
-		}
+		int radio = (int)presenter.getRadio();
+		changeRadio(radio);
 
 		//------------------------------------
 		if(presenter.isNuevo())
@@ -157,15 +153,16 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	{
 		super.onMapReady(map);
 		map.getUiSettings().setZoomControlsEnabled(true);
-		map.setOnMapClickListener(latLng -> {
-			Log.e(TAG, "onMapReady:setOnMapClickListener-------------------------------------------------latLng="+latLng);
-			setPosicion(latLng.latitude, latLng.longitude, true);
-		});
+		map.setOnMapClickListener(latLng -> setPosicion(latLng.latitude, latLng.longitude, true));
 
 		Location loc = util.getLocation();
 		if(loc != null && presenter.isNuevo()) {
-			Log.e(TAG, "onMapReady:-------------------------------------------------loc="+loc);
 			setPosicion(loc.getLatitude(), loc.getLongitude(), false);
+			Log.e(TAG, "onMapReady-----------------------------------------------------------1----"+loc.getLatitude()+","+loc.getLongitude());
+		}
+		else {
+			setPosicion(presenter.getLatitud(), presenter.getLongitud(), false);
+			Log.e(TAG, "onMapReady-----------------------------------------------------------2----"+presenter.getLatitud()+","+presenter.getLongitud());
 		}
 	}
 
@@ -199,7 +196,9 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 					.strokeColor(Color.TRANSPARENT)
 					.fillColor(0x55AA0000));//Color.BLUE
 		}
-		catch(Exception e){Log.e(TAG, "setMarker:e:-------------------------------------------", e);}
+		catch(Exception e) {
+			Log.e(TAG, "setMarker:e:-----------------------------------------------------------", e);
+		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)
@@ -207,7 +206,6 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	{
 		Log.e(TAG, "onCommandEvent------------------------------------------------------------ "+event.getCommand()+" / "+event.getText());
 		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
-
 		switch(event.getCommand()) {
 			case R.string.voice_cancel:
 				presenter.onSalir(true);

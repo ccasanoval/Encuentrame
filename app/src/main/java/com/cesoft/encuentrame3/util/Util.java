@@ -66,11 +66,11 @@ public class Util
 	public static final String TIPO = "tipo";
 
 	//______________________________________________________________________________________________
-	private Application app;
-	private Preferencias pref;
-	private LocationManager lm;
-	private PowerManager pm;
-	private ServiceNotifications sn;
+	private final Application app;
+	private final Preferencias pref;
+	private final LocationManager lm;
+	private final PowerManager pm;
+	private final ServiceNotifications sn;
 	@Inject
 	public Util(Application app, Preferencias pref, LocationManager lm, PowerManager pm, ServiceNotifications sn)
 	{

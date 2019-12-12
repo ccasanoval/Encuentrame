@@ -43,6 +43,5 @@ public class RutaViewHolder extends ItemViewHolder {
                 txtNombre.setTextColor(itemView.getResources().getColor(R.color.colorItem));
             itemView.setBackgroundColor(Color.WHITE);
         }
-
     }
 }

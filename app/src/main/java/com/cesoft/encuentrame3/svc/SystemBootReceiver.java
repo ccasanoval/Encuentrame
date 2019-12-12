@@ -23,7 +23,7 @@ public class SystemBootReceiver extends BroadcastReceiver
 			&& pref.isAutoArranque())
 			//&& intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED))
 		{
-			GeofencingService.start(context);
+			GeofencingService.start();
 			GeotrackingService.start(context);
 			WidgetRutaJobService.start(context);
 		}

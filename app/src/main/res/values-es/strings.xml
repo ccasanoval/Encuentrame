@@ -29,7 +29,6 @@
 
 	<string name="activo">Activo</string>
 	<string name="aviso">Mensaje de aviso</string>
-	<string name="cargando">Cargando…</string>
 	<string name="clave">Clave</string>
 	<string name="clave_confirmar">Confirmar Clave</string>
 	<string name="config">Preferencias</string>
@@ -42,6 +41,7 @@
 	<string name="enter_lbl">Introduce tu usuario</string>
 	<string name="nombre">Nombre</string>
 	<string name="radio">Radio</string>
+
 	<string name="lista_vacia">Lista vacía…</string>
 	<string name="voz_onoff">Voz</string>
 	<string name="activos">ACTIVOS</string>
