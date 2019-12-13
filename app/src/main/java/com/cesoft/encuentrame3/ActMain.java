@@ -1,21 +1,31 @@
 package com.cesoft.encuentrame3;
 
-
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.cesoft.encuentrame3.adapters.SectionsPagerAdapter;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Objeto;
@@ -28,6 +38,7 @@ import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
 import org.greenrobot.eventbus.EventBus;
@@ -39,11 +50,14 @@ import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CU
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by César Casanova
-public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
+public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
+		NavigationView.OnNavigationItemSelectedListener {
+
 	private static final String TAG = ActMain.class.getSimpleName();
 	private static final int ASK_GPS_PERMISSION = 6969;
 	private static final int ASK_GPS_ACTIVATION = 6968;
 
+	private DrawerLayout drawerLayout;
 	private ViewPager viewPager;
 	private Login login;
 	private Util util;
@@ -65,7 +79,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		toolbar.setSubtitle(Login.getCurrentUserName());
+		//toolbar.setDisplayHomeAsUpEnabled(true);
+		//toolbar.setSubtitle(Login.getCurrentUserName());
 
 		createViews();
 		processIntent(getIntent());
@@ -78,6 +93,35 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 			util.pideActivarGPS(this, ASK_GPS_ACTIVATION);
 			startServices();
 		}
+
+		/// Drawer Menu
+		drawerLayout = findViewById(R.id.main_content);
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,R.string.lugares, R.string.rutas);
+		toggle.syncState();
+		drawerLayout.addDrawerListener(toggle);
+		drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+		///
+		NavigationView navigationView = findViewById(R.id.nav_view);
+		navigationView.setNavigationItemSelectedListener(this);
+
+		View headerView = navigationView.getHeaderView(0);
+		TextView userName = headerView.findViewById(R.id.userName);
+		TextView userEmail = headerView.findViewById(R.id.userEmail);
+		ImageView userImage = headerView.findViewById(R.id.userImage);
+
+		userName.setText(Login.getCurrentUserName());
+		userEmail.setText(Login.getCurrentUserEmail());
+		Login.getCurrentUserImage(new CustomTarget<Bitmap>() {
+			@Override
+			public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+				Log.e(TAG, "onResourceReady----------------------------------------------------resource="+resource);
+				userImage.setImageBitmap(resource);
+			}
+			@Override
+			public void onLoadCleared(@Nullable Drawable placeholder) {
+				Log.e(TAG, "onLoadCleared----------------------------------------------------");
+			}
+		});
 	}
 	@Override
 	protected void onNewIntent(Intent intent)
@@ -104,6 +148,15 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 					break;
 			}
 		}
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		if(drawerLayout.isDrawerOpen(GravityCompat.END))
+			drawerLayout.closeDrawer(GravityCompat.END);
+		else
+			super.onBackPressed();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -148,7 +201,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 	private void createViews()
 	{
 		sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-		viewPager = findViewById(R.id.container);
+		viewPager = findViewById(R.id.main_container);
 		viewPager.setAdapter(sectionsPagerAdapter);
 		TabLayout tabLayout = findViewById(R.id.tabs);
 		tabLayout.setupWithViewPager(viewPager);
@@ -459,5 +512,16 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface {
 			MenuItem item = menu.findItem(R.id.action_onoff_geofence);
 			if(item != null)item.setTitle(R.string.start_geofencing);
 		}
+	}
+
+	/// Implements NavigationView.OnNavigationItemSelectedListener
+	@Override
+	public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+		return false;
+	}
+
+	@Override
+	public void onPointerCaptureChanged(boolean hasCapture) {
+
 	}
 }

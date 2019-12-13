@@ -65,7 +65,6 @@ public class App extends Application //implements ActivityCompat.OnRequestPermis
 
 	public void iniServicesDependantOnLogin() {
 //TODO: Aqui y en ActMain despues de pedir permisos, por si al arrancar no arranca ActMain ???????
-Log.e(TAG, "iniServicesDependantOnLogin------------------------------------------------------------------");
 		GeotrackingService.start(this);
 	}
 

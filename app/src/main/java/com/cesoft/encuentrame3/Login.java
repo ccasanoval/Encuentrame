@@ -2,9 +2,16 @@ package com.cesoft.encuentrame3;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -45,9 +52,28 @@ public class Login
 //	}
 	static String getCurrentUserName()
 	{
-		FirebaseAuth a = FirebaseAuth.getInstance();
-		if(a.getCurrentUser() == null)return "";
-		return a.getCurrentUser().getEmail();
+		FirebaseAuth auth = FirebaseAuth.getInstance();
+		if(auth.getCurrentUser() == null)return "";
+		return auth.getCurrentUser().getDisplayName();
+	}
+	static String getCurrentUserEmail()
+	{
+		FirebaseAuth auth = FirebaseAuth.getInstance();
+		if(auth.getCurrentUser() == null)return "";
+		return auth.getCurrentUser().getEmail();
+	}
+	static void getCurrentUserImage(CustomTarget<Bitmap> listener)
+	{
+		FirebaseAuth auth = FirebaseAuth.getInstance();
+		if(auth.getCurrentUser() == null) {
+			listener.onLoadFailed(null);
+			return;
+		}
+		Uri url = auth.getCurrentUser().getPhotoUrl();
+		Glide.with(App.getInstance())
+				.asBitmap()
+				.load(url)
+				.into(listener);
 	}
 
 
@@ -156,7 +182,7 @@ public class Login
 	void logout(@NonNull Activity activity)
 	{
 		if( ! sp.getBoolean(PREF_SAVE_LOGIN, true))
-			signInClient.signOut().addOnCompleteListener(activity, task -> { });
+			signInClient.signOut();//.addOnCompleteListener(activity, task -> { });
 		getAuth().signOut();
 		delPasswordOnly();
 	}

@@ -56,13 +56,6 @@ public class ActSettings extends AppCompatActivity
         }
     }
     @SuppressWarnings("unused")
-    public static class NotificationsPreferenceFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.settings_notifications, rootKey);
-        }
-    }
-    @SuppressWarnings("unused")
     public static class AboutPreferenceFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
