@@ -17,7 +17,7 @@
 			android:id="@+id/toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/colorPrimary"
+			android:background="@drawable/side_nav_bar"
 			app:popupTheme="@style/AppTheme.PopupOverlay"/>
 	</com.google.android.material.appbar.AppBarLayout>
 
@@ -27,7 +27,7 @@
 		android:id="@+id/fabBuscar"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|start"
+		android:layout_gravity="bottom|center"
 		android:layout_margin="@dimen/fab_margin"
 		android:src="@android:drawable/ic_menu_search"/>
 

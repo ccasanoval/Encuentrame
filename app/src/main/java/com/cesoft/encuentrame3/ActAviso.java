@@ -167,7 +167,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	}
 
 	//----------------------------------------------------------------------------------------------
-	protected void setPosicion(double lat, double lon, boolean sucio)
+	private void setPosicion(double lat, double lon, boolean sucio)
 	{
 		presenter.setLatLon(lat, lon);
 		if(sucio) presenter.setSucio();

@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.EditText;
@@ -132,19 +131,19 @@ public class Util
 	//______________________________________________________________________________________________
 	// NOTIFICATION UTILS
 	//______________________________________________________________________________________________
-	private void vibrate()
-	{
-        Vibrator vibrator = (Vibrator)app.getSystemService(Context.VIBRATOR_SERVICE);
-		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
-		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
-		if(vibrator == null) return;
-			//vibrator.vibrate(1000);//1seg
-		if (Build.VERSION.SDK_INT >= 26) {
-			vibrator.vibrate(android.os.VibrationEffect.createOneShot(150,10));
-		} else {
-			vibrator.vibrate(150);
-		}
-    }
+//	private void vibrate()
+//	{
+//        Vibrator vibrator = (Vibrator)app.getSystemService(Context.VIBRATOR_SERVICE);
+//		//long pattern[]={0,200,100,300,400};//pattern for vibration (mili seg ?)
+//		// 0 = start vibration with repeated count, use -1 if you don't want to repeat the vibration
+//		if(vibrator == null) return;
+//			//vibrator.vibrate(1000);//1seg
+//		if (Build.VERSION.SDK_INT >= 26) {
+//			vibrator.vibrate(android.os.VibrationEffect.createOneShot(150,10));
+//		} else {
+//			vibrator.vibrate(150);
+//		}
+//    }
 
 	//______________________________________________________________________________________________
 	public void setTrackingRoute(String idRoute, String nameRoute) {

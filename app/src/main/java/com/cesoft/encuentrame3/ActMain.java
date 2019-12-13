@@ -78,9 +78,8 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 		voice.setActivity(this);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
+		toolbar.setTitleTextAppearance(this, R.style.toolbarTextStyle);
 		setSupportActionBar(toolbar);
-		//toolbar.setDisplayHomeAsUpEnabled(true);
-		//toolbar.setSubtitle(Login.getCurrentUserName());
 
 		createViews();
 		processIntent(getIntent());
@@ -243,9 +242,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 		int id = item.getItemId();
 		switch(id)
 		{
-			case R.id.action_config:
-				startActivityForResult(new Intent(this, ActSettings.class), Constantes.CONFIG);
-				return true;
 			case R.id.action_mapa:
 				goMap();
 				return true;
@@ -253,16 +249,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 				FrgMain frg = sectionsPagerAdapter.getPage(viewPager.getCurrentItem());// frg==null cuando se libero mem y luego se activó app...
 				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT).getItem(viewPager.getCurrentItem());
 				buscar(sectionsPagerAdapter.getPage(viewPager.getCurrentItem()));
-				return true;
-			case R.id.action_onoff_geofence:
-				if(GeofencingService.isOn())
-					GeofencingService.turnOff();//TODO:Preguntar?
-				else
-					GeofencingService.turnOn();
-				return true;
-			case R.id.action_privacy_policy:
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
-				startActivity(browserIntent);
 				return true;
 			case R.id.action_voz:
 				voice.toggleListening();
@@ -477,19 +463,12 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.e(TAG, "onActivityResult() called with: " + "requestCode = [" + requestCode + "], resultCode = [" + resultCode + "], data = [" + data + "]");
-		switch (requestCode) {
-			case Constantes.CONFIG:
-				if(resultCode == RESULT_OK) gotoLogin();
-				break;
-
-			case ASK_GPS_ACTIVATION:
-				Log.e(TAG, "onActivityResult: ASK_GPS_ACTIVATION: resultCode="+resultCode);
-				break;
-
-			default:
-				super.onActivityResult(requestCode, resultCode, data);
-				break;
+		if(requestCode == ASK_GPS_ACTIVATION) {
+			Log.e(TAG, "onActivityResult: ASK_GPS_ACTIVATION: resultCode=" + resultCode);
+		}
+		else {
+			Log.e(TAG, "onActivityResult() called with: " + "requestCode = [" + requestCode + "], resultCode = [" + resultCode + "], data = [" + data + "]");
+			super.onActivityResult(requestCode, resultCode, data);
 		}
 	}
 
@@ -497,31 +476,50 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 	//@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onGeofenceStoreEvent(GeofenceStore.Event event) {
-		if(menu == null) {
-			Log.e(TAG, "DALE TIEMPO---------------------------------------");
-			handler.removeCallbacksAndMessages(null);
-			handler.postDelayed(() -> onGeofenceStoreEvent(event), 500);
-			return;
-		}
-		//Log.e(TAG, "            OK!---------------------------------------isOnOff="+GeofencingService.isOn()+" event.isOn()="+event.isOn());
+		NavigationView navigationView = findViewById(R.id.nav_view);
+		MenuItem item = navigationView.getMenu().findItem(R.id.nav_geofencing_onoff);
+		Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn());
 		if(GeofencingService.isOn()) {
-			MenuItem item = menu.findItem(R.id.action_onoff_geofence);
 			if(item != null)item.setTitle(R.string.stop_geofencing);
 		}
 		else {
-			MenuItem item = menu.findItem(R.id.action_onoff_geofence);
 			if(item != null)item.setTitle(R.string.start_geofencing);
 		}
 	}
 
 	/// Implements NavigationView.OnNavigationItemSelectedListener
 	@Override
-	public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+	public boolean onNavigationItemSelected(MenuItem item) {
+		Intent intent;
+		int id = item.getItemId();
+		switch(id) {
+			case R.id.nav_geofencing_onoff:
+				if(GeofencingService.isOn())
+					GeofencingService.turnOff();//TODO:Preguntar?
+				else
+					GeofencingService.turnOn();
+				return true;
+
+			case R.id.nav_config:
+			case R.id.nav_voice:
+			case R.id.nav_about:
+				intent = new Intent(this, ActSettings.class);
+				intent.putExtra(Constantes.SETTINGS_PAGE, id);
+				startActivity(intent);
+				return true;
+
+			case R.id.nav_privacy_policy:
+				intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cesweb-ef91a.firebaseapp.com"));
+				startActivity(intent);
+				return true;
+
+			case R.id.nav_logout:
+				gotoLogin();
+				return true;
+			case R.id.nav_exit:
+				System.exit(0);
+				return true;
+		}
 		return false;
-	}
-
-	@Override
-	public void onPointerCaptureChanged(boolean hasCapture) {
-
 	}
 }

@@ -1,45 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group android:id="@+id/group_settings">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@android:drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/nav_geofencing_onoff"
+            android:title="@string/stop_geofencing"
+            android:icon="@drawable/ic_my_location_24px"/>
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@android:drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:id="@+id/nav_voice"
+            android:title="@string/nav_voice"
+            android:icon="@drawable/ic_mic_black_24dp"/>
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@android:drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@android:drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:id="@+id/nav_config"
+            android:title="@string/nav_config"
+            android:icon="@drawable/ic_settings"/>
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@android:drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@android:drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>
+    <group android:id="@+id/group_about">
+        <item
+            android:id="@+id/nav_privacy_policy"
+            android:title="@string/privacy_policy"
+            android:icon="@drawable/ic_remove_red_eye_24px"/>
+        <item
+            android:id="@+id/nav_about"
+            android:title="@string/nav_about"
+            android:icon="@drawable/ic_info_black_24dp"/>
+    </group>
 
-    <item>
-        <menu>
-            <item
-                android:id="@+id/nav_exit"
-                android:icon="@android:drawable/ic_menu_share"
-                android:title="Exit" />
-        </menu>
-    </item>
+    <group android:id="@+id/group_exit">
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_face_24px"
+            android:title="@string/nav_logout" />
+        <item
+            android:id="@+id/nav_exit"
+            android:icon="@drawable/ic_power_settings_new_black_24dp"
+            android:title="@string/nav_exit" />
+    </group>
 
 </menu>

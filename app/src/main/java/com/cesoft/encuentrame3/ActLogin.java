@@ -18,9 +18,9 @@ import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CU
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 public class ActLogin extends AppCompatActivity
 {
-	protected static final int ENTER=0;
-	protected static final int REGISTER=1;
-	protected static final int RECOVER=2;
+	public static final int ENTER=0;
+	public static final int REGISTER=1;
+	public static final int RECOVER=2;
 
 	// The android.support.v4.view.PagerAdapter will provide fragments for each of the sections. We use a FragmentPagerAdapter derivative, which will keep every loaded fragment in memory.
 	// If this becomes too memory intensive, it may be best to switch to a android.support.v4.app.FragmentStatePagerAdapter
@@ -89,7 +89,7 @@ public class ActLogin extends AppCompatActivity
 		}
 	}
 
-	protected void goMain()
+	public void goMain()
 	{
 		Intent intent = new Intent(getBaseContext(), ActMain.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

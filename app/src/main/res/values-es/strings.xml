@@ -31,7 +31,6 @@
 	<string name="aviso">Mensaje de aviso</string>
 	<string name="clave">Clave</string>
 	<string name="clave_confirmar">Confirmar Clave</string>
-	<string name="config">Preferencias</string>
 	<string name="privacy_policy">Política de Privacidad</string>
 	<string name="descripcion">Descripción</string>
 	<string name="direccion">Dirección…</string>
@@ -47,6 +46,7 @@
 	<string name="activos">ACTIVOS</string>
 	<string name="inactivos">INACTIVOS</string>
 	<string name="on_timeout">Latencia excesiva, compruebe conexión a Internet</string>
+	<string name="user_image">Imagen de usuario</string>
 
 	<!-- Actions -->
 	<string name="guardar">Guardar</string>
@@ -57,9 +57,11 @@
 	<string name="salir">Salir</string>
 	<string name="ver_mapa">Ver mapa</string>
 	<string name="buscar">Buscar</string>
-	<string name="stop_geofencing">Detener geofencing</string>
-	<string name="start_geofencing">Activar geofencing</string>
+	<string name="stop_geofencing">Detener avisos</string>
+	<string name="start_geofencing">Activar avisos</string>
 	<string name="actualizar_posicion">Actualizar posición</string>
+	<string name="geofencing_service">Servicio de geofencing</string>
+	<string name="geofencing_service_stoping">Deteniendo servicio de geofencing…</string>
 
 	<!-- Items -->
 	<string name="lugares">Lugares</string>
@@ -170,24 +172,18 @@
 	<string name="info_speed2">\nVelocidad: %.0f km/h</string>
 
 
+
+	<!-- Drawer navigation -->
+	<string name="nav_about">Sobre esta app…</string>
+	<string name="nav_logout">Cerrar la sesión</string>
+	<string name="nav_exit">Salir</string>
+	<string name="nav_config">Configuración</string>
+	<string name="nav_voice">Comandos de voz</string>
 	<!-- Preferencias -->
-	<string name="pref_header_opciones">Opciones</string>
 	<string name="pref_save_login">Guardar usuario y contraseña</string>
 	<string name="pref_auto_arranque">Arracar Avisos al Inicio</string>
-	<string name="pref_header_logout">Salir</string>
-	<string name="pref_header_logout_sum">Cerrar la sesión actual</string>
-	<string name="pref_header_about">Sobre esta App..</string>
-	<string name="pref_header_opciones_sum">Configuraciones…</string>
     <string name="pref_save_all">Incluir puntos imprecisos</string>
     <string name="pref_tracking_seconds">Periodo rastreo (segundos)</string>
-	<string name="pref_header_notifications_sum">Configuración de avisos…</string>
-	<string name="pref_header_notifications">Avisos</string>
-	<!-- string name="pref_ringtone">Tono</string -->
-	<!-- string name="pref_ringtone_silent">Silencio</string -->
-	<string name="pref_vibrate">Vibrar</string>
-	<string name="pref_lights">Luces</string>
-	<string name="pref_header_voice">Comandos de voz</string>
-	<string name="pref_header_voice_sum">Reconocimiento de voz…</string>
 	<string name="pref_speech_on">Permir que la App hable</string>
 	<string name="pref_voice_on">Aceptar comandos al iniciar</string>
 

@@ -274,14 +274,13 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		switch(item.getItemId()) {
-			case R.id.action_voz:
-				voice.toggleListening();
-				refreshVoiceIcon();
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+		if(item.getItemId()==R.id.action_voz) {
+			voice.toggleListening();
+			refreshVoiceIcon();
+			return true;
 		}
+		else
+			return super.onOptionsItemSelected(item);
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)

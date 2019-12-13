@@ -1,7 +1,5 @@
 package com.cesoft.encuentrame3;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 
@@ -14,6 +12,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,19 +24,13 @@ public class ActSettings extends AppCompatActivity
     private static final String TITLE = "title";
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
+        private int id;
+        SettingsFragment(int id) {
+            this.id = id;
+        }
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.settings, rootKey);
-            Preference preference = findPreference("setting_logout");
-            if(preference != null)
-                preference.setOnPreferenceClickListener(v -> {
-                    Activity activity = getActivity();
-                    if (activity != null) {
-                        activity.setResult(Activity.RESULT_OK, new Intent());
-                        activity.finish();
-                    }
-                    return true;
-                });
+            setPreferencesFromResource(id, rootKey);
         }
     }
 
@@ -81,12 +74,27 @@ public class ActSettings extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_settings);
-        FragmentManager fm = getSupportFragmentManager();
+
         if(savedInstanceState == null) {
-            fm.beginTransaction()
-                    .replace(R.id.settings, new ActSettings.SettingsFragment())
-                    .commit();
-            titleMain = getTitle().toString();
+            FragmentManager fm = getSupportFragmentManager();
+            ActSettings.SettingsFragment frg;
+            int page = getIntent().getIntExtra(Constantes.SETTINGS_PAGE, -1);
+            switch(page) {
+                case R.id.nav_about:
+                    frg = new ActSettings.SettingsFragment(R.xml.settings_about);
+                    titleMain = getString(R.string.nav_about);
+                    break;
+                case R.id.nav_voice:
+                    frg = new ActSettings.SettingsFragment(R.xml.settings_voice);
+                    titleMain = getString(R.string.nav_config);
+                    break;
+                default:
+                case R.id.nav_config:
+                    frg = new ActSettings.SettingsFragment(R.xml.settings_options);
+                    titleMain = getString(R.string.nav_config);
+                    break;
+            }
+            fm.beginTransaction().replace(R.id.settings, frg).commit();
         }
         else {
             setTitle(savedInstanceState.getCharSequence(TITLE));

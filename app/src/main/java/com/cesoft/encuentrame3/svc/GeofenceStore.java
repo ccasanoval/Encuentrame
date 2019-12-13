@@ -45,7 +45,7 @@ public class GeofenceStore
 	public class Event {
 		private final boolean isOn;
 		public boolean isOn() { return isOn; }
-		public Event(boolean v) {
+		Event(boolean v) {
 			isOn = v;
 		}
 	}
@@ -67,6 +67,7 @@ public class GeofenceStore
 
 	private void update(ArrayList<Geofence> geofences)
 	{
+Log.e(TAG, "update----------------------------------------------------------"+geofences);
 		if( ! geofenceList.isEmpty()) {
 			geofencingClient.removeGeofences(pendingIntent);
 		}
@@ -77,7 +78,7 @@ public class GeofenceStore
 			return;
 		}
 		geofenceList = new ArrayList<>(geofences);
-
+Log.e(TAG, "update----------------------------------------------------------2222");
 		GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 		builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
 		builder.addGeofences(geofenceList);
@@ -93,14 +94,15 @@ public class GeofenceStore
 					Log.e(TAG, "update:addGeofences:e:----------------------------ERROR ADDING : ",e);
 					EventBus.getDefault().postSticky(new Event(false));
 				});
+Log.e(TAG, "update----------------------------------------------------------999");
 	}
 
-	public void clear()
+	void clear()
 	{
 		if(pendingIntent != null)
 			geofencingClient.removeGeofences(pendingIntent)
 					.addOnSuccessListener(aVoid -> {
-						Log.e(TAG, "clear:-----------------------------------------------------");
+						Log.e(TAG, "clear:removeGeofences");
 						EventBus.getDefault().postSticky(new Event(false));
 					});
 	}
@@ -136,25 +138,21 @@ public class GeofenceStore
 		catch(Exception e) { Log.e(TAG, "cargarListaGeoAvisos:e:------------------------------", e); }
 	}
 
-	private boolean isInit = false;
-	private Fire.DatosListener<Aviso> lisAviso;
+	private Fire.DatosListener<Aviso> lisAviso = null;
 	private ArrayList<Aviso> listaGeoAvisos = new ArrayList<>();
 	private void createListAviso()
 	{
-		if(isInit)return;
-		isInit = true;
+		if(lisAviso != null)return;
 		lisAviso = new Fire.DatosListener<Aviso>()
 		{
 			@Override
-			public void onDatos(Aviso[] aData)
-			{
+			public void onDatos(Aviso[] aData) {
 				//TODO: cuando cambia radio debería cambiar tambien, pero esto no le dejara...
 				processDatos(aData);
 			}
 			@Override
-			public void onError(String err)
-			{
-				Log.e(TAG, "cargarListaGeoAvisos:e:-----------------------------------------------------"+err);
+			public void onError(String err) {
+				Log.e(TAG, "cargarListaGeoAvisos:e:--------------------------------------------"+err);
 			}
 		};
 	}
@@ -177,7 +175,6 @@ public class GeofenceStore
             if( ! a.isActivo()) continue;
 
             aAvisos.add(a);
-
             Geofence gf = new Geofence.Builder()
                     .setRequestId(a.getId())
                     .setCircularRegion(a.getLatitud(), a.getLongitud(), (float)a.getRadio())
@@ -192,14 +189,18 @@ public class GeofenceStore
                 bDirty = true;
             }
         }
-        if(bDirty)
+        //if(bDirty)//TODO: Mirar si se desactivo y activo --> si actualizar, si no, no haria falta...
         {
             listaGeoAvisos = aAvisos;
             update(geofenceList2);//Se puede añadir en lugar de crear desde cero?
         }
-        if(geofenceList.isEmpty())
-            GeofencingService.stop();
-        else if(GeofencingService.isOn())
-            GeofencingService.start();
+        if(geofenceList.isEmpty()) {
+			GeofencingService.stop();
+		}
+        else if(GeofencingService.isOn()) {
+			GeofencingService.start();
+			//if( ! bDirty)EventBus.getDefault().postSticky(new Event(false));
+		}
+Log.e(TAG, "processDatos:-----------------------------------------------------9999");
     }
 }

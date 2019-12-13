@@ -7,35 +7,17 @@
 		android:orderInCategory="90"
 		android:title="@string/voz_onoff"
 		android:icon="@drawable/ic_mic_off_white_24dp"
-		app:showAsAction="always"/>
+		app:showAsAction="ifRoom"/>
 	<item
 		android:id="@+id/action_mapa"
 		android:orderInCategory="100"
 		android:title="@string/ver_mapa"
 		android:icon="@android:drawable/ic_menu_mapmode"
-		app:showAsAction="always"/>
+		app:showAsAction="ifRoom"/>
 	<item
 		android:id="@+id/action_buscar"
 		android:orderInCategory="110"
 		android:title="@string/buscar"
 		android:icon="@android:drawable/ic_menu_search"
-		app:showAsAction="ifRoom"/>
-	<item
-		android:id="@+id/action_onoff_geofence"
-		android:orderInCategory="115"
-		android:title="@string/stop_geofencing"
-		android:icon="@android:drawable/ic_menu_close_clear_cancel"
-		app:showAsAction="ifRoom"/>
-	<item
-		android:id="@+id/action_config"
-		android:orderInCategory="120"
-		android:title="@string/config"
-		android:icon="@android:drawable/ic_menu_preferences"
-		app:showAsAction="ifRoom"/>
-	<item
-		android:id="@+id/action_privacy_policy"
-		android:orderInCategory="130"
-		android:title="@string/privacy_policy"
-		android:icon="@android:drawable/ic_menu_view"
 		app:showAsAction="ifRoom"/>
 </menu>

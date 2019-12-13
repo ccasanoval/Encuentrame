@@ -30,7 +30,10 @@ public class Constantes
 	public static final int RUTAS=1;
 	public static final int AVISOS=2;
 	public static final int BUSCAR=9;
-	public static final int CONFIG=10;
+	public static final String SETTINGS_PAGE = "settings_page";
+	public static final int SETTINGS_ABOUT=9;
+	public static final int SETTINGS_CONFIG=10;
+	public static final int SETTINGS_VOICE=11;
 	public static final String WIN_TAB = "wintab";
 	public static final String MENSAJE = "mensaje";
 	static final String DIRTY = "dirty";

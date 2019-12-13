@@ -88,7 +88,7 @@ public class ActividadIntentService extends IntentService {
         }*/
     }
 
-    public static DetectedActivity getMostProbableAct(List<DetectedActivity> list)
+    private static DetectedActivity getMostProbableAct(List<DetectedActivity> list)
     {
         DetectedActivity mostProbable = null;
         int confidence = 0;

@@ -87,14 +87,14 @@ public class ServiceNotifications {
         Intent intentStop = new Intent(context.getApplicationContext(), ActMain.class);
         intentStop.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intentStop.putExtra(Constantes.WIN_TAB, Constantes.AVISOS);
-        intentStop.putExtra(Constantes.MENSAJE, "Stoping geofencing service...");
+        intentStop.putExtra(Constantes.MENSAJE, R.string.geofencing_service_stoping);
         intentStop.putExtra(ACTION_STOP, true);
         PendingIntent stopPendingIntent = PendingIntent.getActivity(context, RC_GEOFENCING_STOP, intentStop, 0);
 
         return create(
                 context,
-                android.R.drawable.ic_menu_mylocation,
-                "Geofencing service",
+                android.R.drawable.ic_menu_compass,
+                context.getString(R.string.geofencing_service),
                 "",
                 mainPendingIntent,
                 stopPendingIntent,
@@ -122,7 +122,7 @@ public class ServiceNotifications {
             subtitle += ":"+aviso.getDescripcion();
         Notification notification = create(
                 context,
-                android.R.drawable.ic_menu_compass,
+                android.R.drawable.ic_menu_myplaces,
                 titulo,
                 subtitle,
                 mainPendingIntent,
@@ -154,7 +154,7 @@ public class ServiceNotifications {
         if(type == Type.GEOFENCING_SERV || type == Type.GEOTRACKING_SERV) {
             builder.addAction(
                     android.R.drawable.ic_menu_close_clear_cancel,
-                    context.getString(R.string.stop),
+                    context.getString(R.string.stop_geofencing),
                     stopPendingIntent);
             builder.setAutoCancel(false);
             if(type == Type.GEOFENCING_SERV) {

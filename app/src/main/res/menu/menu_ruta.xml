@@ -5,30 +5,27 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	tools:context=".ActRuta">
 	<item
-		android:id="@+id/action_voz"
-		android:orderInCategory="90"
-		android:title="@string/voz_onoff"
-		android:icon="@drawable/ic_mic_off_white_24dp"
-		app:showAsAction="always"/>
-	<item
 		android:id="@+id/menu_guardar"
 		android:orderInCategory="100"
 		android:title="@string/guardar"
 		android:icon="@android:drawable/ic_menu_save"
-		app:showAsAction="always">
-	</item>
+		app:showAsAction="always"/>
 	<item
 		android:id="@+id/menu_eliminar"
 		android:orderInCategory="200"
 		android:title="@string/eliminar"
 		android:icon="@android:drawable/ic_menu_delete"
-		app:showAsAction="ifRoom">
-	</item>
+		app:showAsAction="ifRoom"/>
 	<item
 		android:id="@+id/menu_estadisticas"
 		android:orderInCategory="300"
 		android:title="@string/estadisticas"
 		android:icon="@android:drawable/ic_menu_info_details"
-		app:showAsAction="ifRoom">
-	</item>
+		app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/action_voz"
+		android:orderInCategory="400"
+		android:title="@string/voz_onoff"
+		android:icon="@drawable/ic_mic_off_white_24dp"
+		app:showAsAction="ifRoom"/>
 </menu>

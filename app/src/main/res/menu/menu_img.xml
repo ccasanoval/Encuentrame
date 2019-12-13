@@ -9,13 +9,13 @@
 		android:orderInCategory="200"
 		android:title="@string/eliminar"
 		android:icon="@android:drawable/ic_menu_delete"
-		app:showAsAction="always">
+		app:showAsAction="ifRoom">
 	</item>
 	<item
 		android:id="@+id/menu_guardar"
 		android:orderInCategory="300"
 		android:title="@string/guardar"
 		android:icon="@android:drawable/ic_menu_save"
-		app:showAsAction="always">
+		app:showAsAction="ifRoom">
 	</item>
 </menu>

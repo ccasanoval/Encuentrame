@@ -33,6 +33,10 @@
 		<item name="android:padding">10dip</item>
 	</style>
 
+	<style name="toolbarTextStyle">
+		<item name="android:textSize">18sp</item>
+	</style>
+
 	<style name="FullscreenTheme" parent="AppTheme">
 		<item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
 		<item name="android:windowActionBarOverlay">true</item>

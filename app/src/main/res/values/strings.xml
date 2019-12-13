@@ -31,7 +31,6 @@
 	<string name="aviso">Alert message</string>
 	<string name="clave">Password</string>
 	<string name="clave_confirmar">Repeat password</string>
-	<string name="config">Settings</string>
 	<string name="privacy_policy">Privacy Policy</string>
 	<string name="descripcion">Description</string>
 	<string name="direccion">Address…</string>
@@ -47,6 +46,7 @@
 	<string name="activos">ACTIVE</string>
 	<string name="inactivos">INACTIVE</string>
 	<string name="on_timeout">Task timeout, check Internet connection</string>
+	<string name="user_image">User image</string>
 
 	<!-- Actions -->
 	<string name="guardar">Save</string>
@@ -57,9 +57,11 @@
 	<string name="salir">Exit anyway</string>
 	<string name="ver_mapa">Show map</string>
 	<string name="buscar">Search</string>
-	<string name="stop_geofencing">Stop geofencing</string>
-	<string name="start_geofencing">Start geofencing</string>
+	<string name="stop_geofencing">Stop alerts</string>
+	<string name="start_geofencing">Start alerts</string>
 	<string name="actualizar_posicion">Refresh location</string>
+	<string name="geofencing_service">Geofencing service</string>
+	<string name="geofencing_service_stoping">Stoping geofencing service…</string>
 
 	<!-- Items -->
 	<string name="lugares">Points</string>
@@ -170,24 +172,17 @@
 	<string name="info_speed2">\nSpeed: %.0f Km/h</string>
 	<string name="info_activity" translatable="false">\nActiv.: %s</string>
 
+	<!-- Drawer navigation -->
+	<string name="nav_about">About this App…</string>
+	<string name="nav_logout">Logout</string>
+	<string name="nav_exit">Exit</string>
+	<string name="nav_config">Settings</string>
+	<string name="nav_voice">Voice commands</string>
 	<!-- Preferencias -->
-	<string name="pref_header_about">About this App…</string>
-	<string name="pref_header_logout">Logout</string>
-	<string name="pref_header_logout_sum">End current user session</string>
-	<string name="pref_header_opciones">Options</string>
-	<string name="pref_header_opciones_sum">App configuration…</string>
 	<string name="pref_auto_arranque">Start alert service at boot up</string>
 	<string name="pref_save_login">Save login and password</string>
 	<string name="pref_save_all">Save imprecise points also</string>
 	<string name="pref_tracking_seconds">Tracking period (seconds)</string>
-	<string name="pref_header_notifications">Alerts</string>
-	<string name="pref_header_notifications_sum">Alerts settings…</string>
-	<!-- string name="pref_ringtone">Ringtone</string -->
-	<!-- string name="pref_ringtone_silent">Silent</string -->
-	<string name="pref_vibrate">Vibrate</string>
-	<string name="pref_lights">Lights</string>
-	<string name="pref_header_voice">Voice commands</string>
-	<string name="pref_header_voice_sum">Voice recognition settings…</string>
 	<string name="pref_speech_on">Let the App talk</string>
 	<string name="pref_voice_on">Accept voice commands from the start</string>
 

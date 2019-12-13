@@ -12,7 +12,9 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
 import com.cesoft.encuentrame3.models.Objeto;
@@ -119,7 +121,18 @@ public abstract class VistaBase
 		setContentView(idLayout);
 
 		//----------------------------
-		try { setSupportActionBar(findViewById(R.id.toolbar)); } catch(Exception ignore){}//ActMaps no tiene toolbar
+		try {
+			Toolbar toolbar = findViewById(R.id.toolbar);
+			if(toolbar != null) {
+				toolbar.setTitleTextAppearance(this, R.style.toolbarTextStyle);
+				setSupportActionBar(toolbar);
+				ActionBar ab = getSupportActionBar();
+				if(ab != null) ab.setDisplayHomeAsUpEnabled(true);
+			}
+		}
+		catch(Exception e) {
+			Log.e(TAG, "onCreate--------------------------------------------------------------",e);
+		}
 		//
 		FloatingActionButton fab;
 		fab = findViewById(R.id.fabBuscar);
@@ -157,6 +170,14 @@ public abstract class VistaBase
 	}
 
 	//______________________________________________________________________________________________
+	@Override
+	public boolean onSupportNavigateUp() {
+		if(getSupportFragmentManager().popBackStackImmediate())
+			return true;
+		finish();
+		return super.onSupportNavigateUp();
+	}
+
 	@Override
 	public void onStart() {
 		super.onStart();
