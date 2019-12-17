@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,9 +76,6 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-//		FloatingActionButton fab = findViewById(R.id.fabVolver);
-//		if(fab != null)
-//			fab.setOnClickListener(view -> finish());
 
 		//------------------------------------------------------------------------------------------
 		txtNombre = findViewById(R.id.txtNombre);
@@ -114,8 +112,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			{
 				datePickerDialogIni.show();
 				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				//noinspection ConstantConditions
-				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+				if(inputManager != null) {
+					View view = getCurrentFocus();
+					IBinder binder = null;
+					if(view != null)
+						binder = getCurrentFocus().getWindowToken();
+					inputManager.hideSoftInputFromWindow(binder, InputMethodManager.HIDE_NOT_ALWAYS);
+				}
 			});
 		ib = findViewById(R.id.btnFechaFin);
 		if(ib != null)
@@ -123,8 +126,13 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			{
 				datePickerDialogFin.show();
 				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				//noinspection ConstantConditions
-				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+				if(inputManager != null) {
+					View view = getCurrentFocus();
+					IBinder binder = null;
+					if (view != null)
+						binder = getCurrentFocus().getWindowToken();
+					inputManager.hideSoftInputFromWindow(binder, InputMethodManager.HIDE_NOT_ALWAYS);
+				}
 			});
 
 		//------------------------------------------------------------------------------------------
@@ -193,6 +201,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 			Spinner spnActivo = findViewById(R.id.spnActivo);
 
 			filtro = getIntent().getParcelableExtra(Filtro.FILTRO);
+			if(filtro == null) return;
 			//-----
 			txtNombre.setText(filtro.getNombre());
 			//-----

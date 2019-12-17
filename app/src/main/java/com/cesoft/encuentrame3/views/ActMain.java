@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -116,12 +115,11 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 		Login.getCurrentUserImage(new CustomTarget<Bitmap>() {
 			@Override
 			public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-				Log.e(TAG, "onResourceReady----------------------------------------------------resource="+resource);
 				userImage.setImageBitmap(resource);
 			}
 			@Override
 			public void onLoadCleared(@Nullable Drawable placeholder) {
-				Log.e(TAG, "onLoadCleared----------------------------------------------------");
+				//Log.e(TAG, "onLoadCleared------------------------------------------------------");
 			}
 		});
 	}
@@ -252,7 +250,11 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 				return true;
 			case R.id.action_buscar:
 				FrgMain frg = sectionsPagerAdapter.getPage(viewPager.getCurrentItem());// frg==null cuando se libero mem y luego se activó app...
-				if(frg == null)new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT).getItem(viewPager.getCurrentItem());
+				/*while(frg == null) {
+					Log.e(TAG, "***************************TEST********************************************");
+					createViews();
+					frg = sectionsPagerAdapter.getPage(viewPager.getCurrentItem());// frg==null cuando se libero mem y luego se activó app...
+				}*/
 				buscar(sectionsPagerAdapter.getPage(viewPager.getCurrentItem()));
 				return true;
 			case R.id.action_voz:
@@ -412,6 +414,7 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 	//---
 	public void buscar(final FrgMain frg)
 	{
+		if(frg == null)return;
 		try
 		{
 			if( ! frg.isAdded())
@@ -423,9 +426,9 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 			}
 
 			Filtro fil = frg.getFiltro();
-			Intent i = new Intent(/*frg.getContext()*/this, ActBuscar.class);//_main.getApplicationContext
-			i.putExtra(Filtro.FILTRO, fil);
-			frg.startActivityForResult(i, Constantes.BUSCAR);
+			Intent intent = new Intent(this, ActBuscar.class);
+			intent.putExtra(Filtro.FILTRO, fil);
+			frg.startActivityForResult(intent, Constantes.BUSCAR);
 		}
 		catch(Exception e)
 		{
@@ -481,7 +484,7 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 	public void onGeofenceStoreEvent(GeofenceStore.Event event) {
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		MenuItem item = navigationView.getMenu().findItem(R.id.nav_geofencing_onoff);
-		Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn()+" : "+event.isOn());
+//Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn()+" : "+event.isOn());
 		//TODO: si event.isOn == false ---> el servicio deberia estar intentando arrancar? o dejar todo desactivado?
 		if(GeofencingService.isOn()) {
 			if(item != null)item.setTitle(R.string.stop_geofencing);

@@ -7,7 +7,7 @@ import com.cesoft.encuentrame3.BuildConfig;
 //^(?!.*(No setter)).*$
 public class Log
 {
-	private static final boolean FORCE_LOG = false;
+	private static final boolean FORCE_LOG = true;
 	private static final String PREFIX = "CESoft:";
 	private Log(){}
 //	public static void d(String tag, String msg) {

@@ -2,7 +2,9 @@ package com.cesoft.encuentrame3.presenters;
 
 import android.app.AlertDialog;
 import android.app.Application;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Message;
 
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
@@ -365,6 +367,7 @@ public class PreRuta extends PresenterBase
 		dlgEstadisticas.setTitle(app.getString(R.string.estadisticas));
 		dlgEstadisticas.setMessage(s);
 		dlgEstadisticas.setOnDismissListener(dialog ->	bEstadisticas = false);
+		dlgEstadisticas.setButton(DialogInterface.BUTTON_NEGATIVE, app.getString(R.string.cancelar), (Message) null);
 		dlgEstadisticas.show();
 	}
 

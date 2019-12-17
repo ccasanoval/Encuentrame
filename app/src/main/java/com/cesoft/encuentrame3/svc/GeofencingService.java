@@ -63,9 +63,7 @@ public class GeofencingService extends Service {
         Notification notification = sn.createForGeofencing();
         startForeground(ID_SERVICE, notification);
 
-        Log.e(TAG, "onStartCommand:--------------------------------  startId="+startId+"  :  flags="+flags+"  :  intent="+intent);
         if(thread != null && thread.isAlive()) {
-            Log.e(TAG, "onStartCommand:--------------------------------  Killing old thread "+thread.hashCode());
             thread.interrupt();
         }
         isOn = true;
@@ -78,7 +76,6 @@ public class GeofencingService extends Service {
                     GeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
                     while(true) {
                         Log.e(TAG, "onStartCommand:Thread:-------------------------------- RUN ");
-
                         if( ! login.isLogged()) {
                             Log.e(TAG, "No hay usuario logado !! STOPPING SERVICE");
                             Thread.currentThread().interrupt();
@@ -87,7 +84,6 @@ public class GeofencingService extends Service {
                         else {
                             geofenceStoreAvisos.cargarListaGeoAvisos();//PAYLOAD
                         }
-
                         Thread.sleep(Constantes.GEOFENCE_LOAD_DELAY);
                     }
                 }

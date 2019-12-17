@@ -52,6 +52,7 @@ public class ServiceNotifications {
 
     //----------------------------------------------------------------------------------------------
     Notification createForGeotracking(String subtitle) {
+        Context context = App.getInstance().getApplicationContext();
 
         Intent intentMain = new Intent(appContext, ActMain.class);
         intentMain.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -61,14 +62,14 @@ public class ServiceNotifications {
         Intent intentStop = new Intent(appContext, ActMain.class);
         intentStop.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intentStop.putExtra(Constantes.WIN_TAB, Constantes.RUTAS);
-        intentStop.putExtra(Constantes.MENSAJE, "Stoping tracking service...");
+        intentStop.putExtra(Constantes.MENSAJE, R.string.geotracking_service_stoping);
         intentStop.putExtra(ACTION_STOP, true);
         PendingIntent stopPendingIntent = PendingIntent.getActivity(appContext, RC_GEOTRACKING_STOP, intentStop, 0);
 
         return create(
                 appContext,
                 android.R.drawable.ic_menu_directions,
-                "Tracking service",
+                context.getString(R.string.geotracking_service),
                 subtitle,
                 mainPendingIntent,
                 stopPendingIntent,
@@ -151,16 +152,21 @@ public class ServiceNotifications {
                 //.setOngoing(true)
                 .setVibrate(new long[0])
                 ;
-        if(type == Type.GEOFENCING_SERV || type == Type.GEOTRACKING_SERV) {
+        if(type == Type.GEOFENCING_SERV) {
             builder.addAction(
                     android.R.drawable.ic_menu_close_clear_cancel,
                     context.getString(R.string.stop_geofencing),
                     stopPendingIntent);
             builder.setAutoCancel(false);
-            if(type == Type.GEOFENCING_SERV) {
-                builder.setGroup("Avisos!");
-                builder.setGroupSummary(true);
-            }
+            builder.setGroup("Avisos!");
+            builder.setGroupSummary(true);
+        }
+        else if(type == Type.GEOTRACKING_SERV) {
+            builder.addAction(
+                    android.R.drawable.ic_menu_close_clear_cancel,
+                    context.getString(R.string.stop_geotracking),
+                    stopPendingIntent);
+            builder.setAutoCancel(false);
         }
         else {
             builder.setAutoCancel(true);

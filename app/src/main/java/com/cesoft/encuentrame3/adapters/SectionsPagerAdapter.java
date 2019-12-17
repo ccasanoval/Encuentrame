@@ -16,14 +16,14 @@ import com.cesoft.encuentrame3.util.Constantes;
 public class SectionsPagerAdapter extends FragmentPagerAdapter
 {
     private static final int MAX_PAGES = 3;
-    private final FrgMain[] frmMain = new FrgMain[3];
+    private final FrgMain[] frmMain = new FrgMain[MAX_PAGES];
 
     public SectionsPagerAdapter(@NonNull FragmentManager fm, int behavior) {
         super(fm, behavior);
     }
 
     public FrgMain getPage(int position) {
-        if(position > 0 && position < MAX_PAGES)
+        if(position >= 0 && position < MAX_PAGES)
             return frmMain[position];
         else
             return null;

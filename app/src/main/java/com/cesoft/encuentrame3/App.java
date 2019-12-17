@@ -9,7 +9,8 @@ import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
 //TODO:
-// + cuando no hay conexion y se guarda/empieza una ruta, puede quedar una ruta sin puntos, se para la ruta?
+// + cuando no hay conexion y se guarda/empieza una ruta, puede quedar una ruta sin puntos, se para la ruta? NO SIMEPRE FALLA?!
+// + Menu ayuda que explique las tres funciones LUGARES, RUTAS, AVISOS
 // + Traducir a kotlin, asi evito if(view!=null)
 // + En lugar de menu a la derecha un DrawerMenu grande a la izquierda...con foto de usuario etc
 // + Cuando se cambia de orientacion se recrea el activity, evitar!!

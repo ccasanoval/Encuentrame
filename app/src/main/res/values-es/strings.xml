@@ -57,11 +57,14 @@
 	<string name="salir">Salir</string>
 	<string name="ver_mapa">Ver mapa</string>
 	<string name="buscar">Buscar</string>
+	<string name="stop_geotracking">Detener tracking</string>
 	<string name="stop_geofencing">Detener avisos</string>
 	<string name="start_geofencing">Activar avisos</string>
 	<string name="actualizar_posicion">Actualizar posición</string>
 	<string name="geofencing_service">Servicio de geofencing</string>
 	<string name="geofencing_service_stoping">Deteniendo servicio de geofencing…</string>
+    <string name="geotracking_service">Servicio de tracking</string>
+	<string name="geotracking_service_stoping">Deteniendo servicio de geotracking…</string>
 
 	<!-- Items -->
 	<string name="lugares">Lugares</string>

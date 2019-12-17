@@ -36,7 +36,6 @@ public class Preferencias {
     public long getTrackingDelay() {
         long delay = Constantes.MIN_TRACK_DELAY;
         String s = sp.getString(TRACKING_DELAY, "30");
-        if(s == null) s = "30";
         try { delay = Long.parseLong(s) * 1000; } catch (Exception ignore) {}
         if(delay < Constantes.MIN_TRACK_DELAY / 2)///TODO:RELEASE: delay min = 30s  &&&  save all -> only op2501!!!
             delay = Constantes.MIN_TRACK_DELAY / 2;
