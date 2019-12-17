@@ -27,8 +27,9 @@ public class Fire
 			fbdb = FirebaseDatabase.getInstance();
 			try{
 				fbdb.setPersistenceEnabled(true);/// Iniciar firebase disk persistence
+				fbdb.getReference().keepSynced(false);
 			}catch(Exception e){
-				com.cesoft.encuentrame3.util.Log.e("Login", "getDBInstance:e:", e);}
+				Log.e("Login", "getDBInstance:e:", e);}
 		}
 		return fbdb;
 	}
@@ -58,12 +59,10 @@ public class Fire
 			void setRef(DatabaseReference ref){this.ref=ref;}
 
 		private ValueEventListener vel = null;
-			public void setListener(ValueEventListener vel) {
-				delListener(); this.vel = vel;
-			}
-			private void delListener() {
+			public void setListener(ValueEventListener newVel) {
 				if(ref!=null && vel!=null)
 					ref.removeEventListener(vel);
+				this.vel = newVel;
 			}
 	}
 	//----------------------------------------------------------------------------------------------
@@ -76,6 +75,8 @@ public class Fire
 	//----------------------------------------------------------------------------------------------
 	public abstract static class CompletadoListener implements DatabaseReference.CompletionListener
 	{
+		protected boolean isBackPressed = false;
+			public void onBackPressed(){isBackPressed = true;}
 		protected boolean isWorking = true;
 		protected abstract void onDatos(String id);
 		protected abstract void onError(String err, int code);

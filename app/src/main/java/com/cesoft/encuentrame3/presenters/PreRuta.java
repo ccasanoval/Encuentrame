@@ -44,11 +44,9 @@ public class PreRuta extends PresenterBase
 	public String getId(){return o.getId();}
 
 	//----------------------------------------------------------------------------------------------
-	private final Util util;
 	@Inject PreRuta(Application app, Util util)
 	{
-		super(app);
-		this.util = util;
+		super(app, util);
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -78,7 +76,7 @@ public class PreRuta extends PresenterBase
 		bGuardar = false;
 		view.iniEspera();
 
-		guardar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			public void onDatos(String id)
@@ -87,7 +85,8 @@ public class PreRuta extends PresenterBase
 				bGuardar = true;
 				if(view != null) {
 					view.finEspera();
-					util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
+					if( ! isBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
 				}
 			}
 			@Override
@@ -108,10 +107,12 @@ public class PreRuta extends PresenterBase
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);
-					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+					if( ! isBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		guardar(currentCompletadoListener);
 	}
 	public void guardar(Fire.CompletadoListener res)
 	{
@@ -138,7 +139,7 @@ public class PreRuta extends PresenterBase
 
 	//----------------------------------------------------------------------------------------------
 	private void eliminarHelper() {
-		((Ruta)o).eliminar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
@@ -146,7 +147,7 @@ public class PreRuta extends PresenterBase
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
-					if( ! onBackPressed)
+					if( ! isBackPressed)
 						util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_ruta));
 				}
 			}
@@ -163,16 +164,18 @@ public class PreRuta extends PresenterBase
 			@Override
 			public void onTimeout() {
 				if( ! isWorking)return;
-				Log.e(TAG, "eliminar:onTimeout:------------------------------------------------");
+				Log.e(TAG, "eliminar:onTimeout:------------------------------------------------isBackPressed="+isBackPressed);
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
-					if( ! onBackPressed)
+					if( ! isBackPressed)
 						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		((Ruta)o).eliminar(currentCompletadoListener);
 	}
+
 	public synchronized void eliminar()
 	{
 		view.iniEspera();
@@ -180,12 +183,8 @@ public class PreRuta extends PresenterBase
 		if(o.getId() != null && o.getId().equals(util.getIdTrackingRoute()))
 			util.setTrackingRoute("", "");
 
-		onBackPressed = false;
-		new Thread() {
-			@Override public void run() {
-				eliminarHelper();
-			}
-		}.start();
+		delListeners();
+		eliminarHelper();
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -193,8 +192,7 @@ public class PreRuta extends PresenterBase
 	{
 		if(isErrorEnCampos())return false;
 		view.iniEspera();
-		onBackPressed = false;
-		guardar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			public void onDatos(String id)
@@ -202,7 +200,7 @@ public class PreRuta extends PresenterBase
 				util.setTrackingRoute(o.id, o.nombre);
 				if(view != null) {
 					view.finEspera();
-					if(!onBackPressed)
+					if( ! isBackPressed)
 						util.return2Main(view.getAct(), true, app.getString(R.string.ok_guardar_ruta));
 				}
 				GeotrackingService.start(app);
@@ -225,11 +223,11 @@ public class PreRuta extends PresenterBase
 				GeotrackingService.start(app);
 				if(view != null) {
 					view.finEspera();
-					if(!onBackPressed)
-						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		guardar(currentCompletadoListener);
 		return true;
 	}
 	//----------------------------------------------------------------------------------------------
@@ -404,17 +402,16 @@ public class PreRuta extends PresenterBase
 	private void showRutaHelper(Ruta.RutaPunto[] aPts)
 	{
 		if(aPts.length < 1) {
-			Log.e(TAG, "showRutaHelper:e:------------------------------------------------------ n pts = "+aPts.length);
+			Log.e(TAG, "showRutaHelper:e:------------------------------------------------------NO POINTS: #pts="+aPts.length);
 			return;
 		}
 		if(view == null || view.getMap()==null) {
-			Log.e(TAG, "showRutaHelper:e:------------------------------------------------------ MAP = NULL");
+			Log.e(TAG, "showRutaHelper:e:------------------------------------------------------MAP = NULL");
 			return;
 		}
 		view.getMap().clear();
 
-		String ini = app.getString(R.string.ini);
-		String fin = app.getString(R.string.fin);
+
 		PolylineOptions po = new PolylineOptions();
 
 		Ruta.RutaPunto gpAnt = null;
@@ -422,60 +419,68 @@ public class PreRuta extends PresenterBase
 		Ruta.RutaPunto gpFin = aPts[aPts.length -1];
 		for(Ruta.RutaPunto pto : aPts)
 		{
-			LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
-			MarkerOptions mo = new MarkerOptions();
-			mo.title(o.getNombre());
-
-			String snippet;
-			if(pto == gpIni)snippet = ini;
-			else if(pto == gpFin)snippet = fin;
-			else snippet = app.getString(R.string.info_time);
-
-			Date date = new Date(pto.getFecha());
-			snippet += util.formatFechaTiempo(date);
-			snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_prec), pto.getPrecision());
-			if(gpAnt != null)
-			{
-				float d = pto.distanciaReal(gpAnt);
-				String sDist;
-				if(d > 3000)	sDist = String.format(Locale.ENGLISH, app.getString(R.string.info_dist2), d/1000);
-				else			sDist = String.format(Locale.ENGLISH, app.getString(R.string.info_dist), d);
-				snippet += sDist;
-			}
-			if(pto.getVelocidad() > 3)
-				snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
-			else if(pto.getVelocidad() > 0)
-				snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_speed), pto.getVelocidad());
-			if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_nor), pto.getDireccion());
-			if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_alt), pto.getAltura());
-			snippet += String.format(app.getString(R.string.info_activity), util.getActivityString(pto.getActividad()));
-			mo.snippet(snippet);
-
-			if(pto == gpIni)
-			{
-				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-				mo.rotation(45);
-				Marker m = view.getMap().addMarker(mo.position(pos));
-				m.setTag(pto.getId());
-			}
-			else if(pto == gpFin)
-			{
-				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				mo.rotation(-45);
-				Marker m = view.getMap().addMarker(mo.position(pos));
-				m.setTag(pto.getId());
-			}
-			else if(gpAnt != null && pto.distanciaReal(gpAnt) > 5)
-			{
-				mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-				Marker m = view.getMap().addMarker(mo.position(pos));
-				m.setTag(pto.getId());
-			}
-			gpAnt = pto;
+			LatLng pos = showRutaHelperPto(pto, gpIni, gpFin, gpAnt);
 			po.add(pos);
+			gpAnt = pto;
 		}
 		po.width(5).color(Color.BLUE);
 		view.getMap().addPolyline(po);
 		((IVistaRuta) view).moveCamara(new LatLng(gpFin.getLatitud(), gpFin.getLongitud()));
+	}
+
+	private LatLng showRutaHelperPto(Ruta.RutaPunto pto, Ruta.RutaPunto gpIni, Ruta.RutaPunto gpFin, Ruta.RutaPunto gpAnt) {
+		String ini = app.getString(R.string.ini);
+		String fin = app.getString(R.string.fin);
+
+		LatLng pos = new LatLng(pto.getLatitud(), pto.getLongitud());
+		MarkerOptions mo = new MarkerOptions();
+		mo.title(o.getNombre());
+
+		String snippet;
+		if(pto == gpIni)snippet = ini;
+		else if(pto == gpFin)snippet = fin;
+		else snippet = app.getString(R.string.info_time);
+
+		Date date = new Date(pto.getFecha());
+		snippet += util.formatFechaTiempo(date);
+		snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_prec), pto.getPrecision());
+		if(gpAnt != null)
+		{
+			float d = pto.distanciaReal(gpAnt);
+			String sDist;
+			if(d > 3000)	sDist = String.format(Locale.ENGLISH, app.getString(R.string.info_dist2), d/1000);
+			else			sDist = String.format(Locale.ENGLISH, app.getString(R.string.info_dist), d);
+			snippet += sDist;
+		}
+		if(pto.getVelocidad() > 3)
+			snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_speed2), pto.getVelocidad()*3600/1000);
+		else if(pto.getVelocidad() > 0)
+			snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_speed), pto.getVelocidad());
+		if(pto.getDireccion() > 0)snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_nor), pto.getDireccion());
+		if(pto.getAltura() > 0)snippet += String.format(Locale.ENGLISH, app.getString(R.string.info_alt), pto.getAltura());
+		snippet += String.format(app.getString(R.string.info_activity), util.getActivityString(pto.getActividad()));
+		mo.snippet(snippet);
+
+		if(pto == gpIni)
+		{
+			mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+			mo.rotation(45);
+			Marker m = view.getMap().addMarker(mo.position(pos));
+			m.setTag(pto.getId());
+		}
+		else if(pto == gpFin)
+		{
+			mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+			mo.rotation(-45);
+			Marker m = view.getMap().addMarker(mo.position(pos));
+			m.setTag(pto.getId());
+		}
+		else if(gpAnt != null && pto.distanciaReal(gpAnt) > 5)
+		{
+			mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+			Marker m = view.getMap().addMarker(mo.position(pos));
+			m.setTag(pto.getId());
+		}
+		return pos;
 	}
 }

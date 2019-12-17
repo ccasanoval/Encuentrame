@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.app.Activity;
 import android.location.Location;
@@ -10,6 +10,9 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.util.Login;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.util.Log;
@@ -23,7 +26,8 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 {
 	private static final String TAG = ActWidgetNuevoLugar.class.getSimpleName();
 	@Inject	Util util;
-	@Inject	Login login;
+	@Inject
+    Login login;
 	private ProgressBar progressBar;
 
 	@Override

@@ -13,8 +13,8 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import com.cesoft.encuentrame3.ActAviso;
-import com.cesoft.encuentrame3.ActMain;
+import com.cesoft.encuentrame3.views.ActAviso;
+import com.cesoft.encuentrame3.views.ActMain;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;

@@ -1,22 +1,19 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.util;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.cesoft.encuentrame3.App;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.cesoft.encuentrame3.models.Fire;
-import com.cesoft.encuentrame3.util.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,7 +37,7 @@ public class Login
 	}
 
 	private GoogleSignInClient signInClient;
-	void setGoogleSignInClient(GoogleSignInClient signInClient) {
+	public void setGoogleSignInClient(GoogleSignInClient signInClient) {
 		this.signInClient = signInClient;
 	}
 	private FirebaseAuth getAuth(){return FirebaseAuth.getInstance();}
@@ -50,19 +47,19 @@ public class Login
 //		if(a.getCurrentUser() == null)return "";
 //		return a.getCurrentUser().getUid();
 //	}
-	static String getCurrentUserName()
+	public static String getCurrentUserName()
 	{
 		FirebaseAuth auth = FirebaseAuth.getInstance();
 		if(auth.getCurrentUser() == null)return "";
 		return auth.getCurrentUser().getDisplayName();
 	}
-	static String getCurrentUserEmail()
+	public static String getCurrentUserEmail()
 	{
 		FirebaseAuth auth = FirebaseAuth.getInstance();
 		if(auth.getCurrentUser() == null)return "";
 		return auth.getCurrentUser().getEmail();
 	}
-	static void getCurrentUserImage(CustomTarget<Bitmap> listener)
+	public static void getCurrentUserImage(CustomTarget<Bitmap> listener)
 	{
 		FirebaseAuth auth = FirebaseAuth.getInstance();
 		if(auth.getCurrentUser() == null) {
@@ -79,7 +76,7 @@ public class Login
 
 	//-----
 
-	void addUser(String email, String password, final Fire.AuthListener listener)
+	public void addUser(String email, String password, final Fire.AuthListener listener)
 	{
 		//TODO: Mostrar reglas de Firebase para crear usuarios...(en caso de error...)
 		getAuth().createUserWithEmailAndPassword(email, password)
@@ -179,7 +176,7 @@ public class Login
 	}
 
 	//-------
-	void logout(@NonNull Activity activity)
+	public void logout(@NonNull Activity activity)
 	{
 		if( ! sp.getBoolean(PREF_SAVE_LOGIN, true))
 			signInClient.signOut();//.addOnCompleteListener(activity, task -> { });
@@ -188,7 +185,7 @@ public class Login
 	}
 
 	//-------
-	void restoreUser(final String email, final Fire.AuthListener listener)
+	public void restoreUser(final String email, final Fire.AuthListener listener)
 	{
 		getAuth().sendPasswordResetEmail(email)
 			.addOnSuccessListener(aVoid -> listener.onExito(getAuth().getCurrentUser()))

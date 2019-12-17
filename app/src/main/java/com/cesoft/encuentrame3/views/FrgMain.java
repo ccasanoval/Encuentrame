@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,6 +18,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.adapters.AvisoArrayAdapter;
 import com.cesoft.encuentrame3.adapters.IListaItemClick;
 import com.cesoft.encuentrame3.adapters.ShadowItemDecorator;

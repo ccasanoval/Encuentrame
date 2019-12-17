@@ -39,7 +39,7 @@
 
 		<!-- ************************* ACTIVITIES ************************* -->
 		<activity
-			android:name=".ActSplash"
+			android:name=".views.ActSplash"
 			android:label="@string/app_name"
 			android:theme="@style/SplashTheme">
 			<intent-filter>
@@ -48,44 +48,44 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".ActLogin"
+			android:name=".views.ActLogin"
 			android:label="@string/app_name"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".ActMain"
+			android:name=".views.ActMain"
 			android:label="@string/title_activity_act_main"
 			android:launchMode="singleInstance"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".ActSettings"
+			android:name=".views.ActSettings"
 			android:label="@string/title_activity_act_config" />
 		<activity
-			android:name=".ActLugar"
+			android:name=".views.ActLugar"
 			android:label="@string/title_activity_act_lugar"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".ActRuta"
+			android:name=".views.ActRuta"
 			android:label="@string/title_activity_act_ruta"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".ActAviso"
+			android:name=".views.ActAviso"
 			android:label="@string/title_activity_act_aviso"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".ActMaps"
+			android:name=".views.ActMaps"
 			android:label="@string/title_activity_act_maps"/>
 		<activity
-			android:name=".ActBuscar"
+			android:name=".views.ActBuscar"
 			android:label="@string/title_activity_act_buscar"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".ActWidgetNuevoLugar"
+			android:name=".views.ActWidgetNuevoLugar"
 			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"/>
 		<activity
-			android:name=".ActWidgetNuevaRuta"
+			android:name=".views.ActWidgetNuevaRuta"
 			android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"/>
 		<activity
-			android:name=".ActImagen"
+			android:name=".views.ActImagen"
 			android:configChanges="orientation|keyboardHidden|screenSize"
 			android:label="@string/title_act_imagen"
 			android:theme="@style/FullscreenTheme"/>
@@ -95,6 +95,10 @@
 		<service android:name=".svc.GeotrackingService" android:foregroundServiceType="location" /><!-- ForegroundService VS ACCESS_BACKGROUND_LOCATION ??? -->
 		<service android:name=".svc.GeofencingService" android:foregroundServiceType="location" />
 		<service android:name=".svc.ActividadIntentService" />
+		<service
+			android:name=".svc.GeofenceJobIntentService"
+			android:exported="true"
+			android:permission="android.permission.BIND_JOB_SERVICE" />
 
 		<!-- ************************* RECEIVERS ******************************** -->
 		<receiver android:name=".svc.GeofenceReceiver"

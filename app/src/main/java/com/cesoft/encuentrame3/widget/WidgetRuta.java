@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.cesoft.encuentrame3.ActMain;
-import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
+import com.cesoft.encuentrame3.views.ActMain;
+import com.cesoft.encuentrame3.views.ActWidgetNuevaRuta;
 import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.util.Constantes;

@@ -23,7 +23,7 @@ import android.widget.EditText;
 
 import androidx.core.app.ActivityCompat;
 
-import com.cesoft.encuentrame3.ActMain;
+import com.cesoft.encuentrame3.views.ActMain;
 import com.cesoft.encuentrame3.adapters.IListaItemClick;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
@@ -166,7 +166,6 @@ public class Util
 		intent.putExtra(Constantes.MENSAJE, sMensaje);
 		act.setResult(Activity.RESULT_OK, intent);
 		act.finish();
-Log.e(TAG, "return2Main-------------------------------------------- ");
 	}
 	public void return2Main(Activity act, Filtro filtro)
 	{

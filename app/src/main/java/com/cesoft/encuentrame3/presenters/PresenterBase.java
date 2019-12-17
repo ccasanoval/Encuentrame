@@ -11,7 +11,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cesoft.encuentrame3.R;
+import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
+import com.cesoft.encuentrame3.util.Log;
+import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.GoogleMap;
 
@@ -48,8 +51,6 @@ public abstract class PresenterBase
 		public void setLatLon(double lat, double lon){
 			o.setLatLon(lat, lon);}
 
-	boolean onBackPressed = false;
-		public void onBackPressed(){ onBackPressed=true; }
 	boolean isSucio = false;
 		public void setSucio(){ isSucio=true; }
 	private boolean isNuevo = false;
@@ -59,7 +60,11 @@ public abstract class PresenterBase
 	boolean bDesdeNotificacion = false;
 	////////////////////////////////////////////////////
 	protected final Application app;
-	PresenterBase(Application app) { this.app = app; }
+	protected final Util util;
+	PresenterBase(Application app, Util util) {
+		this.app = app;
+		this.util = util;
+	}
 
 	//----------------------------------------------------------------------------------------------
 	public void ini(IVista view)
@@ -128,7 +133,7 @@ public abstract class PresenterBase
 
 	//______________________________________________________________________________________________
 	private AlertDialog dlgSucio = null;
-	public void onSalir() { onSalir(false); }
+//	public void onSalir() { onSalir(false); }
 	public void onSalir(boolean force)
 	{
 		if(!force && isSucio)
@@ -187,5 +192,20 @@ public abstract class PresenterBase
 	{
 		nom.addTextChangedListener(new PresenterBase.CesTextWatcher(nom, getNombre(), this));
 		desc.addTextChangedListener(new PresenterBase.CesTextWatcher(desc,  getDescripcion(), this));
+	}
+
+
+	protected Fire.CompletadoListener currentCompletadoListener = null;
+	public void onBackPressed() {
+Log.e(TAG, "onBackPressed--------------------------------------------------------------------"+currentCompletadoListener);
+		if(currentCompletadoListener != null) {
+			currentCompletadoListener.onBackPressed();
+		}
+	}
+	public void onPause() {
+Log.e(TAG, "onPause--------------------------------------------------------------------"+currentCompletadoListener);
+		if(currentCompletadoListener != null) {
+			currentCompletadoListener.onBackPressed();
+		}
 	}
 }

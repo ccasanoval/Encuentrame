@@ -67,7 +67,6 @@ public class GeofenceStore
 
 	private void update(ArrayList<Geofence> geofences)
 	{
-Log.e(TAG, "update----------------------------------------------------------"+geofences);
 		if( ! geofenceList.isEmpty()) {
 			geofencingClient.removeGeofences(pendingIntent);
 		}
@@ -78,7 +77,7 @@ Log.e(TAG, "update----------------------------------------------------------"+ge
 			return;
 		}
 		geofenceList = new ArrayList<>(geofences);
-Log.e(TAG, "update----------------------------------------------------------2222");
+
 		GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 		builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
 		builder.addGeofences(geofenceList);
@@ -94,7 +93,6 @@ Log.e(TAG, "update----------------------------------------------------------2222
 					Log.e(TAG, "update:addGeofences:e:----------------------------ERROR ADDING : ",e);
 					EventBus.getDefault().postSticky(new Event(false));
 				});
-Log.e(TAG, "update----------------------------------------------------------999");
 	}
 
 	void clear()
@@ -201,6 +199,5 @@ Log.e(TAG, "update----------------------------------------------------------999"
 			GeofencingService.start();
 			//if( ! bDirty)EventBus.getDefault().postSticky(new Event(false));
 		}
-Log.e(TAG, "processDatos:-----------------------------------------------------9999");
     }
 }

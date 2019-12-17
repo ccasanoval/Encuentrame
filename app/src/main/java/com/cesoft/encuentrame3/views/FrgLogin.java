@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,6 +15,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.util.Login;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.util.Log;
@@ -31,9 +34,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
-import static com.cesoft.encuentrame3.ActLogin.ENTER;
-import static com.cesoft.encuentrame3.ActLogin.RECOVER;
-import static com.cesoft.encuentrame3.ActLogin.REGISTER;
+import static com.cesoft.encuentrame3.views.ActLogin.ENTER;
+import static com.cesoft.encuentrame3.views.ActLogin.RECOVER;
+import static com.cesoft.encuentrame3.views.ActLogin.REGISTER;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

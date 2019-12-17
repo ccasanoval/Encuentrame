@@ -1,14 +1,14 @@
 package com.cesoft.encuentrame3.di.components;
 
-import com.cesoft.encuentrame3.ActAviso;
-import com.cesoft.encuentrame3.ActBuscar;
-import com.cesoft.encuentrame3.ActLugar;
-import com.cesoft.encuentrame3.ActMaps;
-import com.cesoft.encuentrame3.ActRuta;
-import com.cesoft.encuentrame3.ActWidgetNuevaRuta;
-import com.cesoft.encuentrame3.ActWidgetNuevoLugar;
-import com.cesoft.encuentrame3.FrgMain;
-import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.views.ActAviso;
+import com.cesoft.encuentrame3.views.ActBuscar;
+import com.cesoft.encuentrame3.views.ActLugar;
+import com.cesoft.encuentrame3.views.ActMaps;
+import com.cesoft.encuentrame3.views.ActRuta;
+import com.cesoft.encuentrame3.views.ActWidgetNuevaRuta;
+import com.cesoft.encuentrame3.views.ActWidgetNuevoLugar;
+import com.cesoft.encuentrame3.views.FrgMain;
+import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.adapters.RutaArrayAdapter;
 import com.cesoft.encuentrame3.di.modules.GlobalModuleTest;
 import com.cesoft.encuentrame3.svc.ServiceNotifications;

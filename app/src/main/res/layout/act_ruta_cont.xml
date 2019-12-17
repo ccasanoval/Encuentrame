@@ -10,7 +10,7 @@
 	android:paddingRight="@dimen/activity_horizontal_margin"
 	android:paddingTop="@dimen/activity_vertical_margin"
 	app:layout_behavior="@string/appbar_scrolling_view_behavior"
-	tools:context="com.cesoft.encuentrame3.ActRuta"
+	tools:context="com.cesoft.encuentrame3.views.ActRuta"
 	tools:showIn="@layout/act_ruta">
 
 
@@ -84,6 +84,6 @@
 		android:layout_marginTop="5dp"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		tools:context=".ActRuta" />
+		tools:context=".views.ActRuta" />
 
 </RelativeLayout>

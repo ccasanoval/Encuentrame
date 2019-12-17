@@ -78,7 +78,8 @@ public class Ruta extends Objeto implements Parcelable
 
 	//// FIREBASE
 	//
-	private void eliminarHelper(Fire.CompletadoListener listener) {
+	public void eliminar(Fire.CompletadoListener listener)
+	{
 		String id = Ruta.this.getId();
 		RutaPunto.eliminar(id);
 		if(datos != null)
@@ -97,18 +98,9 @@ public class Ruta extends Objeto implements Parcelable
 		/// Just in case there's no Internet connection...
 		handler.postDelayed(() -> listener.onComplete(null, newFirebase()), DELAY);
 	}
-	public void eliminar(Fire.CompletadoListener listener)
-	{
-		new Thread() {
-			@Override
-			public void run() {
-				super.run();
-				eliminarHelper(listener);
-			}
-		}.start();
-	}
 
-	private void guardarHelper(final Fire.CompletadoListener listener) {
+	public void guardar(final Fire.CompletadoListener listener)
+	{
 		String id = Ruta.this.getId();
 		if(datos != null)
 		{
@@ -129,21 +121,11 @@ public class Ruta extends Objeto implements Parcelable
 				datos.setValue(this, listener);
 			}
 			catch(Exception e) {
-				Log.e(TAG, "guardar:datos.setValue:e-----------------",e);
+				Log.e(TAG, "guardar:datos.setValue:e-------------------------------------------",e);
 			}
 		}
 		/// Just in case there's no Internet connection...
 		handler.postDelayed(listener::onTimeout, DELAY);
-	}
-	public void guardar(final Fire.CompletadoListener listener)
-	{
-		new Thread() {
-			@Override
-			public void run() {
-				super.run();
-				guardarHelper(listener);
-			}
-		}.start();
 	}
 	public static void getById(String sId, final Fire.SimpleListener<Ruta> listener)
 	{
@@ -160,7 +142,7 @@ public class Ruta extends Objeto implements Parcelable
 				catch(Exception e)
 				{
 					listener.onError("ID does not exists on database");
-					Log.e(TAG, "getById:onDataChange---------------------ds="+ds,e);
+					Log.e(TAG, "getById:onDataChange------------------------------------------ds="+ds,e);
 				}
 			}
 			@Override
@@ -678,7 +660,7 @@ public class Ruta extends Objeto implements Parcelable
 				public void onCancelled(@NonNull DatabaseError err)
 				{
 					Log.e(TAG, "getListaAsync:onCancelled:"+err);
-					listener.onError("Ruta:getListaAsync:onCancelled:"+err);
+					listener.onError("Ruta:getListaRep:onCancelled:"+err);
 				}
 			};
 			listener.setRef(queryRef.getRef());

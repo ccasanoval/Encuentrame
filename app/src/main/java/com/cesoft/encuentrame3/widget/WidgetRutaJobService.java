@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.cesoft.encuentrame3.App;
-import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
@@ -32,7 +32,6 @@ import static com.cesoft.encuentrame3.util.Constantes.WIDGET_DELAY_SHORT;
 public class WidgetRutaJobService extends JobService {
     private static final String TAG = WidgetRutaJobService.class.getSimpleName();
 
-    //TODO: not static!!!
     public static void start(Context context) {
         start(context, WIDGET_DELAY_SHORT, true);
     }
@@ -61,20 +60,23 @@ public class WidgetRutaJobService extends JobService {
     public boolean onStartJob(JobParameters jobParameters) {
         Log.e(TAG, "************************* onStartJob *************************");
         App.getComponent().inject(this);
-
         new Thread(() -> {
-            if( ! login.isLogged()) {
-                Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
-                stopSelf();
-                WidgetRutaJobService.this.jobFinished(jobParameters, false);
+            try {
+                if (!login.isLogged()) {
+                    Log.e(TAG, "No hay usuario logado !! STOPPING JOB");
+                    stopSelf();
+                    WidgetRutaJobService.this.jobFinished(jobParameters, false);
+                } else {
+
+                    long delay = payLoad();
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        start(getApplicationContext(), delay, false);
+                    WidgetRutaJobService.this.jobFinished(jobParameters, true);
+                }
             }
-            else {
-
-                long delay = payLoad();
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    start(getApplicationContext(), delay, false);
-                WidgetRutaJobService.this.jobFinished(jobParameters, true);
+            catch(Exception e) {
+                Log.e(TAG, "onStartJob:e:------------------------------------------------------",e);
             }
         }).start();
         return false;

@@ -8,7 +8,7 @@
 	android:paddingStart="4dp"
 	android:paddingEnd="2dp"
 	android:paddingTop="2dp"
-	tools:context=".ActMain">
+	tools:context=".views.ActMain">
 
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/listView"

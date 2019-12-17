@@ -14,7 +14,7 @@ import android.os.PowerManager;
 import androidx.annotation.Nullable;
 
 import com.cesoft.encuentrame3.App;
-import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.util.Log;

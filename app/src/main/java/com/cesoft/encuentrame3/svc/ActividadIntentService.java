@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.cesoft.encuentrame3.App;
-import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 import com.google.android.gms.location.ActivityRecognitionClient;
@@ -19,6 +19,9 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Created by Cesar_Casanova on 21/03/2016.
+//
 public class ActividadIntentService extends IntentService {
     private static final String TAG = ActividadIntentService.class.getSimpleName();
     private static final int REQUEST_CODE = 6901;

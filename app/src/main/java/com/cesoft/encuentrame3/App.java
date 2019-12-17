@@ -5,12 +5,11 @@ import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent;
 import com.cesoft.encuentrame3.di.components.GlobalComponent;
 import com.cesoft.encuentrame3.di.modules.GlobalModule;
 import com.cesoft.encuentrame3.svc.GeotrackingService;
-import com.cesoft.encuentrame3.util.Log;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
 //TODO:
-// + Cuando borra se congela la UI ? y luego para atras y luego vuelves y te echa?
+// + cuando no hay conexion y se guarda/empieza una ruta, puede quedar una ruta sin puntos, se para la ruta?
 // + Traducir a kotlin, asi evito if(view!=null)
 // + En lugar de menu a la derecha un DrawerMenu grande a la izquierda...con foto de usuario etc
 // + Cuando se cambia de orientacion se recrea el activity, evitar!!

@@ -12,7 +12,7 @@
 	android:paddingRight="@dimen/activity_horizontal_margin"
 	android:paddingTop="@dimen/activity_vertical_margin"
 	app:layout_behavior="@string/appbar_scrolling_view_behavior"
-	tools:context="com.cesoft.encuentrame3.ActAviso"
+	tools:context="com.cesoft.encuentrame3.views.ActAviso"
 	tools:showIn="@layout/act_aviso"
 	>
 
@@ -148,7 +148,7 @@
 	<!-- *************************************************************************************** -->
 	<fragment
 		class="com.google.android.gms.maps.SupportMapFragment"
-		tools:context=".ActAviso"
+		tools:context=".views.ActAviso"
 		android:id="@+id/map"
 		android:layout_width="0dp"
         android:layout_height="match_parent"

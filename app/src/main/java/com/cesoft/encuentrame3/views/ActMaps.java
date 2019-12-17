@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.graphics.Typeface;
 import android.graphics.Color;
@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreMaps;
 import com.cesoft.encuentrame3.util.Voice;

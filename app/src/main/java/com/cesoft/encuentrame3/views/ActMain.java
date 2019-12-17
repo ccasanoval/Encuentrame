@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -26,6 +26,9 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.util.Login;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.adapters.SectionsPagerAdapter;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.models.Objeto;
@@ -152,6 +155,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 	@Override
 	public void onBackPressed()
 	{
+Log.e(TAG, "onBackPressed-------------------------------------------------------------------- MAIN");
 		if(drawerLayout.isDrawerOpen(GravityCompat.END))
 			drawerLayout.closeDrawer(GravityCompat.END);
 		else
@@ -169,6 +173,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 	@Override
 	public void onResume()
 	{
+Log.e(TAG, "onResume:--------------------------------------------------------");
 		super.onResume();
 		if(voice.isListening()) {
 			voice.startListening();
@@ -472,13 +477,12 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 		}
 	}
 
-	private final Handler handler = new Handler();
-	//@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onGeofenceStoreEvent(GeofenceStore.Event event) {
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		MenuItem item = navigationView.getMenu().findItem(R.id.nav_geofencing_onoff);
-		Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn());
+		Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn()+" : "+event.isOn());
+		//TODO: si event.isOn == false ---> el servicio deberia estar intentando arrancar? o dejar todo desactivado?
 		if(GeofencingService.isOn()) {
 			if(item != null)item.setTitle(R.string.stop_geofencing);
 		}
@@ -495,7 +499,7 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 		switch(id) {
 			case R.id.nav_geofencing_onoff:
 				if(GeofencingService.isOn())
-					GeofencingService.turnOff();//TODO:Preguntar?
+					GeofencingService.turnOff();
 				else
 					GeofencingService.turnOn();
 				return true;
@@ -519,7 +523,9 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 			case R.id.nav_exit:
 				System.exit(0);
 				return true;
+
+			default:
+				return false;
 		}
-		return false;
 	}
 }

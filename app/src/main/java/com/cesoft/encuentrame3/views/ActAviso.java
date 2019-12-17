@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.graphics.Color;
 import android.location.Location;
@@ -13,6 +13,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.presenters.PreAviso;
 import com.cesoft.encuentrame3.util.Log;
@@ -158,11 +160,9 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		Location loc = util.getLocation();
 		if(loc != null && presenter.isNuevo()) {
 			setPosicion(loc.getLatitude(), loc.getLongitude(), false);
-			Log.e(TAG, "onMapReady-----------------------------------------------------------1----"+loc.getLatitude()+","+loc.getLongitude());
 		}
 		else {
 			setPosicion(presenter.getLatitud(), presenter.getLongitud(), false);
-			Log.e(TAG, "onMapReady-----------------------------------------------------------2----"+presenter.getLatitud()+","+presenter.getLongitud());
 		}
 	}
 
@@ -204,7 +204,6 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCommandEvent(Voice.CommandEvent event)
 	{
-		Log.e(TAG, "onCommandEvent------------------------------------------------------------ "+event.getCommand()+" / "+event.getText());
 		Toast.makeText(this, event.getText(), Toast.LENGTH_LONG).show();
 		switch(event.getCommand()) {
 			case R.string.voice_cancel:

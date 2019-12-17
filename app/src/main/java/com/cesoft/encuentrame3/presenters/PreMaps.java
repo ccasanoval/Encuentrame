@@ -39,7 +39,7 @@ public class PreMaps extends PresenterBase
 
 	private int iTipo = Constantes.NADA;
 
-	@Inject PreMaps(Application app) { super(app);}
+	@Inject PreMaps(Application app, Util util) { super(app, util);}
 
 	@Override
 	public void subscribe(IVista view)
@@ -93,7 +93,7 @@ public class PreMaps extends PresenterBase
 				@Override
 				protected void onError(String err, int code)
 				{
-					Log.e(TAG, "guardar:handleFault:e:----------------------------------------------"+err);
+					Log.e(TAG, "guardar:onError:e:--------------------------------------------"+err);
 					view.toast(R.string.error_guardar, err);
 				}
 			});
@@ -114,7 +114,7 @@ public class PreMaps extends PresenterBase
 				@Override
 				protected void onError(String err, int code)
 				{
-					Log.e(TAG, "guardar:handleFault:e:----------------------------------------------"+err);
+					Log.e(TAG, "guardar:onError:e:--------------------------------------------"+err);
 					view.toast(R.string.error_guardar, err);
 				}
 			});
@@ -193,7 +193,7 @@ public class PreMaps extends PresenterBase
 	{
 		if(r == null)
 		{
-			Log.e(TAG, "showRuta:e:----------------------------------------------------------------- r == NULL");
+			Log.e(TAG, "showRuta:e:------------------------------------------------------------ r == NULL");
 			return;
 		}
 		Ruta.RutaPunto.getLista(r.getId(), new Fire.SimpleListener<Ruta.RutaPunto>()
@@ -206,7 +206,7 @@ public class PreMaps extends PresenterBase
 			@Override
 			public void onError(String err)
 			{
-				Log.e(TAG, "showRuta:e:-------------------------------------------------------------"+err);
+				Log.e(TAG, "showRuta:e:--------------------------------------------------------"+err);
 			}
 		});
 	}

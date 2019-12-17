@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.Manifest;
 import android.app.Activity;
@@ -15,6 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.util.Login;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.svc.GeotrackingService;
@@ -33,7 +36,8 @@ public class ActWidgetNuevaRuta extends Activity
 	private static final String TAG = ActWidgetNuevaRuta.class.getSimpleName();
 
 	@Inject	Util util;
-	@Inject Login login;
+	@Inject
+    Login login;
 
 	private EditText txtNombre;
 
@@ -65,12 +69,12 @@ public class ActWidgetNuevaRuta extends Activity
 		startActivity(intent);
 		finish();
 	}
-	@Override
-	public void onPause()
-	{
-		super.onPause();
-		//progressDialog.dismiss();
-	}
+//	@Override
+//	public void onPause()
+//	{
+//		super.onPause();
+//		//progressDialog.dismiss();
+//	}
 	@Override
 	public void onResume()
 	{

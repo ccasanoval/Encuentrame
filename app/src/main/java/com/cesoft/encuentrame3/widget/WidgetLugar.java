@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
-import com.cesoft.encuentrame3.ActMain;
-import com.cesoft.encuentrame3.ActWidgetNuevoLugar;
+import com.cesoft.encuentrame3.views.ActMain;
+import com.cesoft.encuentrame3.views.ActWidgetNuevoLugar;
 import com.cesoft.encuentrame3.R;
 
 //http://www.vogella.com/tutorials/AndroidWidgets/article.html

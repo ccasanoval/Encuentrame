@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 
-import com.cesoft.encuentrame3.ActImagen;
+import com.cesoft.encuentrame3.views.ActImagen;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
@@ -24,12 +24,10 @@ public class PreLugar extends PresenterBase
 
 	private String imgURLnew = null;
 
-	private final Util util;
 	@Inject
 	public PreLugar(Application app, Util util)
 	{
-		super(app);
-		this.util = util;
+		super(app, util);
 	}
 
 	//______________________________________________________________________________________________
@@ -58,7 +56,7 @@ public class PreLugar extends PresenterBase
 		o.setNombre(view.getTextNombre());
 		o.setDescripcion(view.getTextDescripcion());
 
-		((Lugar) o).guardar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
@@ -69,7 +67,7 @@ Log.e(TAG, "GUARDAR : *****************************************"+imgURLnew);
 				imgURLnew = null;
 				if(view != null) {
 					Activity act = view.getAct();
-					if (act != null)
+					if (act != null && ! isBackPressed)
 						util.return2Main(act, true, app.getString(R.string.ok_guardar_lugar));
 					view.finEspera();
 				}
@@ -91,10 +89,12 @@ Log.e(TAG, "GUARDAR : *****************************************"+imgURLnew);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);
-					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+					if(! isBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		((Lugar) o).guardar(currentCompletadoListener);
 	}
 
 	//______________________________________________________________________________________________
@@ -102,7 +102,7 @@ Log.e(TAG, "GUARDAR : *****************************************"+imgURLnew);
 	protected synchronized void eliminar()
 	{
 		view.iniEspera();
-		((Lugar) o).eliminar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
@@ -110,7 +110,8 @@ Log.e(TAG, "GUARDAR : *****************************************"+imgURLnew);
 				isEliminar = true;
 				if(view != null) {
 					view.finEspera();
-					util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_lugar));
+					if(! isBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.ok_eliminar_lugar));
 				}
 			}
 			@Override
@@ -132,10 +133,12 @@ Log.e(TAG, "GUARDAR : *****************************************"+imgURLnew);
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);
-					util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
+					if(! isBackPressed)
+						util.return2Main(view.getAct(), true, app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		((Lugar) o).eliminar(currentCompletadoListener);
 	}
 
 	//----------------------------------------------------------------------------------------------

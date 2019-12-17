@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -18,6 +18,8 @@ import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Filtro;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;

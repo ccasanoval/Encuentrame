@@ -7,8 +7,8 @@ android {
     signingConfigs {
         config {
             keyAlias 'ces'
-            keyPassword 'sig550'
-            storePassword 'sig550'
+            keyPassword 'akm345'
+            storePassword 'akm345'
             storeFile file('/home/cesar/usr/tests/ces.jks')
         }
     }

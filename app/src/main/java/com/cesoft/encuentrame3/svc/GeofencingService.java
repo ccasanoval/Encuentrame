@@ -11,7 +11,7 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 
 import com.cesoft.encuentrame3.App;
-import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 
@@ -73,9 +73,9 @@ public class GeofencingService extends Service {
         thread = new Thread() {
             @Override
             public void run() {
-                Login login = App.getComponent().login();
-                GeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
                 try {
+                    Login login = App.getComponent().login();
+                    GeofenceStore geofenceStoreAvisos = App.getComponent().geofence();
                     while(true) {
                         Log.e(TAG, "onStartCommand:Thread:-------------------------------- RUN ");
 

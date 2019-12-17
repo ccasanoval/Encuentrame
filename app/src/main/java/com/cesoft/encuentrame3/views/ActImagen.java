@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.bumptech.glide.Glide;
+import com.cesoft.encuentrame3.BuildConfig;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Lugar;
 import com.cesoft.encuentrame3.util.Log;
@@ -136,7 +138,7 @@ public class ActImagen extends AppCompatActivity
 		{
 			imgURLnew = getIntent().getStringExtra(PARAM_IMG_PATH);
 			lugar = getIntent().getParcelableExtra(PARAM_LUGAR);
-Log.e(TAG, "onCreate----------------------------------------------------------------imgURLnew="+imgURLnew);
+//Log.e(TAG, "onCreate----------------------------------------------------------------imgURLnew="+imgURLnew);
 			if(imgURLnew != null)
 			{
 				File file = new File(imgURLnew);
@@ -164,13 +166,13 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 						@Override
 						public void onDatos(String[] aData)
 						{
-							Log.e(TAG, "onCreate: tiene imagen y se establecio----------------------- OK: ");
+							//Log.e(TAG, "onCreate: tiene imagen y se establecio----------------- OK: ");
 							refreshMenu(ESTADO.OLD_IMG);
 						}
 						@Override
 						public void onError(String err)
 						{
-							Log.e(TAG, "onCreate: no tiene imagen o error---------------------------: "+err);
+							Log.e(TAG, "onCreate: no tiene imagen o error----------------------: "+err);
 							refreshMenu(ESTADO.SIN_IMG);
 							takePhoto();
 						}
@@ -178,7 +180,7 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 				}
 				else
 				{
-					Log.e(TAG, "onCreate: no existe url ni Lugar -----------------------------------");
+					Log.e(TAG, "onCreate: no existe url ni Lugar ------------------------------");
 					refreshMenu(ESTADO.SIN_IMG);
 					takePhoto();
 				}
@@ -186,7 +188,7 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 		}
 		catch(Exception e)
 		{
-			Log.e(TAG, "onCreate:e:-----------------------------------------------------------------",e);
+			Log.e(TAG, "onCreate:e:------------------------------------------------------------",e);
 		}
 	}
 
@@ -293,7 +295,7 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 			return image;
 		}
 		catch(Exception e) {
-			Log.e(TAG, "createImageFile:e:---------------------------- ",e);
+			Log.e(TAG, "createImageFile:e:-----------------------------------------------------",e);
 			return null;
 		}
 	}
@@ -364,7 +366,7 @@ Log.e(TAG, "onCreate------------------------------------------------------------
 
 	private void guardar()
 	{
-Log.e(TAG, "guardar-----------------------------------------------------------------------imgURLnew="+imgURLnew);
+//Log.e(TAG, "guardar-----------------------------------------------------------------------imgURLnew="+imgURLnew);
 		Intent i = new Intent();
 		i.putExtra(PARAM_IMG_PATH, imgURLnew);
 		setResult(RESULT_OK, i);
@@ -409,9 +411,6 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
 	{
-		//Log.e(TAG, "------------------------------------- requestCode = "+requestCode+" : ");
-		//for(String s : permissions)Log.e(TAG, "------------------------------------- permissions = "+s);
-		//for(int i : grantResults)Log.e(TAG, "------------------------------------- granted = "+i);
 		switch(requestCode) {
 			case REQUEST_PERMISSION_CAMERA:
 			case REQUEST_PERMISSION_EXTERNAL_STORAGE:
@@ -422,13 +421,11 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 		}
 	}
 
-
 	private void requestStoragePermission() {
 		ActivityCompat.requestPermissions(this,
 				new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
 				REQUEST_PERMISSION_EXTERNAL_STORAGE);
 	}
-
 
 	private void takePhoto() {
 		if( ! isCameraHardware()) {

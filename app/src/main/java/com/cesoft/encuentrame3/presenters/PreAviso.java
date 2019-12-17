@@ -28,13 +28,10 @@ public class PreAviso extends PresenterBase
 		boolean isActivo();
 	}
 
-	private final Util util;
 	private final GeofenceStore geofenceStoreAvisos;
 	@Inject PreAviso(Application app, Util util, GeofenceStore geofenceStoreAvisos)
 	{
-		super(app);
-Log.e(TAG, "Constructor:--------------------------------------o="+o);
-		this.util = util;
+		super(app, util);
 		this.geofenceStoreAvisos = geofenceStoreAvisos;
 	}
 
@@ -92,12 +89,10 @@ Log.e(TAG, "Constructor:--------------------------------------o="+o);
 		bGuardar = false;
 		view.iniEspera();
 
-Log.e(TAG, "guardar-------------------------------------------------------------"+o);
-
 		o.setNombre(view.getTextNombre());
 		o.setDescripcion(view.getTextDescripcion());
 		((Aviso) o).setActivo(((IVistaAviso) view).isActivo());
-		((Aviso) o).guardar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
@@ -106,7 +101,8 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 				geofenceStoreAvisos.cargarListaGeoAvisos();
 				if(view != null) {
 					view.finEspera();
-					openMain(app.getString(R.string.ok_guardar_aviso));
+					if( ! isBackPressed)
+						openMain(app.getString(R.string.ok_guardar_aviso));
 				}
 			}
 			@Override
@@ -128,10 +124,12 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);
-					openMain(app.getString(R.string.on_timeout));
+					if( ! isBackPressed)
+						openMain(app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		((Aviso) o).guardar(currentCompletadoListener);
 	}
 
 	//______________________________________________________________________________________________
@@ -139,14 +137,15 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 	public synchronized void eliminar()
 	{
 		view.iniEspera();
-		((Aviso) o).eliminar(new Fire.CompletadoListener()
+		currentCompletadoListener = new Fire.CompletadoListener()
 		{
 			@Override
 			protected void onDatos(String id)
 			{
 				isEliminar = true;
 				if(view != null) view.finEspera();
-				openMain(app.getString(R.string.ok_eliminar_aviso));
+				if( ! isBackPressed)
+					openMain(app.getString(R.string.ok_eliminar_aviso));
 			}
 			@Override
 			protected void onError(String err, int code)
@@ -167,9 +166,11 @@ Log.e(TAG, "guardar-------------------------------------------------------------
 				if(view != null) {
 					view.finEspera();
 					view.toast(R.string.on_timeout);
-					openMain(app.getString(R.string.on_timeout));
+					if( ! isBackPressed)
+						openMain(app.getString(R.string.on_timeout));
 				}
 			}
-		});
+		};
+		((Aviso) o).eliminar(currentCompletadoListener);
 	}
 }

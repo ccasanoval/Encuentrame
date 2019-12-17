@@ -1,4 +1,4 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import androidx.fragment.app.FragmentTransaction;
 
+import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreRuta;
 import com.cesoft.encuentrame3.util.Log;
@@ -70,6 +72,10 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 
 		//-----------------------------------
 		initUI();
+	}
+	@Override public void onPause() {
+		super.onPause();
+		Log.e(TAG, "onPause:--------------------------------------------------------");
 	}
 
 	@Override
@@ -279,7 +285,7 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 
 	@Override
 	public void onBackPressed() {
+		Log.e(TAG, "onBackPressed--------------------------------------------------------------------CCC");
 		super.onBackPressed();
-		presenter.onBackPressed();
 	}
 }

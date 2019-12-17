@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.cesoft.encuentrame3.App;
-import com.cesoft.encuentrame3.FrgMain;
+import com.cesoft.encuentrame3.views.FrgMain;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.util.Constantes;
 

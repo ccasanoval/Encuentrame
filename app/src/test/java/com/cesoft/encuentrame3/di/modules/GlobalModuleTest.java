@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.PowerManager;
 
-import com.cesoft.encuentrame3.Login;
+import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;

@@ -1,10 +1,11 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3.views;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
+import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.presenters.PresenterBase;
 import com.cesoft.encuentrame3.util.Log;
@@ -109,10 +111,6 @@ public abstract class VistaBase
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// ACTIVITY
 	//----------------------------------------------------------------------------------------------
-	@Override
-	public void onBackPressed() {
-		presenter.onSalir();
-	}
 
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -212,6 +210,7 @@ public abstract class VistaBase
 		super.onPause();
 		stopTracking();
 		voice.stopListening();
+		presenter.onPause();
 	}
 
 
@@ -315,4 +314,26 @@ public abstract class VistaBase
 	public void onVoiceEvent(Voice.VoiceStatusEvent event) {
 		refreshVoiceIcon();
 	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if(item.getItemId() == android.R.id.home) {
+Log.e(TAG, "onBackPressed--------------------------------------------------------------------A");
+			presenter.onBackPressed();
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	@Override
+	public void onBackPressed() {
+Log.e(TAG, "onBackPressed--------------------------------------------------------------------B");
+		super.onBackPressed();
+		presenter.onBackPressed();
+	}
+	@Override
+	public boolean onKeyDown(int keyCode, android.view.KeyEvent event) {
+		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK)
+			Log.e(TAG, "onKeyDown--------------------------------------------------------------------KEYCODE_BACK");
+		return super.onKeyDown(keyCode, event);
+	}
+
 }
