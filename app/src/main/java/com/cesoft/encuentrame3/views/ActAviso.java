@@ -18,7 +18,6 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Aviso;
 import com.cesoft.encuentrame3.presenters.PreAviso;
 import com.cesoft.encuentrame3.util.Log;
-import com.cesoft.encuentrame3.util.Util;
 
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -60,8 +59,6 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	private Circle circle;
 	private Marker marker;
 
-	@Inject	Voice voice;
-	@Inject Util util;
 	@Inject PreAviso presenter;
 
 	//------------------------------------------------------------------------------------------
@@ -69,10 +66,8 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		App.getComponent().inject(this);
-		super.ini(presenter, util, voice, new Aviso(), R.layout.act_aviso);
+		super.ini(presenter, new Aviso(), R.layout.act_aviso);
 		super.onCreate(savedInstanceState);
-
-		voice.setActivity(this);
 
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
@@ -125,9 +120,7 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 		getMenuInflater().inflate(R.menu.menu_aviso, menu);
 		if(presenter.isNuevo())
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
-		vozMenuItem = menu.findItem(R.id.action_voz);
-		refreshVoiceIcon();
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -138,10 +131,6 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 				return true;
 			case R.id.menu_eliminar:
 				presenter.onEliminar();
-				return true;
-			case R.id.action_voz:
-				voice.toggleListening();
-				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

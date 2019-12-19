@@ -29,7 +29,7 @@ public class WidgetRuta extends AppWidgetProvider
 	{
 		WidgetRutaJobService.start(context);
 
-		Util util = ((App)context.getApplicationContext()).getGlobalComponent().util();
+		Util util = App.getComponent().util();
 
 		if(ACTION_WIDGET_RUTA_ADD.equals(intent.getAction()))
 		{

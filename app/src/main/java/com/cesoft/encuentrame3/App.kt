@@ -1,14 +1,17 @@
-package com.cesoft.encuentrame3;
+package com.cesoft.encuentrame3
 
-import android.app.Application;
-import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent;
-import com.cesoft.encuentrame3.di.components.GlobalComponent;
-import com.cesoft.encuentrame3.di.modules.GlobalModule;
-import com.cesoft.encuentrame3.svc.GeotrackingService;
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
+import android.app.Application
+import com.cesoft.encuentrame3.di.components.DaggerGlobalComponent
+import com.cesoft.encuentrame3.di.components.GlobalComponent
+import com.cesoft.encuentrame3.di.modules.GlobalModule
+import com.cesoft.encuentrame3.svc.GeotrackingService
+import com.crashlytics.android.Crashlytics
+import io.fabric.sdk.android.Fabric
+
 
 //TODO:
+// + mas comandos de voz?
+// + cambia widget para radio en ventana de busqueda como en aviso!
 // + cuando no hay conexion y se guarda/empieza una ruta, puede quedar una ruta sin puntos, se para la ruta? NO SIMEPRE FALLA?!
 // + Menu ayuda que explique las tres funciones LUGARES, RUTAS, AVISOS
 // + Traducir a kotlin, asi evito if(view!=null)
@@ -33,39 +36,30 @@ import io.fabric.sdk.android.Fabric;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by CESoft on 15/09/2016
-public class App extends Application //implements ActivityCompat.OnRequestPermissionsResultCallback
+class App : Application()//implements ActivityCompat.OnRequestPermissionsResultCallback
 {
-	private static final String TAG = App.class.getSimpleName();
-	private static App instance = null;
-	public static App getInstance() { return instance; }
-	public static GlobalComponent getComponent() { return instance.getGlobalComponent(); }
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+        component = DaggerGlobalComponent.builder()
+                .globalModule(GlobalModule(this))
+                .build()
+        Fabric.with(this, Crashlytics())
+        iniServicesDependantOnLogin()
+    }
 
-	private GlobalComponent globalComponent;
+    //TODO: Aqui y en ActMain despues de pedir permisos, por si al arrancar no arranca ActMain ???????
+    fun iniServicesDependantOnLogin() {
+        GeotrackingService.start(this)
+    }
 
-	@Override public void onCreate()
-	{
-		super.onCreate();
-		instance = this;
-
-		Fabric.with(this, new Crashlytics());
-
-		getGlobalComponent();
-
-		iniServicesDependantOnLogin();
-	}
-
-	public GlobalComponent getGlobalComponent()
-	{
-		if(globalComponent == null)
-			globalComponent = DaggerGlobalComponent.builder()
-				.globalModule(new GlobalModule(this))
-				.build();
-		return globalComponent;
-	}
-
-	public void iniServicesDependantOnLogin() {
-//TODO: Aqui y en ActMain despues de pedir permisos, por si al arrancar no arranca ActMain ???????
-		GeotrackingService.start(this);
-	}
-
+    companion object {
+        private val TAG = App::class.java.simpleName
+        @JvmStatic
+        lateinit var instance: App
+            private set
+        @JvmStatic
+        lateinit var component: GlobalComponent
+            private set
+    }
 }

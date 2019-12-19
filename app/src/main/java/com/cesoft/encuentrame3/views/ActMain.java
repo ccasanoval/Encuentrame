@@ -1,5 +1,6 @@
 package com.cesoft.encuentrame3.views;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,6 +27,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cesoft.encuentrame3.App;
+import com.cesoft.encuentrame3.presenters.PreMain;
 import com.cesoft.encuentrame3.util.Login;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.adapters.SectionsPagerAdapter;
@@ -47,12 +49,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import javax.inject.Inject;
+
 import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by César Casanova
-public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
+public class ActMain extends AppCompatActivity implements
+		PreMain.IVista,
+		FrgMain.MainIterface,
 		NavigationView.OnNavigationItemSelectedListener {
 
 	private static final String TAG = ActMain.class.getSimpleName();
@@ -61,11 +67,13 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 
 	private DrawerLayout drawerLayout;
 	private ViewPager viewPager;
-	private Login login;
-	private Util util;
-	private Voice voice;
 	private MenuItem vozMenuItem;
 	private SectionsPagerAdapter sectionsPagerAdapter;
+
+	@Inject	Login login;
+	@Inject	Util util;
+	@Inject	Voice voice;
+	@Inject	PreMain presenter;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
@@ -73,11 +81,11 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_main);
-		login = ((App)getApplication()).getGlobalComponent().login();
+		App.getComponent().inject(this);
+
+		presenter.onCreate(this);
+
 		if(!login.isLogged())gotoLogin();
-		util = ((App)getApplication()).getGlobalComponent().util();
-		voice = ((App)getApplication()).getGlobalComponent().voice();
-		voice.setActivity(this);
 
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		toolbar.setTitleTextAppearance(this, R.style.toolbarTextStyle);
@@ -153,7 +161,6 @@ public class ActMain extends AppCompatActivity implements FrgMain.MainIterface,
 	@Override
 	public void onBackPressed()
 	{
-Log.e(TAG, "onBackPressed-------------------------------------------------------------------- MAIN");
 		if(drawerLayout.isDrawerOpen(GravityCompat.END))
 			drawerLayout.closeDrawer(GravityCompat.END);
 		else
@@ -171,7 +178,6 @@ Log.e(TAG, "onBackPressed-------------------------------------------------------
 	@Override
 	public void onResume()
 	{
-Log.e(TAG, "onResume:--------------------------------------------------------");
 		super.onResume();
 		if(voice.isListening()) {
 			voice.startListening();
@@ -235,7 +241,7 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 		getMenuInflater().inflate(R.menu.menu_act_main, menu);
 		vozMenuItem = menu.findItem(R.id.action_voz);
 		refreshVoiceIcon();
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item)
@@ -249,15 +255,10 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 				goMap();
 				return true;
 			case R.id.action_buscar:
-				FrgMain frg = sectionsPagerAdapter.getPage(viewPager.getCurrentItem());// frg==null cuando se libero mem y luego se activó app...
-				/*while(frg == null) {
-					Log.e(TAG, "***************************TEST********************************************");
-					createViews();
-					frg = sectionsPagerAdapter.getPage(viewPager.getCurrentItem());// frg==null cuando se libero mem y luego se activó app...
-				}*/
 				buscar(sectionsPagerAdapter.getPage(viewPager.getCurrentItem()));
 				return true;
 			case R.id.action_voz:
+				voice.checkPermissions(this);
 				voice.toggleListening();
 				refreshVoiceIcon();
 				return true;
@@ -326,7 +327,6 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 	/// FrgMain : MainIterface
 	public void gotoLogin()
 	{
-		login.logout(this);
 		Intent intent = new Intent(getBaseContext(), ActLogin.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
@@ -530,5 +530,32 @@ Log.e(TAG, "onResume:--------------------------------------------------------");
 			default:
 				return false;
 		}
+	}
+
+
+	/// Implements PreMain.IVista
+	@Override
+	public Activity getAct() {
+		return null;
+	}
+
+	@Override
+	public void iniEspera() {
+
+	}
+
+	@Override
+	public void finEspera() {
+
+	}
+
+	@Override
+	public void toast(int msg) {
+
+	}
+
+	@Override
+	public void toast(int msg, @org.jetbrains.annotations.Nullable String err) {
+
 	}
 }

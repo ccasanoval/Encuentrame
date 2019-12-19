@@ -3,6 +3,7 @@ package com.cesoft.encuentrame3.di.components;
 import com.cesoft.encuentrame3.views.ActAviso;
 import com.cesoft.encuentrame3.views.ActBuscar;
 import com.cesoft.encuentrame3.views.ActLugar;
+import com.cesoft.encuentrame3.views.ActMain;
 import com.cesoft.encuentrame3.views.ActMaps;
 import com.cesoft.encuentrame3.views.ActRuta;
 import com.cesoft.encuentrame3.views.ActWidgetNuevaRuta;
@@ -18,6 +19,7 @@ import com.cesoft.encuentrame3.svc.ServiceNotifications;
 import com.cesoft.encuentrame3.util.Preferencias;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
+import com.cesoft.encuentrame3.views.VistaBase;
 import com.cesoft.encuentrame3.widget.WidgetRutaJobService;
 
 import javax.inject.Singleton;
@@ -28,18 +30,20 @@ import dagger.Component;
 @Component(modules = {GlobalModule.class})
 public interface GlobalComponent
 {
-	void inject(FrgLogin v);
+	void inject(VistaBase v);
+	void inject(ActMain v);
 	void inject(ActAviso v);
 	void inject(ActLugar v);
 	void inject(ActRuta v);
 	void inject(ActMaps v);
 	void inject(ActBuscar v);
+	void inject(FrgMain v);
+	void inject(FrgLogin v);
 	void inject(ActWidgetNuevaRuta v);
 	void inject(ActWidgetNuevoLugar v);
-	void inject(RutaArrayAdapter v);
-	void inject(FrgMain v);
 	void inject(WidgetRutaJobService v);
 	void inject(RutaViewHolder v);
+	void inject(RutaArrayAdapter v);
 
 	Util util();
 	Voice voice();

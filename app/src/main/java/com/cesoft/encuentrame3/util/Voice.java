@@ -33,8 +33,6 @@ public class Voice implements RecognitionListener {
 
     private final Application app;
     private final Preferencias pref;
-    private Activity activity;
-    public void setActivity(Activity activity) { this.activity = activity; }
 
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
@@ -82,12 +80,15 @@ public class Voice implements RecognitionListener {
         startListening();
     }
     public void startListening() {
+        if( ! isCheckPermissions) {
+            Log.e(TAG, "startListening: NOT INITIALIZED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            return;
+        }
         if(isListening) {
             return;
         }
-        if( ! checkPermissions())return;
+
         isListening = true;
-        Log.e(TAG, "isRecognitionAvailable: -------------------" + SpeechRecognizer.isRecognitionAvailable(app));
 
         recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         //recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.getDefault().getLanguage());
@@ -113,7 +114,6 @@ public class Voice implements RecognitionListener {
     }
 
 
-
     //----------------------------------------------------------------------------------------------
     // implements RecognitionListener
     @Override
@@ -127,7 +127,6 @@ public class Voice implements RecognitionListener {
     @Override
     public void onRmsChanged(float rmsdB) {
         if( !isListeningActive) {
-            Log.e(TAG, "onRmsChanged------------------------------ isListening="+isListening);
             stopListening();
         }
     }
@@ -169,8 +168,8 @@ public class Voice implements RecognitionListener {
                 text.append("\n");
             }
         }
-        Log.e(TAG, "onResults=\n"+text);
-        Log.e(TAG, "speech.startListening(recognizerIntent)---------------------------------------------------------------------"+speech+"/"+recognizerIntent);
+//        Log.e(TAG, "onResults=\n"+text);
+//        Log.e(TAG, "speech.startListening(recognizerIntent)---------------------------------------------------------------------"+speech+"/"+recognizerIntent);
         if(speech == null) {
             restartListening();
         }
@@ -236,29 +235,38 @@ public class Voice implements RecognitionListener {
 
     //----------------------------------------------------------------------------------------------
     // Ask Sound Record Permissions
-    private boolean checkPermissions() {
+    private boolean isCheckPermissions = false;
+    public void checkPermissions(Activity activity) {
+        if(isCheckPermissions)return;
         ArrayList<String> permissionsList = new ArrayList<>();
         boolean isGranted = isPermissionGranted(permissionsList);
         if( !isGranted && !permissionsList.isEmpty()) {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity != null)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 activity.requestPermissions(permissionsList.toArray(new String[]{}), REQUEST_RECORD_PERMISSION);
-            return false;
         }
-        return true;
+        else
+            isCheckPermissions = true;
     }
     @TargetApi(Build.VERSION_CODES.M)
     private boolean isPermissionGranted(ArrayList<String> permissionsList) {
+        if( ! SpeechRecognizer.isRecognitionAvailable(app)) {
+            isCheckPermissions = false;
+            return false;
+        }
+
         String permission = android.Manifest.permission.RECORD_AUDIO;
         if(app.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "isPermissionGranted----------------- NOT GRANTED "+activity);
+            Log.e(TAG, "isPermissionGranted----------------- NOT GRANTED ");
             //if(activity != null && activity.shouldShowRequestPermissionRationale(permission))
             {
                 Log.e(TAG, "isPermissionGranted----------------- ASK");
                 permissionsList.add(permission);
             }
-            return false;
+            isCheckPermissions = false;
         }
-        return true;
+        else
+            isCheckPermissions = true;
+        return isCheckPermissions;
     }
     // Ask Sound Record Permissions
     //----------------------------------------------------------------------------------------------

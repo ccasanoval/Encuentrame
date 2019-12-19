@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.cesoft.encuentrame3.util.Log;
-import com.cesoft.encuentrame3.util.Util;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -37,24 +36,20 @@ public class ActLugar extends VistaBase
 {
 	protected static final String TAG = ActLugar.class.getSimpleName();
 
-	@Inject	Voice voice;
-	@Inject	Util util;
-	@Inject	PreLugar presenter;
-
 	private Marker marker;
 	private TextView lblPosicion;
 	private void setPosLabel(double lat, double lon){
 		lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
 
+	@Inject	PreLugar presenter;
+
 	//______________________________________________________________________________________________
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		((App)getApplication()).getGlobalComponent().inject(this);
-		super.ini(presenter, util, voice, new Lugar(), R.layout.act_lugar);
+		App.getComponent().inject(this);
+		super.ini(presenter, new Lugar(), R.layout.act_lugar);
 		super.onCreate(savedInstanceState);
-
-		voice.setActivity(this);
 
 		//------------------------------------
 		ImageButton btnActPos = findViewById(R.id.btnActPos);
@@ -89,9 +84,7 @@ public class ActLugar extends VistaBase
 		getMenuInflater().inflate(R.menu.menu_lugar, menu);
 		if(presenter.isNuevo())
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
-		vozMenuItem = menu.findItem(R.id.action_voz);
-		refreshVoiceIcon();
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -105,10 +98,6 @@ public class ActLugar extends VistaBase
 				return true;
 			case R.id.menu_img:
 				presenter.imagen();
-				return true;
-			case R.id.action_voz:
-				voice.toggleListening();
-				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);

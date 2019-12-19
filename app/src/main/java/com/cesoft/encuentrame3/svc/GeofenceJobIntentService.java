@@ -30,7 +30,7 @@ public class GeofenceJobIntentService extends JobIntentService {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if( ! geofencingEvent.hasError())
         {
-            Util util = ((App)getApplicationContext()).getGlobalComponent().util();
+            Util util = App.getComponent().util();
             int transition = geofencingEvent.getGeofenceTransition();
             List<Geofence> geofences = geofencingEvent.getTriggeringGeofences();
             switch(transition)

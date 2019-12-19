@@ -36,7 +36,7 @@ public class ActWidgetNuevoLugar extends Activity//AppCompatActivity porque se m
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		((App)getApplication()).getGlobalComponent().inject(this);
+		App.getComponent().inject(this);
 		progressBar = findViewById(R.id.progressBar);
 	}
 	@Override

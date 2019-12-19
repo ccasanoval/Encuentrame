@@ -4,7 +4,6 @@ import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -15,6 +14,7 @@ import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreMaps;
+import com.cesoft.encuentrame3.util.GpsLocationCallback;
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,20 +51,15 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	private Marker marker;
 	private Circle circle;
 
-	@Inject Voice voice;
-	@Inject Util util;
 	@Inject PreMaps presenter;
 
 	//----------------------------------------------------------------------------------------------
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		((App)getApplication()).getGlobalComponent().inject(this);
-		super.ini(presenter, util, voice, new Lugar(), R.layout.act_maps);
+		App.getComponent().inject(this);
+		super.ini(presenter, new Lugar(), R.layout.act_maps);
 		super.onCreate(savedInstanceState);
-
-		voice.setActivity(this);
-
 		FloatingActionButton fabGuardar = findViewById(R.id.btnGuardar);
 		if( ! presenter.isAviso() && ! presenter.isLugar())
 			fabGuardar.hide();
@@ -269,20 +264,7 @@ public class ActMaps extends VistaBase implements PreMaps.IMapsView
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.menu_mapa, menu);
-		vozMenuItem = menu.findItem(R.id.action_voz);
-		refreshVoiceIcon();
-		return true;
-	}
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		if(item.getItemId()==R.id.action_voz) {
-			voice.toggleListening();
-			refreshVoiceIcon();
-			return true;
-		}
-		else
-			return super.onOptionsItemSelected(item);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)

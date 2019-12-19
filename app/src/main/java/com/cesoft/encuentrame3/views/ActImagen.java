@@ -247,7 +247,7 @@ public class ActImagen extends AppCompatActivity
 		getMenuInflater().inflate(R.menu.menu_img, menu);
 		this.menu = menu;
 		refreshMenu(estado);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 	private void refreshMenu(ESTADO v)
 	{

@@ -327,7 +327,7 @@ public class ActBuscar extends AppCompatActivity implements OnMapReadyCallback, 
 	{
 		getMenuInflater().inflate(R.menu.menu_buscar, menu);
 		if(!filtro.isOn())menu.findItem(R.id.menu_eliminar).setVisible(false);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)

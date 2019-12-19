@@ -44,8 +44,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	private static final String TAG = ActRuta.class.getSimpleName();
 	private static final int ASK_GPS_ACTIVATION = 6968;
 
-	@Inject	Voice voice;
-	@Inject Util util;
 	@Inject PreRuta presenter;
 
 	@Override public void moveCamara(LatLng pos) {
@@ -59,10 +57,9 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		App.getComponent().inject(this);
-		super.ini(presenter, util, voice, new Ruta(), R.layout.act_ruta);
+		super.ini(presenter, new Ruta(), R.layout.act_ruta);
 		super.onCreate(savedInstanceState);
 
-		voice.setActivity(this);
 		btnStart = findViewById(R.id.btnStart);
 		btnStop = findViewById(R.id.btnStop);
 
@@ -167,9 +164,7 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 			menu.findItem(R.id.menu_eliminar).setVisible(false);
 			menu.findItem(R.id.menu_estadisticas).setVisible(false);
 		}
-		vozMenuItem = menu.findItem(R.id.action_voz);
-		refreshVoiceIcon();
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -183,10 +178,6 @@ public class ActRuta extends VistaBase implements PreRuta.IVistaRuta
 				return true;
 			case R.id.menu_estadisticas:
 				presenter.estadisticas();
-				return true;
-			case R.id.action_voz:
-				voice.toggleListening();
-				refreshVoiceIcon();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -281,11 +272,5 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 			default:
 				break;
 		}
-	}
-
-	@Override
-	public void onBackPressed() {
-		Log.e(TAG, "onBackPressed--------------------------------------------------------------------CCC");
-		super.onBackPressed();
 	}
 }

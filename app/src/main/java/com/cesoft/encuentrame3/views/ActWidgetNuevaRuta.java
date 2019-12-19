@@ -36,8 +36,7 @@ public class ActWidgetNuevaRuta extends Activity
 	private static final String TAG = ActWidgetNuevaRuta.class.getSimpleName();
 
 	@Inject	Util util;
-	@Inject
-    Login login;
+	@Inject Login login;
 
 	private EditText txtNombre;
 
@@ -47,6 +46,10 @@ public class ActWidgetNuevaRuta extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.act_widget_nuevo);
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+		App.getComponent().inject(this);
+		if(!login.isLogged())gotoLogin();
+
 		txtNombre = findViewById(R.id.txtNombre);
 		txtNombre.setHint(R.string.nueva_ruta);
 		txtNombre.setOnEditorActionListener((v, actionId, event) -> {
@@ -56,10 +59,6 @@ public class ActWidgetNuevaRuta extends Activity
             }
             return false;
         });
-		((App)getApplication()).getGlobalComponent().inject(this);
-
-		login = ((App)getApplication()).getGlobalComponent().login();
-		if(!login.isLogged())gotoLogin();
 	}
 	public void gotoLogin()
 	{
@@ -69,19 +68,11 @@ public class ActWidgetNuevaRuta extends Activity
 		startActivity(intent);
 		finish();
 	}
-//	@Override
-//	public void onPause()
-//	{
-//		super.onPause();
-//		//progressDialog.dismiss();
-//	}
+
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		//progressDialog = ProgressDialog.show(this, "", getString(R.string.cargando), true, true);//_progressDialog.setIcon(R.mipmap.ic_launcher);//funcionaria si dialogo tuviese titulo
-		//progressDialog.hide();
-		//
 		if( ! login.isLogged())
 		{
 			login.login(new Fire.AuthListener() {
@@ -97,9 +88,6 @@ public class ActWidgetNuevaRuta extends Activity
 				}
 			});
 		}
-		//
-		//TODO: ruta_activa = false
-		//TODO: desactiva boton stop
 		//
 		ImageButton btnSave = findViewById(R.id.btnSave);
 		btnSave.setOnClickListener(v -> save());
@@ -132,11 +120,6 @@ public class ActWidgetNuevaRuta extends Activity
 			return;
 		}
 
-		// if(ruta_activa)"quiere parar la ruta actual y crear una nueva?"
-		//TODO: ruta_activa = true
-		//TODO: activa boton stop
-
-		//TODO:añadir flags: ignore_battery_optimization, delay, etc
 		final int[] flag = new int[]{0};
 		final Ruta r = new Ruta();
 		r.setNombre(txtNombre.getText().toString());
@@ -163,7 +146,6 @@ public class ActWidgetNuevaRuta extends Activity
 					return;
 				}
 				Log.e(TAG, "ActWidgetNuevaRuta:addNuevo:e:----------------------------------"+err);
-				//progressDialog.hide();
 				Toast.makeText(ActWidgetNuevaRuta.this, String.format(getString(R.string.error_guardar), err), Toast.LENGTH_LONG).show();
 				//
 				WidgetRutaJobService.start(getApplicationContext());
@@ -193,6 +175,9 @@ public class ActWidgetNuevaRuta extends Activity
 			for(int i=0; i < permissions.length; i++)
 				Log.e(TAG, "onRequestPermissionsResult------------------- requestCode = "
 					+ requestCode + " : " + permissions[i] + " = " + grantResults[i]);
-		}catch(Exception ignore) { }
+		}
+		catch(Exception e) {
+			Log.e(TAG, "onRequestPermissionsResult:e:------------------------------------------",e);
+		}
 	}
 }

@@ -17,8 +17,9 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.util.Constantes;
 import com.cesoft.encuentrame3.util.Log;
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+// Created by César Casanova
 public class ActSettings extends AppCompatActivity
         implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
@@ -32,44 +33,23 @@ public class ActSettings extends AppCompatActivity
         }
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(id, rootKey);
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class OptionsPreferenceFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.settings_options, rootKey);
-        }
-    }
-    @SuppressWarnings("unused")
-    public static class VoicePreferenceFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.settings_voice, rootKey);
-        }
-    }
-    @SuppressWarnings("unused")
-    public static class AboutPreferenceFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.settings_about, rootKey);
             try {
-                App app = App.getInstance();
-                PackageInfo pInfo = app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
-                String version = getString(R.string.app_vers, pInfo.versionName);
-                Preference p = getPreferenceScreen().findPreference("version");
-                if(p != null) {
-                    p.setSummary(version);
+                setPreferencesFromResource(id, rootKey);
+                if(id == R.xml.settings_about) {
+                    Preference preference = findPreference("version");
+                    if(preference != null) {
+                        App app = App.getInstance();
+                        PackageInfo pInfo = app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
+                        String version = getString(R.string.app_vers, pInfo.versionName);
+                        preference.setSummary(version);
+                    }
                 }
             }
             catch (Exception e) {
-                Log.e(TAG, "AboutPreferenceFragment:e:", e);
+                Log.e(TAG, "onCreatePreferences:e:---------------------------------------------", e);
             }
         }
     }
-
     private String titleMain = "";
 
     @Override
@@ -88,7 +68,7 @@ public class ActSettings extends AppCompatActivity
                     break;
                 case R.id.nav_voice:
                     frg = new ActSettings.SettingsFragment(R.xml.settings_voice);
-                    titleMain = getString(R.string.nav_config);
+                    titleMain = getString(R.string.nav_voice);
                     break;
                 default:
                 case R.id.nav_config:
@@ -97,6 +77,7 @@ public class ActSettings extends AppCompatActivity
                     break;
             }
             fm.beginTransaction().replace(R.id.settings, frg).commit();
+            setTitle(titleMain);
         }
         else {
             setTitle(savedInstanceState.getCharSequence(TITLE));

@@ -15,7 +15,7 @@
     <Preference
         android:title="@string/app_vers_tit"
         android:key="version"
-        android:summary="2016-2019  Ver. 2.5"/>
+        android:summary="@string/app_vers"/>
         <!-- android:summary="@string/app_vers"/ -->
 
 </PreferenceScreen>

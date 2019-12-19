@@ -5,7 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
-import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -18,17 +18,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
+import com.cesoft.encuentrame3.App;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Objeto;
 import com.cesoft.encuentrame3.presenters.PresenterBase;
+import com.cesoft.encuentrame3.util.GpsLocationCallback;
 import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,7 +41,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.List;
+import javax.inject.Inject;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,10 +55,6 @@ public abstract class VistaBase
 	private static final int DELAY_LOCATION = 30 * 1000;
 	private static final String MAP_ZOOM = "mapzoom";
 
-	private PresenterBase presenter;
-	private Util util;
-	private Voice voice;
-
     protected MenuItem vozMenuItem;
 	protected EditText txtNombre;
 	protected EditText txtDescripcion;
@@ -70,14 +66,17 @@ public abstract class VistaBase
 	protected float mapZoom = 20;
 
 	protected FusedLocationProviderClient fusedLocationClient;
+	protected PresenterBase presenterBase;
+
+	@Inject Voice voice;
+	@Inject	Util util;
+	@Inject GpsLocationCallback locationCallback;
 
 	//----------------------------------------------------------------------------------------------
-	void ini(PresenterBase presenter, Util util, Voice voice, Objeto objDefecto, int idLayout) {
-		this.util = util;
-		this.voice = voice;
-		this.presenter = presenter;
-		this.presenter.ini(this);
-		this.presenter.loadObjeto(objDefecto);
+	void ini(PresenterBase presenter, Objeto objDefecto, int idLayout) {
+		this.presenterBase = presenter;
+		this.presenterBase.ini(this);
+		this.presenterBase.loadObjeto(objDefecto);
 		this.idLayout = idLayout;
 	}
 
@@ -117,6 +116,7 @@ public abstract class VistaBase
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(idLayout);
+		App.getComponent().inject(this);
 
 		//----------------------------
 		try {
@@ -140,19 +140,19 @@ public abstract class VistaBase
 		try {
 			txtNombre = findViewById(R.id.txtNombre);
 			txtDescripcion = findViewById(R.id.txtDescripcion);
-			txtNombre.setText(presenter.getNombre());
-			txtDescripcion.setText(presenter.getDescripcion());
-			presenter.setOnTextChange(txtNombre, txtDescripcion);
+			txtNombre.setText(presenterBase.getNombre());
+			txtDescripcion.setText(presenterBase.getDescripcion());
+			presenterBase.setOnTextChange(txtNombre, txtDescripcion);
 			progressBar = findViewById(R.id.progressBar);
 		} catch(Exception ignore){}//ActMaps no tiene campos
 
 		//----------------------------
 		if(savedInstanceState != null) {
 			mapZoom = savedInstanceState.getFloat(MAP_ZOOM, mapZoom);
-			presenter.loadSavedInstanceState(savedInstanceState);
+			presenterBase.loadSavedInstanceState(savedInstanceState);
 		}
 
-		if(presenter.isVoiceCommand())
+		if(presenterBase.isVoiceCommand())
 			txtNombre.setText(R.string.voice_generated);
 
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -164,7 +164,7 @@ public abstract class VistaBase
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putFloat(MAP_ZOOM, mapZoom);
-		presenter.onSaveInstanceState(outState);
+		presenterBase.onSaveInstanceState(outState);
 	}
 
 	//______________________________________________________________________________________________
@@ -180,7 +180,7 @@ public abstract class VistaBase
 	public void onStart() {
 		super.onStart();
 		EventBus.getDefault().register(this);
-		presenter.subscribe(this);
+		presenterBase.subscribe(this);
 		buildLocationRequest();
 		SupportMapFragment smf = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 		if(smf != null)
@@ -190,7 +190,7 @@ public abstract class VistaBase
 	@Override
 	public void onStop() {
 		EventBus.getDefault().unregister(this);
-		presenter.unsubscribe();
+		presenterBase.unsubscribe();
 		clean();
 		super.onStop();
 	}
@@ -210,7 +210,7 @@ public abstract class VistaBase
 		super.onPause();
 		stopTracking();
 		voice.stopListening();
-		presenter.onPause();
+		presenterBase.onPause();
 	}
 
 
@@ -218,12 +218,13 @@ public abstract class VistaBase
 		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 		&& ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 		    return;
-		locationCallback = createLocationCallback();
 		fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
 	}
 
 	private void stopTracking() {
-		if(locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback);
+		if(locationCallback != null) {
+			fusedLocationClient.removeLocationUpdates(locationCallback);
+		}
 		locationCallback = null;
 	}
 
@@ -261,24 +262,9 @@ public abstract class VistaBase
 		Log.e(TAG, "---------------------------------onResult---------------------------------"+status);
 	}
 
-	private LocationCallback locationCallback = null;
-	private LocationCallback createLocationCallback() {
-		return new LocationCallback() {
-			@Override
-			public void onLocationResult(LocationResult locationResult) {
-				List<Location> locationList = locationResult.getLocations();
-				if( ! locationList.isEmpty()) {
-					Location location = locationList.get(locationList.size() - 1);
-					util.setLocation(location);
-					if(presenter.getLatitud() == 0 && presenter.getLongitud() == 0)
-						setPosLugar(location.getLatitude(), location.getLongitude());
-				}
-			}
-		};
-	}
 	protected void setPosLugar(double lat, double lon)
 	{
-		presenter.setLatLon(lat, lon);
+		presenterBase.setLatLon(lat, lon);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -295,13 +281,13 @@ public abstract class VistaBase
 			if(map != null)
 				mapZoom = map.getCameraPosition().zoom;
 		});
-		if(presenter.getLatitud() == 0 && presenter.getLongitud() == 0 && presenter.isNuevo())
+		if(presenterBase.getLatitud() == 0 && presenterBase.getLongitud() == 0 && presenterBase.isNuevo())
 		{
 			Location loc = util.getLocation();
 			if(loc != null)
-				presenter.setLatLon(loc.getLatitude(), loc.getLongitude());
+				presenterBase.setLatLon(loc.getLatitude(), loc.getLongitude());
 		}
-		setPosLugar(presenter.getLatitud(), presenter.getLongitud());
+		setPosLugar(presenterBase.getLatitud(), presenterBase.getLongitud());
 		map.animateCamera(CameraUpdateFactory.zoomTo(mapZoom));
 	}
 
@@ -310,30 +296,40 @@ public abstract class VistaBase
             vozMenuItem.setIcon(voice.isListening() ? R.drawable.ic_mic_white_24dp : R.drawable.ic_mic_off_white_24dp);
     }
 
-	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
-	public void onVoiceEvent(Voice.VoiceStatusEvent event) {
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		vozMenuItem = menu.findItem(R.id.action_voz);
 		refreshVoiceIcon();
+		return super.onCreateOptionsMenu(menu);
 	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if(item.getItemId() == android.R.id.home) {
-Log.e(TAG, "onBackPressed--------------------------------------------------------------------A");
-			presenter.onBackPressed();
+			presenterBase.onBackPressed();
+		}
+		if(item.getItemId() == R.id.action_voz) {
+			voice.checkPermissions(this);
+			voice.toggleListening();
+			refreshVoiceIcon();
 		}
 		return super.onOptionsItemSelected(item);
 	}
 	@Override
 	public void onBackPressed() {
-Log.e(TAG, "onBackPressed--------------------------------------------------------------------B");
 		super.onBackPressed();
-		presenter.onBackPressed();
-	}
-	@Override
-	public boolean onKeyDown(int keyCode, android.view.KeyEvent event) {
-		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK)
-			Log.e(TAG, "onKeyDown--------------------------------------------------------------------KEYCODE_BACK");
-		return super.onKeyDown(keyCode, event);
+		presenterBase.onBackPressed();
 	}
 
+
+	@Subscribe(sticky = true, threadMode = ThreadMode.POSTING)
+	public void onVoiceEvent(Voice.VoiceStatusEvent event) {
+		refreshVoiceIcon();
+	}
+
+	@Subscribe
+	public void onGpsLocation(Location location) {
+		setPosLugar(location.getLatitude(), location.getLongitude());
+		util.setLocation(location);
+	}
 }

@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Objeto;
-import com.cesoft.encuentrame3.util.Log;
 import com.cesoft.encuentrame3.util.Util;
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.GoogleMap;
@@ -133,7 +132,6 @@ public abstract class PresenterBase
 
 	//______________________________________________________________________________________________
 	private AlertDialog dlgSucio = null;
-//	public void onSalir() { onSalir(false); }
 	public void onSalir(boolean force)
 	{
 		if(!force && isSucio)
@@ -197,13 +195,11 @@ public abstract class PresenterBase
 
 	protected Fire.CompletadoListener currentCompletadoListener = null;
 	public void onBackPressed() {
-Log.e(TAG, "onBackPressed--------------------------------------------------------------------"+currentCompletadoListener);
 		if(currentCompletadoListener != null) {
 			currentCompletadoListener.onBackPressed();
 		}
 	}
 	public void onPause() {
-Log.e(TAG, "onPause--------------------------------------------------------------------"+currentCompletadoListener);
 		if(currentCompletadoListener != null) {
 			currentCompletadoListener.onBackPressed();
 		}

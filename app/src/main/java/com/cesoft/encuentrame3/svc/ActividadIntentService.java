@@ -81,6 +81,7 @@ public class ActividadIntentService extends IntentService {
             EventBus.getDefault().post(new ActividadEvent(act));
         }
 
+        //TODO: if its WALKING but velocity > 5 km/h --> RUNNING
         //Log.e(TAG, "--------------------------------------------------------------------");
         //Log.e(TAG, "---IN_VEHICLE = 0;   ON_BICYCLE = 1;   ON_FOOT = 2;     STILL   = 3;");
         //Log.e(TAG, "---UNKNOWN    = 4;   TILTING    = 5;   WALKING = 7;     RUNNING = 8;");

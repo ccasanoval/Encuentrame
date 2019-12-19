@@ -24,6 +24,7 @@ public class Filtro implements Parcelable
 
 	private boolean onOff = false;
 		public boolean isOn(){return onOff;}
+		public boolean isOff(){return !onOff;}
 		public void turnOn(){
 			onOff = true;}
 		public void turnOff(){
