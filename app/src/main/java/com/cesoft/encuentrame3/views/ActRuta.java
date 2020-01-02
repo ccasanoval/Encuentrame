@@ -22,7 +22,6 @@ import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Ruta;
 import com.cesoft.encuentrame3.presenters.PreRuta;
 import com.cesoft.encuentrame3.util.Log;
-import com.cesoft.encuentrame3.util.Util;
 
 import com.cesoft.encuentrame3.util.Voice;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -233,12 +232,11 @@ Log.e(TAG, "---------------------------- getInfoContents "+marker.getSnippet()+"
 	}
 
 	private void askToDelete(Marker marker) {
+		String id = (String)marker.getTag();
+		if(id == null) return;
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ActRuta.this);
 		dialogBuilder.setNegativeButton(getString(R.string.cancelar), (dlg, which) -> {});
-		dialogBuilder.setPositiveButton(getString(R.string.eliminar), (dialog1, which) -> {
-            String id = (String)marker.getTag();
-			presenter.eliminarPto(id);
-		});
+		dialogBuilder.setPositiveButton(getString(R.string.eliminar), (dialog1, which) -> presenter.eliminarPto(id));
 		final AlertDialog dlgEliminar = dialogBuilder.create();
 		dlgEliminar.setTitle(marker.getTitle());
 		dlgEliminar.setMessage(getString(R.string.seguro_eliminar_pto));

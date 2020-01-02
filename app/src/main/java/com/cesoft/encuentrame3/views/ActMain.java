@@ -83,7 +83,7 @@ public class ActMain extends AppCompatActivity implements
 		setContentView(R.layout.act_main);
 		App.getComponent().inject(this);
 
-		presenter.onCreate(this);
+		presenter.subscribe(this);
 
 		if(!login.isLogged())gotoLogin();
 
@@ -201,7 +201,11 @@ public class ActMain extends AppCompatActivity implements
 	@Override
 	public void onDestroy()
 	{
+		NavigationView navigationView = findViewById(R.id.nav_view);
+		navigationView.setNavigationItemSelectedListener(null);
+
 		viewPager = null;
+		presenter.unsubscribe();
 		super.onDestroy();
 	}
 
@@ -484,9 +488,20 @@ public class ActMain extends AppCompatActivity implements
 	public void onGeofenceStoreEvent(GeofenceStore.Event event) {
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		MenuItem item = navigationView.getMenu().findItem(R.id.nav_geofencing_onoff);
-//Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn()+" : "+event.isOn());
-		//TODO: si event.isOn == false ---> el servicio deberia estar intentando arrancar? o dejar todo desactivado?
-		if(GeofencingService.isOn()) {
+Log.e(TAG, "onGeofenceStoreEvent--------------------------------------------------------------------item="+item+" : "+GeofencingService.isOn()+" : "+event.isOn());
+
+		if(GeofencingService.isOn() && !event.isOn()) {
+			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+			dialogBuilder.setPositiveButton(getString(R.string.ok), (dialog1, which) -> {});
+			final AlertDialog dlg = dialogBuilder.create();
+			dlg.setTitle(R.string.geofencing_service);
+			dlg.setMessage(getString(R.string.ask_to_enable_gps));
+			dlg.show();
+			GeofencingService.stop();
+			//GeofencingService.start();
+		}
+
+		if(GeofencingService.isOn() && event.isOn()) {
 			if(item != null)item.setTitle(R.string.stop_geofencing);
 		}
 		else {
@@ -502,9 +517,9 @@ public class ActMain extends AppCompatActivity implements
 		switch(id) {
 			case R.id.nav_geofencing_onoff:
 				if(GeofencingService.isOn())
-					GeofencingService.turnOff();
+					GeofencingService.stop();
 				else
-					GeofencingService.turnOn();
+					GeofencingService.start();
 				return true;
 
 			case R.id.nav_config:
@@ -524,6 +539,8 @@ public class ActMain extends AppCompatActivity implements
 				gotoLogin();
 				return true;
 			case R.id.nav_exit:
+				GeofencingService.stop();
+				finish();
 				System.exit(0);
 				return true;
 

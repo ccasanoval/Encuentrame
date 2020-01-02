@@ -546,7 +546,7 @@ public class Ruta extends Objeto implements Parcelable
 
 		//----------------------------------------------------------------------------------------------
 		// FIREBASE
-		public static void eliminarPto(final String idRutaPunto) {
+		public static void eliminarPto(@NonNull final String idRutaPunto) {
 			Query queryRef = RutaPunto.newFirebase().child(idRutaPunto);
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener()
 			{

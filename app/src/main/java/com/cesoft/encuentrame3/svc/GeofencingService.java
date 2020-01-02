@@ -23,12 +23,12 @@ public class GeofencingService extends Service {
     private static final int ID_SERVICE = 6970;
 
     private static boolean isOn = true;
-    public static void turnOn() {
-        GeofencingService.start();
-    }
-    public static void turnOff() {
-        GeofencingService.stop();
-    }
+//    public static void turnOn() {
+//        GeofencingService.start();
+//    }
+//    public static void turnOff() {
+//        GeofencingService.stop();
+//    }
     public static boolean isOn() { return isOn; }
 
     private static boolean isStarted = false;
@@ -42,11 +42,13 @@ public class GeofencingService extends Service {
             appContext.startService(intent);
         }
         isStarted = true;
+Log.e(TAG, "start---------------------------------------------------------------FENCE");
     }
     public static synchronized void stop() {
         Context appContext = App.getInstance();
         Intent intentService = new Intent(appContext, GeofencingService.class);
         appContext.stopService(intentService);
+Log.e(TAG, "stop---------------------------------------------------------------FENCE");
     }
 
     private Thread thread = null;

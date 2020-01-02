@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Message;
 
+import androidx.annotation.NonNull;
+
 import com.cesoft.encuentrame3.R;
 import com.cesoft.encuentrame3.models.Fire;
 import com.cesoft.encuentrame3.models.Ruta;
@@ -135,7 +137,7 @@ public class PreRuta extends PresenterBase
 	}
 
 	//----------------------------------------------------------------------------------------------
-	public synchronized void eliminarPto(String idRutaPunto) {
+	public synchronized void eliminarPto(@NonNull String idRutaPunto) {
 		Ruta.RutaPunto.eliminarPto(idRutaPunto);
 	}
 

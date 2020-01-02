@@ -138,7 +138,7 @@
 	<string name="seguro_eliminar_pto">Are you sure you want to remove the point?</string>
 	<string name="seguro_salir">You made changes. Do you want to save?</string>
 	<string name="ask_to_ignore_energy_saving_again">The tracking will stop in doze mode if battery optimizations are on. Are you sure?</string>
-	<!-- string name="ask_to_enable_gps">The tracking service needs you to activate the GPS</string -->
+	<string name="ask_to_enable_gps">The geofencing service needs the GPS on</string>
 	<string name="permission_required">The permission is required to use the app</string>
 	<string name="permission_required_title">Grant permission?</string>
 

@@ -70,7 +70,8 @@ public abstract class VistaBase
 
 	@Inject Voice voice;
 	@Inject	Util util;
-	@Inject GpsLocationCallback locationCallback;
+	//@Inject
+	GpsLocationCallback locationCallback = null;
 
 	//----------------------------------------------------------------------------------------------
 	void ini(PresenterBase presenter, Objeto objDefecto, int idLayout) {
@@ -215,6 +216,7 @@ public abstract class VistaBase
 
 
 	private void startTracking() {
+		locationCallback = new GpsLocationCallback();
 		if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 		&& ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 		    return;

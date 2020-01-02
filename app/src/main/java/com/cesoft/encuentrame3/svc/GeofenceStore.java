@@ -90,7 +90,7 @@ public class GeofenceStore
 				})
 				.addOnFailureListener(e -> {
 					//Falla sin GPS: @RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
-					Log.e(TAG, "update:addGeofences:e:----------------------------ERROR ADDING : ",e);
+					Log.e(TAG, "update:addGeofences:e:-----------------------------------------ERROR ADDING : ",e);
 					EventBus.getDefault().postSticky(new Event(false));
 				});
 	}

@@ -70,13 +70,13 @@ public abstract class PresenterBase
 	{
 		this.view = view;
 		isSucio = false;
-	}
+	}//TODO: Diferencia entre estos dos? eliminar ini?
 	public void subscribe(IVista view)
 	{
 		this.view = view;
 		if( !isEliminar)
 		{
-			isEliminar =true;
+			isEliminar = true;
 			onEliminar();
 		}
 	}

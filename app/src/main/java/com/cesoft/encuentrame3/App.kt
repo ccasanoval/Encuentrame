@@ -10,6 +10,7 @@ import io.fabric.sdk.android.Fabric
 
 
 //TODO:
+// + Configurable: maxima imprecision permitida en metros (ACCURACY_MAX)! Permitir puntos imprecisos mira solo velocidad, etc
 // + mas comandos de voz?
 // + cambia widget para radio en ventana de busqueda como en aviso!
 // + cuando no hay conexion y se guarda/empieza una ruta, puede quedar una ruta sin puntos, se para la ruta? NO SIMEPRE FALLA?!

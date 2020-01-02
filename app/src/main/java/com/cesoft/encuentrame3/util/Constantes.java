@@ -8,7 +8,7 @@ public class Constantes
 
 	// GPS TRACKING SERVICE
 	public static final long MIN_TRACK_DELAY = 30*1000L;
-	public static final long ACCURACY_MAX = 50L;//m
+	public static final long ACCURACY_MAX = 38L;//m
 	public static final long DISTANCE_MIN = 5L;//m
 	//public static final long DISTANCE_MAX = 50;//m
 	public static final long GEOFENCE_LOAD_DELAY =		30*60*1000L;//5min

@@ -11,6 +11,7 @@ import javax.inject.Singleton
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created by Cesar Casanova on 18/12/2019.
 // PRESENTER MAIN
+//TODO: common interface for all presenters... subscribe and unsubscribe
 @Singleton
 class PreMain @Inject constructor(
         val app: Application,
@@ -40,5 +41,12 @@ class PreMain @Inject constructor(
         }
     }
 
+    fun subscribe(view: IVista?) {
+        this.view = view
 
+    }
+
+    fun unsubscribe() {
+        view = null
+    }
 }

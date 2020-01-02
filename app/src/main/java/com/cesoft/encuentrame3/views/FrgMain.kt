@@ -31,7 +31,7 @@ class FrgMain
     : Fragment(), IListaItemClick, PreFrgMain.IVista
 {
     private val util: Util = component.util()
-    private val presenter = PreFrgMain()
+    //private val presenter = PreFrgMain()
 
     private var filtro: Filtro? = null
     fun getFiltro(): Filtro? {
@@ -98,7 +98,13 @@ class FrgMain
     override fun onDestroyView() {
         super.onDestroyView()
         val view = rootView?.parent as ViewGroup?
-        view?.removeView(rootView)
+        view?.let { v ->
+            v.removeView(rootView)
+            listView?.let { recycler ->
+                recycler.removeAllViews()
+                //recycler.layoutManager?.removeAndRecycleView(recycler, recycler.Recycler())
+            }
+        }
         rootView = null
         listView = null
     }

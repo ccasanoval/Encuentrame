@@ -139,7 +139,9 @@ public class PreMaps extends PresenterBase
 		{
 			@Override public void onDatos(Lugar[] aData)
 			{
-				for(Lugar o : aData)((IMapsView) view).showLugar(o);
+				if(view != null)
+					for(Lugar o : aData)
+						((IMapsView)view).showLugar(o);
 			}
 			@Override
 			public void onError(String err)
@@ -151,7 +153,9 @@ public class PreMaps extends PresenterBase
 		{
 			@Override public void onDatos(Aviso[] aData)
 			{
-				for(Aviso o : aData)((IMapsView) view).showAviso(o);
+				if(view != null)
+					for(Aviso o : aData)
+						((IMapsView)view).showAviso(o);
 			}
 			@Override
 			public void onError(String err)
@@ -201,7 +205,8 @@ public class PreMaps extends PresenterBase
 			@Override
 			public void onDatos(Ruta.RutaPunto[] aData)
 			{
-				((IMapsView) view).showRutaHelper(r, aData);
+				if(view != null)
+					((IMapsView)view).showRutaHelper(r, aData);
 			}
 			@Override
 			public void onError(String err)
