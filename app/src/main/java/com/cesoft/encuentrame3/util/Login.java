@@ -176,7 +176,7 @@ public class Login
 	}
 
 	//-------
-	public void logout(@NonNull Activity activity)
+	public void logout()
 	{
 		if( ! sp.getBoolean(PREF_SAVE_LOGIN, true))
 			signInClient.signOut();//.addOnCompleteListener(activity, task -> { });
@@ -187,6 +187,7 @@ public class Login
 	//-------
 	public void restoreUser(final String email, final Fire.AuthListener listener)
 	{
+		if(email == null || listener == null) return;
 		getAuth().sendPasswordResetEmail(email)
 			.addOnSuccessListener(aVoid -> listener.onExito(getAuth().getCurrentUser()))
 			.addOnFailureListener(listener::onFallo);

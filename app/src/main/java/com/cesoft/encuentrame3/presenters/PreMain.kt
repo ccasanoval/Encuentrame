@@ -36,7 +36,7 @@ class PreMain @Inject constructor(
     fun onCreate(view: IVista) {
         this.view = view
         if (!login.isLogged) {
-            login.logout(view.act!!)
+            login.logout()
             view.gotoLogin()
         }
     }

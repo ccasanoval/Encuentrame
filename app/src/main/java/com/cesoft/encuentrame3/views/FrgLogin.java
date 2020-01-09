@@ -55,20 +55,25 @@ public class FrgLogin extends Fragment //implements GoogleApiClient.OnConnection
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN)
-        {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            GoogleSignInAccount account = task.getResult();
-            if (task.isSuccessful()) {
-Log.e(TAG, "onActivityResult---------------------------------------------------------");
-                if(account != null)
-                    firebaseAuthWithGoogle(account);
+        try {
+            if (requestCode == RC_SIGN_IN) {
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                GoogleSignInAccount account = task.getResult();
+                if (task.isSuccessful()) {
+                    Log.e(TAG, "onActivityResult---------------------------------------------------------");
+                    if (account != null)
+                        firebaseAuthWithGoogle(account);
 
-            } else {
-                //ERROR en SHA1 y google-services.json?
-                Log.e(TAG, "onActivityResult: Google Sign In failed: "+task.toString()+" --- "+task.getException());
-                Toast.makeText(getContext(), R.string.login_error, Toast.LENGTH_LONG).show();
+                } else {
+                    //ERROR en SHA1 y google-services.json?
+                    Log.e(TAG, "onActivityResult: Google Sign In failed: " + task.toString() + " --- " + task.getException());
+                    Toast.makeText(getContext(), R.string.login_error, Toast.LENGTH_LONG).show();
+                }
             }
+        }
+        catch(Exception e) {
+            Log.e(TAG, "onActivityResult:e: Google Sign In failed: ----------------------------",e);
+            Toast.makeText(getContext(), R.string.login_error, Toast.LENGTH_LONG).show();
         }
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct)

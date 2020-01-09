@@ -40,14 +40,20 @@ public class ActAviso extends VistaBase implements PreAviso.IVistaAviso
 {
 	private static final String TAG = ActAviso.class.getSimpleName();
 
-	private TextView lblPosicion;
-		private void setPosLabel(double lat, double lon){
-			lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));}
-	private Switch swtActivo;
-		public boolean isActivo() { return swtActivo.isChecked(); }
-	private TextView lblRadio;
+	private TextView lblPosicion = null;
+		private void setPosLabel(double lat, double lon) {
+			if(lblPosicion != null)
+				lblPosicion.setText(String.format(Locale.ENGLISH, "%.5f/%.5f", lat, lon));
+		}
+	private Switch swtActivo = null;
+		public boolean isActivo() {
+			if(swtActivo == null) return false;
+			return swtActivo.isChecked();
+		}
+	private TextView lblRadio = null;
 		private void setRadioLabel(int radio) {
-			lblRadio.setText(getString(R.string.radio_m, radio));
+			if(lblRadio != null)
+				lblRadio.setText(getString(R.string.radio_m, radio));
 		}
 	private SeekBar seekBarRadio;
 	private void changeRadio(int radio) {

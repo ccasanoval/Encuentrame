@@ -62,7 +62,7 @@ public class ActWidgetNuevaRuta extends Activity
 	}
 	public void gotoLogin()
 	{
-		login.logout(this);
+		login.logout();
 		Intent intent = new Intent(getBaseContext(), ActLogin.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);

@@ -118,17 +118,17 @@ public class ActMain extends AppCompatActivity implements
 		TextView userEmail = headerView.findViewById(R.id.userEmail);
 		ImageView userImage = headerView.findViewById(R.id.userImage);
 
-		userName.setText(Login.getCurrentUserName());
-		userEmail.setText(Login.getCurrentUserEmail());
+		if(userName != null)
+			userName.setText(Login.getCurrentUserName());
+		if(userEmail != null)
+			userEmail.setText(Login.getCurrentUserEmail());
 		Login.getCurrentUserImage(new CustomTarget<Bitmap>() {
 			@Override
 			public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
 				userImage.setImageBitmap(resource);
 			}
 			@Override
-			public void onLoadCleared(@Nullable Drawable placeholder) {
-				//Log.e(TAG, "onLoadCleared------------------------------------------------------");
-			}
+			public void onLoadCleared(@Nullable Drawable placeholder) { }
 		});
 	}
 	@Override
@@ -203,7 +203,6 @@ public class ActMain extends AppCompatActivity implements
 	{
 		NavigationView navigationView = findViewById(R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(null);
-
 		viewPager = null;
 		presenter.unsubscribe();
 		super.onDestroy();
@@ -214,9 +213,11 @@ public class ActMain extends AppCompatActivity implements
 	{
 		sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 		viewPager = findViewById(R.id.main_container);
-		viewPager.setAdapter(sectionsPagerAdapter);
-		TabLayout tabLayout = findViewById(R.id.tabs);
-		tabLayout.setupWithViewPager(viewPager);
+		if(viewPager != null) {
+			viewPager.setAdapter(sectionsPagerAdapter);
+			TabLayout tabLayout = findViewById(R.id.tabs);
+			tabLayout.setupWithViewPager(viewPager);
+		}
 	}
 	private void gotoPage(Intent intent)
 	{

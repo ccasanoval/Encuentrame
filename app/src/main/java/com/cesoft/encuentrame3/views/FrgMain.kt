@@ -97,13 +97,15 @@ class FrgMain
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val view = rootView?.parent as ViewGroup?
-        view?.let { v ->
-            v.removeView(rootView)
-            listView?.let { recycler ->
-                recycler.removeAllViews()
-                //recycler.layoutManager?.removeAndRecycleView(recycler, recycler.Recycler())
+        try {
+            val view = rootView?.parent as ViewGroup?
+            view?.let { v ->
+                v.removeView(rootView)
+                listView?.removeAllViews()
             }
+        }
+        catch(e: java.lang.Exception) {
+            Log.e(TAG, "onDestroyView:e:-------------------------------------------------------",e)
         }
         rootView = null
         listView = null
