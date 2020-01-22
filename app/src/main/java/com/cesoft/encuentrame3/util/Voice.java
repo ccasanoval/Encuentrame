@@ -254,6 +254,11 @@ public class Voice implements RecognitionListener {
             return false;
         }
 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            isCheckPermissions = true;
+            return true;
+        }
+
         String permission = android.Manifest.permission.RECORD_AUDIO;
         if(app.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "isPermissionGranted----------------- NOT GRANTED ");
